@@ -9,6 +9,7 @@ export function createAbout() {
       h("div", { class: "lg-about-head" }, [h("div", {}, [h("h2", { class: "lg-about-name", id: "about-title", text: "Dynamic-Stagebuilder" }), version])]),
       h("p", { class: "lg-about-text", text: "A 3D stage builder for IPSC practical shooting: lay out a stage at real scale and print the stage briefing." }),
       h("p", { class: "lg-about-text lg-muted", text: `Round counts and points follow the ${SCORING.edition}. Stage type is suggested from the round count; check the rules for the hits-per-position limits.` }),
+      h("p", { class: "lg-about-text lg-muted", text: "Install it to use it offline: in Safari, Share → Add to Home Screen; in Chrome or Edge, the install button in the address bar." }),
       h("p", { class: "lg-about-text lg-muted", text: "MIT licence. Uses Three.js (MIT) and the Låda Glass design system." }),
     ]),
     h("div", { class: "lg-modal-actions" }, [h("button", { type: "button", class: "lg-btn lg-btn-primary", autofocus: true, onclick: () => dialog.close(), text: "Close" })]),

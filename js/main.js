@@ -241,3 +241,13 @@ rig.frameAll(editor.stage());
   if (pick) await openProject(pick.id);
   else await addProject(editor.stage());
 })();
+
+// Offline support (PWA). Not on file:// pages or browsers without service workers.
+if ("serviceWorker" in navigator && location.protocol !== "file:") {
+  // The page requires Trusted Types for script URLs; this policy allows only our own worker.
+  const policy = globalThis.trustedTypes?.createPolicy("dsb-sw", {
+    createScriptURL: (url) => { if (url !== "./sw.js") throw new TypeError(`Blocked script URL ${url}`); return url; },
+  });
+  navigator.serviceWorker.register(policy ? policy.createScriptURL("./sw.js") : "./sw.js")
+    .catch((err) => console.warn("Offline support unavailable", err));
+}

@@ -13,6 +13,10 @@ export default [
     rules: { "no-eval": "error", "no-implied-eval": "error", "no-new-func": "error" },
   },
   {
+    files: ["sw.js"],
+    languageOptions: { globals: { ...globals.serviceworker } },
+  },
+  {
     files: ["**/*.test.*", "tests/**", "test/**"],
     languageOptions: { globals: { ...globals.node } },
   },
