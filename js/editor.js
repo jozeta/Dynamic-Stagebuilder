@@ -105,6 +105,12 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
         start: s.start && { ...s.start, position: clampToBay(s.start.position, bay) } };
       edit(s);
     },
+    newStage() {
+      const fresh = createStage({ name: "New stage" });
+      edit({ ...fresh, settings: { ...fresh.settings, environment: present().settings.environment } });
+      state.selection = [];
+      state.mode = "select";
+    },
     beginDraw({ lineType }) { state.mode = { draw: lineType, points: [] }; },
     addPoint({ point }) {
       if (!state.mode?.draw) return;

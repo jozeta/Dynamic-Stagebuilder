@@ -8,6 +8,7 @@
   <title>Dynamic-Stagebuilder</title>
   <link rel="stylesheet" href="vendor/lada-glass/2.3.0/lada-glass.css">
   <link rel="stylesheet" href="css/app.css">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <script type="importmap">
 { "imports": { "three": "./vendor/three/0.187.0/three.module.js", "three/addons/": "./vendor/three/0.187.0/addons/" } }
 </script>
@@ -20,8 +21,13 @@
     <aside class="library lg-glass" id="library" aria-label="Prop library"></aside>
     <main class="viewport-wrap">
       <canvas id="viewport" aria-label="3D stage view" tabindex="0"></canvas>
+      <div id="camera-slot"></div>
+      <div class="hint lg-glass" id="hint" role="status" aria-live="polite" hidden></div>
     </main>
-    <aside class="inspector lg-glass" id="inspector" aria-label="Inspector"></aside>
+    <aside class="inspector lg-glass" id="inspector" aria-label="Inspector">
+      <div id="inspector-body"></div>
+      <div id="stats" class="stats"></div>
+    </aside>
   </div>
 </body>
 </html>

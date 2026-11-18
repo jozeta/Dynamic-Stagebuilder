@@ -27,20 +27,26 @@ npm run lint        # ESLint, including the unsafe-DOM rule
 
 ## Layout
 
-- `index.html`: entry page (strict CSP, viewport, Låda Glass app shell)
-- `css/app.css`: the app's own styles; `js/app.js`: starter script (replaced by `js/main.js`)
-- `vendor/lada-glass/2.3.0/`: the Låda Glass design system (copied; update with claude-check's advice)
-- `tests/`: `node --test` tests
+- `index.html`: entry page (strict CSP with the import map's sha256, app grid, small-screen message)
+- `css/app.css`: the app's own styles on Låda Glass tokens
+- `js/main.js`: boot and wiring; `js/editor.js`: user actions → undoable stage edits (no DOM)
+- `js/model/`: pure stage data (props, scoring-rules, stage, history, snap, numbering, stats, schema)
+- `js/render/`: Three.js (engine, stage-view, builders/, environments/, camera, labels, picking, ground)
+- `js/ui/`: Låda Glass panels (toolbar, library, inspector, stats, shortcuts, about, dom helpers)
+- `js/demo.js`: the example stage shown on open (until saved projects exist)
+- `vendor/three/0.187.0/`, `vendor/lada-glass/2.3.0/`: self-hosted libraries (don't edit)
+- `tests/`: `node --test` (model, editor, builders and environments run in Node; Three.js from
+  node_modules, pinned to the vendored version)
+- `docs/superpowers/`: the v1 design and the implementation plans
 
-Planned (see the design doc): `js/model/` pure stage-data modules (schema, stage, history,
-numbering, stats, scoring-rules, snap, props), `js/render/` Three.js (engine, stage-view,
-builders, environments, camera, picking, labels), `js/ui/` Låda Glass panels, `js/storage/`
-IndexedDB and JSON files, `print.html` + `css/print.css`, `sw.js` + `manifest.webmanifest`,
-`vendor/three/<version>/` (Three.js plus addons, self-hosted).
+Still to come (Plans 2 and 3): `js/storage/` (IndexedDB, JSON files), `print.html` + `css/print.css`,
+`sw.js` + `manifest.webmanifest`.
 
 ## Architecture rules
 
-- **1 world unit = 1 metre.** x across the bay, z down range (0 at the uprange edge), y up.
+- **1 world unit = 1 metre.** x across the bay (centred), z down range (0 at the uprange edge), y up.
+  Right-handed: looking down range, +x is to the shooter's left. Rotation is degrees about y;
+  a node's `rotation.y = −degrees`.
 - **Stage data is plain JSON and the single source of truth.** It never holds Three.js objects; the
   3D view is rebuilt from it. Every edit goes through `model/history.js` so it can be undone.
 - **Environments never touch stage data.** Scene groups: `environmentGroup` (ground, sky, lights)

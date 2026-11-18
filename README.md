@@ -4,37 +4,40 @@ A browser-based 3D stage builder for IPSC practical shooting. Lay out a stage at
 it from any angle, and print a Written Stage Briefing with a stage map for range officers and
 competitors.
 
-**Version:** 0.1.0 · **Status:** early development (v1 is being built; see the
-[v1 design](docs/superpowers/specs/2026-11-18-stage-builder-v1-design.md)). Started 2026-11-18.
+**Version:** 0.1.0 · **Status:** early development. The 3D editor works; the printable briefing and
+saved projects come next (see the [v1 design](docs/superpowers/specs/2026-11-18-stage-builder-v1-design.md)).
+Started 2026-11-18.
 
 ## Who it's for
 
 Professional stage builders and enthusiast IPSC shooters who design stages for club matches and
 training, and want a clear briefing sheet without drawing the map by hand.
 
-## What v1 will do
+## What v1 does
 
-- **Shooting bay** at real scale: width × depth in metres (default 20 × 30 m), 1 m grid.
-- **Prop library**, every prop drawn in 3D at real dimensions:
+Built so far (✓) and still to come in v1 (later):
+
+- ✓ **Shooting bay** at real scale: width × depth in metres (default 20 × 30 m), 1 m grid.
+- ✓ **Prop library**, every prop drawn in 3D at real dimensions:
   - paper: IPSC target, mini target, no-shoot, mini no-shoot (on stick stands, adjustable height)
   - steel: IPSC popper, mini popper, round plate, square plate
   - walls: mesh wall (black or blue mesh, black or wood frame), wooden wall, wall with a real port
   - obstacles: barrel, tyre, tyre stack, wooden crate
   - fault lines, shooting areas and the start position
-- **Editing by eye:** click or drag props in, drag them on the ground, rotate them, all with grid
+- ✓ **Editing by eye:** click or drag props in, drag them on the ground, rotate them, all with grid
   and angle snapping; multi-select, duplicate, delete, undo and redo.
-- **Automatic target numbers** (T1…, P1… for steel, NS1… for no-shoots), with hand-set labels kept.
-- **Live statistics:** targets, no-shoots, minimum rounds, maximum points, suggested stage type.
-- **Written Stage Briefing** editor: match, stage name and number, designer, stage type, scoring,
+- ✓ **Automatic target numbers** (T1…, P1… for steel, NS1… for no-shoots), with hand-set labels kept.
+- ✓ **Live statistics:** targets, no-shoots, minimum rounds, maximum points, suggested stage type.
+- (later) **Written Stage Briefing** editor: match, stage name and number, designer, stage type, scoring,
   targets, minimum rounds, maximum points, start signal, start position, gun condition, procedure,
   stop time and notes. Counted fields come from the stage itself.
-- **Printable brief** (A4, two pages): briefing and top-down map with a scale bar on page 1, a 3D
+- (later) **Printable brief** (A4, two pages): briefing and top-down map with a scale bar on page 1, a 3D
   view on page 2. Save it as a PDF from the print dialog.
-- **Two surroundings,** Technical (grey floor, grid) and Outdoor (dirt, sunlight). Switching never
+- ✓ **Two surroundings,** Technical (grey floor, grid) and Outdoor (dirt, sunlight). Switching never
   moves anything on the stage.
-- **Cameras:** orbit, pan, zoom, Top, Isometric, Front and a shooter's-eye view from the start position.
-- **Projects** saved in the browser automatically, plus JSON export and import.
-- **Works offline** and can be installed as an app (PWA).
+- ✓ **Cameras:** orbit, pan, zoom, Top, Isometric, Front and a shooter's-eye view from the start position.
+- (later) **Projects** saved in the browser automatically, plus JSON export and import.
+- (later) **Works offline** and can be installed as an app (PWA).
 
 Later versions (not in v1): matches with several stages, build sheet with coordinates, sight-line
 analysis, measuring tools, moving targets, more surroundings and props, model import, version history.
@@ -46,21 +49,29 @@ not supported: below 768 px wide the app asks you to use a larger screen. Englis
 
 ## What's new
 
+### Unreleased
+
+- The 3D stage editor: shooting bay, prop library (paper, steel, walls with real ports, obstacles),
+  fault lines, shooting areas and the start position; drag, rotate, duplicate, delete, undo/redo.
+- Automatic target numbers (T1, P1, NS1) and live round count, points and suggested stage type.
+- Technical and Outdoor surroundings, camera presets including the shooter's eye.
+
 ### 0.1.0
 
 - Project created; v1 design agreed. Older versions are listed in [CHANGELOG.md](CHANGELOG.md).
 
 ## Screenshots
 
-<!-- Once the UI exists, show the screenshots in a grid with a caption under each (claude-shots
-     --write Dynamic-Stagebuilder refreshes the images), e.g.:
 <table>
   <tr>
-    <td><img src="docs/main.png" alt="Main screen" width="400"><br>The main screen</td>
-    <td><img src="docs/settings.png" alt="Settings" width="400"><br>Settings</td>
+    <td><img src="docs/screenshots/editor-technical.png" alt="The editor with the Technical surroundings" width="400"><br>The editor: prop library, 3D stage in the Technical surroundings, stage statistics</td>
+    <td><img src="docs/screenshots/editor-outdoor.png" alt="The same stage outdoors with a wall selected" width="400"><br>The same stage outdoors, with a mesh wall selected and its rotate ring</td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/shooters-eye.png" alt="Shooter's eye view from the start position" width="400"><br>Shooter's eye: the view from the start position at 1.6 m</td>
+    <td><img src="docs/screenshots/ipad-landscape.png" alt="The editor at iPad landscape width" width="400"><br>On an iPad (1024 px): the inspector moves under the 3D view</td>
   </tr>
 </table>
--->
 
 ## Installation
 
@@ -72,13 +83,60 @@ python3 -m http.server 8002      # then open http://localhost:8002/ (or: claude-
 
 ## Configuration
 
-(Every setting, what it does and its default, once there are any. Planned: bay width and depth,
-grid snap (default 0.25 m), angle snap (default 15°), surroundings (default Technical).)
+Stage settings are in the inspector when nothing is selected. Saving them comes with saved projects
+(later in v1); until then a reload starts again from the example stage.
+
+| Setting | What it does | Default |
+|---|---|---|
+| Bay width | Width of the shooting bay across the range, 1–200 m | 20 m |
+| Bay depth | Depth of the bay down range, 1–200 m | 30 m |
+| Grid snap | Positions snap to this grid: off, 0.1, 0.25, 0.5 or 1 m | 0.25 m |
+| Angle snap | Rotations snap to this step: off, 5°, 15°, 45° or 90° | 15° |
+| Surroundings | Technical (grey floor, grid) or Outdoor (dirt, sun); never moves the stage | Technical |
+
+Prop settings (inspector, one prop selected): label (targets), rotation, and per prop: mount height
+for paper targets (0.1–2 m, default 1 m to the target's bottom), base height for steel, plate size
+(15–30 cm), wall length (0.5–4 m) and height (0.5–2.5 m), mesh colour (black/blue), frame
+(black/wood), port width, height and bottom edge, tyres in a stack (1–6), crate size.
+
+Scoring follows the IPSC Combined Competition Rules, January 2024 edition (Handgun): 2 hits per
+paper target and 1 per steel target (Comstock), 5 points per A-zone or steel hit, and Short ≤ 12,
+Medium ≤ 24, Long ≤ 32 rounds. The rules also limit hits per shooting position, so the stage type
+is a suggestion from the round count.
 
 ## How to
 
-(A short how-to for each main task once the app does something: build a stage, number targets,
-fill in the briefing, print the brief as a PDF, export and import a stage, install the app.)
+**Build a stage.** Pick a prop in the library on the left, then tap (or click) the ground to place it.
+With a mouse you can also drag a prop from the library onto the stage. Drag a placed prop to move it;
+it snaps to the grid and stays inside the bay. Rotate the selected prop with the green ring, the
+↺/↻ buttons in the inspector, or Q and E. Shift-click selects several props.
+
+**Draw fault lines and shooting areas.** Choose *Fault line* or *Shooting area* in the toolbar, tap
+the points on the ground, then double-click, press Enter or tap *Finish*. Escape or *Cancel* stops.
+*Start position* then a tap sets where the shooter starts (the shooter's-eye camera stands there).
+
+**Number targets.** Targets are numbered as you place them: T1… for paper, P1… for steel, NS1… for
+no-shoots. Deleting a target leaves a gap until you press *Renumber*. To set a label by hand, type
+it in the inspector; Renumber keeps hand-set labels and warns about duplicates.
+
+**Look at the stage.** Drag the empty ground to orbit, right-drag (two fingers on an iPad) to pan,
+scroll or pinch to zoom. The buttons over the view jump to Isometric, Top, Front, Shooter's eye or
+frame everything. Switch *Technical*/*Outdoor* at any time; nothing on the stage moves.
+
+**Undo anything** with Undo/Redo or ⌘Z / ⇧⌘Z (Ctrl on Windows). *New stage* starts empty and can be
+undone too.
+
+### Keyboard shortcuts
+
+| Key | Action |
+|---|---|
+| ⌘/Ctrl Z, ⇧⌘/Ctrl Z | Undo, redo |
+| ⌘/Ctrl D | Duplicate the selection |
+| Delete / Backspace | Delete the selection |
+| Q / E | Rotate the selection by the angle snap |
+| Enter / Escape | Finish / cancel drawing; Escape also clears the selection |
+| F | Frame all |
+| 1 2 3 4 | Isometric, Top, Front, Shooter's eye |
 
 ## Tests
 

@@ -1,39 +1,94 @@
-// Boot: create the 3D engine and show a demo stage (temporary until the editor UI lands).
+// Boot: wire the editor (stage data + undo) to the 3D view and the Låda Glass panels.
+import * as THREE from "three";
 import { createEngine } from "./render/engine.js";
 import { createStageView } from "./render/stage-view.js";
 import { createLabel } from "./render/labels.js";
 import { createCameraRig } from "./render/camera.js";
-import { createStage, addObject, addLine, setStart } from "./model/stage.js";
-import { assignLabels } from "./model/numbering.js";
+import { attachPicking } from "./render/picking.js";
+import { createEditor } from "./editor.js";
+import { getProp } from "./model/props.js";
+import { demoStage } from "./demo.js";
+import { createToolbar } from "./ui/toolbar.js";
+import { createLibrary } from "./ui/library.js";
+import { createInspector } from "./ui/inspector.js";
+import { createStats } from "./ui/stats.js";
+import { attachShortcuts } from "./ui/shortcuts.js";
+import { createAbout } from "./ui/about.js";
+import { h } from "./ui/dom.js";
 
 const canvas = document.getElementById("viewport");
 const engine = createEngine(canvas);
 const view = createStageView(engine.groups.stage, { labelFactory: createLabel });
 const rig = createCameraRig(engine, canvas);
+const about = createAbout();
 
-let s = createStage();
-const add = (t, x, z, r = 0, p = {}) => { s = addObject(s, t, [x, z], r, p).stage; };
-add("wall-mesh", -4, 8, 0, { length: 3 });
-add("wall-mesh", -2.5, 9.5, 90, { length: 3, mesh: "blue", frame: "wood" });
-add("wall-port", 2, 8, 0, { length: 2.4 });
-add("wall-wood", 5, 10, 60);
-for (let i = 0; i < 4; i++) add("paper-ipsc", -6 + i * 1.2, 14, 0);
-add("noshoot", -1, 14.3);
-add("paper-mini", 3, 15);
-add("popper", 6, 16);
-add("mini-popper", 7, 16);
-add("plate-round", 0.5, 18);
-add("plate-square", 1.3, 18);
-add("barrel", 0, 11);
-add("tyre-stack", -6, 10, 0, { count: 4 });
-add("tyre", -5.2, 10.6);
-add("crate", 7, 9, 20);
-s = addLine(s, "fault-line", [[-7, 4], [-3, 4], [-1, 6], [4, 6], [6, 3]], false).stage;
-s = addLine(s, "shooting-area", [[-2, 0.5], [2, 0.5], [2, 2.5], [-2, 2.5]], true).stage;
-s = setStart(s, [0, 1.5], 0);
-s = assignLabels(s);
-view.sync(s);
+let envKey = "";
+const highlight = new THREE.Group();
+const preview = new THREE.Group();
+engine.groups.helper.add(highlight, preview);
+const ACCENT = 0x5a93c4;
 
-const params = new URLSearchParams(location.search);
-engine.setEnvironment(params.get("env") === "outdoor" ? "outdoor" : "technical", s.bay);
-rig.preset(params.get("cam") || "iso", s);
+const hint = document.getElementById("hint");
+const updaters = [];
+
+function render(state) {
+  const stage = state.history.present;
+  view.sync(stage);
+  const key = `${stage.settings.environment}|${stage.bay.width}|${stage.bay.depth}`;
+  if (key !== envKey) { envKey = key; engine.setEnvironment(stage.settings.environment, stage.bay); }
+
+  // Selection outline.
+  for (const c of [...highlight.children]) { highlight.remove(c); c.geometry.dispose(); c.material.dispose(); }
+  for (const id of state.selection) {
+    const node = view.objectFor(id);
+    if (node) highlight.add(new THREE.BoxHelper(node, ACCENT));
+  }
+
+  // The line being drawn.
+  for (const c of [...preview.children]) { preview.remove(c); c.geometry.dispose(); c.material.dispose(); }
+  if (state.mode?.draw && state.mode.points.length) {
+    const pts = state.mode.points.map(([x, z]) => new THREE.Vector3(x, 0.06, z));
+    preview.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({ color: 0xff5a4f })));
+    preview.add(new THREE.Points(new THREE.BufferGeometry().setFromPoints(pts), new THREE.PointsMaterial({ color: 0xff5a4f, size: 8, sizeAttenuation: false })));
+  }
+
+  picking?.updateGizmo();
+  for (const u of updaters) u(state);
+  updateHint(state);
+  engine.requestRender();
+}
+
+function updateHint(state) {
+  const m = state.mode;
+  const stage = state.history.present;
+  const cancel = h("button", { type: "button", class: "lg-btn", onclick: () => editor.dispatch({ type: "cancel" }), text: "Cancel" });
+  let nodes = null;
+  if (m?.place) nodes = [h("span", { text: `Tap the ground to place: ${getProp(m.place).name}.` }), cancel];
+  else if (m?.draw) {
+    const need = m.draw === "fault-line" ? 2 : 3;
+    nodes = [h("span", { text: `Tap to add points (${m.points.length}). Double-click, Enter or Finish to end.` }),
+      h("button", { type: "button", class: "lg-btn lg-btn-primary", disabled: m.points.length < need, onclick: () => editor.dispatch({ type: "finishDraw" }), text: "Finish" }), cancel];
+  } else if (m === "start") nodes = [h("span", { text: "Tap the ground to set the start position." }), cancel];
+  else if (!stage.objects.length && !stage.lines.length) nodes = [h("span", { text: "Empty stage. Pick a prop on the left, then tap the ground to place it." })];
+  hint.hidden = !nodes;
+  if (nodes) hint.replaceChildren(...nodes);
+}
+
+let picking = null;
+const editor = createEditor({ stage: demoStage(), onChange: (state) => render(state) });
+picking = attachPicking({ engine, stageView: view, editor, cameraRig: rig, canvas });
+
+updaters.push(
+  createToolbar(document.getElementById("toolbar"), {
+    editor, rig, onAbout: () => about.open(),
+    onNew: () => editor.dispatch({ type: "newStage" }),
+  }),
+  createLibrary(document.getElementById("library"), { editor }),
+  createInspector(document.getElementById("inspector-body"), { editor }),
+  createStats(document.getElementById("stats")),
+);
+attachShortcuts({ editor, rig });
+
+render(editor.state);
+rig.preset("iso", editor.stage());
+rig.frameAll(editor.stage());

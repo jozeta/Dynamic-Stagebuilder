@@ -30,3 +30,13 @@ test("CSP allows the inline import map by its sha256 hash and nothing else inlin
 test("boots js/main.js as a module", () => {
   assert.match(html, /<script type="module" src="js\/main.js"><\/script>/);
 });
+
+test("phones get only the larger-screen message", () => {
+  assert.match(html, /<p class="small-screen">Dynamic-Stagebuilder needs a computer or an iPad\.<\/p>/);
+  const css = readFileSync(new URL("../css/app.css", import.meta.url), "utf8");
+  assert.match(css, /@media \(max-width: 767px\)/);
+});
+
+test("has an app icon", () => {
+  assert.match(html, /<link rel="icon" href="icons\/icon.svg"/);
+});
