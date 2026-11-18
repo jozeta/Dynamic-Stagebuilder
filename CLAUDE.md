@@ -39,8 +39,10 @@ npm run lint        # ESLint, including the unsafe-DOM rule
   node_modules, pinned to the vendored version)
 - `docs/superpowers/`: the v1 design and the implementation plans
 
-Still to come (Plans 2 and 3): `js/storage/` (IndexedDB, JSON files), `print.html` + `css/print.css`,
-`sw.js` + `manifest.webmanifest`.
+- `js/storage/`: IndexedDB store (db), project records (projects), stage files (files)
+- `css/print.css` + `js/ui/print.js` + `js/model/map.js`: the A4 brief (a hidden `#print` section)
+- `sw.js` + `manifest.webmanifest` + `icons/`: the PWA. **Add every new app file to `FILES` in
+  `sw.js`** (tests/pwa.test.mjs fails otherwise) and update `VERSION` there when bumping the version.
 
 ## Architecture rules
 
@@ -58,6 +60,7 @@ Still to come (Plans 2 and 3): `js/storage/` (IndexedDB, JSON files), `print.htm
 - Imported JSON is validated by `model/schema.js` before use and never overwrites an existing project.
 - Three.js is loaded through an inline import map allowed by its `sha256` hash in the CSP. If you
   change the import map, update the hash.
+- The CSP requires Trusted Types for scripts: script URLs (the service worker) go through a policy.
 
 ## Design
 

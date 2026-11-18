@@ -4,42 +4,39 @@ A browser-based 3D stage builder for IPSC practical shooting. Lay out a stage at
 it from any angle, and print a Written Stage Briefing with a stage map for range officers and
 competitors.
 
-**Version:** 0.1.0 · **Status:** early development. The 3D editor works; the printable briefing and
-saved projects come next (see the [v1 design](docs/superpowers/specs/2026-11-18-stage-builder-v1-design.md)).
-Started 2026-11-18.
+**Version:** 0.1.0 · **Status:** v1 feature-complete, not yet released (see the
+[v1 design](docs/superpowers/specs/2026-11-18-stage-builder-v1-design.md)). Started 2026-11-18.
 
 ## Who it's for
 
 Professional stage builders and enthusiast IPSC shooters who design stages for club matches and
 training, and want a clear briefing sheet without drawing the map by hand.
 
-## What v1 does
+## What it does
 
-Built so far (✓) and still to come in v1 (later):
-
-- ✓ **Shooting bay** at real scale: width × depth in metres (default 20 × 30 m), 1 m grid.
-- ✓ **Prop library**, every prop drawn in 3D at real dimensions:
-  - paper: IPSC target, mini target, no-shoot, mini no-shoot (on stick stands, adjustable height)
+- **Shooting bay** at real scale: width × depth in metres (default 20 × 30 m), 1 m grid.
+- **Prop library**, every prop drawn in 3D at real dimensions:
+  - paper: IPSC target, mini target, no-shoot, mini no-shoot (on sticks, adjustable height)
   - steel: IPSC popper, mini popper, round plate, square plate
   - walls: mesh wall (black or blue mesh, black or wood frame), wooden wall, wall with a real port
   - obstacles: barrel, tyre, tyre stack, wooden crate
   - fault lines, shooting areas and the start position
-- ✓ **Editing by eye:** click or drag props in, drag them on the ground, rotate them, all with grid
-  and angle snapping; multi-select, duplicate, delete, undo and redo.
-- ✓ **Automatic target numbers** (T1…, P1… for steel, NS1… for no-shoots), with hand-set labels kept.
-- ✓ **Live statistics:** targets, no-shoots, minimum rounds, maximum points, suggested stage type.
-- (later) **Written Stage Briefing** editor: match, stage name and number, designer, stage type, scoring,
-  targets, minimum rounds, maximum points, start signal, start position, gun condition, procedure,
-  stop time and notes. Counted fields come from the stage itself.
-- (later) **Printable brief** (A4, two pages): briefing and top-down map with a scale bar on page 1, a 3D
-  view on page 2. Save it as a PDF from the print dialog.
-- ✓ **Two surroundings,** Technical (grey floor, grid) and Outdoor (dirt, sunlight). Switching never
+- **Editing by eye:** tap or drag props in, drag them on the ground, rotate them, all with grid and
+  angle snapping; multi-select, duplicate, delete, undo and redo.
+- **Automatic target numbers** (T1…, P1… for steel, NS1… for no-shoots), with hand-set labels kept.
+- **Live statistics:** targets, no-shoots, minimum rounds, maximum points, suggested stage type.
+- **Written Stage Briefing** editor: match, stage name and number, designer, stage type, scoring,
+  start signal, start position, gun condition, procedure, stop time and notes. Targets, rounds and
+  points are counted from the stage.
+- **Printable brief** (A4): briefing and a top-down map with a scale bar on page 1, a 3D view on
+  page 2. Save it as a PDF from the print dialog.
+- **Two surroundings,** Technical (grey floor, grid) and Outdoor (dirt, sunlight). Switching never
   moves anything on the stage.
-- ✓ **Cameras:** orbit, pan, zoom, Top, Isometric, Front and a shooter's-eye view from the start position.
-- (later) **Projects** saved in the browser automatically, plus JSON export and import.
-- (later) **Works offline** and can be installed as an app (PWA).
+- **Cameras:** orbit, pan, zoom, Top, Isometric, Front and a shooter's-eye view from the start position.
+- **Projects** saved in the browser automatically, with JSON export and import.
+- **Works offline** and can be installed as an app (PWA).
 
-Later versions (not in v1): matches with several stages, build sheet with coordinates, sight-line
+Not in v1 (ideas for later): matches with several stages, a build sheet with coordinates, sight-line
 analysis, measuring tools, moving targets, more surroundings and props, model import, version history.
 
 ## Devices
@@ -55,6 +52,8 @@ not supported: below 768 px wide the app asks you to use a larger screen. Englis
   fault lines, shooting areas and the start position; drag, rotate, duplicate, delete, undo/redo.
 - Automatic target numbers (T1, P1, NS1) and live round count, points and suggested stage type.
 - Technical and Outdoor surroundings, camera presets including the shooter's eye.
+- Written Stage Briefing editor and a two-page A4 brief with a top-down map (Save as PDF).
+- Projects saved in the browser with autosave, JSON export and import; works offline as an app.
 
 ### 0.1.0
 
@@ -64,11 +63,19 @@ not supported: below 768 px wide the app asks you to use a larger screen. Englis
 
 <table>
   <tr>
-    <td><img src="docs/screenshots/editor-technical.png" alt="The editor with the Technical surroundings" width="400"><br>The editor: prop library, 3D stage in the Technical surroundings, stage statistics</td>
+    <td><img src="docs/screenshots/editor-technical.png" alt="The editor with the Technical surroundings" width="400"><br>The editor: prop library, the stage in the Technical surroundings, stage statistics</td>
     <td><img src="docs/screenshots/editor-outdoor.png" alt="The same stage outdoors with a wall selected" width="400"><br>The same stage outdoors, with a mesh wall selected and its rotate ring</td>
   </tr>
   <tr>
     <td><img src="docs/screenshots/shooters-eye.png" alt="Shooter's eye view from the start position" width="400"><br>Shooter's eye: the view from the start position at 1.6 m</td>
+    <td><img src="docs/screenshots/briefing.png" alt="The Written Stage Briefing dialog" width="400"><br>The Written Stage Briefing; rounds and points are counted from the stage</td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/print-page1.png" alt="Printed brief, page 1" width="400"><br>Printed brief, page 1: header, top-down map with scale bar, briefing</td>
+    <td><img src="docs/screenshots/print-page2.png" alt="Printed brief, page 2" width="400"><br>Printed brief, page 2: the 3D view</td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/projects.png" alt="The Projects dialog" width="400"><br>Projects saved in this browser, with export hints</td>
     <td><img src="docs/screenshots/ipad-landscape.png" alt="The editor at iPad landscape width" width="400"><br>On an iPad (1024 px): the inspector moves under the 3D view</td>
   </tr>
 </table>
@@ -81,10 +88,16 @@ No build step and no server-side code. Serve the folder and open it in a browser
 python3 -m http.server 8002      # then open http://localhost:8002/ (or: claude-update)
 ```
 
+Any static web server works (the app only loads its own files). Offline support and installing
+need `http://localhost` or HTTPS; opened as a `file://` page the editor works but nothing is cached.
+
+**Install as an app:** in Safari on an iPad or Mac, Share → Add to Home Screen (or Add to Dock); in
+Chrome or Edge, the install button in the address bar. Installed, it works without a connection, and
+Safari keeps its saved stages (a site that isn't installed can lose them after 7 days unvisited).
+
 ## Configuration
 
-Stage settings are in the inspector when nothing is selected. Saving them comes with saved projects
-(later in v1); until then a reload starts again from the example stage.
+Stage settings are in the inspector when nothing is selected. They are saved with the stage.
 
 | Setting | What it does | Default |
 |---|---|---|
@@ -123,8 +136,23 @@ it in the inspector; Renumber keeps hand-set labels and warns about duplicates.
 scroll or pinch to zoom. The buttons over the view jump to Isometric, Top, Front, Shooter's eye or
 frame everything. Switch *Technical*/*Outdoor* at any time; nothing on the stage moves.
 
-**Undo anything** with Undo/Redo or ⌘Z / ⇧⌘Z (Ctrl on Windows). *New stage* starts empty and can be
-undone too.
+**Undo anything** with Undo/Redo or ⌘Z / ⇧⌘Z (Ctrl on Windows).
+
+**Write the briefing.** *Briefing* opens the Written Stage Briefing. Fill in the match, stage
+number, designer, start signal, start position, gun condition, procedure and notes. Targets,
+minimum rounds and maximum points are counted from the stage and can't be typed over. Stage type
+is suggested from the round count; pick Short, Medium or Long to set it yourself.
+
+**Print the brief or save it as a PDF.** *Print* makes a two-page A4 brief: the briefing and a
+top-down map with a scale bar on page 1 (down range at the top), a 3D view on page 2. A long
+procedure carries on to the next page instead of being cut. In the print dialog choose
+*Save as PDF*; on an iPad, tap Share → Print, then pinch out on the preview and Share → Save to Files.
+
+**Projects, export and import.** Every change is saved in this browser automatically (the chip in
+the toolbar says *Saved*). *Projects* lists your stages: open, duplicate or delete them, start a
+*New stage*, *Export this stage* as a `.json` file, or *Import file…* to add a stage from a file.
+An import always becomes a new project, so it never overwrites one. A project with changes that
+aren't in an exported file shows a hint, so you know when to export a backup.
 
 ### Keyboard shortcuts
 
