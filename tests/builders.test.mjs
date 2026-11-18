@@ -39,3 +39,47 @@ test("two targets share one material", () => {
   assert.ok(a.some((m) => b.includes(m)));
 });
 
+
+// --- Task 8: walls, ports, obstacles, lines and the start marker ---
+import { buildLine, buildStartMarker } from "../js/render/builders/index.js";
+import { getMaterial } from "../js/render/materials.js";
+
+for (const type of ["wall-mesh", "wall-wood", "wall-port", "barrel", "tyre", "tyre-stack", "crate"]) {
+  test(`${type} is drawn at its real size`, () => checkSize(type));
+}
+
+test("resized walls keep their real size", () => {
+  checkSize("wall-mesh", { length: 3.5, height: 1.2 });
+  checkSize("wall-port", { length: 1.2, height: 2.4, portBottom: 1.5 });
+  checkSize("tyre-stack", { count: 5 });
+});
+
+test("a port is a real opening in the wall", () => {
+  const g = buildProp(obj("wall-port", { portWidth: 0.4, portHeight: 0.4, portBottom: 1.0 }));
+  g.updateMatrixWorld(true);
+  const ray = (x, y) => new Raycaster(new Vector3(x, y, -1), new Vector3(0, 0, 1)).intersectObject(g, true);
+  assert.equal(ray(0, 1.2).length, 0, "through the port centre");
+  assert.ok(ray(0.5, 1.2).length > 0, "beside the port");
+  assert.ok(ray(0, 0.5).length > 0, "below the port");
+});
+
+test("mesh colour comes from the wall's own setting", () => {
+  const uses = (g, name) => { let found = false; g.traverse((c) => { if (c.material === getMaterial(name)) found = true; }); return found; };
+  assert.ok(uses(buildProp(obj("wall-mesh", { mesh: "blue" })), "mesh-blue"));
+  assert.ok(!uses(buildProp(obj("wall-mesh", { mesh: "blue" })), "mesh-black"));
+  assert.ok(uses(buildProp(obj("wall-mesh", { frame: "wood" })), "wood"));
+});
+
+test("fault lines have one bar per segment, closing the loop when closed", () => {
+  const pts = [[0, 0], [2, 0], [2, 2]];
+  const bars = (l) => l.children.filter((c) => c.userData.bar).length;
+  assert.equal(bars(buildLine({ id: "a", type: "fault-line", points: pts, closed: true })), 3);
+  assert.equal(bars(buildLine({ id: "b", type: "fault-line", points: pts, closed: false })), 2);
+  assert.equal(buildLine({ id: "b", type: "fault-line", points: pts, closed: false }).userData.id, "b");
+});
+
+test("start marker is a 1 m square on the ground", () => {
+  const s = size(buildStartMarker({ position: [0, 1], facing: 0 }));
+  near(s.x, 1, 0.01, "width");
+  near(s.z, 1, 0.01, "depth");
+});
