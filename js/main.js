@@ -15,6 +15,7 @@ import { createStats } from "./ui/stats.js";
 import { attachShortcuts } from "./ui/shortcuts.js";
 import { createAbout } from "./ui/about.js";
 import { createBriefing } from "./ui/briefing.js";
+import { renderPrint } from "./ui/print.js";
 import { h } from "./ui/dom.js";
 
 const canvas = document.getElementById("viewport");
@@ -92,6 +93,28 @@ function updateHint(state) {
   if (nodes) hint.replaceChildren(...nodes);
 }
 
+// Print: an isometric snapshot of the stage (without selection helpers), then the browser's print
+// dialog, where "Save as PDF" makes the PDF.
+function snapshot() {
+  const cam = engine.camera.position.clone();
+  const target = rig.controls.target.clone();
+  engine.groups.helper.visible = false;
+  rig.preset("iso", editor.stage());
+  rig.frameAll(editor.stage());
+  engine.renderer.render(engine.scene, engine.camera);
+  const url = canvas.toDataURL("image/png");
+  engine.groups.helper.visible = true;
+  engine.camera.position.copy(cam);
+  rig.controls.target.copy(target);
+  rig.controls.update();
+  engine.requestRender();
+  return url;
+}
+function printBrief() {
+  renderPrint(document.getElementById("print"), editor.stage(), snapshot());
+  window.print();
+}
+
 let picking = null;
 let briefing = null;
 const editor = createEditor({ stage: demoStage(), onChange: (state) => render(state) });
@@ -99,7 +122,7 @@ picking = attachPicking({ engine, stageView: view, editor, cameraRig: rig, canva
 
 updaters.push(
   createToolbar(document.getElementById("toolbar"), {
-    editor, rig, onAbout: () => about.open(), onBriefing: () => briefing.open(),
+    editor, rig, onAbout: () => about.open(), onBriefing: () => briefing.open(), onPrint: () => printBrief(),
     onNew: () => editor.dispatch({ type: "newStage" }),
   }),
   createLibrary(document.getElementById("library"), { editor }),

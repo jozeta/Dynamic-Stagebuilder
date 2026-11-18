@@ -1,0 +1,23 @@
+/* The printed stage brief: A4 portrait, black on white whatever the screen theme. */
+#print { display: none; }
+
+@media print {
+  @page { size: A4; margin: 12mm; }
+  html, body { height: auto; overflow: visible; background: #fff !important; }
+  body > *:not(#print) { display: none !important; }
+  #print { display: block; color: #111; font: 10.5pt/1.4 -apple-system, "Segoe UI", system-ui, sans-serif;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .print-head { margin-bottom: 3mm; }
+  .print-match { margin: 0; font-size: 10pt; color: #444; }
+  .print-head h1 { margin: 0; font-size: 17pt; }
+  .print-map { border: 0.3mm solid #999; margin-bottom: 4mm; break-inside: avoid; }
+  .print-map svg { display: block; }
+  .print-wsb { width: 100%; border-collapse: collapse; margin-bottom: 3mm; }
+  .print-wsb th, .print-wsb td { text-align: left; vertical-align: top; padding: 1.2mm 2mm; border-bottom: 0.2mm solid #ccc; }
+  .print-wsb th { width: 38mm; font-weight: 600; }
+  .print-text h2, .print-3d h2 { font-size: 11pt; margin: 3mm 0 1mm; }
+  .print-text p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .print-3d { break-before: page; }
+  .print-3d img { width: 100%; height: auto; border: 0.3mm solid #999; }
+  .print-foot { font-size: 8pt; color: #555; }
+}
