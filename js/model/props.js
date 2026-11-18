@@ -1,0 +1,101 @@
+// The v1 prop catalogue: every prop's type, category, scoring kind and parameters, and its overall
+// real-world size in metres. Pure data: no DOM, no Three.js.
+//
+// Target outlines: IPSC Target ≈ 46 × 58 cm and Mini Target ≈ 2/3 of that (Appendix B2/B3 drawings);
+// IPSC Popper 85 cm tall with a 30 cm head, Mini Popper 2/3 of that (Appendix C2); plates 15–30 cm
+// (Appendix C3a). The appendix drawings are images, so these are the commonly published sizes.
+
+export const TARGET_SIZES = Object.freeze({
+  ipsc: Object.freeze({ w: 0.46, h: 0.58 }),
+  mini: Object.freeze({ w: 0.31, h: 0.39 }),
+  popper: Object.freeze({ w: 0.30, h: 0.85, d: 0.30 }),
+  miniPopper: Object.freeze({ w: 0.20, h: 0.57, d: 0.25 }),
+});
+
+export const STICK = 0.04;         // target stick and wall frame section (m)
+export const PLATE_FOOT = 0.30;    // footprint of a plate stand (m)
+export const TYRE = Object.freeze({ diameter: 0.65, height: 0.22 });
+export const BARREL = Object.freeze({ diameter: 0.58, height: 0.88 });
+
+const mount = { mountHeight: { default: 1.0, min: 0.1, max: 2.0, step: 0.05 } };
+const wallSize = {
+  length: { default: 2, min: 0.5, max: 4, step: 0.1 },
+  height: { default: 2, min: 0.5, max: 2.5, step: 0.1 },
+};
+
+const defs = [
+  { type: "paper-ipsc", name: "IPSC target", category: "paper", scoring: "paper", params: mount },
+  { type: "paper-mini", name: "IPSC mini target", category: "paper", scoring: "paper", params: mount },
+  { type: "noshoot", name: "No-shoot", category: "paper", scoring: "noshoot", params: mount },
+  { type: "noshoot-mini", name: "Mini no-shoot", category: "paper", scoring: "noshoot", params: mount },
+  { type: "popper", name: "IPSC popper", category: "steel", scoring: "steel",
+    params: { baseHeight: { default: 0, min: 0, max: 1.5, step: 0.05 } } },
+  { type: "mini-popper", name: "Mini popper", category: "steel", scoring: "steel",
+    params: { baseHeight: { default: 0, min: 0, max: 1.5, step: 0.05 } } },
+  { type: "plate-round", name: "Round plate", category: "steel", scoring: "steel",
+    params: { size: { default: 0.2, min: 0.15, max: 0.3, step: 0.01 }, baseHeight: { default: 1.0, min: 0.2, max: 1.5, step: 0.05 } } },
+  { type: "plate-square", name: "Square plate", category: "steel", scoring: "steel",
+    params: { size: { default: 0.15, min: 0.15, max: 0.3, step: 0.01 }, baseHeight: { default: 1.0, min: 0.2, max: 1.5, step: 0.05 } } },
+  { type: "wall-mesh", name: "Mesh wall", category: "wall", scoring: null,
+    params: { ...wallSize, mesh: { default: "black", options: ["black", "blue"] }, frame: { default: "black", options: ["black", "wood"] } } },
+  { type: "wall-wood", name: "Wooden wall", category: "wall", scoring: null, params: wallSize },
+  { type: "wall-port", name: "Wall with port", category: "wall", scoring: null,
+    params: { ...wallSize,
+      portWidth: { default: 0.4, min: 0.2, max: 1.5, step: 0.05 },
+      portHeight: { default: 0.4, min: 0.2, max: 1.5, step: 0.05 },
+      portBottom: { default: 1.0, min: 0.1, max: 2.0, step: 0.05 } } },
+  { type: "barrel", name: "Barrel (200 l)", category: "obstacle", scoring: null, params: {} },
+  { type: "tyre", name: "Tyre", category: "obstacle", scoring: null, params: {} },
+  { type: "tyre-stack", name: "Tyre stack", category: "obstacle", scoring: null,
+    params: { count: { default: 3, min: 1, max: 6, step: 1 } } },
+  { type: "crate", name: "Wooden crate", category: "obstacle", scoring: null,
+    params: { size: { default: 0.6, min: 0.3, max: 1.2, step: 0.05 } } },
+];
+
+function deepFreeze(o) {
+  for (const v of Object.values(o)) if (v && typeof v === "object") deepFreeze(v);
+  return Object.freeze(o);
+}
+
+export const PROPS = deepFreeze(Object.fromEntries(defs.map((d) => [d.type, d])));
+
+export function getProp(type) {
+  if (!Object.hasOwn(PROPS, type)) throw new Error(`Unknown prop type: ${type}`);
+  return PROPS[type];
+}
+
+export function defaultParams(type) {
+  const out = {};
+  for (const [k, p] of Object.entries(getProp(type).params)) out[k] = p.default;
+  return out;
+}
+
+const round = (v) => Math.round(v * 1e6) / 1e6;
+
+/** Overall bounding box { w, h, d } in metres (x, y, z at rotation 0), stand and frame included. */
+export function dimensionsOf(obj) {
+  const p = { ...defaultParams(obj.type), ...obj.params };
+  let w, h, d;
+  switch (obj.type) {
+    case "paper-ipsc": case "noshoot":
+      [w, h, d] = [TARGET_SIZES.ipsc.w, p.mountHeight + TARGET_SIZES.ipsc.h, STICK]; break;
+    case "paper-mini": case "noshoot-mini":
+      [w, h, d] = [TARGET_SIZES.mini.w, p.mountHeight + TARGET_SIZES.mini.h, STICK]; break;
+    case "popper": {
+      const s = TARGET_SIZES.popper; [w, h, d] = [s.w, p.baseHeight + s.h, s.d]; break;
+    }
+    case "mini-popper": {
+      const s = TARGET_SIZES.miniPopper; [w, h, d] = [s.w, p.baseHeight + s.h, s.d]; break;
+    }
+    case "plate-round": case "plate-square":
+      [w, h, d] = [Math.max(p.size, PLATE_FOOT), p.baseHeight + p.size, PLATE_FOOT]; break;
+    case "wall-mesh": case "wall-wood": case "wall-port":
+      [w, h, d] = [p.length, p.height, STICK]; break;
+    case "barrel": [w, h, d] = [BARREL.diameter, BARREL.height, BARREL.diameter]; break;
+    case "tyre": [w, h, d] = [TYRE.diameter, TYRE.height, TYRE.diameter]; break;
+    case "tyre-stack": [w, h, d] = [TYRE.diameter, TYRE.height * p.count, TYRE.diameter]; break;
+    case "crate": [w, h, d] = [p.size, p.size, p.size]; break;
+    default: throw new Error(`Unknown prop type: ${obj.type}`);
+  }
+  return { w: round(w), h: round(h), d: round(d) };
+}
