@@ -23,6 +23,7 @@ import { openStore, memoryStore } from "./storage/db.js";
 import { projectRecord, sortProjects, nextProjectAfterDelete } from "./storage/projects.js";
 import { exportFileName, stageToJson } from "./storage/files.js";
 import { createProjects } from "./ui/projects.js";
+import { createAutosave } from "./storage/autosave.js";
 
 const canvas = document.getElementById("viewport");
 let engine;
@@ -130,74 +131,63 @@ picking = attachPicking({ engine, stageView: view, editor, cameraRig: rig, canva
 const LAST = "dsb:last";
 const status = h("span", { class: "lg-chip save-status", role: "status", "aria-live": "polite", text: "…" });
 let store = null;
-let savedStage = null;
-let exportedAt = null;
-let saveTimer = 0;
+let autosave = null;
 
 const remember = (id) => { try { localStorage.setItem(LAST, id); } catch { /* private mode */ } };
 const recall = () => { try { return localStorage.getItem(LAST); } catch { return null; } };
 function setStatus(text, tone = "") { status.textContent = text; status.className = `lg-chip save-status ${tone}`; }
-
-function scheduleSave() {
-  if (!store || editor.stage() === savedStage) return;
-  setStatus("Saving…");
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(saveNow, 600);
+function onSaveStatus(kind, err) {
+  if (kind === "saving") setStatus("Saving…");
+  else if (kind === "saved") setStatus(store.memory ? "Not saved: this browser blocks storage" : "Saved", store.memory ? "lg-warn" : "lg-ok");
+  else { console.error(err); setStatus("Not saved: storage error", "lg-bad"); }
 }
-async function saveNow() {
-  clearTimeout(saveTimer);
-  const stage = editor.stage();
-  if (!store || stage === savedStage) return;
-  try {
-    await store.put(projectRecord(stage, { now: Date.now(), exportedAt }));
-    savedStage = stage;
-    setStatus(store.memory ? "Not saved: this browser blocks storage" : "Saved", store.memory ? "lg-warn" : "lg-ok");
-  } catch (err) {
-    console.error(err);
-    setStatus("Not saved: storage error", "lg-bad");
-  }
-}
+function scheduleSave() { autosave?.schedule(); }
+const saveNow = () => autosave?.flush();
 addEventListener("pagehide", () => { saveNow(); });
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") saveNow(); });
 
+/** Open a stored project; false if it is missing or can't be read. */
 async function openProject(id) {
   await saveNow();
   const rec = await store.get(id);
-  if (!rec) return;
-  const r = validateStage(rec.stage);
-  if (!r.ok) { setStatus("That project could not be read", "lg-bad"); return; }
-  exportedAt = rec.exportedAt ?? null;
+  const r = rec ? validateStage(rec.stage) : { ok: false };
+  if (!r.ok) { setStatus("That project could not be read", "lg-bad"); return false; }
   editor.dispatch({ type: "load", stage: r.stage });
-  savedStage = editor.stage();
+  autosave.markSaved(editor.stage(), rec.exportedAt ?? null);
   remember(id);
   setStatus("Saved", "lg-ok");
   rig.preset("iso", editor.stage());
   rig.frameAll(editor.stage());
+  return true;
 }
 async function addProject(stage) {
   await saveNow();
   await store.put(projectRecord(stage, { now: Date.now() }));
   await openProject(stage.id);
 }
+const freshStage = () => {
+  const s = createStage({ name: "New stage" });
+  return { ...s, settings: { ...s.settings, environment: editor.stage().settings.environment } };
+};
 
 const projects = createProjects({
   store: { list: () => store.list() },
   currentId: () => editor.stage().id,
   onOpen: openProject,
-  onNew: () => addProject({ ...createStage({ name: "New stage" }), settings: { ...createStage().settings, environment: editor.stage().settings.environment } }),
+  onNew: () => addProject(freshStage()),
   onDuplicate: async (id) => {
     await saveNow();
     const rec = await store.get(id);
     if (rec) await store.put(projectRecord({ ...rec.stage, id: crypto.randomUUID(), name: `${rec.stage.name} (copy)`.slice(0, 120) }, { now: Date.now() }));
   },
   onDelete: async (id) => {
+    const open = id === editor.stage().id;
+    if (open) { autosave.cancel(); autosave.markSaved(editor.stage()); }   // no pending save may bring it back
     const all = await store.list();
     await store.remove(id);
-    if (id !== editor.stage().id) return;
-    savedStage = editor.stage();     // don't re-save the deleted project
+    if (!open) return;
     const next = nextProjectAfterDelete(all, id);
-    if (next) await openProject(next);
-    else await addProject(createStage({ name: "New stage" }));
+    if (!(next && await openProject(next))) await addProject(freshStage());
   },
   onImport: (stage) => addProject(stage),
   onExport: async () => {
@@ -209,9 +199,9 @@ const projects = createProjects({
     a.click();
     a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-    exportedAt = Date.now();
-    await store.put(projectRecord(stage, { now: exportedAt - 1, exportedAt }));
-    savedStage = stage;
+    const at = Date.now();
+    await store.put(projectRecord(stage, { now: at - 1, exportedAt: at }));
+    autosave.markSaved(stage, at);
   },
 });
 
@@ -235,11 +225,12 @@ rig.frameAll(editor.stage());
 // Open the last project, else the newest, else save the example stage as the first project.
 (async () => {
   try { store = await openStore(); } catch (err) { console.warn(err); store = memoryStore(); }
+  autosave = createAutosave({ store, getStage: () => editor.stage(), onStatus: onSaveStatus });
+  autosave.markSaved(editor.stage());   // the example stage on screen is not a project until chosen below
   const all = sortProjects(await store.list());
   const last = recall();
   const pick = all.find((r) => r.id === last) ?? all[0];
-  if (pick) await openProject(pick.id);
-  else await addProject(editor.stage());
+  if (!(pick && await openProject(pick.id))) await addProject(demoStage());
 })();
 
 // Offline support (PWA). Not on file:// pages or browsers without service workers.

@@ -8,6 +8,7 @@
 import * as THREE from "three";
 import { TransformControls } from "three/addons/controls/TransformControls.js";
 import { groundPoint } from "./ground.js";
+import { yawDegrees } from "./rotation.js";
 
 const TAP_PX = 6;
 
@@ -28,8 +29,7 @@ export function attachPicking({ engine, stageView, editor, cameraRig, canvas, on
     cameraRig.controls.enabled = !e.value;
     if (!e.value && gizmo.object) {
       const id = gizmo.object.userData.id;
-      const deg = (-gizmo.object.rotation.y * 180) / Math.PI;
-      editor.dispatch({ type: "setRotation", id, value: deg });
+      editor.dispatch({ type: "setRotation", id, value: yawDegrees(gizmo.object) });
     }
   });
 

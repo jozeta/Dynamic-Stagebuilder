@@ -34,7 +34,25 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
     return out;
   }
 
-  function moved(base, ids, delta) {
+  // Limit a group move so every selected item stays inside the bay (the group stops as a whole).
+  function limitDelta(base, ids, [dx, dz]) {
+    const pts = [];
+    for (const id of ids) {
+      const o = base.objects.find((x) => x.id === id);
+      if (o) pts.push(o.position);
+      const l = base.lines.find((x) => x.id === id);
+      if (l) pts.push(...l.points);
+    }
+    const half = base.bay.width / 2;
+    for (const [x, z] of pts) {
+      dx = Math.min(Math.max(dx, -half - x), half - x);
+      dz = Math.min(Math.max(dz, -z), base.bay.depth - z);
+    }
+    return [dx, dz];
+  }
+
+  function moved(base, ids, rawDelta) {
+    const delta = limitDelta(base, ids, rawDelta);
     let s = base;
     for (const id of ids) {
       const o = base.objects.find((x) => x.id === id);
@@ -43,6 +61,14 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
       if (l) s = { ...s, lines: s.lines.map((x) => x.id !== id ? x : { ...x, points: l.points.map((p) => fit([p[0] + delta[0], p[1] + delta[1]], base)) }) };
     }
     return s;
+  }
+
+  // Undo/redo change the stage, not the surroundings the user is looking at.
+  function keepEnvironment(step) {
+    const env = present().settings.environment;
+    state.history = step(state.history);
+    if (present().settings.environment !== env) state.history = replacePresent(state.history, setSetting(present(), "environment", env));
+    state.selection = pruneSelection(state.selection, present());
   }
 
   const handlers = {
@@ -88,11 +114,12 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
     duplicate({ ids = state.selection }) {
       const r = duplicateObjects(present(), ids);
       if (!r.ids.length) return;
-      edit(r.stage);
+      const copies = new Set(r.ids);
+      edit({ ...r.stage, objects: r.stage.objects.map((o) => (copies.has(o.id) ? { ...o, position: fit(o.position) } : o)) });
       state.selection = r.ids;
     },
-    undo() { state.history = undo(state.history); state.selection = pruneSelection(state.selection, present()); },
-    redo() { state.history = redo(state.history); state.selection = pruneSelection(state.selection, present()); },
+    undo() { keepEnvironment(undo); },
+    redo() { keepEnvironment(redo); },
     renumber() { edit(renumber(present())); },
     setLabel({ id, text }) { edit(setLabel(present(), id, text)); },
     setEnvironment({ name }) { state.history = replacePresent(state.history, setSetting(present(), "environment", name)); },
