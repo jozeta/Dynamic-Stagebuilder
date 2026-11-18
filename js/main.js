@@ -17,6 +17,12 @@ import { createAbout } from "./ui/about.js";
 import { createBriefing } from "./ui/briefing.js";
 import { renderPrint } from "./ui/print.js";
 import { h } from "./ui/dom.js";
+import { createStage } from "./model/stage.js";
+import { validateStage } from "./model/schema.js";
+import { openStore, memoryStore } from "./storage/db.js";
+import { projectRecord, sortProjects, nextProjectAfterDelete } from "./storage/projects.js";
+import { exportFileName, stageToJson } from "./storage/files.js";
+import { createProjects } from "./ui/projects.js";
 
 const canvas = document.getElementById("viewport");
 let engine;
@@ -117,13 +123,102 @@ function printBrief() {
 
 let picking = null;
 let briefing = null;
-const editor = createEditor({ stage: demoStage(), onChange: (state) => render(state) });
+const editor = createEditor({ stage: demoStage(), onChange: (state) => { render(state); scheduleSave(); } });
 picking = attachPicking({ engine, stageView: view, editor, cameraRig: rig, canvas });
+
+// --- Saved projects: autosave 600 ms after the last change, and when the page is hidden. ---
+const LAST = "dsb:last";
+const status = h("span", { class: "lg-chip save-status", role: "status", "aria-live": "polite", text: "…" });
+let store = null;
+let savedStage = null;
+let exportedAt = null;
+let saveTimer = 0;
+
+const remember = (id) => { try { localStorage.setItem(LAST, id); } catch { /* private mode */ } };
+const recall = () => { try { return localStorage.getItem(LAST); } catch { return null; } };
+function setStatus(text, tone = "") { status.textContent = text; status.className = `lg-chip save-status ${tone}`; }
+
+function scheduleSave() {
+  if (!store || editor.stage() === savedStage) return;
+  setStatus("Saving…");
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveNow, 600);
+}
+async function saveNow() {
+  clearTimeout(saveTimer);
+  const stage = editor.stage();
+  if (!store || stage === savedStage) return;
+  try {
+    await store.put(projectRecord(stage, { now: Date.now(), exportedAt }));
+    savedStage = stage;
+    setStatus(store.memory ? "Not saved: this browser blocks storage" : "Saved", store.memory ? "lg-warn" : "lg-ok");
+  } catch (err) {
+    console.error(err);
+    setStatus("Not saved: storage error", "lg-bad");
+  }
+}
+addEventListener("pagehide", () => { saveNow(); });
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") saveNow(); });
+
+async function openProject(id) {
+  await saveNow();
+  const rec = await store.get(id);
+  if (!rec) return;
+  const r = validateStage(rec.stage);
+  if (!r.ok) { setStatus("That project could not be read", "lg-bad"); return; }
+  exportedAt = rec.exportedAt ?? null;
+  editor.dispatch({ type: "load", stage: r.stage });
+  savedStage = editor.stage();
+  remember(id);
+  setStatus("Saved", "lg-ok");
+  rig.preset("iso", editor.stage());
+  rig.frameAll(editor.stage());
+}
+async function addProject(stage) {
+  await saveNow();
+  await store.put(projectRecord(stage, { now: Date.now() }));
+  await openProject(stage.id);
+}
+
+const projects = createProjects({
+  store: { list: () => store.list() },
+  currentId: () => editor.stage().id,
+  onOpen: openProject,
+  onNew: () => addProject({ ...createStage({ name: "New stage" }), settings: { ...createStage().settings, environment: editor.stage().settings.environment } }),
+  onDuplicate: async (id) => {
+    await saveNow();
+    const rec = await store.get(id);
+    if (rec) await store.put(projectRecord({ ...rec.stage, id: crypto.randomUUID(), name: `${rec.stage.name} (copy)`.slice(0, 120) }, { now: Date.now() }));
+  },
+  onDelete: async (id) => {
+    const all = await store.list();
+    await store.remove(id);
+    if (id !== editor.stage().id) return;
+    savedStage = editor.stage();     // don't re-save the deleted project
+    const next = nextProjectAfterDelete(all, id);
+    if (next) await openProject(next);
+    else await addProject(createStage({ name: "New stage" }));
+  },
+  onImport: (stage) => addProject(stage),
+  onExport: async () => {
+    await saveNow();
+    const stage = editor.stage();
+    const url = URL.createObjectURL(new Blob([stageToJson(stage)], { type: "application/json" }));
+    const a = h("a", { href: url, download: exportFileName(stage) });
+    document.body.append(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    exportedAt = Date.now();
+    await store.put(projectRecord(stage, { now: exportedAt - 1, exportedAt }));
+    savedStage = stage;
+  },
+});
 
 updaters.push(
   createToolbar(document.getElementById("toolbar"), {
-    editor, rig, onAbout: () => about.open(), onBriefing: () => briefing.open(), onPrint: () => printBrief(),
-    onNew: () => editor.dispatch({ type: "newStage" }),
+    editor, rig, status, onAbout: () => about.open(), onBriefing: () => briefing.open(), onPrint: () => printBrief(),
+    onProjects: () => projects.open(),
   }),
   createLibrary(document.getElementById("library"), { editor }),
   createInspector(document.getElementById("inspector-body"), { editor }),
@@ -136,3 +231,13 @@ render(editor.state);
 document.getElementById("boot-state")?.remove();
 rig.preset("iso", editor.stage());
 rig.frameAll(editor.stage());
+
+// Open the last project, else the newest, else save the example stage as the first project.
+(async () => {
+  try { store = await openStore(); } catch (err) { console.warn(err); store = memoryStore(); }
+  const all = sortProjects(await store.list());
+  const last = recall();
+  const pick = all.find((r) => r.id === last) ?? all[0];
+  if (pick) await openProject(pick.id);
+  else await addProject(editor.stage());
+})();

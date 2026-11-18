@@ -4,7 +4,7 @@ import { canUndo, canRedo } from "../model/history.js";
 import { ENVIRONMENT_NAMES, ENVIRONMENT_LABELS } from "../render/environments/index.js";
 import { PRESETS, PRESET_LABELS } from "../render/camera.js";
 
-export function createToolbar(root, { editor, rig, onAbout, onNew, onBriefing, onPrint }) {
+export function createToolbar(root, { editor, rig, status, onAbout, onBriefing, onPrint, onProjects }) {
   // Camera presets live in a bar over the 3D view (#camera-slot); the rest in the toolbar.
   const btn = (name, label, onclick, extra = {}) =>
     h("button", { type: "button", class: "lg-btn lg-btn-ghost tool", "aria-label": label, onclick, ...extra }, [icon(name), h("span", { text: label.split(" (")[0] })]);
@@ -36,11 +36,11 @@ export function createToolbar(root, { editor, rig, onAbout, onNew, onBriefing, o
 
   root.append(
     h("div", { class: "brand" }, [h("span", { class: "brand-name", text: "Dynamic-Stagebuilder" })]),
-    h("div", { class: "toolgroup", role: "group", "aria-label": "Edit" }, [btn("new", "New stage", onNew), undoB, redoB, dupB, delB]),
+    h("div", { class: "toolgroup", role: "group", "aria-label": "Edit" }, [btn("folder", "Projects", onProjects), undoB, redoB, dupB, delB]),
     h("div", { class: "toolgroup", role: "group", "aria-label": "Draw" }, [lineB, areaB, startB, numB]),
     h("div", { class: "toolgroup", role: "group", "aria-label": "Brief" }, [wsbB, printB]),
     env,
-    h("div", { class: "toolgroup end" }, [btn("info", "About", onAbout)]),
+    h("div", { class: "toolgroup end" }, [status, btn("info", "About", onAbout)]),
   );
 
   return function update(state) {

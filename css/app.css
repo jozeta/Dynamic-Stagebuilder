@@ -102,3 +102,16 @@ body { background: var(--lg-bg); overflow: hidden; }
 .briefing-body { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--lg-space-s) var(--lg-space-l); }
 .briefing-body .lg-input, .briefing-body .lg-select { width: 100%; box-sizing: border-box; }
 .wsb-wide { grid-column: 1 / -1; }
+
+.save-status { white-space: nowrap; }
+.proj-actions { flex-wrap: wrap; gap: var(--lg-space-s); }
+.proj-list { display: grid; gap: var(--lg-space-xs); }
+.proj-row { display: flex; align-items: center; justify-content: space-between; gap: var(--lg-space-m); flex-wrap: wrap;
+  padding: var(--lg-space-s) var(--lg-space-m); border: 1px solid var(--lg-border); border-radius: var(--lg-radius-control); }
+.proj-row.is-current { border-color: var(--lg-accent); }
+.proj-info { display: grid; gap: 2px; min-width: 0; }
+.proj-name { font-weight: 600; overflow-wrap: anywhere; }
+.proj-meta { font-size: var(--lg-fs-small); }
+.proj-hint { font-size: var(--lg-fs-small); color: var(--lg-warn-text, var(--lg-warn)); }
+.proj-buttons { gap: var(--lg-space-xs); }
+.proj-confirm { overflow-wrap: anywhere; }

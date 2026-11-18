@@ -169,16 +169,13 @@ test("the same snapped point twice in a row is stored once (double-click to fini
   assert.deepEqual(ed.state.mode.points, [[0, 2], [3, 2]]);
 });
 
-test("New stage starts empty, keeps the surroundings, and can be undone", () => {
+test("load replaces the stage with fresh history and no selection", () => {
   const ed = placed();
-  ed.dispatch({ type: "setEnvironment", name: "outdoor" });
-  ed.dispatch({ type: "setStart", position: [0, 1] });
-  ed.dispatch({ type: "newStage" });
-  const s = ed.stage();
-  assert.equal(s.objects.length, 0);
-  assert.equal(s.start, null);
-  assert.equal(s.settings.environment, "outdoor");
+  const other = createEditor().stage();
+  ed.dispatch({ type: "load", stage: other });
+  assert.equal(ed.stage().id, other.id);
+  assert.deepEqual(ed.state.history.past, []);
+  assert.deepEqual(ed.state.history.future, []);
   assert.deepEqual(ed.state.selection, []);
-  ed.dispatch({ type: "undo" });
-  assert.equal(ed.stage().objects.length, 1);
+  assert.equal(ed.state.mode, "select");
 });
