@@ -1,12 +1,15 @@
 // Boot: create the 3D engine and show a demo stage (temporary until the editor UI lands).
 import { createEngine } from "./render/engine.js";
 import { createStageView } from "./render/stage-view.js";
+import { createLabel } from "./render/labels.js";
+import { createCameraRig } from "./render/camera.js";
 import { createStage, addObject, addLine, setStart } from "./model/stage.js";
 import { assignLabels } from "./model/numbering.js";
 
 const canvas = document.getElementById("viewport");
 const engine = createEngine(canvas);
-const view = createStageView(engine.groups.stage);
+const view = createStageView(engine.groups.stage, { labelFactory: createLabel });
+const rig = createCameraRig(engine, canvas);
 
 let s = createStage();
 const add = (t, x, z, r = 0, p = {}) => { s = addObject(s, t, [x, z], r, p).stage; };
@@ -33,6 +36,4 @@ view.sync(s);
 
 const params = new URLSearchParams(location.search);
 engine.setEnvironment(params.get("env") === "outdoor" ? "outdoor" : "technical", s.bay);
-engine.camera.position.set(-12, 14, -6);
-engine.camera.lookAt(0, 0, 11);
-engine.requestRender();
+rig.preset(params.get("cam") || "iso", s);
