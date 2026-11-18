@@ -7,7 +7,7 @@ import { createHash } from "node:crypto";
 const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 
 test("has a viewport meta tag (responsive)", () => {
-  assert.match(html, /<meta name="viewport" content="width=device-width, initial-scale=1">/);
+  assert.match(html, /<meta name="viewport" content="width=device-width, initial-scale=1(, viewport-fit=cover)?">/);
 });
 
 test("has a strict Content-Security-Policy", () => {

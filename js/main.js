@@ -17,7 +17,24 @@ import { createAbout } from "./ui/about.js";
 import { h } from "./ui/dom.js";
 
 const canvas = document.getElementById("viewport");
-const engine = createEngine(canvas);
+let engine;
+try {
+  engine = createEngine(canvas);
+} catch (err) {
+  showViewportError(err);
+  throw err;
+}
+
+// DES-STATES-1: if WebGL can't start, say so in the viewport instead of leaving it blank.
+function showViewportError(err) {
+  console.error(err);
+  document.getElementById("boot-state")?.remove();
+  canvas.hidden = true;
+  canvas.parentElement.append(h("div", { class: "lg-state lg-state-error viewport-state", role: "alert" }, [
+    h("p", { class: "lg-state-title", text: "The 3D view could not start" }),
+    h("p", { class: "lg-state-text", text: "Your browser may have WebGL turned off. Try the latest Safari, Chrome or Edge, or restart the browser." }),
+  ]));
+}
 const view = createStageView(engine.groups.stage, { labelFactory: createLabel });
 const rig = createCameraRig(engine, canvas);
 const about = createAbout();
@@ -90,5 +107,6 @@ updaters.push(
 attachShortcuts({ editor, rig });
 
 render(editor.state);
+document.getElementById("boot-state")?.remove();
 rig.preset("iso", editor.stage());
 rig.frameAll(editor.stage());

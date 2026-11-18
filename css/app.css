@@ -11,6 +11,8 @@ body { background: var(--lg-bg); overflow: hidden; }
   gap: var(--lg-space-s); padding: var(--lg-space-s);
   padding-left: max(var(--lg-space-s), env(safe-area-inset-left));
   padding-right: max(var(--lg-space-s), env(safe-area-inset-right));
+  padding-top: max(var(--lg-space-s), env(safe-area-inset-top));
+  padding-bottom: max(var(--lg-space-s), env(safe-area-inset-bottom));
   box-sizing: border-box;
 }
 .toolbar { grid-area: toolbar; }
@@ -24,7 +26,7 @@ body { background: var(--lg-bg); overflow: hidden; }
 /* iPad portrait and small laptops: the inspector becomes a panel under the viewport. */
 @media (max-width: 1099px) {
   .app { grid-template-columns: 200px minmax(0, 1fr);
-    grid-template-rows: auto minmax(0, 1fr) 240px;
+    grid-template-rows: auto minmax(0, 1fr) clamp(240px, 34dvh, 340px);
     grid-template-areas: "toolbar toolbar" "library viewport" "library inspector"; }
 }
 
@@ -84,3 +86,15 @@ body { background: var(--lg-bg); overflow: hidden; }
 .camera-bar .lg-btn { font-size: var(--lg-fs-small); }
 
 @media (max-width: 1099px) { .brand { display: none; } }
+
+/* Touch screens (iPad): every control at least 44 px. */
+@media (pointer: coarse) {
+  .tool, .tool-text, .lib-item, .camera-bar .lg-btn, .hint .lg-btn, .rot-row .lg-btn { min-height: var(--lg-touch); }
+  .rot-row .lg-btn { min-width: var(--lg-touch); }
+}
+@media (max-width: 899px) {
+  .toolbar { gap: var(--lg-space-xs) var(--lg-space-s); }
+  .tool { min-width: 44px; padding: 4px 3px; }
+}
+.viewport-state { position: absolute; inset: 0; display: grid; place-content: center; padding: var(--lg-space-xl); text-align: center; }
+.small-screen { overflow-wrap: anywhere; }

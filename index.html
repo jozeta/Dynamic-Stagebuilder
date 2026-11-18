@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="dark light">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-CIq23Q/15Qd4etb6G6BJsTzAatGsQJZhB+k5vG+djZI='; style-src 'self'; img-src 'self' data: blob:; object-src 'none'; base-uri 'none'; form-action 'self'; require-trusted-types-for 'script'">
   <title>Dynamic-Stagebuilder</title>
@@ -21,6 +21,11 @@
     <aside class="library lg-glass" id="library" aria-label="Prop library"></aside>
     <main class="viewport-wrap">
       <canvas id="viewport" aria-label="3D stage view" tabindex="0"></canvas>
+      <div class="lg-state lg-state-loading viewport-state" id="boot-state" role="status">
+        <span class="lg-state-icon"><span class="lg-spinner" aria-hidden="true"></span></span>
+        <p class="lg-state-title">Loading the 3D view…</p>
+        <p class="lg-state-text">If this stays, your browser may be too old for this app. Use the latest Safari, Chrome or Edge.</p>
+      </div>
       <div id="camera-slot"></div>
       <div class="hint lg-glass" id="hint" role="status" aria-live="polite" hidden></div>
     </main>
