@@ -19,3 +19,8 @@
 # Node (tooling only)
 node_modules/
 *.log
+
+# Claude worktrees and plan workspaces
+.worktrees/
+.superpowers/
+.playwright-mcp/

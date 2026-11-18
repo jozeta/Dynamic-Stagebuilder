@@ -1,3 +1,35 @@
 /* The app's own styles. Build on the Låda Glass tokens (var(--lg-…)) and lg- components; animate
    only with --lg-dur-* and keep a prefers-reduced-motion rule for any animation added here. */
-.app-lead { margin: 0; max-width: 60ch; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--lg-bg); overflow: hidden; }
+
+.app {
+  display: grid; height: 100vh; height: 100dvh;
+  grid-template-columns: 232px minmax(0, 1fr) 280px;
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-areas: "toolbar toolbar toolbar" "library viewport inspector";
+  gap: var(--lg-space-s); padding: var(--lg-space-s);
+  padding-left: max(var(--lg-space-s), env(safe-area-inset-left));
+  padding-right: max(var(--lg-space-s), env(safe-area-inset-right));
+  box-sizing: border-box;
+}
+.toolbar { grid-area: toolbar; }
+.library { grid-area: library; overflow: auto; }
+.viewport-wrap { grid-area: viewport; position: relative; min-width: 0; min-height: 0;
+  border-radius: var(--lg-radius-card); overflow: hidden; border: 1px solid var(--lg-border); }
+#viewport { display: block; width: 100%; height: 100%; touch-action: none; outline: none; }
+#viewport:focus-visible { box-shadow: inset 0 0 0 2px var(--lg-accent); }
+.inspector { grid-area: inspector; overflow: auto; }
+
+/* iPad portrait and small laptops: the inspector becomes a panel under the viewport. */
+@media (max-width: 1099px) {
+  .app { grid-template-columns: 200px minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) 240px;
+    grid-template-areas: "toolbar toolbar" "library viewport" "library inspector"; }
+}
+
+.small-screen { display: none; }
+@media (max-width: 767px) {
+  .app { display: none; }
+  .small-screen { display: block; padding: var(--lg-space-xl); color: var(--lg-text); font: 15px/1.5 var(--lg-font); }
+}

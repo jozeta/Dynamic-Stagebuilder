@@ -2,6 +2,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 
 const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 
@@ -16,4 +17,16 @@ test("has a strict Content-Security-Policy", () => {
 
 test("loads nothing from other hosts", () => {
   assert.doesNotMatch(html, /(src|href)="https?:\/\//);
+});
+
+test("CSP allows the inline import map by its sha256 hash and nothing else inline", () => {
+  const map = html.match(/<script type="importmap">([\s\S]*?)<\/script>/)[1];
+  const hash = createHash("sha256").update(map).digest("base64");
+  assert.ok(html.includes(`script-src 'self' 'sha256-${hash}'`), "CSP hash matches the import map");
+  const inline = html.match(/<script(?![^>]*\bsrc=)(?![^>]*importmap)[^>]*>/g) || [];
+  assert.equal(inline.length, 0);
+});
+
+test("boots js/main.js as a module", () => {
+  assert.match(html, /<script type="module" src="js\/main.js"><\/script>/);
 });
