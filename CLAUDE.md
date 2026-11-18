@@ -4,10 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-an Online IPSC 3d stage builder
+A browser-based 3D IPSC stage builder for professional stage builders and enthusiast shooters:
+build one stage at real scale, view it in 3D, print a Written Stage Briefing (WSB) with a stage map.
+Static web app, no backend, no build step. Created 2026-11-18.
 
-Project type: Static web site / web app (HTML, CSS, JS). Created 2026-11-18. **Keep this file up to date** as the project takes shape:
-replace the starter sections below with the real commands, architecture and rules once they exist.
+**The v1 design is `docs/superpowers/specs/2026-11-18-stage-builder-v1-design.md`** (goals,
+non-goals, data schema, module layout, my calls). Read it before working on features. Anything in
+its non-goals list is a later version, not v1.
 
 ## Commands
 
@@ -25,16 +28,43 @@ npm run lint        # ESLint, including the unsafe-DOM rule
 ## Layout
 
 - `index.html`: entry page (strict CSP, viewport, Låda Glass app shell)
-- `css/app.css`, `js/app.js`: the app's own styles and script (no build step)
+- `css/app.css`: the app's own styles; `js/app.js`: starter script (replaced by `js/main.js`)
 - `vendor/lada-glass/2.3.0/`: the Låda Glass design system (copied; update with claude-check's advice)
 - `tests/`: `node --test` tests
+
+Planned (see the design doc): `js/model/` pure stage-data modules (schema, stage, history,
+numbering, stats, scoring-rules, snap, props), `js/render/` Three.js (engine, stage-view,
+builders, environments, camera, picking, labels), `js/ui/` Låda Glass panels, `js/storage/`
+IndexedDB and JSON files, `print.html` + `css/print.css`, `sw.js` + `manifest.webmanifest`,
+`vendor/three/<version>/` (Three.js plus addons, self-hosted).
+
+## Architecture rules
+
+- **1 world unit = 1 metre.** x across the bay, z down range (0 at the uprange edge), y up.
+- **Stage data is plain JSON and the single source of truth.** It never holds Three.js objects; the
+  3D view is rebuilt from it. Every edit goes through `model/history.js` so it can be undone.
+- **Environments never touch stage data.** Scene groups: `environmentGroup` (ground, sky, lights)
+  and `stageGroup` (props). A wall's mesh colour and frame are wall properties. A test asserts the
+  stage JSON is identical before and after an environment switch.
+- `js/model/` has no DOM and no Three.js imports, so it runs under `node --test`. Put logic there.
+- Scoring constants live in `js/model/scoring-rules.js` with the IPSC rulebook edition they come
+  from; don't add rule checks without a cited rule and edition.
+- Imported JSON is validated by `model/schema.js` before use and never overwrites an existing project.
+- Three.js is loaded through an inline import map allowed by its `sha256` hash in the CSP. If you
+  change the import map, update the hash.
 
 ## Design
 
 Låda Glass 2.3.0 (`~/Desktop/code/tools/design`, preview: `design/preview.html` there): dark frosted
 glass is the main theme, light the alternative, compact density. Use its `lg-` components and
 tokens instead of new styles; don't edit the vendored copy (update it when `claude-check` says it's
-old). UI must stay responsive (no sideways scrolling at 375 px) and keyboard accessible.
+old). The 3D viewport is the app's own canvas.
+
+Devices: computers (mouse first, keyboard shortcuts) and iPads (touch; every action also has an
+on-screen button, touch targets ≥ 44 px, nothing hover-only). Check at 768, 1024 and 1280 px. No
+phones: below 768 px show a "use a computer or an iPad" message (waiver in `.claude-standards`).
+English only. Installable PWA (`pwa=yes`): the service worker caches only the app's own files,
+versioned with the app.
 
 ## Working agreements
 
