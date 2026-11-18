@@ -35,6 +35,9 @@ const PATHS = {
   rotr: ["M20 4v5h-5", "M19.4 15a8 8 0 1 1-1.8-8.3L20 9"],
   search: ["M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14z", "M20 20l-4-4"],
   check: ["M5 12l5 5 9-11"],
+  doc: ["M6 3h9l4 4v14H6z", "M9 12h7M9 16h7M9 8h3"],
+  print: ["M7 9V3h10v6", "M7 17H4v-7h16v7h-3", "M7 14h10v7H7z"],
+  folder: ["M3 6h6l2 2h10v11H3z"],
   x: ["M6 6l12 12M18 6 6 18"],
 };
 

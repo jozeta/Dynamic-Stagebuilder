@@ -4,7 +4,7 @@ import { canUndo, canRedo } from "../model/history.js";
 import { ENVIRONMENT_NAMES, ENVIRONMENT_LABELS } from "../render/environments/index.js";
 import { PRESETS, PRESET_LABELS } from "../render/camera.js";
 
-export function createToolbar(root, { editor, rig, onAbout, onNew }) {
+export function createToolbar(root, { editor, rig, onAbout, onNew, onBriefing }) {
   // Camera presets live in a bar over the 3D view (#camera-slot); the rest in the toolbar.
   const btn = (name, label, onclick, extra = {}) =>
     h("button", { type: "button", class: "lg-btn lg-btn-ghost tool", "aria-label": label, onclick, ...extra }, [icon(name), h("span", { text: label.split(" (")[0] })]);
@@ -17,6 +17,7 @@ export function createToolbar(root, { editor, rig, onAbout, onNew }) {
   const areaB = btn("area", "Shooting area", () => editor.dispatch({ type: "beginDraw", lineType: "shooting-area" }), { "aria-pressed": "false" });
   const startB = btn("flag", "Start position", () => editor.dispatch({ type: "beginStart" }), { "aria-pressed": "false" });
   const numB = btn("hash", "Renumber", () => editor.dispatch({ type: "renumber" }));
+  const wsbB = btn("doc", "Briefing", onBriefing);
 
   const env = h("div", { class: "lg-segmented", role: "radiogroup", "aria-label": "Surroundings" });
   for (const name of ENVIRONMENT_NAMES) {
@@ -36,6 +37,7 @@ export function createToolbar(root, { editor, rig, onAbout, onNew }) {
     h("div", { class: "brand" }, [h("span", { class: "brand-name", text: "Dynamic-Stagebuilder" })]),
     h("div", { class: "toolgroup", role: "group", "aria-label": "Edit" }, [btn("new", "New stage", onNew), undoB, redoB, dupB, delB]),
     h("div", { class: "toolgroup", role: "group", "aria-label": "Draw" }, [lineB, areaB, startB, numB]),
+    h("div", { class: "toolgroup", role: "group", "aria-label": "Brief" }, [wsbB]),
     env,
     h("div", { class: "toolgroup end" }, [btn("info", "About", onAbout)]),
   );

@@ -14,6 +14,7 @@ import { createInspector } from "./ui/inspector.js";
 import { createStats } from "./ui/stats.js";
 import { attachShortcuts } from "./ui/shortcuts.js";
 import { createAbout } from "./ui/about.js";
+import { createBriefing } from "./ui/briefing.js";
 import { h } from "./ui/dom.js";
 
 const canvas = document.getElementById("viewport");
@@ -92,12 +93,13 @@ function updateHint(state) {
 }
 
 let picking = null;
+let briefing = null;
 const editor = createEditor({ stage: demoStage(), onChange: (state) => render(state) });
 picking = attachPicking({ engine, stageView: view, editor, cameraRig: rig, canvas });
 
 updaters.push(
   createToolbar(document.getElementById("toolbar"), {
-    editor, rig, onAbout: () => about.open(),
+    editor, rig, onAbout: () => about.open(), onBriefing: () => briefing.open(),
     onNew: () => editor.dispatch({ type: "newStage" }),
   }),
   createLibrary(document.getElementById("library"), { editor }),
@@ -105,6 +107,7 @@ updaters.push(
   createStats(document.getElementById("stats")),
 );
 attachShortcuts({ editor, rig });
+briefing = createBriefing({ editor });
 
 render(editor.state);
 document.getElementById("boot-state")?.remove();

@@ -8,6 +8,8 @@ import { assignLabels, renumber, setLabel } from "./model/numbering.js";
 import { snapPoint, snapAngle, clampToBay } from "./model/snap.js";
 import { getProp } from "./model/props.js";
 
+const STAGE_TYPES = ["", "Short", "Medium", "Long"];
+const BRIEFING_TEXT = ["matchName", "designer", "startSignal", "startPosition", "gunCondition", "procedure", "stopTime", "notes", "scoring"];
 const LINE_MIN = { "fault-line": 2, "shooting-area": 3 };
 const clampNum = (v, min, max) => Math.min(max, Math.max(min, v));
 
@@ -95,7 +97,16 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
     setLabel({ id, text }) { edit(setLabel(present(), id, text)); },
     setEnvironment({ name }) { state.history = replacePresent(state.history, setSetting(present(), "environment", name)); },
     setSetting({ key, value }) { edit(setSetting(present(), key, value)); },
-    setBriefing({ patch }) { edit(setBriefing(present(), patch)); },
+    setBriefing({ patch }) {
+      const clean = {};
+      for (const [k, v] of Object.entries(patch)) {
+        if (k === "stageNumber") clean[k] = clampNum(Math.round(Number(v) || 0), 0, 999);
+        else if (k === "stageType") { if (STAGE_TYPES.includes(v)) clean[k] = v; }
+        else if (BRIEFING_TEXT.includes(k)) clean[k] = String(v ?? "").slice(0, 4000);
+      }
+      edit(setBriefing(present(), clean));
+    },
+    rename({ name }) { edit({ ...present(), name: String(name ?? "").trim().slice(0, 120) || "Untitled stage" }); },
     setBay({ width, depth }) {
       const bay = { width: clampNum(Number(width) || 1, 1, 200), depth: clampNum(Number(depth) || 1, 1, 200) };
       let s = setBay(present(), bay.width, bay.depth);
