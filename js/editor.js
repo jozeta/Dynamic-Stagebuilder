@@ -1,0 +1,139 @@
+// The editor: turns user actions into stage edits. Every edit is snapped to the grid and angle
+// settings, kept inside the bay, numbered, and committed to the undo history as one step. No DOM,
+// no Three.js, so it runs under node --test.
+import { createStage, addObject, updateObject, removeObjects, duplicateObjects, addLine, setStart,
+  setSetting, setBay, setBriefing, pruneSelection } from "./model/stage.js";
+import { createHistory, commit, replacePresent, undo, redo } from "./model/history.js";
+import { assignLabels, renumber, setLabel } from "./model/numbering.js";
+import { snapPoint, snapAngle, clampToBay } from "./model/snap.js";
+import { getProp } from "./model/props.js";
+
+const LINE_MIN = { "fault-line": 2, "shooting-area": 3 };
+const clampNum = (v, min, max) => Math.min(max, Math.max(min, v));
+
+export function createEditor({ stage = createStage(), onChange = () => {} } = {}) {
+  const state = { history: createHistory(assignLabels(stage)), selection: [], mode: "select", drag: null };
+  const present = () => state.history.present;
+  const fit = (p, s = present()) => clampToBay(snapPoint(p, s.settings.grid), s.bay);
+
+  function edit(next) {
+    state.history = commit(state.history, assignLabels(next));
+    state.selection = pruneSelection(state.selection, present());
+  }
+
+  function cleanParams(type, params) {
+    const out = {};
+    for (const [k, v] of Object.entries(params)) {
+      const spec = getProp(type).params[k];
+      if (!spec) continue;
+      if (spec.options) { if (spec.options.includes(v)) out[k] = v; }
+      else if (Number.isFinite(Number(v))) out[k] = clampNum(Number(v), spec.min, spec.max);
+    }
+    return out;
+  }
+
+  function moved(base, ids, delta) {
+    let s = base;
+    for (const id of ids) {
+      const o = base.objects.find((x) => x.id === id);
+      if (o) { s = updateObject(s, id, { position: fit([o.position[0] + delta[0], o.position[1] + delta[1]], base) }); continue; }
+      const l = base.lines.find((x) => x.id === id);
+      if (l) s = { ...s, lines: s.lines.map((x) => x.id !== id ? x : { ...x, points: l.points.map((p) => fit([p[0] + delta[0], p[1] + delta[1]], base)) }) };
+    }
+    return s;
+  }
+
+  const handlers = {
+    setMode({ mode }) { state.mode = mode; },
+    cancel() { state.mode = "select"; },
+    select({ ids, add }) {
+      if (!add) state.selection = [...ids];
+      else for (const id of ids) state.selection = state.selection.includes(id) ? state.selection.filter((x) => x !== id) : [...state.selection, id];
+    },
+    place({ propType, position, rotation = 0 }) {
+      const r = addObject(present(), propType, fit(position), snapAngle(rotation, present().settings.angleSnap));
+      edit(r.stage);
+      state.selection = [r.id];
+      state.mode = "select";
+    },
+    move({ id, position }) { edit(updateObject(present(), id, { position: fit(position) })); },
+    dragStart({ ids }) { state.drag = { base: state.history, ids: [...ids] }; },
+    dragMove({ delta }) {
+      if (!state.drag) return;
+      state.history = replacePresent(state.drag.base, moved(state.drag.base.present, state.drag.ids, delta));
+    },
+    dragEnd() {
+      if (!state.drag) return;
+      const { base } = state.drag;
+      state.drag = null;
+      if (state.history.present !== base.present) state.history = commit(base, state.history.present);
+      else state.history = base;
+    },
+    rotate({ by, ids = state.selection }) {
+      let s = present();
+      for (const id of ids) {
+        const o = s.objects.find((x) => x.id === id);
+        if (o) s = updateObject(s, id, { rotation: snapAngle(o.rotation + by, s.settings.angleSnap) });
+      }
+      edit(s);
+    },
+    setRotation({ id, value }) { edit(updateObject(present(), id, { rotation: snapAngle(Number(value) || 0, present().settings.angleSnap) })); },
+    setParams({ id, params }) {
+      const o = present().objects.find((x) => x.id === id);
+      if (o) edit(updateObject(present(), id, { params: cleanParams(o.type, params) }));
+    },
+    delete({ ids = state.selection }) { edit(removeObjects(present(), ids)); state.selection = []; },
+    duplicate({ ids = state.selection }) {
+      const r = duplicateObjects(present(), ids);
+      if (!r.ids.length) return;
+      edit(r.stage);
+      state.selection = r.ids;
+    },
+    undo() { state.history = undo(state.history); state.selection = pruneSelection(state.selection, present()); },
+    redo() { state.history = redo(state.history); state.selection = pruneSelection(state.selection, present()); },
+    renumber() { edit(renumber(present())); },
+    setLabel({ id, text }) { edit(setLabel(present(), id, text)); },
+    setEnvironment({ name }) { state.history = replacePresent(state.history, setSetting(present(), "environment", name)); },
+    setSetting({ key, value }) { edit(setSetting(present(), key, value)); },
+    setBriefing({ patch }) { edit(setBriefing(present(), patch)); },
+    setBay({ width, depth }) {
+      const bay = { width: clampNum(Number(width) || 1, 1, 200), depth: clampNum(Number(depth) || 1, 1, 200) };
+      let s = setBay(present(), bay.width, bay.depth);
+      s = { ...s,
+        objects: s.objects.map((o) => ({ ...o, position: clampToBay(o.position, bay) })),
+        lines: s.lines.map((l) => ({ ...l, points: l.points.map((p) => clampToBay(p, bay)) })),
+        start: s.start && { ...s.start, position: clampToBay(s.start.position, bay) } };
+      edit(s);
+    },
+    beginDraw({ lineType }) { state.mode = { draw: lineType, points: [] }; },
+    addPoint({ point }) {
+      if (!state.mode?.draw) return;
+      const p = fit(point);
+      const last = state.mode.points[state.mode.points.length - 1];
+      if (last && last[0] === p[0] && last[1] === p[1]) return;
+      state.mode = { ...state.mode, points: [...state.mode.points, p] };
+    },
+    finishDraw() {
+      const m = state.mode;
+      state.mode = "select";
+      if (!m?.draw || m.points.length < LINE_MIN[m.draw]) return;
+      const r = addLine(present(), m.draw, m.points, m.draw === "shooting-area");
+      edit(r.stage);
+      state.selection = [r.id];
+    },
+    beginStart() { state.mode = "start"; },
+    setStart({ position, facing = 0 }) {
+      edit(setStart(present(), fit(position), snapAngle(facing, present().settings.angleSnap)));
+      state.mode = "select";
+    },
+  };
+
+  function dispatch(action) {
+    const h = handlers[action.type];
+    if (!h) throw new Error(`Unknown editor action: ${action.type}`);
+    h(action);
+    onChange(state, action);
+  }
+
+  return { state, dispatch, stage: present };
+}
