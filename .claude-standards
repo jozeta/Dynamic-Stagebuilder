@@ -1,0 +1,5 @@
+# Per-app decisions and reasoned waivers for the app standards
+# (~/Desktop/code/tools/standards/STANDARDS.md). key=value, parsed, never executed.
+baseline=2026-11              # held to the full security and UX baseline (rollout rules count as important)
+design=family
+design_decided=2026-11-18
