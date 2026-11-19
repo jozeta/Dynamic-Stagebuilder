@@ -32,3 +32,29 @@ test("__proto__ in a file does not pollute objects", () => {
   assert.equal(r.ok, true, r.error);
   assert.equal(({}).hacked, undefined);
 });
+
+test("a match file holds the match name and its stages in order; importing gives every stage a new id", async () => {
+  const { matchToJson, parseFile, matchFileName } = await import("../js/storage/files.js");
+  const a = addObject(createStage({ name: "A" }), "barrel", [1, 2]).stage, b = createStage({ name: "B" });
+  const text = matchToJson({ name: "Spring Cup" }, [a, b]);
+  assert.equal(matchFileName({ name: "Spring Cup" }), "match-spring-cup.json");
+  const r = parseFile(text);
+  assert.equal(r.ok, true, r.error);
+  assert.equal(r.kind, "match");
+  assert.equal(r.name, "Spring Cup");
+  assert.deepEqual(r.stages.map((s) => s.name), ["A", "B"]);
+  assert.ok(r.stages.every((s, i) => s.id !== [a, b][i].id));
+  const one = parseFile(stageToJson(a));
+  assert.equal(one.kind, "stage");
+  assert.equal(one.stage.name, "A");
+});
+
+test("a broken match file is refused with the stage that has problems", async () => {
+  const { parseFile } = await import("../js/storage/files.js");
+  const bad = JSON.stringify({ kind: "dynamic-stagebuilder-match", version: 1, name: "M", stages: [createStage({ name: "ok" }), { schema: 1, name: "bad" }] });
+  const r = parseFile(bad);
+  assert.equal(r.ok, false);
+  assert.match(r.error, /Stage 2/);
+  assert.equal(parseFile(JSON.stringify({ kind: "dynamic-stagebuilder-match", version: 1, name: "M", stages: [] })).ok, false, "no stages");
+  assert.equal(parseFile(JSON.stringify({ kind: "dynamic-stagebuilder-match", version: 1, name: "M", stages: Array(101).fill(createStage()) })).ok, false, "too many");
+});

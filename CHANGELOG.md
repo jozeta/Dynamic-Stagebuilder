@@ -4,6 +4,9 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Match files: *Export the match* saves the match and all its stages in one file; *Import file…*
+  takes stage files and match files (each stage becomes a new project, in a new match).
+
 - Exact positions: the inspector shows a prop's position (across, + to the shooter's left, and down
   range, in metres); type a value to place it exactly, without grid snap.
 - Mirror, align and spread: *Mirror the stage* flips everything left to right (Stage panel or the

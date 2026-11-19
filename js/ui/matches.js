@@ -7,7 +7,7 @@ import { h, icon } from "./dom.js";
 import { createMatch, addStages, removeStage, moveStage, renameMatch, briefingFor, matchSummary, cleanMatch } from "../model/match.js";
 import { sortProjects } from "../storage/projects.js";
 
-export function createMatches({ store, currentId, onOpen, onNewStage, onApplyBriefing, onPrint, onViewChange = () => {}, onChanged = async () => {} }) {
+export function createMatches({ store, currentId, onOpen, onNewStage, onApplyBriefing, onPrint, onExport = () => {}, onViewChange = () => {}, onChanged = async () => {} }) {
   const box = h("section", { class: "matches", "aria-labelledby": "matches-title" });
   let openId = null;            // the match whose page is shown, or null for the list
   let adding = false;           // the "add existing stages" checklist is open
@@ -27,6 +27,16 @@ export function createMatches({ store, currentId, onOpen, onNewStage, onApplyBri
     adding = true;
     await fill();
     box.querySelector(".match-name")?.select();
+  }
+
+  /** A match from a match file: its stages are already saved as projects; open its page. */
+  async function adopt(name, ids) {
+    const m = addStages(renameMatch(createMatch({ name }), name), ids);
+    await save(m);
+    await syncBriefings(m);
+    openId = m.id;
+    adding = false;
+    await fill();
   }
 
   const btn = (label, onclick, cls = "lg-btn", ic = null, extra = {}) => h("button", { type: "button", class: cls, onclick, ...extra }, [ic ? icon(ic) : null, label].filter(Boolean));
@@ -122,6 +132,7 @@ export function createMatches({ store, currentId, onOpen, onNewStage, onApplyBri
         btn("New stage in this match", async () => { const id = await onNewStage(); if (id) await update(addStages(m, [id])); }, "lg-btn", "new"),
         btn("Add stages you made…", async () => { adding = true; await fill(); }, "lg-btn", "folder", { "aria-expanded": String(adding) }),
         btn("Print the match", () => onPrint(m, m.stageIds.map((id) => byId.get(id).stage)), "lg-btn", "print", { disabled: !m.stageIds.length }),
+        btn("Export the match", () => onExport(m, m.stageIds.map((id) => byId.get(id).stage)), "lg-btn", "doc", { disabled: !m.stageIds.length, title: "One file with the match and all its stages" }),
       ]),
       picker,
       h("p", { class: "lg-muted hint-text", text: "Each stage here gets the match name and its stage number in its briefing. Taking a stage out (or deleting the match) keeps the stage as a project." }),
@@ -135,5 +146,5 @@ export function createMatches({ store, currentId, onOpen, onNewStage, onApplyBri
     if (m) await fillMatch(m); else await fillList();
   }
 
-  return { box, fill, create, get inMatch() { return Boolean(openId); } };
+  return { box, fill, create, adopt, get inMatch() { return Boolean(openId); } };
 }

@@ -22,7 +22,17 @@ import { createStage } from "./model/stage.js";
 import { validateStage } from "./model/schema.js";
 import { openStore, memoryStore } from "./storage/db.js";
 import { projectRecord, sortProjects, nextProjectAfterDelete } from "./storage/projects.js";
-import { exportFileName, stageToJson } from "./storage/files.js";
+import { exportFileName, stageToJson, matchToJson, matchFileName } from "./storage/files.js";
+
+// Save text as a file download (a same-origin blob link, removed straight after).
+function download(text, name) {
+  const url = URL.createObjectURL(new Blob([text], { type: "application/json" }));
+  const a = h("a", { href: url, download: name });
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
 import { createProjects } from "./ui/projects.js";
 import { createHelp } from "./ui/help.js";
 import { createAnimator } from "./render/animate.js";
@@ -393,15 +403,21 @@ const projects = createProjects({
     if (!(next && await openProject(next))) await addProject(freshStage());
   },
   onImport: (stage) => addProject(stage),
+  // A match file's stages: saved as new projects (not opened), in order; their ids go in the match.
+  onImportMatch: async (stages) => {
+    const now = Date.now();
+    for (const [i, st] of stages.entries()) await store.put(projectRecord(st, { now: now - i }));
+    return stages.map((st) => st.id);
+  },
+  onExportMatch: async (match, stages) => {
+    await saveNow();
+    const now = stages.map((st) => (st.id === editor.stage().id ? editor.stage() : st));
+    download(matchToJson(match, now), matchFileName(match));
+  },
   onExport: async () => {
     await saveNow();
     const stage = editor.stage();
-    const url = URL.createObjectURL(new Blob([stageToJson(stage)], { type: "application/json" }));
-    const a = h("a", { href: url, download: exportFileName(stage) });
-    document.body.append(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    download(stageToJson(stage), exportFileName(stage));
     const at = Date.now();
     await store.put(projectRecord(stage, { now: at - 1, exportedAt: at }));
     autosave.markSaved(stage, at);

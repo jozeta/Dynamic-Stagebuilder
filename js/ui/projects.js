@@ -2,20 +2,20 @@
 // import and export. Names and file contents are untrusted and only ever shown with textContent.
 import { h, icon } from "./dom.js";
 import { sortProjects, exportAge } from "../storage/projects.js";
-import { parseStageFile } from "../storage/files.js";
+import { parseFile } from "../storage/files.js";
 import { STAGE_LIBRARY, LIBRARY_CATEGORIES, librarySummary } from "../model/stage-library.js";
 import { createMatches } from "./matches.js";
 
 const when = (t) => new Date(t).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
 
 export function createProjects({ panel, docked = false, hide = [], onToggle = () => {}, onOpenLibrary = async () => {}, store, currentId, onOpen, onNew, onDuplicate, onDelete, onImport, onExport,
-  onNewStage = async () => null, onApplyBriefing = async () => {}, onPrintMatch = () => {} }) {
+  onNewStage = async () => null, onApplyBriefing = async () => {}, onPrintMatch = () => {}, onExportMatch = () => {}, onImportMatch = async () => [] }) {
   // Matches: their list above the stages, and a match's own page in place of the lists.
   const stagesBox = h("div", { class: "lg-stack" });
   const matches = createMatches({
     store, currentId,
     onOpen: async (id) => { await onOpen(id); await fill(); },
-    onNewStage, onApplyBriefing, onPrint: onPrintMatch,
+    onNewStage, onApplyBriefing, onPrint: onPrintMatch, onExport: onExportMatch,
     onViewChange: (inMatch) => { stagesBox.hidden = inMatch; },
     onChanged: async () => {},
   });
@@ -86,9 +86,17 @@ export function createProjects({ panel, docked = false, hide = [], onToggle = ()
     const f = file.files?.[0];
     file.value = "";
     if (!f) return;
-    if (f.size > 5_000_000) return say("The file is too large to be a stage file.", "bad");
-    const r = parseStageFile(await f.text());
+    if (f.size > 20_000_000) return say("The file is too large to be a stage or match file.", "bad");
+    const r = parseFile(await f.text());
     if (!r.ok) return say(r.error, "bad");
+    if (r.kind === "match") {
+      // Every stage becomes a new project, and a new match holds them in the file's order.
+      const ids = await onImportMatch(r.stages);
+      await matches.adopt(r.name, ids);
+      say(`Imported the match "${r.name}" with ${ids.length} stage${ids.length === 1 ? "" : "s"}.`, "ok");
+      await fill();
+      return;
+    }
     await onImport(r.stage);
     say(`Imported "${r.stage.name}" as a new project.`, "ok");
     await fill();
