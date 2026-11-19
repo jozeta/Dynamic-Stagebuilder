@@ -183,7 +183,11 @@ Stage settings are in the inspector when nothing is selected. They are saved wit
 | Object snap | Toolbar *Objects*: a wall's end jumps onto another wall's end within 35 cm | On |
 | Angle snap | Rotations snap to this step: off, 5°, 15°, 45° or 90° | 15° |
 | Surroundings | *Settings*: Outdoor (dirt range), Technical (grey floor, grid) or Blueprint (drafting sheet); never moves the stage | Outdoor |
-| Ground | *Settings* (Outdoor): sand, light sand, dark sand, red dirt or gravel | Sand |
+| Ground | *Settings* (Outdoor): sand, light sand, dark sand, red dirt or gravel | Gravel |
+| Foliage | *Settings* (Outdoor): mixed broadleaf, Nordic, desert, savanna, tropical or bare banks | Mixed broadleaf |
+| Paper / Floor hue, intensity, brightness | *Settings* (Blueprint, Technical): 0–359°, 0–100 %, 40–160 % | Blueprint's blue paper (216°, 80 %), Technical's grey floor (no colour) |
+| Show walls | *Settings* (Technical): the backstop and side walls; the floor runs on to the horizon either way | On |
+| Cloud shadows | *Settings* (Outdoor): how dark the clouds' shadows on the ground are, 0–100 % | 50 % |
 | Time of day | *Settings*: on/off; on, 06:00–20:00 moves the sun (its height, direction and colour follow it) | Outdoor off (sun set by hand), Technical on at 16:00 |
 | Sun height, direction, colour | *Settings*, with Time of day off: 2–90°; 0–359° (0° = behind the shooter, 90° = to the shooter's left); dark orange → yellow → white | Outdoor 36°, 30°, warm white |
 | Sunlight | *Settings*: 0–200 % | Outdoor 60 %, Technical 115 % |
