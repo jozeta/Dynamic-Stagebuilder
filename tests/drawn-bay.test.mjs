@@ -55,21 +55,16 @@ test("the Outdoor ground rises on the raised cells, with the banks' earth colour
   assert.ok(heightAt(15, 15, b) > 1, "the side banks still run round the bay");
 });
 
-test("raised ground gets the surroundings' plants: trees on a big raised block, bushes and grass on it", async () => {
+test("raised ground gets grass, bushes and stones, but no trees on the drawn area", async () => {
   const { buildFoliage } = await import("../js/render/environments/foliage.js");
-  const { raisedTreeSpots } = await import("../js/render/environments/foliage.js");
   const rows = Array.from({ length: 30 }, (_, r) => (r >= 8 && r < 20 ? "0000" + "1".repeat(12) + "0000" : "0".repeat(20)));
   const b = drawnBay({ width: 20, depth: 30, name: "Hill", rows });
-  let seed = 7;
-  const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
-  const spots = raisedTreeSpots(b, rnd);
-  assert.ok(spots.length >= 2, `trees on 144 m² of raised ground: ${spots.length}`);
-  assert.ok(spots.every(([x, z]) => Math.abs(x) <= 6 && z >= 8 && z <= 20), "on the raised block");
-  assert.equal(raisedTreeSpots(drawnBay({ width: 20, depth: 30, rows: [] }), rnd).length, 0, "no raised ground, no trees");
   const g = buildFoliage(b, "nordic");
   const onMound = [];
-  g.traverse((o) => { if (o.isInstancedMesh) { const m = new (o.matrix.constructor)(); for (let i = 0; i < o.count; i++) { o.getMatrixAt(i, m); const x = m.elements[12], z = m.elements[14]; if (Math.abs(x) < 6 && z > 9 && z < 19) onMound.push(o.name || "inst"); } } });
+  g.traverse((o) => { if (o.isInstancedMesh) { const m = new (o.matrix.constructor)(); for (let i = 0; i < o.count; i++) { o.getMatrixAt(i, m); const x = m.elements[12], z = m.elements[14]; if (Math.abs(x) < 6 && z > 9 && z < 19) onMound.push(1); } } });
   assert.ok(onMound.length > 20, `grass and bushes on the mound: ${onMound.length}`);
+  const trees = g.children.filter((c) => !c.isInstancedMesh && Math.abs(c.position.x) <= 10 && c.position.z >= 0 && c.position.z <= 30);
+  assert.equal(trees.length, 0, "no trees on the drawn area");
 });
 
 test("Technical and Blueprint show the raised ground as a relief at the same heights", async () => {
@@ -105,4 +100,36 @@ test("my shapes: a checked list (at most 30), each with an id; a stage's drawn b
   assert.equal(cleanShapeList(Array.from({ length: 40 }, (_, i) => ({ id: `s${i}`, name: "n", width: 2, depth: 2 }))).length, 30);
   assert.equal(cleanShapeList(null).length, 0);
   assert.equal(cleanBay({ width: 4, depth: 2, shape: "drawn", shapeId: "a", rows: [] }).shapeId, "a");
+});
+
+test("the paint bucket fills the connected area of one colour, like other paint apps", async () => {
+  const { floodFill } = await import("../js/model/bay.js");
+  const rows = ["0010", "0010", "1110", "0000"];
+  assert.deepEqual(floodFill(rows, 0, 0, "1"), ["1110", "1110", "1110", "0000"], "the pocket behind the wall");
+  assert.deepEqual(floodFill(rows, 3, 3, "1"), ["0011", "0011", "1111", "1111"], "edge neighbours only: the corner gap doesn't leak");
+  assert.deepEqual(floodFill(rows, 2, 0, "0"), ["0000", "0000", "0000", "0000"], "the wall's cells all join up");
+  assert.equal(floodFill(rows, 0, 0, "0"), rows, "already that colour: nothing changes");
+  assert.equal(floodFill(rows, 9, 9, "1"), rows, "outside the sheet");
+});
+
+test("outside the drawn area is raised ground at the sides and back; the front stays open", () => {
+  const b = drawnBay({ width: 10, depth: 10, name: "Open", rows: [] });
+  assert.equal(raisedHeight(b, 0, 5), 0, "the floor");
+  assert.equal(raisedHeight(b, 5 + RAISE.slope + 1, 5), RAISE.height, "beside the drawing");
+  assert.equal(raisedHeight(b, 0, 10 + RAISE.slope + 1), RAISE.height, "behind it");
+  const mid = raisedHeight(b, 5 + RAISE.slope / 2, 5);
+  assert.ok(mid > 0.2 && mid < RAISE.height - 0.2, `a slope up from the floor's edge: ${mid}`);
+  assert.equal(raisedHeight(b, 0, -3), 0, "up range is open");
+  assert.equal(insideBay([5 + 1, 5], b), false);
+});
+
+test("the Technical relief reaches past the drawing's sides and back, where the ground is raised", async () => {
+  const { technical } = await import("../js/render/environments/technical.js");
+  const b = drawnBay({ width: 10, depth: 10, name: "Plain", rows: [] });
+  const relief = technical(b).group.getObjectByName("relief");
+  relief.geometry.computeBoundingBox();
+  const bb = relief.geometry.boundingBox;
+  assert.ok(bb.max.x > 5 + RAISE.slope && bb.max.z > 10 + RAISE.slope, "beyond the grid");
+  assert.ok(bb.min.z >= 0, "not in front");
+  assert.ok(Math.abs(bb.max.y - RAISE.height) < 0.01);
 });

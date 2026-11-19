@@ -148,7 +148,7 @@ export function createInspector(root, { editor, shapes = { list: () => [], draw:
     const current = shape === "drawn" ? (mine.some((m) => m.id === bay.shapeId) ? `my:${bay.shapeId}` : "drawn") : shape;
     const sel = h("select", { class: "lg-select", dataset: { field: "bayShape" }, onchange: (e) => {
       const v = e.target.value;
-      if (v === "draw") { e.target.value = current; shapes.draw({ size: { width: bay.width, depth: bay.depth } }); return; }
+      if (v === "draw") { e.target.value = current; shapes.draw(); return; }
       if (v.startsWith("my:")) { const m = mine.find((x) => `my:${x.id}` === v); if (m) { const { id, ...b } = m; d({ type: "setBay", ...b, shapeId: id }); } return; }
       d({ type: "setBay", width: bay.width, depth: bay.depth, shape: v });
     } }, [

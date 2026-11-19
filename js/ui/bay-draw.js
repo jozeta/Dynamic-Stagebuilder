@@ -3,9 +3,10 @@
 // are whole metres; the drawing keeps what fits when they change. Name it and save it to My shapes.
 // Names are shown with textContent; the drawing is a canvas.
 import { h, icon } from "./dom.js";
-import { drawnBay } from "../model/bay.js";
+import { drawnBay, floodFill } from "../model/bay.js";
 
 const MAX = 200;
+export const NEW_SIZE = Object.freeze({ width: 35, depth: 35 });           // a new drawing: 35 × 35 m
 const blank = (w, d) => Array.from({ length: d }, () => "0".repeat(w));
 // Resize the grid: keep the cells that still fit (anchored at the front, centred across).
 function resized(rows, w0, w, d) {
@@ -14,7 +15,7 @@ function resized(rows, w0, w, d) {
 }
 
 export function createBayDrawer({ onSave, onDelete = null }) {
-  let w = 20, d = 30, rows = blank(w, d), tool = "1", brush = 1, editing = null;
+  let w = NEW_SIZE.width, d = NEW_SIZE.depth, rows = blank(w, d), tool = "1", mode = "pencil", brush = 1, editing = null;
   const name = h("input", { class: "lg-input", maxlength: "60", placeholder: "For example: Bay 3 with the pit", "aria-label": "Shape name" });
   const num = (label, onchange) => {
     const input = h("input", { class: "lg-input", type: "number", inputmode: "numeric", min: "2", max: String(MAX), step: "1", onchange });
@@ -27,7 +28,10 @@ export function createBayDrawer({ onSave, onDelete = null }) {
   const msg = h("p", { class: "lg-muted hint-text", role: "status", "aria-live": "polite" });
   const toolBtn = (v, label, swatch) => h("button", { type: "button", class: "lg-btn bay-tool", "aria-pressed": "false", dataset: { tool: v }, onclick: () => setTool(v) },
     [h("span", { class: `bay-swatch bay-swatch-${swatch}`, "aria-hidden": "true" }), label]);
-  const tools = [toolBtn("1", "Black pencil: raise", "black"), toolBtn("0", "White pencil: floor", "white")];
+  const tools = [toolBtn("1", "Black: raised ground", "black"), toolBtn("0", "White: floor", "white")];
+  // Pencil (paints squares under it) or paint bucket (fills the connected area of one colour).
+  const modeBtn = (v, label, ic) => h("button", { type: "button", class: "lg-btn bay-tool", "aria-pressed": "false", dataset: { mode: v }, onclick: () => setMode(v) }, [icon(ic), label]);
+  const modes = [modeBtn("pencil", "Pencil", "line"), modeBtn("bucket", "Paint bucket", "bucket")];
   const brushSel = h("select", { class: "lg-select", "aria-label": "Pencil size", onchange: (e) => { brush = Number(e.target.value); } },
     [[1, "1 m"], [2, "2 m"], [3, "3 m"], [5, "5 m"]].map(([v, t]) => h("option", { value: String(v), text: `Pencil ${t}` })));
   const del = h("button", { type: "button", class: "lg-btn lg-btn-danger is-gone", onclick: async () => { if (editing && onDelete) { await onDelete(editing); dialog.close(); } }, text: "Delete from My shapes" });
@@ -35,10 +39,13 @@ export function createBayDrawer({ onSave, onDelete = null }) {
     h("section", { class: "lg-modal-body bay-draw-body" }, [
       h("div", { class: "lg-stack bay-draw-side" }, [
         h("h2", { class: "lg-subtitle", id: "bay-draw-title", text: "Draw a bay shape" }),
-        h("p", { class: "lg-muted hint-text", text: "Each square is 1 × 1 m. Black is raised ground (a bank with a slope down to the floor), white is floor. Seen from above: down range at the top, the shooter's left on the left." }),
+        h("p", { class: "lg-muted hint-text", text: "Each square is 1 × 1 m. Black is raised ground (a bank with a slope down to the floor), white is floor; everything outside the sheet's sides and back is raised too. Seen from above: down range at the top, the shooter's left on the left." }),
         h("label", { class: "lg-field" }, [h("span", { text: "Name" }), name]),
         h("div", { class: "pos-fields" }, [wField, dField]),
-        h("div", { class: "lg-stack bay-draw-tools" }, [...tools, brushSel,
+        h("span", { class: "lg-label", text: "Colour" }),
+        h("div", { class: "lg-stack bay-draw-tools" }, tools),
+        h("span", { class: "lg-label", text: "Tool" }),
+        h("div", { class: "lg-stack bay-draw-tools" }, [...modes, brushSel,
           h("button", { type: "button", class: "lg-btn", onclick: () => { rows = blank(w, d); draw(); }, text: "Clear the drawing" })]),
         msg,
       ]),
@@ -55,6 +62,12 @@ export function createBayDrawer({ onSave, onDelete = null }) {
   document.body.append(dialog);
 
   function setTool(v) { tool = v; for (const b of tools) b.setAttribute("aria-pressed", String(b.dataset.tool === v)); }
+  function setMode(v) {
+    mode = v;
+    for (const b of modes) b.setAttribute("aria-pressed", String(b.dataset.mode === v));
+    brushSel.disabled = v === "bucket";
+    canvas.classList.toggle("is-bucket", v === "bucket");
+  }
   function resize() {
     const nw = Math.min(MAX, Math.max(2, Math.round(Number(wIn.value) || w))), nd = Math.min(MAX, Math.max(2, Math.round(Number(dIn.value) || d)));
     wIn.value = String(nw); dIn.value = String(nd);
@@ -96,7 +109,15 @@ export function createBayDrawer({ onSave, onDelete = null }) {
   }
   let last = null;
   const at = (e) => { const b = canvas.getBoundingClientRect(); return [e.clientX - b.left, e.clientY - b.top]; };
-  canvas.addEventListener("pointerdown", (e) => { e.preventDefault(); canvas.setPointerCapture(e.pointerId); last = at(e); if (paint(...last)) draw(); });
+  canvas.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    if (mode === "bucket") {
+      const [px, py] = at(e), next = floodFill(rows, Math.floor(px / cell), d - 1 - Math.floor(py / cell), tool);
+      if (next !== rows) { rows = next; draw(); }
+      return;
+    }
+    canvas.setPointerCapture(e.pointerId); last = at(e); if (paint(...last)) draw();
+  });
   canvas.addEventListener("pointermove", (e) => {
     if (!last) return;
     const p = at(e), steps = Math.ceil(Math.hypot(p[0] - last[0], p[1] - last[1]) / Math.max(1, cell / 2));
@@ -117,7 +138,7 @@ export function createBayDrawer({ onSave, onDelete = null }) {
 
   return {
     /** Open it: a new drawing the size of `size`, or `shape` (a drawn bay, with `id` when it is one of My shapes) to edit. */
-    open({ size = { width: 20, depth: 30 }, shape = null, id = null } = {}) {
+    open({ size = NEW_SIZE, shape = null, id = null } = {}) {
       editing = id;
       w = Math.min(MAX, Math.max(2, Math.round(shape?.width ?? size.width)));
       d = Math.min(MAX, Math.max(2, Math.round(shape?.depth ?? size.depth)));
@@ -127,6 +148,7 @@ export function createBayDrawer({ onSave, onDelete = null }) {
       msg.textContent = "";
       del.classList.toggle("is-gone", !(id && onDelete));
       setTool("1");
+      setMode("pencil");
       dialog.showModal();
       draw();
       name.focus();

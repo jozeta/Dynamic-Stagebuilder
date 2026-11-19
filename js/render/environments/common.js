@@ -2,7 +2,7 @@
 // the bay. Environments only ever build into their own group.
 import * as THREE from "three";
 import { sunFromLook, groundTone, gridTone } from "../../model/look.js";
-import { isDrawn, raisedHeight } from "../../model/bay.js";
+import { isDrawn, raisedHeight, RAISE } from "../../model/bay.js";
 
 export const hasDom = typeof document !== "undefined";
 
@@ -106,15 +106,18 @@ export function applyLook(env, look, bay) {
 }
 
 /**
- * A drawn bay's raised ground as a mesh (Technical, Blueprint): a height field over the grid, two
+ * A drawn bay's raised ground as a mesh (Technical, Blueprint): a height field over the grid (and a
+ * strip beside and behind it, which is raised too), two
  * vertices a metre, at the same heights as the Outdoor ground. The floor parts sit just under the
  * floor so only the raised parts show. null for other bays.
  */
 export function reliefMesh(bay, material) {
-  if (!isDrawn(bay) || !bay.rows.some((r) => r.includes("1"))) return null;
-  const geo = new THREE.PlaneGeometry(bay.width, bay.depth, bay.width * 2, bay.depth * 2);
+  if (!isDrawn(bay)) return null;
+  // The raised ground beside and behind the drawing too, out to where it reaches full height.
+  const m = Math.ceil(RAISE.slope) + 1;
+  const geo = new THREE.PlaneGeometry(bay.width + 2 * m, bay.depth + m, (bay.width + 2 * m) * 2, (bay.depth + m) * 2);
   geo.rotateX(-Math.PI / 2);
-  geo.translate(0, 0, bay.depth / 2);
+  geo.translate(0, 0, (bay.depth + m) / 2);
   const pos = geo.attributes.position;
   for (let i = 0; i < pos.count; i++) { const h = raisedHeight(bay, pos.getX(i), pos.getZ(i)); pos.setY(i, h > 0 ? h : -0.03); }
   geo.computeVertexNormals();

@@ -58,7 +58,7 @@ export const BAY_SHAPE_NAMES = Object.freeze(SPECS.map((s) => [s.id, s.name]));
 // Drawn bays: a grid of 1 m cells, one string per row ("0" floor, "1" raised ground). Row 0 is the
 // up-range row; column 0 is on the shooter's left (+ x), as the drawing is seen from above with down
 // range at the top. Raised ground rises over RAISE.slope metres from the floor's edge (the floor
-// stays flat) to RAISE.height. The outer rectangle's banks still run round the outside.
+// stays flat) to RAISE.height. Beside and behind the drawing is raised ground too; up range is open.
 export const RAISE = Object.freeze({ height: 2.5, slope: 1.5 });
 const DRAWN_MAX = 200;
 export const isDrawn = (bay) => bay.shape === "drawn";
@@ -99,19 +99,43 @@ export function cellAt(bay, x, z) {
 // The ground area of cell (c, r): x from x0 to x1, z from z0 to z1.
 const cellBox = (bay, c, r) => ({ x0: bay.width / 2 - c - 1, x1: bay.width / 2 - c, z0: r, z1: r + 1 });
 const toBox = (p, b) => [clamp(p[0], b.x0, b.x1), clamp(p[1], b.z0, b.z1)];
+// Raised ground at a point: a raised cell, or anywhere beside or behind the drawing (the area
+// outside the drawn grid is raised). Up range of the bay (z < 0) is open.
+function raisedAt(bay, c, r) {
+  if (r < 0) return false;
+  if (r >= bay.depth || c < 0 || c >= bay.width) return true;
+  return bay.rows[r][c] === "1";
+}
 /** The height of raised ground at a point (0 on the floor): a smooth slope up from the floor's edge. */
 export function raisedHeight(bay, x, z) {
-  if (!cellAt(bay, x, z)) return 0;
-  const c0 = Math.floor(bay.width / 2 - x), r0 = Math.floor(z), k = Math.ceil(RAISE.slope) + 1;
-  let d = RAISE.slope;
-  for (let r = r0 - k; r <= r0 + k; r++) for (let c = c0 - k; c <= c0 + k; c++) {
-    const raised = r >= 0 && r < bay.depth && c >= 0 && c < bay.width && bay.rows[r][c] === "1";
-    if (raised) continue;                                              // outside the grid counts as floor
+  const c0 = Math.floor(bay.width / 2 - x), r0 = Math.floor(z);
+  if (!raisedAt(bay, c0, r0)) return 0;
+  const k = Math.ceil(RAISE.slope) + 1;
+  let d = Math.min(RAISE.slope, z);                                  // the open front
+  for (let r = Math.max(0, r0 - k); r <= Math.min(bay.depth - 1, r0 + k); r++) for (let c = Math.max(0, c0 - k); c <= Math.min(bay.width - 1, c0 + k); c++) {
+    if (raisedAt(bay, c, r)) continue;
     const q = toBox([x, z], cellBox(bay, c, r));
     d = Math.min(d, Math.hypot(x - q[0], z - q[1]));
   }
   const t = clamp(d / RAISE.slope, 0, 1);
   return r2(RAISE.height * t * t * (3 - 2 * t) * 1000) / 1000;
+}
+
+/** The paint bucket: fill the area of one colour connected (edge to edge) to cell (c, r) with v. */
+export function floodFill(rows, c, r, v) {
+  const n = rows.length, w = rows[0]?.length ?? 0;
+  if (r < 0 || r >= n || c < 0 || c >= w) return rows;
+  const from = rows[r][c];
+  if (from === v) return rows;
+  const grid = rows.map((row) => row.split(""));
+  const stack = [[c, r]];
+  while (stack.length) {
+    const [x, y] = stack.pop();
+    if (y < 0 || y >= n || x < 0 || x >= w || grid[y][x] !== from) continue;
+    grid[y][x] = v;
+    stack.push([x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]);
+  }
+  return grid.map((row) => row.join(""));
 }
 
 /** A bay with only the fields its shape uses, each kept inside the rectangle. */
