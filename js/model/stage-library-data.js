@@ -790,7 +790,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 90,
     "params": {
      "length": 3.667,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -802,7 +802,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 90,
     "params": {
      "length": 3.667,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -814,7 +814,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 90,
     "params": {
      "length": 3.667,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -969,7 +969,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 0,
     "params": {
      "length": 4,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -980,8 +980,8 @@ export const LIBRARY_STAGES = Object.freeze([
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
@@ -992,8 +992,8 @@ export const LIBRARY_STAGES = Object.freeze([
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
@@ -1112,36 +1112,36 @@ export const LIBRARY_STAGES = Object.freeze([
     "type": "wall-mesh",
     "position": [
      0,
-     3.0
+     3
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      0,
-     7.0
+     7
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      0,
-     11.0
+     11
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
@@ -1520,7 +1520,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 0,
     "params": {
      "length": 4,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -1531,8 +1531,8 @@ export const LIBRARY_STAGES = Object.freeze([
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
@@ -1543,8 +1543,8 @@ export const LIBRARY_STAGES = Object.freeze([
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
@@ -1683,7 +1683,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 0,
     "params": {
      "length": 4,
-     "height": 1.0
+     "height": 1
     }
    },
    {
@@ -1694,8 +1694,8 @@ export const LIBRARY_STAGES = Object.freeze([
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
@@ -1706,8 +1706,8 @@ export const LIBRARY_STAGES = Object.freeze([
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
@@ -1839,8 +1839,8 @@ export const LIBRARY_STAGES = Object.freeze([
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
@@ -1851,8 +1851,8 @@ export const LIBRARY_STAGES = Object.freeze([
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
@@ -1863,8 +1863,8 @@ export const LIBRARY_STAGES = Object.freeze([
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
@@ -1875,7 +1875,7 @@ export const LIBRARY_STAGES = Object.freeze([
     ],
     "rotation": 0,
     "params": {
-     "baseHeight": 1.0
+     "baseHeight": 1
     }
    },
    {
@@ -1886,7 +1886,7 @@ export const LIBRARY_STAGES = Object.freeze([
     ],
     "rotation": 0,
     "params": {
-     "baseHeight": 1.0
+     "baseHeight": 1
     }
    },
    {
@@ -1897,7 +1897,7 @@ export const LIBRARY_STAGES = Object.freeze([
     ],
     "rotation": 0,
     "params": {
-     "baseHeight": 1.0
+     "baseHeight": 1
     }
    },
    {
@@ -1908,7 +1908,7 @@ export const LIBRARY_STAGES = Object.freeze([
     ],
     "rotation": 0,
     "params": {
-     "baseHeight": 1.0
+     "baseHeight": 1
     }
    },
    {
@@ -2146,72 +2146,72 @@ export const LIBRARY_STAGES = Object.freeze([
     "type": "wall-mesh",
     "position": [
      2.5,
-     3.0
+     3
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      2.5,
-     7.0
+     7
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      2.5,
-     11.0
+     11
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      -2.5,
-     3.0
+     3
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      -2.5,
-     7.0
+     7
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      -2.5,
-     11.0
+     11
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
@@ -2226,7 +2226,7 @@ export const LIBRARY_STAGES = Object.freeze([
      "height": 2,
      "portWidth": 0.5,
      "portHeight": 0.5,
-     "portBottom": 1.0
+     "portBottom": 1
     }
    },
    {
@@ -2238,7 +2238,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 0,
     "params": {
      "length": 0.5,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -2250,7 +2250,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 0,
     "params": {
      "length": 0.5,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -2462,48 +2462,48 @@ export const LIBRARY_STAGES = Object.freeze([
     "type": "wall-mesh",
     "position": [
      0,
-     3.0
+     3
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      0,
-     7.0
+     7
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      0,
-     11.0
+     11
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      0,
-     15.0
+     15
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
@@ -2705,7 +2705,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 90,
     "params": {
      "length": 3.64,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -2717,7 +2717,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 90,
     "params": {
      "length": 3.64,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -2729,7 +2729,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 90,
     "params": {
      "length": 3.64,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -2741,7 +2741,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 90,
     "params": {
      "length": 3.64,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -2753,7 +2753,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 90,
     "params": {
      "length": 3.64,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -2932,48 +2932,48 @@ export const LIBRARY_STAGES = Object.freeze([
     "type": "wall-mesh",
     "position": [
      0,
-     3.0
+     3
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      0,
-     7.0
+     7
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      0,
-     11.0
+     11
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      0,
-     15.0
+     15
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
@@ -3170,120 +3170,120 @@ export const LIBRARY_STAGES = Object.freeze([
     "type": "wall-mesh",
     "position": [
      3,
-     3.0
+     3
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      3,
-     7.0
+     7
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      3,
-     11.0
+     11
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      3,
-     15.0
+     15
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      3,
-     19.0
+     19
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      -3,
-     3.0
+     3
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      -3,
-     7.0
+     7
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      -3,
-     11.0
+     11
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      -3,
-     15.0
+     15
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      -3,
-     19.0
+     19
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
@@ -3483,25 +3483,25 @@ export const LIBRARY_STAGES = Object.freeze([
    {
     "type": "wall-mesh",
     "position": [
-     -2.0,
+     -2,
      9
     ],
     "rotation": 0,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
-     2.0,
+     2,
      9
     ],
     "rotation": 0,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
@@ -3638,96 +3638,96 @@ export const LIBRARY_STAGES = Object.freeze([
     "type": "wall-mesh",
     "position": [
      -2.4,
-     3.0
+     3
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      -2.4,
-     7.0
+     7
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      -2.4,
-     11.0
+     11
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      -2.4,
-     15.0
+     15
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      2.5,
-     3.0
+     3
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      2.5,
-     7.0
+     7
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      2.5,
-     11.0
+     11
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      2.5,
-     15.0
+     15
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
@@ -3742,7 +3742,7 @@ export const LIBRARY_STAGES = Object.freeze([
      "height": 2,
      "portWidth": 0.5,
      "portHeight": 0.5,
-     "portBottom": 1.0
+     "portBottom": 1
     }
    },
    {
@@ -3980,7 +3980,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 0,
     "params": {
      "length": 4,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -3991,8 +3991,8 @@ export const LIBRARY_STAGES = Object.freeze([
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
@@ -4003,8 +4003,8 @@ export const LIBRARY_STAGES = Object.freeze([
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
@@ -4163,96 +4163,96 @@ export const LIBRARY_STAGES = Object.freeze([
     "type": "wall-mesh",
     "position": [
      4,
-     3.0
+     3
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      4,
-     7.0
+     7
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      4,
-     11.0
+     11
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      4,
-     15.0
+     15
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      -4,
-     3.0
+     3
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      -4,
-     7.0
+     7
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      -4,
-     11.0
+     11
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      -4,
-     15.0
+     15
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
@@ -4271,25 +4271,25 @@ export const LIBRARY_STAGES = Object.freeze([
    {
     "type": "wall-mesh",
     "position": [
-     2.0,
+     2,
      6.5
     ],
     "rotation": 0,
     "params": {
      "length": 2.5,
-     "height": 2.0
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
-     -2.0,
+     -2,
      6.5
     ],
     "rotation": 0,
     "params": {
      "length": 2.5,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -4301,7 +4301,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 0,
     "params": {
      "length": 0.75,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -4313,7 +4313,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 0,
     "params": {
      "length": 0.75,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -4540,120 +4540,120 @@ export const LIBRARY_STAGES = Object.freeze([
     "type": "wall-mesh",
     "position": [
      3.2,
-     3.0
+     3
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      3.2,
-     7.0
+     7
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      3.2,
-     11.0
+     11
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      3.2,
-     15.0
+     15
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      3.2,
-     19.0
+     19
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      -3.2,
-     3.0
+     3
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      -3.2,
-     7.0
+     7
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      -3.2,
-     11.0
+     11
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      -3.2,
-     15.0
+     15
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      -3.2,
-     19.0
+     19
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
@@ -4928,7 +4928,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 90,
     "params": {
      "length": 3.6,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -4940,19 +4940,19 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 90,
     "params": {
      "length": 3.6,
-     "height": 2.0
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      -3.2,
-     10.0
+     10
     ],
     "rotation": 90,
     "params": {
      "length": 3.6,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -4964,7 +4964,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 90,
     "params": {
      "length": 3.6,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -4976,7 +4976,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 90,
     "params": {
      "length": 3.6,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -4988,7 +4988,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 90,
     "params": {
      "length": 3.6,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -5000,19 +5000,19 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 90,
     "params": {
      "length": 3.6,
-     "height": 2.0
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      3.2,
-     10.0
+     10
     ],
     "rotation": 90,
     "params": {
      "length": 3.6,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -5024,7 +5024,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 90,
     "params": {
      "length": 3.6,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -5036,7 +5036,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 90,
     "params": {
      "length": 3.6,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -5448,79 +5448,79 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 0,
     "params": {
      "length": 3,
-     "height": 2.0
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      0,
-     3.0
+     3
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      0,
-     7.0
+     7
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      0,
-     11.0
+     11
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      0,
-     15.0
+     15
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      0,
-     19.0
+     19
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      0,
-     23.0
+     23
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
@@ -5706,11 +5706,11 @@ export const LIBRARY_STAGES = Object.freeze([
       9.2
      ],
      [
-      6.0,
+      6,
       9.2
      ],
      [
-      6.0,
+      6,
       12.8
      ],
      [
@@ -5759,7 +5759,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 0,
     "params": {
      "length": 4,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -5771,7 +5771,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 90,
     "params": {
      "length": 3.85,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -5783,7 +5783,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 90,
     "params": {
      "length": 3.85,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -5795,7 +5795,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 90,
     "params": {
      "length": 3.85,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -5807,7 +5807,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 90,
     "params": {
      "length": 3.85,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -5819,7 +5819,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 0,
     "params": {
      "length": 4,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -5831,7 +5831,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 90,
     "params": {
      "length": 3.85,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -5843,7 +5843,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 90,
     "params": {
      "length": 3.85,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -5855,7 +5855,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 90,
     "params": {
      "length": 3.85,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -5867,7 +5867,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 90,
     "params": {
      "length": 3.85,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -5879,7 +5879,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 0,
     "params": {
      "length": 4,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -5891,7 +5891,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 90,
     "params": {
      "length": 3.85,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -5903,7 +5903,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 90,
     "params": {
      "length": 3.85,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -5915,7 +5915,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 90,
     "params": {
      "length": 3.85,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -5927,7 +5927,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 90,
     "params": {
      "length": 3.85,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -6180,7 +6180,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 0,
     "params": {
      "length": 3.55,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -6192,7 +6192,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 0,
     "params": {
      "length": 3.55,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -6204,7 +6204,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 0,
     "params": {
      "length": 3.55,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -6216,7 +6216,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 0,
     "params": {
      "length": 3.55,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -6228,7 +6228,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 0,
     "params": {
      "length": 3.55,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -6240,7 +6240,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 0,
     "params": {
      "length": 3.55,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -6252,7 +6252,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 0,
     "params": {
      "length": 3.55,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -6264,7 +6264,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 0,
     "params": {
      "length": 3.55,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -6276,7 +6276,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 0,
     "params": {
      "length": 3.55,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -6288,7 +6288,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 0,
     "params": {
      "length": 3.55,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -6300,7 +6300,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 0,
     "params": {
      "length": 3.55,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -6312,115 +6312,115 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 0,
     "params": {
      "length": 3.55,
-     "height": 2.0
+     "height": 2
     }
    },
    {
     "type": "wall-wood",
     "position": [
      -8.6,
-     3.0
+     3
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-wood",
     "position": [
      -8.6,
-     7.0
+     7
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-wood",
     "position": [
      -8.6,
-     11.0
+     11
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-wood",
     "position": [
      -8.6,
-     15.0
+     15
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-wood",
     "position": [
      -8.6,
-     19.0
+     19
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-wood",
     "position": [
      -8.6,
-     23.0
+     23
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-wood",
     "position": [
      -8.6,
-     27.0
+     27
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-wood",
     "position": [
      -8.6,
-     31.0
+     31
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-wood",
     "position": [
      -8.6,
-     35.0
+     35
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
@@ -6683,48 +6683,48 @@ export const LIBRARY_STAGES = Object.freeze([
     "type": "wall-mesh",
     "position": [
      0,
-     3.0
+     3
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      0,
-     7.0
+     7
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      0,
-     11.0
+     11
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      0,
-     15.0
+     15
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
@@ -6868,48 +6868,48 @@ export const LIBRARY_STAGES = Object.freeze([
     "type": "wall-mesh",
     "position": [
      3,
-     3.0
+     3
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      3,
-     7.0
+     7
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      3,
-     11.0
+     11
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
     "type": "wall-mesh",
     "position": [
      3,
-     15.0
+     15
     ],
     "rotation": 90,
     "params": {
-     "length": 4.0,
-     "height": 2.0
+     "length": 4,
+     "height": 2
     }
    },
    {
@@ -7143,7 +7143,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 90,
     "params": {
      "length": 3.32,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -7155,7 +7155,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 90,
     "params": {
      "length": 3.32,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -7167,7 +7167,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 90,
     "params": {
      "length": 3.32,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -7179,7 +7179,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 90,
     "params": {
      "length": 3.32,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -7191,7 +7191,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "rotation": 90,
     "params": {
      "length": 3.32,
-     "height": 2.0
+     "height": 2
     }
    },
    {
@@ -8265,7 +8265,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "type": "popper",
     "position": [
      5,
-     18
+     18.9
     ],
     "rotation": -25,
     "params": {}
@@ -8274,7 +8274,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "type": "popper",
     "position": [
      4.3,
-     18.2
+     19.15
     ],
     "rotation": -20,
     "params": {}
@@ -8338,7 +8338,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "type": "popper",
     "position": [
      -9.3,
-     7
+     14.45
     ],
     "rotation": 90,
     "params": {}
@@ -8347,7 +8347,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "type": "popper",
     "position": [
      -9.3,
-     7.8
+     14.55
     ],
     "rotation": 85,
     "params": {}
@@ -9022,7 +9022,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "type": "popper",
     "position": [
      0.9,
-     8.5
+     10.35
     ],
     "rotation": -10,
     "params": {}
@@ -9031,7 +9031,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "type": "popper",
     "position": [
      0,
-     8.5
+     10.3
     ],
     "rotation": 0,
     "params": {}
@@ -9040,7 +9040,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "type": "popper",
     "position": [
      -0.9,
-     8.5
+     10.35
     ],
     "rotation": 10,
     "params": {}
@@ -9409,7 +9409,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "type": "popper",
     "position": [
      -5,
-     14
+     15.95
     ],
     "rotation": 25,
     "params": {}
@@ -9418,7 +9418,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "type": "popper",
     "position": [
      -5.8,
-     14.4
+     15.7
     ],
     "rotation": 25,
     "params": {}
@@ -10776,7 +10776,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "type": "popper",
     "position": [
      0.8,
-     8.5
+     11.85
     ],
     "rotation": -10,
     "params": {
@@ -10787,7 +10787,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "type": "popper",
     "position": [
      1.6,
-     8.5
+     11.85
     ],
     "rotation": -15,
     "params": {
@@ -10798,7 +10798,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "type": "popper",
     "position": [
      2.4,
-     8.5
+     11.85
     ],
     "rotation": -25,
     "params": {
@@ -10809,7 +10809,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "type": "popper",
     "position": [
      3.2,
-     8.5
+     11.95
     ],
     "rotation": -30,
     "params": {
@@ -11235,7 +11235,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "type": "popper",
     "position": [
      2.5,
-     17
+     19.65
     ],
     "rotation": -10,
     "params": {}
@@ -11244,7 +11244,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "type": "popper",
     "position": [
      3.2,
-     17.3
+     19.6
     ],
     "rotation": -15,
     "params": {}
@@ -11253,7 +11253,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "type": "popper",
     "position": [
      8,
-     16
+     19.25
     ],
     "rotation": -45,
     "params": {}
@@ -11262,7 +11262,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "type": "popper",
     "position": [
      8.7,
-     16.4
+     18.85
     ],
     "rotation": -45,
     "params": {}
@@ -11559,7 +11559,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "type": "popper",
     "position": [
      3,
-     16
+     19.8
     ],
     "rotation": -20,
     "params": {}
@@ -11577,7 +11577,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "type": "popper",
     "position": [
      -0.9,
-     16
+     19.8
     ],
     "rotation": 5,
     "params": {}
@@ -11586,7 +11586,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "type": "popper",
     "position": [
      1.5,
-     17.8
+     19.5
     ],
     "rotation": -10,
     "params": {}
@@ -11615,7 +11615,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "type": "popper",
     "position": [
      -7.6,
-     15
+     18
     ],
     "rotation": 45,
     "params": {}
@@ -11772,7 +11772,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "type": "popper",
     "position": [
      6,
-     13.5
+     16.15
     ],
     "rotation": -55,
     "params": {}
@@ -11781,7 +11781,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "type": "popper",
     "position": [
      5.2,
-     13.8
+     16.5
     ],
     "rotation": -50,
     "params": {}

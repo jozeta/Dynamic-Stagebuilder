@@ -4,6 +4,14 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Safety checks under the stage statistics, from the IPSC Combined Competition Rules (January
+  2024): steel closer than 7 m to where a shooter may stand, fault lines closer than 8 m to steel
+  (rule 2.1.3), targets that can only be shot, or can also be shot, with the muzzle past 90° from
+  down range (rule 2.1.2), and targets nobody can see from a shooting area, position or the start.
+  *Show* selects the props concerned.
+- Library: steel in seven stages (Barrel Gate, Popper Curtain, Zigzag Run, Split Wall, Dogleg,
+  Octagon House, Chicane) moved down range to keep the 7 m minimum distance.
+
 - Match files: *Export the match* saves the match and all its stages in one file; *Import file…*
   takes stage files and match files (each stage becomes a new project, in a new match).
 

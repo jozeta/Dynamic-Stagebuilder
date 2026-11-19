@@ -108,7 +108,7 @@ export function crossesBlocker(bs, p, q) {
 
 // Points worth shooting on a target: the centre, the upper part and both sides (as seen face on).
 // A target counts as seen if any of them is.
-function aimPoints(o) {
+export function aimPoints(o) {
   const h = aimHeight(o), d = [Math.cos(rad(o.rotation || 0)), Math.sin(rad(o.rotation || 0))];
   const half = o.type.startsWith("paper") ? paperSize(o).w * 0.35 : 0.1;
   const top = o.type.startsWith("paper") ? (o.params.mountHeight ?? 0) + paperSize(o).h * 0.85 : h + 0.1;

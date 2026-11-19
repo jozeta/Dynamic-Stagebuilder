@@ -440,7 +440,7 @@ updaters.push(
   library,
   layers.update,
   createInspector(document.getElementById("inspector-body"), { editor }),
-  createStats(document.getElementById("stats")),
+  createStats(document.getElementById("stats"), { onShow: (ids) => editor.dispatch({ type: "select", ids }) }),
 );
 attachShortcuts({ editor, rig });
 // Play / pause for animated props, in the bar over the 3D view (shown when any prop is animated).
