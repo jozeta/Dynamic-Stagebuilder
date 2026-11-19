@@ -9,7 +9,7 @@ import { validateStage } from "../js/model/schema.js";
 test("defaults", () => {
   assert.deepEqual({ ...LOOK_DEFAULTS }, { hour: 15.75, sun: 0.85, ambient: 1.05, shadows: true, softness: 4, shadowStrength: 0.55, haze: 0.15, exposure: 1, ground: "gravel", foliage: "mixed",
     clouds: 0.45, cloudSpeed: 0.5, wind: 70, cloudShadow: 0.5, sunAuto: false, sunElevation: 31, sunAzimuth: 35, sunColor: 0.78,
-    groundHue: null, groundIntensity: null, groundBrightness: null, walls: true });
+    groundHue: null, groundIntensity: null, groundBrightness: null, walls: true, gridIntensity: null, gridColor: null });
   assert.ok(Object.isFrozen(LOOK_DEFAULTS));
 });
 
@@ -58,7 +58,7 @@ test("old files read with the default look; a saved look round-trips", () => {
 
 test("Technical surroundings have their own light defaults; reset and switching use them", async () => {
   const { lookDefaults, TECHNICAL_LOOK } = await import("../js/model/look.js");
-  assert.deepEqual({ ...TECHNICAL_LOOK }, { hour: 16, sun: 1.15, ambient: 1.1, shadows: true, softness: 3, shadowStrength: 0.55, haze: 0.2, exposure: 1, ground: "sand", foliage: "mixed", clouds: 0.35, cloudSpeed: 1, wind: 60, cloudShadow: 0.5, sunAuto: true, sunElevation: 35, sunAzimuth: 20, sunColor: 0.8, groundHue: null, groundIntensity: null, groundBrightness: null, walls: true });
+  assert.deepEqual({ ...TECHNICAL_LOOK }, { hour: 16, sun: 1.15, ambient: 1.1, shadows: true, softness: 3, shadowStrength: 0.55, haze: 0.2, exposure: 1, ground: "sand", foliage: "mixed", clouds: 0.35, cloudSpeed: 1, wind: 60, cloudShadow: 0.5, sunAuto: true, sunElevation: 35, sunAzimuth: 20, sunColor: 0.8, groundHue: null, groundIntensity: null, groundBrightness: null, walls: true, gridIntensity: null, gridColor: null });
   assert.deepEqual(lookDefaults("technical"), TECHNICAL_LOOK);
   assert.deepEqual(lookDefaults("outdoor"), LOOK_DEFAULTS);
   const ed = createEditor();
@@ -75,7 +75,7 @@ test("Technical surroundings have their own light defaults; reset and switching 
 test("Blueprint has its own light defaults: 11:00, ambient 115 %, softness 4, shadows 70 %, no haze, exposure 1.05", async () => {
   const { lookDefaults, BLUEPRINT_LOOK } = await import("../js/model/look.js");
   assert.deepEqual(lookDefaults("blueprint"), BLUEPRINT_LOOK);
-  assert.deepEqual({ ...BLUEPRINT_LOOK }, { hour: 11, sun: 1, ambient: 1.15, shadows: true, softness: 4, shadowStrength: 0.7, haze: 0, exposure: 1.05, ground: "sand", foliage: "mixed", clouds: 0.35, cloudSpeed: 1, wind: 60, cloudShadow: 0.5, sunAuto: true, sunElevation: 35, sunAzimuth: 20, sunColor: 0.8, groundHue: null, groundIntensity: null, groundBrightness: null, walls: true });
+  assert.deepEqual({ ...BLUEPRINT_LOOK }, { hour: 11, sun: 1, ambient: 1.15, shadows: true, softness: 4, shadowStrength: 0.7, haze: 0, exposure: 1.05, ground: "sand", foliage: "mixed", clouds: 0.35, cloudSpeed: 1, wind: 60, cloudShadow: 0.5, sunAuto: true, sunElevation: 35, sunAzimuth: 20, sunColor: 0.8, groundHue: null, groundIntensity: null, groundBrightness: null, walls: true, gridIntensity: null, gridColor: null });
   const { ENVIRONMENTS } = await import("../js/model/schema.js");
   assert.ok(ENVIRONMENTS.includes("blueprint"));
 });
@@ -155,4 +155,16 @@ test("cloud shadows have their own strength, 0 (none) to 100 %", () => {
   assert.equal(cleanLook({ cloudShadow: 3 }).cloudShadow, 1);
   assert.equal(cleanLook({ cloudShadow: -1 }).cloudShadow, 0);
   assert.equal(cleanLook({ cloudShadow: "dark" }).cloudShadow, 0.5);
+});
+
+test("Blueprint and Technical grids have their own intensity and colour", async () => {
+  const { gridTone, GRID_DEFAULTS } = await import("../js/model/look.js");
+  assert.equal(LOOK_DEFAULTS.gridIntensity, null);
+  assert.equal(LOOK_DEFAULTS.gridColor, null);
+  assert.deepEqual(gridTone({}, "blueprint"), GRID_DEFAULTS.blueprint, "not set: the surroundings' own grid");
+  assert.deepEqual(gridTone({}, "technical"), GRID_DEFAULTS.technical);
+  assert.deepEqual(gridTone({ gridIntensity: 0.4, gridColor: "#ff0000" }, "technical"), { intensity: 0.4, color: "#ff0000" });
+  const c = cleanLook({ gridIntensity: 5, gridColor: "#ABCDEF" });
+  assert.equal(c.gridIntensity, 1); assert.equal(c.gridColor, "#abcdef");
+  assert.equal(cleanLook({ gridColor: "blue" }).gridColor, null, "not a colour: the surroundings' own");
 });

@@ -4,6 +4,10 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Settings → Environment, Blueprint and Technical: *Grid intensity* (0 hides it) and *Grid
+  colour* (swatches or your own). The grid is drawn on its own layer, so the ground colour no
+  longer changes it.
+
 - New View defaults: figures 20 %, position marks 30 %, route line 15 % opacity.
 
 - Much more detailed, realistic foliage: trees grow from branching, tapered, bark-textured

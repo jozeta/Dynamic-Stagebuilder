@@ -10,7 +10,11 @@ import { WALK_SPEEDS } from "../model/route.js";
 import { RUN_PARTS, RUN_COLORS } from "../model/run-look.js";
 import { LIBRARY_GROUPS, MARKINGS, isShown, setShown } from "../model/visibility.js";
 import { PROPS } from "../model/props.js";
-import { GROUNDS, FOLIAGE, groundTone } from "../model/look.js";
+import { GROUNDS, FOLIAGE, groundTone, gridTone } from "../model/look.js";
+
+// Grid colours offered as swatches (any colour can be picked as well).
+const GRID_COLORS = [["#e2eeff", "Pale blue (Blueprint)"], ["#ffffff", "White"], ["#c8ccd2", "Light grey"], ["#55585c", "Dark grey (Technical)"],
+  ["#1a1c20", "Black"], ["#ffd23f", "Yellow"], ["#e0453a", "Red"]];
 import { customId, customEnv, BUILDING_TYPES } from "../model/surroundings.js";
 import { ENVIRONMENT_NAMES, ENVIRONMENT_LABELS } from "../render/environments/index.js";
 
@@ -268,6 +272,23 @@ export function createSettings({ editor, panel, docked = false, hide = [], onTog
         slider("groundHue", "hue", `${name} hue`, 0, 359, 1, (v) => `${Math.round(v)}°`, "hue-slider"),
         slider("groundIntensity", "intensity", `${name} intensity`, 0, 1, 0.02, (v) => `${Math.round(v * 100)} %`),
         slider("groundBrightness", "brightness", `${name} brightness`, 0.4, 1.6, 0.02, (v) => `${Math.round(v * 100)} %`));
+      // The grid: its intensity, and its colour (swatches or your own).
+      const grid = gridTone(look, st.environment);
+      const gid = "set-gridIntensity";
+      const gout = h("output", { for: gid, class: "lg-mono settings-value", text: grid.intensity ? `${Math.round(grid.intensity * 100)} %` : "Hidden" });
+      const gin = h("input", { type: "range", class: "lg-slider", id: gid, min: 0, max: 1, step: 0.02, value: String(grid.intensity),
+        oninput: (e) => { const v = Number(e.target.value); gout.textContent = v ? `${Math.round(v * 100)} %` : "Hidden"; d({ type: "setLook", patch: { gridIntensity: v } }); } });
+      const setColor = (hex) => { d({ type: "setLook", patch: { gridColor: hex } }); fill(); };
+      const swatches = h("div", { class: "run-swatches", role: "radiogroup", "aria-label": "Grid colour" }, GRID_COLORS.map(([hex, label]) => {
+        const b = h("button", { type: "button", class: "run-swatch", role: "radio", "aria-checked": String(grid.color === hex), "aria-label": label, title: label, onclick: () => setColor(hex) });
+        b.style.setProperty("--swatch", hex);
+        return b;
+      }));
+      const own = h("input", { type: "color", class: "run-color", id: "set-gridColor", value: grid.color, "aria-label": "Grid: your own colour", title: "Your own colour", onchange: (e) => setColor(e.target.value) });
+      toneRows.push(
+        h("div", { class: "settings-row" }, [h("label", { for: gid, text: "Grid intensity" }), gin, gout]),
+        h("div", { class: "settings-row" }, [h("span", { class: "settings-label", text: "Grid colour" }), h("div", { class: "run-colors settings-wide" }, [swatches, own])]),
+      );
       if (st.environment === "technical") {
         const walls = h("input", { type: "checkbox", class: "lg-toggle", id: "set-walls", onchange: (e) => d({ type: "setLook", patch: { walls: e.target.checked } }) });
         walls.checked = look.walls !== false;

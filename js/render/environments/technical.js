@@ -19,11 +19,18 @@ export function technical(bay) {
       g.fillStyle = `rgba(${v},${v},${v},0.18)`;
       g.fillRect(Math.random() * s, Math.random() * s, 2 + Math.random() * 3, 2 + Math.random() * 3);
     }
-    g.strokeStyle = "#55585c"; g.lineWidth = 3; g.strokeRect(0, 0, s, s);
   }, [W, D]);
+  // The 1 m seams on their own layer (white on clear; Settings sets their colour and intensity).
+  const seams = canvasTexture(256, (g, s) => { g.strokeStyle = "#ffffff"; g.lineWidth = 3; g.strokeRect(0, 0, s, s); }, [W, D], { seed: 3 });
   const floorMat = new THREE.MeshStandardMaterial({ color: tiles ? 0xffffff : 0x7c7f83, map: tiles, roughness: 0.92 });
   group.add(ground(W, D, floorMat, bay.depth / 2));
   const floorBase = floorMat.color.clone();
+  const gridMat = new THREE.MeshStandardMaterial({ color: 0x55585c, map: seams, transparent: true, opacity: seams ? 1 : 0, depthWrite: false,
+    polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1, roughness: 0.92 });
+  const gridMesh = ground(W, D, gridMat, bay.depth / 2);
+  gridMesh.position.y = 0.001;
+  gridMesh.userData.grid = true;
+  group.add(gridMesh);
 
   // Bay outline (thin dark line) so the edge reads in top view.
   const edge = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints([
@@ -54,6 +61,8 @@ export function technical(bay) {
     hazeColor: null, background: new THREE.Color(BG), fog, baseFog: fog,
     walls: true,
     setWalls(on) { this.walls = on; walls.visible = on; },
+    /** The seams' colour and intensity (Settings). */
+    setGrid({ intensity, color }) { gridMat.color.set(color); gridMat.opacity = seams ? intensity : 0; gridMesh.visible = intensity > 0.01; },
     // The floor's colour: its grey tiles times an HSV tint (no intensity: plain grey).
     setGroundTone({ hue, intensity, brightness }) {
       floorMat.color.setRGB(...hsvToRgb(hue, intensity, Math.min(1, brightness)).map((c) => c * Math.max(1, brightness)), THREE.SRGBColorSpace).multiply(floorBase);

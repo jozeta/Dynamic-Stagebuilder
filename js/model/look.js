@@ -4,7 +4,7 @@ const SPEC = {
   hour: [6, 20], sun: [0, 2], ambient: [0, 2], softness: [0, 8], shadowStrength: [0, 1], haze: [0, 1], exposure: [0.5, 1.6],
   clouds: [0, 1], cloudSpeed: [0, 3], wind: [0, 359], cloudShadow: [0, 1],
   sunElevation: [2, 90], sunAzimuth: [0, 359], sunColor: [0, 1],
-  groundHue: [0, 359], groundIntensity: [0, 1], groundBrightness: [0.4, 1.6],
+  groundHue: [0, 359], groundIntensity: [0, 1], groundBrightness: [0.4, 1.6], gridIntensity: [0, 1],
 };
 // Clouds (Outdoor only): how much of the sky they cover, how fast they drift (1 = about 8 m/s) and
 // the wind they drift with (degrees, 0 = down range, 90 = toward +x). They move only with Play on.
@@ -14,7 +14,17 @@ const CLOUDS = { clouds: 0.35, cloudSpeed: 1, wind: 60, cloudShadow: 0.5 };     
 const SUN = { sunAuto: true, sunElevation: 35, sunAzimuth: 20, sunColor: 0.8 };
 // The Blueprint paper and the Technical floor can take a colour (null: the surroundings' own), and
 // the Technical walls can be hidden (then its floor runs on to the horizon).
-const TONE = { groundHue: null, groundIntensity: null, groundBrightness: null, walls: true };
+const TONE = { groundHue: null, groundIntensity: null, groundBrightness: null, walls: true, gridIntensity: null, gridColor: null };
+/** Each surroundings' own grid: Blueprint's pale ink lines, Technical's dark tile seams (intensity 1 = as drawn). */
+export const GRID_DEFAULTS = Object.freeze({
+  blueprint: Object.freeze({ intensity: 1, color: "#e2eeff" }),
+  technical: Object.freeze({ intensity: 1, color: "#55585c" }),
+});
+/** The grid a look asks for in a surroundings: its own values, else that surroundings' default. */
+export function gridTone(look, environment) {
+  const d = GRID_DEFAULTS[environment] || GRID_DEFAULTS.technical;
+  return { intensity: look.gridIntensity ?? d.intensity, color: look.gridColor ?? d.color };
+}
 /** Each surroundings' own ground colour: Blueprint's Prussian blue paper, Technical's grey floor. */
 export const GROUND_TONE_DEFAULTS = Object.freeze({
   blueprint: Object.freeze({ hue: 216, intensity: 0.8, brightness: 1 }),
@@ -73,6 +83,7 @@ export function cleanLook(look) {
   for (const [k, def] of Object.entries(LOOK_DEFAULTS)) {
     const v = src[k];
     if (k === "ground") out[k] = GROUND_IDS.includes(v) ? v : def;
+    else if (k === "gridColor") out[k] = typeof v === "string" && /^#[0-9a-f]{6}$/i.test(v) ? v.toLowerCase() : null;
     else if (k === "foliage") out[k] = FOLIAGE_IDS.includes(v) ? v : def;
     else if (typeof def === "boolean") out[k] = typeof v === "boolean" ? v : def;
     else if (def === null) out[k] = typeof v === "number" && Number.isFinite(v) ? Math.min(SPEC[k][1], Math.max(SPEC[k][0], v)) : null;

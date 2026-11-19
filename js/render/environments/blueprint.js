@@ -89,16 +89,22 @@ export function blueprint(bay) {
     // Grit and paper fibre: fine dark and light specks, short hair-like strokes.
     for (let i = 0; i < 9000; i++) { g.fillStyle = r() < 0.55 ? `rgba(0,14,48,${0.06 + r() * 0.16})` : `rgba(230,240,255,${0.04 + r() * 0.1})`; g.fillRect(r() * s, r() * s, 1 + r() * 1.6, 1 + r() * 1.6); }
     for (let i = 0; i < 260; i++) { const x = r() * s, y = r() * s, a = r() * Math.PI; g.strokeStyle = `rgba(230,240,255,${0.04 + r() * 0.06})`; g.lineWidth = 0.8; g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(a) * (4 + r() * 10), y + Math.sin(a) * (4 + r() * 10)); g.stroke(); }
-    const step = s / TILE;
-    g.strokeStyle = INK(0.16); g.lineWidth = 1.2;                    // a fine quarter-metre grid
-    for (let i = 1; i < TILE * 4; i++) { if (i % 4 === 0) continue; const q = (i * step) / 4; g.beginPath(); g.moveTo(q, 0); g.lineTo(q, s); g.moveTo(0, q); g.lineTo(s, q); g.stroke(); }
-    g.strokeStyle = INK(0.34); g.lineWidth = 2.2;
-    for (let i = 1; i < TILE; i++) { g.beginPath(); g.moveTo(i * step, 0); g.lineTo(i * step, s); g.moveTo(0, i * step); g.lineTo(s, i * step); g.stroke(); }
-    g.strokeStyle = INK(0.78); g.lineWidth = 4.2;
-    g.strokeRect(0, 0, s, s);
-    g.strokeStyle = INK(0.1); g.lineWidth = 1;                       // a fine quarter-metre ticks along the major lines
-    for (let i = 1; i < TILE * 4; i++) { const p = (i * step) / 4; g.beginPath(); g.moveTo(p, 0); g.lineTo(p, 10); g.moveTo(0, p); g.lineTo(10, p); g.stroke(); }
   }, [SIZE / TILE, SIZE / TILE], { seed: 7 });
+  // The grid on its own layer just above the paper (white lines on clear; Settings sets its colour
+  // and intensity): a fine quarter-metre grid, a line every metre, a bold one every 5 m, and ticks.
+  const ink = (a) => `rgba(255,255,255,${a})`;
+  const lines = canvasTexture(640, (g, s) => {
+    const step = s / TILE;
+    g.strokeStyle = ink(0.2); g.lineWidth = 1.2;
+    for (let i = 1; i < TILE * 4; i++) { if (i % 4 === 0) continue; const q = (i * step) / 4; g.beginPath(); g.moveTo(q, 0); g.lineTo(q, s); g.moveTo(0, q); g.lineTo(s, q); g.stroke(); }
+    g.strokeStyle = ink(0.42); g.lineWidth = 2.2;
+    for (let i = 1; i < TILE; i++) { g.beginPath(); g.moveTo(i * step, 0); g.lineTo(i * step, s); g.moveTo(0, i * step); g.lineTo(s, i * step); g.stroke(); }
+    g.strokeStyle = ink(0.9); g.lineWidth = 4.2;
+    g.strokeRect(0, 0, s, s);
+    g.strokeStyle = ink(0.14); g.lineWidth = 1;
+    for (let i = 1; i < TILE * 4; i++) { const p = (i * step) / 4; g.beginPath(); g.moveTo(p, 0); g.lineTo(p, 10); g.moveTo(0, p); g.lineTo(10, p); g.stroke(); }
+  }, [SIZE / TILE, SIZE / TILE], { seed: 8 });
+  if (lines) lines.anisotropy = 16;
   if (grid) grid.anisotropy = 16;
   // Toned down so the lit paper reads as deep Prussian blue, not bright royal blue.
   const paper = toned(new THREE.MeshStandardMaterial({ color: grid ? 0xdce6f6 : 0x2a6fd6, map: grid, roughness: 0.95 }), uTone);
@@ -106,6 +112,13 @@ export function blueprint(bay) {
   // Line the grid up with the world: whole metres on whole metres, a bold line on the bay's centre.
   if (grid) grid.offset.set(((SIZE / 2) % TILE) / TILE, ((SIZE / 2 - D / 2) % TILE) / TILE);
   group.add(g0);
+  if (lines) lines.offset.copy(grid.offset);
+  const gridMat = new THREE.MeshStandardMaterial({ color: 0xe2eeff, map: lines, transparent: true, opacity: lines ? 1 : 0, depthWrite: false,
+    polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1, roughness: 0.95 });
+  const gridMesh = ground(SIZE, SIZE, gridMat, D / 2);
+  gridMesh.position.y = 0.001;
+  gridMesh.userData.grid = true;
+  group.add(gridMesh);
 
   // The drafting sheet of floor plans round the stage.
   {
@@ -236,6 +249,8 @@ export function blueprint(bay) {
   return { group, lights: [hemiLight, sunLight], hemiLight, sunLight, sunStrength: 1.5, hemiStrength: 1.8, warmth: 0,
     hazeColor: null, background, fog, baseFog: fog, exposure: 1,
     toneName: "blueprint",
+    /** The grid's colour and intensity (Settings). */
+    setGrid({ intensity, color }) { gridMat.color.set(color); gridMat.opacity = lines ? intensity : 0; gridMesh.visible = intensity > 0.01; },
     // The paper's colour: hue turned from its own Prussian blue, saturation and brightness scaled;
     // the background and the distance fade follow.
     setGroundTone({ hue, intensity, brightness }) {
