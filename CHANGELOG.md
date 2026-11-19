@@ -4,6 +4,35 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- **Stage library:** 34 ready-made stages in the Projects panel, searchable and grouped:
+  - drills and standards (El Presidente, Vice Presidente, Bill Drill, Mozambique, Hostage
+    Presidente and more)
+  - 8 short, 8 medium and 6 long IPSC courses
+  - 4 USPSA and club stages with moving and reactive targets
+
+  *Open as new project* makes an editable copy. The layouts and briefs are original, modelled on
+  published stage books and stage-design guides (sources in docs/stage-library-sources.md); IPSC
+  stages keep to the course round limits and use no stars, racks or trees.
+
+- **Shooting positions:** a new stage marking. Tap each place the shooter shoots from; they are
+  numbered 1, 2, 3… and each remembers its place, facing, look up/down angle and stance (standing,
+  crouching, kneeling, sitting, prone), shown as a see-through figure at real size. In Shooter's eye
+  the arrows next to the view buttons (or [ and ]) step from the start through every position at
+  that stance's eye height; *Save view* stores where you're looking. Positions are on the printed
+  map.
+- **Blueprint surroundings:** the stage drawn on an endless blue drafting sheet with a 1 m / 5 m
+  grid, title block, north arrow, scale bar, dimension lines, registration crosses, a detail
+  callout and handwritten notes. No bay floor or walls; props keep their colours.
+- **Outdoor ground:** choose sand, light sand, dark sand, red dirt or gravel (Settings → Ground).
+- **Target heights:** switching presentation keeps the top of the targets where it was and changes
+  the sticks instead; an array that would go over the IPSC 1.8 m (mini 1.6 m) limit gets a lower
+  stand. An array with two targets takes two numbers (T2–3).
+- Fixed: the printed 3D view (page 2) was blank. The brief now waits for the 3D picture before the
+  print dialog opens, renders it at 2000 px, and is also built when printing with ⌘P / Ctrl+P.
+- Fixed for iPads: 16 px text in fields (no zoom when you tap one), 44 px Help topics, view buttons
+  and toolbar buttons; the view buttons are easier to read over bright ground; the Help topic strip
+  shows that it scrolls.
+
 - **Cars rebuilt:** each car is one smooth body lofted along its length, with real glass, pillars,
   bumpers, door seams and wheel arches, in four models: saloon, hatchback, pickup (with a bed
   cover) and van. Every model keeps the wear, lights, mirrors, handles, wipers, aerial and exhaust.

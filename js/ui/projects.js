@@ -3,13 +3,43 @@
 import { h, icon } from "./dom.js";
 import { sortProjects, exportAge } from "../storage/projects.js";
 import { parseStageFile } from "../storage/files.js";
+import { STAGE_LIBRARY, LIBRARY_CATEGORIES, librarySummary } from "../model/stage-library.js";
 
 const when = (t) => new Date(t).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
 
-export function createProjects({ panel, hide = [], onToggle = () => {}, store, currentId, onOpen, onNew, onDuplicate, onDelete, onImport, onExport }) {
+export function createProjects({ panel, hide = [], onToggle = () => {}, onOpenLibrary = async () => {}, store, currentId, onOpen, onNew, onDuplicate, onDelete, onImport, onExport }) {
   const list = h("div", { class: "proj-list", role: "list" });
   const message = h("div", { class: "proj-message", role: "status", "aria-live": "polite" });
   const file = h("input", { type: "file", accept: ".json,application/json", hidden: true, onchange: () => importFile() });
+  // The stage library: ready-made stages and drills, each opened as a new project to edit.
+  const libSearch = h("input", { type: "search", placeholder: "Search stages", "aria-label": "Search the stage library", oninput: () => fillLibrary() });
+  const libCat = h("select", { class: "lg-select", "aria-label": "Stage category", onchange: () => fillLibrary() },
+    [h("option", { value: "", text: "All categories" }), ...LIBRARY_CATEGORIES.map((c) => h("option", { value: c.id, text: c.name }))]);
+  const libList = h("div", { class: "lib-stages", role: "list" });
+  const summaries = new Map();
+  const summaryOf = (spec) => { if (!summaries.has(spec.id)) summaries.set(spec.id, librarySummary(spec)); return summaries.get(spec.id); };
+  const libraryBox = h("section", { class: "stage-library", "aria-labelledby": "library-title" }, [
+    h("h3", { class: "lg-label stage-library-title", id: "library-title", text: `Stage library (${STAGE_LIBRARY.length})` }),
+    h("p", { class: "lg-muted hint-text", text: "Ready-made stages and drills. Open one as a new project, then change anything." }),
+    h("div", { class: "lg-search" }, [icon("search"), libSearch]),
+    libCat,
+    libList,
+  ]);
+  function fillLibrary() {
+    const q = libSearch.value.trim().toLowerCase(), cat = libCat.value;
+    const shown = STAGE_LIBRARY.filter((s) => (!cat || s.category === cat) && (!q || `${s.name} ${s.summary} ${s.discipline}`.toLowerCase().includes(q)));
+    libList.replaceChildren(...(shown.length ? shown.map((spec) => {
+      const sum = summaryOf(spec);
+      const catName = LIBRARY_CATEGORIES.find((c) => c.id === spec.category)?.name || spec.category;
+      return h("div", { class: "lib-stage", role: "listitem" }, [
+        h("span", { class: "proj-name", text: spec.name }),
+        h("span", { class: "lg-muted proj-meta", text: `${catName} · ${spec.discipline === "both" ? "IPSC and USPSA" : spec.discipline} · ${sum.rounds}` }),
+        h("span", { class: "lib-stage-summary", text: spec.summary }),
+        h("button", { type: "button", class: "lg-btn", onclick: async () => { await onOpenLibrary(spec); close(); } }, [icon("new"), "Open as new project"]),
+      ]);
+    }) : [h("p", { class: "lg-muted", text: "No stages match. Try another word or category." })]));
+  }
+
   panel.append(
     h("div", { class: "side-head" }, [
       h("h2", { class: "lg-subtitle panel-title", id: "projects-title", text: "Projects" }),
@@ -25,6 +55,7 @@ export function createProjects({ panel, hide = [], onToggle = () => {}, store, c
       message,
       h("p", { class: "lg-muted hint-text", text: "Stages are saved in this browser only. Export a file to keep a copy or move a stage to another device." }),
       list,
+      libraryBox,
     ]),
   );
   panel.setAttribute("aria-labelledby", "projects-title");
@@ -79,7 +110,7 @@ export function createProjects({ panel, hide = [], onToggle = () => {}, store, c
   }
 
   return {
-    async open() { if (isOpen) return close(); say(""); await fill(); show(true); panel.querySelector("button")?.focus(); },
+    async open() { if (isOpen) return close(); say(""); await fill(); fillLibrary(); show(true); panel.querySelector("button")?.focus(); },
     close,
     get isOpen() { return isOpen; },
   };

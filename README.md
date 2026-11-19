@@ -16,7 +16,8 @@ training, and want a clear briefing sheet without drawing the map by hand.
 
 - **Shooting bay** at real scale: width × depth in metres (default 20 × 30 m), 1 m grid.
 - **Prop library**, every prop drawn in 3D at real dimensions:
-  - stage markings (first in the panel): fault lines, shooting areas and the start position
+  - stage markings (first in the panel): fault lines, shooting areas, the start position and
+    numbered shooting positions with a facing, look angle and stance
   - paper: IPSC target and mini target, each in two versions, Classic (octagon, 45 × 57 cm) or
     With head (46 × 76 cm), on sticks with an adjustable stand height. Each one can be a target, a
     no-shoot or a common competition array (no-shoots over a side or the lower half, between two
@@ -47,12 +48,15 @@ training, and want a clear briefing sheet without drawing the map by hand.
   procedure and a top-down map with a legend and scale bar on page 1, a 3D view on page 2. Save it
   as a PDF from the print dialog.
 - **Help** guide with a drawing for every main task, and folding side panels.
-- **Two surroundings,** Outdoor (a dirt range with earth banks, bushes and trees, gravel and stones)
-  and Technical (grey floor, grid). Switching never moves anything on the stage.
+- **Three surroundings,** Outdoor (a dirt range with earth banks, bushes and trees, stones, and a
+  choice of sand, light sand, dark sand, red dirt or gravel), Technical (grey floor, grid) and
+  Blueprint (an endless blue drafting sheet with grid, title block and notes). Switching never moves
+  anything on the stage.
 - **Environment settings:** time of day (the sun moves and warms toward evening), sunlight,
   ambient light, shadows and their softness, haze and exposure, saved with the stage.
 - **Cameras:** orbit, pan, zoom, Top, Isometric, Front and a shooter's-eye view from the start position.
-- **Projects** saved in the browser automatically, with JSON export and import.
+- **Projects** saved in the browser automatically, with JSON export and import, and a **stage
+  library** of 34 ready-made drills and IPSC/USPSA stages to open and edit.
 - **Works offline** and can be installed as an app (PWA).
 
 Not in v1 (ideas for later): matches with several stages, a build sheet with coordinates, sight-line
@@ -150,7 +154,8 @@ Stage settings are in the inspector when nothing is selected. They are saved wit
 | Grid snap | Positions snap to this grid: off, 0.1, 0.25, 0.5 or 1 m (toolbar *Grid* turns it on/off) | 0.25 m |
 | Object snap | Toolbar *Objects*: a wall's end jumps onto another wall's end within 35 cm | On |
 | Angle snap | Rotations snap to this step: off, 5°, 15°, 45° or 90° | 15° |
-| Surroundings | *Settings*: Outdoor (dirt range) or Technical (grey floor, grid); never moves the stage | Outdoor |
+| Surroundings | *Settings*: Outdoor (dirt range), Technical (grey floor, grid) or Blueprint (drafting sheet); never moves the stage | Outdoor |
+| Ground | *Settings* (Outdoor): sand, light sand, dark sand, red dirt or gravel | Sand |
 | Time of day | *Settings*: 06:00–20:00; the sun's height, direction and colour follow it | Outdoor 15:45, Technical 16:00 |
 | Sunlight | *Settings*: 0–200 % | Outdoor 50 %, Technical 115 % |
 | Ambient light | *Settings*: 0–200 % | Outdoor 100 %, Technical 110 % |
@@ -202,6 +207,12 @@ plate rack, dueling tree) are in their own group.
 the points on the ground, then double-click, press Enter or tap *Finish*. Escape or *Cancel* stops.
 *Start position* then a tap sets where the shooter starts (the shooter's-eye camera stands there).
 
+**Plan the shooter's run.** Pick *Shooting position* in Stage markings and tap each place the
+shooter shoots from; they are numbered 1, 2, 3…. In the inspector set the stance (standing,
+crouching, kneeling, sitting, prone), the facing and the look up/down angle. Click *Shooter's eye*:
+the arrows next to the view buttons (or [ and ]) step from the start to each position, seen from
+that stance's eye height. Look around and press *Save view* to store the facing and angle.
+
 **Number targets.** Targets are numbered as you place them: T1… for paper, P1… for steel, NS1… for
 a lone no-shoot (an array with a target is one T label; its targets and no-shoots all count in the
 statistics). Deleting a target leaves a gap until you press *Renumber*. To set a label by hand, type
@@ -237,7 +248,10 @@ procedure carries on to the next page instead of being cut. In the print dialog 
 **Projects, export and import.** Every change is saved in this browser automatically (the chip in
 the toolbar says *Saved*). *Projects* opens in the left-hand panel and lists your stages: open, duplicate or delete them, start a
 *New stage*, *Export this stage* as a `.json` file, or *Import file…* to add a stage from a file.
-An import always becomes a new project, so it never overwrites one. A project with changes that
+An import always becomes a new project, so it never overwrites one. Below your projects is the
+*Stage library*: 34 ready-made stages (drills and standards, short, medium and long IPSC courses,
+USPSA and club stages with moving targets). Search or pick a category, then *Open as new project*
+to get your own copy to change. A project with changes that
 aren't in an exported file shows a hint, so you know when to export a backup.
 
 ### Keyboard shortcuts
@@ -252,6 +266,7 @@ aren't in an exported file shows a hint, so you know when to export a backup.
 | Enter / Escape | Finish / cancel drawing; Escape also clears the selection |
 | F | Frame all |
 | 1 2 3 4 | Isometric, Top, Front, Shooter's eye |
+| [ / ] | In Shooter's eye: previous / next shooting position |
 
 ## Tests
 
