@@ -116,7 +116,7 @@ test("the walk rounds the route's corners and keeps its ends", async () => {
 test("the walk eases in, keeps a steady pace, eases out", async () => {
   const { walkMotion } = await import("../js/model/route.js");
   const m = walkMotion(13);
-  assert.ok(m.duration > 5 && m.duration < 6.5, `13 m at a jog: ${m.duration}`);
+  assert.ok(m.duration > 3.8 && m.duration < 4.8, `13 m at a fast IPSC move: ${m.duration}`);
   assert.equal(m.at(0), 0);
   assert.ok(Math.abs(m.at(m.duration) - 13) < 1e-9);
   let last = 0, lastV = 0;
@@ -127,4 +127,19 @@ test("the walk eases in, keeps a steady pace, eases out", async () => {
     last = s; lastV = v;
   }
   assert.ok(walkMotion(0.3).duration >= 0.5, "even a short step takes a moment");
+});
+
+test("stepping up onto a platform, the eye rises over a stride, not in one jump", async () => {
+  const { groundAlong } = await import("../js/model/route.js");
+  const { createStage, addObject } = await import("../js/model/stage.js");
+  let st = createStage({ width: 10, depth: 20 });
+  st = addObject(st, "platform", [0, 10], 0, { width: 2, depth: 2, height: 0.3 }).stage;
+  const pts = [[0, 2], [0, 10]];                       // ends on the platform's middle
+  const total = 8;
+  const h = (s) => groundAlong(st, pts, s);
+  assert.equal(h(0), 0);
+  assert.ok(Math.abs(h(total) - 0.3) < 1e-9, "arrives at the platform's height exactly");
+  let worst = 0;
+  for (let s = 0.05; s <= total; s += 0.05) worst = Math.max(worst, Math.abs(h(s) - h(s - 0.05)));
+  assert.ok(worst < 0.06, `no jump: largest change per 5 cm ${worst.toFixed(3)} m`);
 });

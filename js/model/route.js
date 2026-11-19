@@ -139,11 +139,11 @@ export function smoothRoute(pts, r = 0.9, steps = 10) {
 }
 
 /**
- * How a walk of `total` metres moves in time: easing in over the first metre, then a steady jog
- * (2.6 m/s), easing out over the last metre (a smooth speed curve, no jolts).
+ * How a walk of `total` metres moves in time: easing in over the first metre, then a fast steady move
+ * (3.4 m/s, a quick IPSC move), easing out over the last metre (a smooth speed curve, no jolts).
  * { duration: seconds, at(t): metres walked at t seconds }.
  */
-export function walkMotion(total, pace = 2.6) {
+export function walkMotion(total, pace = 3.4) {
   if (!(total > 0)) return { duration: 0.5, at: () => 0 };
   const ease = Math.min(1, total / 2);                 // metres to speed up, and to slow down
   // Speed rises as a smooth S over the easing time T: walking `ease` metres takes T = 2·ease/pace.
@@ -161,3 +161,30 @@ export function walkMotion(total, pace = 2.6) {
     },
   };
 }
+
+/**
+ * The ground under a walk at `s` metres along route `pts`, eased: the average of the surface over
+ * a stride (0.8 m) round that point, so stepping onto a platform or a ramp rises smoothly. At the
+ * ends it settles to the exact surface, so the walk arrives at the position's own height.
+ */
+export function groundAlong(stage, pts, s, stride = 0.8) {
+  const total = legLength(pts);
+  const at = (d) => { const p = pointAlong(pts, total > 0 ? Math.min(1, Math.max(0, d / total)) : 0); return surfaceHeight(stage, p[0], p[1]); };
+  const exact = at(s);
+  let sum = 0;
+  const n = 16;
+  for (let i = 0; i <= n; i++) sum += at(s - stride / 2 + (stride * i) / n);
+  const eased = sum / (n + 1);
+  const edge = Math.min(1, Math.min(s, total - s) / stride);   // 0 at the ends → the exact surface
+  const w = edge * edge * (3 - 2 * edge);
+  return exact + (eased - exact) * w;
+}
+
+/** The paces Shooter's eye can walk the course at (Settings, per browser). */
+export const WALK_SPEEDS = Object.freeze([
+  { id: "slow", name: "Slow walk", pace: 1.6 },
+  { id: "walk", name: "Walk", pace: 2.4 },
+  { id: "quick", name: "Quick move", pace: 3.4 },
+  { id: "sprint", name: "Sprint", pace: 4.6 },
+].map((s) => Object.freeze(s)));
+export const walkSpeed = (id) => WALK_SPEEDS.find((s) => s.id === id) || WALK_SPEEDS[2];

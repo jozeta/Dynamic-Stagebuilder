@@ -4,6 +4,11 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Walks between shooting positions are faster (3.4 m/s, a quick IPSC move, by default) and
+  smoother: stepping onto a platform or a ramp rises over a stride instead of jumping.
+- Settings → Light and view: Shooter's eye walking speed (slow walk, walk, quick move, sprint),
+  kept in this browser.
+
 - Figures (at the start and the shooting positions) fade out as the camera comes close and are
   gone when it is inside one, so Shooter's eye never looks out from inside a body.
 

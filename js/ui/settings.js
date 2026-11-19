@@ -4,6 +4,7 @@
 // Sliders apply while dragging; settings are saved with the stage but aren't undo steps.
 // The Props tab hides library groups and single props (a per-browser preference).
 import { h } from "./dom.js";
+import { WALK_SPEEDS } from "../model/route.js";
 import { LIBRARY_GROUPS, MARKINGS, isShown, setShown } from "../model/visibility.js";
 import { PROPS } from "../model/props.js";
 import { GROUNDS } from "../model/look.js";
@@ -20,7 +21,8 @@ const SLIDERS = [
   ["exposure", "Exposure", 0.5, 1.6, 0.05, (v) => v.toFixed(2)],
 ];
 
-export function createSettings({ editor, panel, hide = [], onToggle = () => {}, getHidden = () => ({ categories: [], props: [] }), onHidden = () => {}, mine = null }) {
+export function createSettings({ editor, panel, hide = [], onToggle = () => {}, getHidden = () => ({ categories: [], props: [] }), onHidden = () => {}, mine = null,
+  getSpeed = () => "quick", onSpeed = () => {} }) {
   const d = (a) => editor.dispatch(a);
   const body = h("div", { class: "settings-body" });
   const lookPane = h("div", { id: "settings-look", role: "tabpanel", "aria-labelledby": "settings-tab-look" }, [
@@ -176,6 +178,9 @@ export function createSettings({ editor, panel, hide = [], onToggle = () => {}, 
     const groundSel = h("select", { class: "lg-select", id: "set-ground", onchange: (e) => d({ type: "setLook", patch: { ground: e.target.value } }) },
       GROUNDS.map((g) => h("option", { value: g.id, text: g.name })));
     groundSel.value = look.ground || "sand";
+    const speedSel = h("select", { class: "lg-select", id: "set-walk-speed", onchange: (e) => onSpeed(e.target.value) },
+      WALK_SPEEDS.map((s) => h("option", { value: s.id, text: `${s.name} (${s.pace.toFixed(1)} m/s)` })));
+    speedSel.value = getSpeed();
     body.replaceChildren(...[
       h("div", { class: "settings-row" }, [h("span", { class: "settings-label", text: "Surroundings" }), env]),
       st.environment === "outdoor" ? h("div", { class: "settings-row" }, [h("label", { for: "set-ground", text: "Ground" }), groundSel]) : null,
@@ -185,6 +190,8 @@ export function createSettings({ editor, panel, hide = [], onToggle = () => {}, 
       h("div", { class: "settings-row" }, [h("label", { for: "set-shadows", text: "Shadows" }), shadows]),
       ...rows.slice(3),
       h("p", { class: "lg-muted", text: "Saved with this stage and used for the printed 3D view. Changing these is not an undo step." }),
+      h("div", { class: "settings-row" }, [h("label", { for: "set-walk-speed", text: "Shooter's eye walking speed" }), speedSel]),
+      h("p", { class: "lg-muted", text: "How fast Shooter's eye moves between positions when Play is on. Kept in this browser." }),
     ].filter(Boolean));
   }
 

@@ -4,7 +4,7 @@ import { obliqueView, stageArea, VIEW } from "./view-math.js";
 import { viewFromPosition, anglesFromView } from "../model/positions.js";
 
 const RUN_EYE = 1.6;          // eye height while moving between positions (standing)
-import { surfaceHeight, pointAlong, legLength, walkLook, smoothRoute, walkMotion } from "../model/route.js";
+import { surfaceHeight, pointAlong, legLength, walkLook, smoothRoute, walkMotion, groundAlong } from "../model/route.js";
 import { startLook, startEye } from "../model/start-pose.js";
 
 export const PRESETS = ["iso", "top", "front", "shooter"];
@@ -86,6 +86,7 @@ export function createCameraRig(engine, domElement) {
     look(v.eye, v.eye.map((p, i) => p + dir[i] * 0.1));
   }
   let walking = null;
+  let pace = 3.4;                                    // metres a second (Settings → walking speed)
   function stopWalk() { if (walking) { cancelAnimationFrame(walking.frame); walking.done(false); walking = null; } }
   // With a route (`path`, [[x, z], …] from here to there, and the stage), the camera walks along it,
   // standing on the ground, ramps and platforms under it.
@@ -100,7 +101,7 @@ export function createCameraRig(engine, domElement) {
     // Always a route on the ground: the drawn one (corners rounded), else straight from here to there.
     const route = smoothRoute(path && path.length >= 2 ? path : [[from.eye[0], from.eye[2]], [to.eye[0], to.eye[2]]]);
     const dist = legLength(route);
-    const motion = walkMotion(dist);
+    const motion = walkMotion(dist, pace);
     const ms = reduce ? 0 : motion.duration * 1000;
     // Get up into a standing run over the first 0.8 m, drop into the next stance over the last.
     const smooth = (x) => { const u = Math.min(1, Math.max(0, x)); return u * u * (3 - 2 * u); };
@@ -119,7 +120,8 @@ export function createCameraRig(engine, domElement) {
         const s = t >= 1 ? dist : motion.at((t * ms) / 1000);
         const k = dist > 0 ? s / dist : 1;
         const [x, z] = pointAlong(route, k);
-        const v = { eye: [x, ground(x, z) + eyeAt(s), z], ...walkLook(route, k, from, to) };
+        const floor = stage ? groundAlong(stage, route, s) : 0;      // steps up onto platforms and ramps smoothly
+        const v = { eye: [x, floor + eyeAt(s), z], ...walkLook(route, k, from, to) };
         if (t >= 1) Object.assign(v, { yaw: to.yaw, pitch: to.pitch ?? 0 });
         lookFrom(v);
         if (t < 1) w.frame = requestAnimationFrame(step);
@@ -144,5 +146,5 @@ export function createCameraRig(engine, domElement) {
   const getView = () => ({ position: camera.position.toArray(), target: controls.target.toArray(), fov: camera.fov });
   const setView = (v) => { stopWalk(); lens(v.fov); look(v.position, v.target); };
 
-  return { controls, preset, frameAll, viewFrom, currentAngles, walkTo, stopWalk, jumpTo: (v) => { stopWalk(); lens(VIEW.eyeFov); lookFrom(v); }, startView, positionView, getView, setView, dispose: () => controls.dispose() };
+  return { controls, preset, frameAll, viewFrom, currentAngles, walkTo, stopWalk, jumpTo: (v) => { stopWalk(); lens(VIEW.eyeFov); lookFrom(v); }, startView, positionView, getView, setView, setPace: (p) => { pace = p; }, dispose: () => controls.dispose() };
 }

@@ -31,7 +31,8 @@ import { fadeFigures } from "./render/figure-fade.js";
 import { createSurroundings } from "./ui/surroundings.js";
 import { takeBuildingPieces } from "./model/surroundings.js";
 import { libraryStage } from "./model/stage-library.js";
-import { loadHidden, saveHidden, loadView, saveView } from "./ui/prefs.js";
+import { loadHidden, saveHidden, loadView, saveView, loadWalkSpeed, saveWalkSpeed } from "./ui/prefs.js";
+import { walkSpeed } from "./model/route.js";
 import { createAutosave } from "./storage/autosave.js";
 
 const canvas = document.getElementById("viewport");
@@ -55,6 +56,8 @@ function showViewportError(err) {
 }
 const view = createStageView(engine.groups.stage, { labelFactory: createLabel });
 const rig = createCameraRig(engine, canvas);
+let speed = loadWalkSpeed();                     // Shooter's eye walking speed (per browser)
+rig.setPace(walkSpeed(speed).pace);
 const about = createAbout();
 
 let envKey = "";
@@ -362,6 +365,8 @@ settings = createSettings({
   },
   getHidden: () => hiddenProps,
   onHidden: (next) => { hiddenProps = next; saveHidden(next); library.setHidden(next); },
+  getSpeed: () => speed,
+  onSpeed: (id) => { speed = walkSpeed(id).id; saveWalkSpeed(speed); rig.setPace(walkSpeed(speed).pace); },
 });
 
 render(editor.state);
