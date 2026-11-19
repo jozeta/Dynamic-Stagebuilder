@@ -69,9 +69,9 @@ test("the look moves the sun with the hour and switches shadows, never touching 
   const before = structuredClone(stage);
   for (const name of ENVIRONMENT_NAMES) {
     const env = createEnvironment(name, stage.bay);
-    applyLook(env, { ...LOOK_DEFAULTS, hour: 13 }, stage.bay);
+    applyLook(env, { ...LOOK_DEFAULTS, sunAuto: true, hour: 13 }, stage.bay);
     const noonY = env.sunLight.position.y;
-    applyLook(env, { ...LOOK_DEFAULTS, hour: 19, shadows: false, haze: 0 }, stage.bay);
+    applyLook(env, { ...LOOK_DEFAULTS, sunAuto: true, hour: 19, shadows: false, haze: 0 }, stage.bay);
     assert.ok(env.sunLight.position.y < noonY, name);
     assert.equal(env.sunLight.castShadow, false);
     assert.equal(env.fog, name === "blueprint" ? env.baseFog : null, "no haze: only Blueprint's distance fade");

@@ -71,7 +71,7 @@ function makeTree(r, mats) {
   trunkGeo.computeVertexNormals();
   const trunk = new THREE.Mesh(trunkGeo, mats.bark);
   trunk.position.y = h * 0.31;
-  trunk.castShadow = true;
+  trunk.castShadow = false;
   tree.add(trunk);
   const tips = [];
   for (let b = 0; b < 4; b++) {
@@ -79,7 +79,7 @@ function makeTree(r, mats) {
     const br = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.07, len, 5), mats.bark);
     br.position.set(bend * 0.6 + Math.cos(a) * len * 0.35, y + len * 0.3, Math.sin(a) * len * 0.35);
     br.rotation.set(Math.sin(a) * 0.9, 0, -Math.cos(a) * 0.9);
-    br.castShadow = true;
+    br.castShadow = false;
     tree.add(br);
     tips.push([bend * 0.6 + Math.cos(a) * len * 0.7, y + len * 0.6, Math.sin(a) * len * 0.7]);
   }
@@ -89,7 +89,7 @@ function makeTree(r, mats) {
       const rad = 0.55 + r() * 0.6;
       const c = new THREE.Mesh(jitter(new THREE.IcosahedronGeometry(rad, 1), r, 0.35), k % 2 ? mats.leaf : mats.leafDark);
       c.position.set(x + (r() - 0.5) * 0.8, y + (r() - 0.3) * 0.6, z + (r() - 0.5) * 0.8);
-      c.castShadow = true;
+      c.castShadow = false;
       tree.add(c);
     }
   }
@@ -151,7 +151,7 @@ export function outdoor(bay, { onUpdate } = {}) {
   const hemiLight = new THREE.HemisphereLight(0x9db4d0, 0xb8946a, 0.85);
   const sunLight = sun(bay, 0xffe0b8, 3.1, [-16, 15, 16]);
   const skyTex = canvasTexture(256, (g, s) => paintSky(g, s, 0.5), [1, 1]);
-  const clouds = createClouds(bay);
+  const clouds = createClouds(bay, groundGroup.children.find((c) => c.userData.ground));
   if (clouds) group.add(clouds.mesh, clouds.shadow);
   return {
     clouds,

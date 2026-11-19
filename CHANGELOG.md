@@ -4,6 +4,16 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- New Outdoor defaults: the sun set by hand (36° high, 30°, warm white), sunlight 60 %, ambient
+  65 %, shadow softness 3, shadow strength 55 %, haze 10 %, exposure 1.10, clouds 75 % at 130 %
+  speed, wind 70°. Stages keep their own light; *Reset light to defaults* takes the new one.
+- Outdoor: the floor runs into the earth banks without a line: the banks rise from the floor
+  without a crease, their earth colour blends in over a couple of metres, and the cloud shadows
+  lie over the banks too (they used to end in a straight edge).
+- Shadow strength now changes only the shadows props cast: cloud shadows keep their own
+  strength, and the scenery (stones, trees, the Technical walls) no longer casts sun shadows.
+- Fault lines and shooting areas are thinner: 5 × 4 cm timber.
+
 - Panels move one at a time (Låda Glass 2.5.0): Props, On stage and Projects are tabs of one
   frame on the left, Inspector and Settings of one on the right. Drag a tab onto a side to give
   it a frame of its own there, or onto another frame to add it there as a tab; the grip's menu

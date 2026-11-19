@@ -6,7 +6,7 @@
 // cards on the banks.
 import * as THREE from "three";
 import { rng } from "./common.js";
-import { heightAt, groundTone, heightToNormal, cavityAO, BERM, fbm } from "./terrain.js";
+import { heightAt, groundTone, heightToNormal, cavityAO, BERM, fbm, bankBlend } from "./terrain.js";
 
 const hasDom = typeof document !== "undefined";
 const TILE = 4;          // metres per procedural tile (1024 px → 256 px per metre)
@@ -148,7 +148,7 @@ function loadPhotoMaps(mat, W, D, onUpdate, control) {
 export function buildGround(bay, { onUpdate } = {}) {
   const group = new THREE.Group();
   const W = bay.width + 120, D = bay.depth + 120;
-  const geo = new THREE.PlaneGeometry(W, D, 260, 260);
+  const geo = new THREE.PlaneGeometry(W, D, 320, 320);              // fine enough for a smooth foot to the banks
   geo.rotateX(-Math.PI / 2);
   geo.translate(0, 0, bay.depth / 2);
   const pos = geo.attributes.position;
@@ -162,7 +162,7 @@ export function buildGround(bay, { onUpdate } = {}) {
     const t = groundTone(x, z, bay);
     c.setRGB(0, 0, 0).add(tmp.copy(TONE.dry).multiplyScalar(t.dry)).add(tmp.copy(TONE.compact).multiplyScalar(t.compact)).add(tmp.copy(TONE.damp).multiplyScalar(t.damp));
     c.lerp(TONE.wear, t.wear * 0.45);
-    c.lerp(TONE.earth, Math.min(1, y / 0.9) * 0.8);                              // raw earth on the banks
+    c.lerp(TONE.earth, bankBlend(x, z, bay) * 0.8);                             // raw earth on the banks, blended in from the floor
     const grass = y > 1.8 ? Math.min(1, (y - 1.8) / 0.4) * Math.min(1, Math.max(0, grassPatch(x * 0.25, z * 0.25) + 0.45) * 1.6) : 0;
     c.lerp(TONE.grass, grass * 0.85);
     colors.set([c.r, c.g, c.b], i * 3);
@@ -245,7 +245,7 @@ function scatterStones(bay) {
       placed++;
     }
     mesh.count = placed;
-    mesh.castShadow = s.shadow;
+    mesh.castShadow = false;        // only props cast sun shadows, so Shadow strength is about them alone
     mesh.receiveShadow = true;
     return mesh;
   });

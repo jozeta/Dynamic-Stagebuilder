@@ -52,3 +52,22 @@ test("a bump tilts the normals away from its centre and darkens its foot", () =>
   const ao = cavityAO(h, size);
   assert.ok(ao[(8 * size + 7) * 4] < 255, "the foot of the bump is a little occluded");
 });
+
+test("the floor runs into the banks without a crease or a colour line", async () => {
+  const { bankBlend } = await import("../js/render/environments/terrain.js");
+  const bay = { width: 20, depth: 30 };
+  // Height: rising from the foot with no kink (the slope starts at zero and grows smoothly).
+  const x0 = bay.width / 2 + BERM.setback, z = 15;
+  let foot = null;
+  for (let x = x0 - 1.5; x < x0 + 2; x += 0.01) if (heightAt(x, z, bay) > 0 && foot === null) foot = x;
+  const slope = (x) => (heightAt(x + 0.01, z, bay) - heightAt(x, z, bay)) / 0.01;
+  assert.ok(slope(foot + 0.02) < 0.05, `gentle at the foot: ${slope(foot + 0.02).toFixed(3)}`);
+  let worst = 0;
+  for (let x = foot; x < foot + 3; x += 0.05) worst = Math.max(worst, Math.abs(slope(x + 0.05) - slope(x)));
+  assert.ok(worst < 0.12, `no crease: largest change in slope over 5 cm ${worst.toFixed(3)}`);
+  // Colour: the earth tone starts before the foot and builds up over a couple of metres.
+  assert.equal(bankBlend(0, 15, bay), 0, "the middle of the bay is floor");
+  const before = bankBlend(foot - 1, z, bay), at = bankBlend(foot, z, bay), up = bankBlend(foot + 2.5, z, bay);
+  assert.ok(before > 0 && before < at && at < up, `${before.toFixed(2)} < ${at.toFixed(2)} < ${up.toFixed(2)}`);
+  assert.ok(up > 0.9);
+});

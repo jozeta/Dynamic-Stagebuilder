@@ -25,23 +25,41 @@ export function fbm(seed, octaves = 4) {
 /** Berms: a flat apron round the bay, then an earth bank 2–3 m high with an irregular face. */
 export const BERM = Object.freeze({ setback: 2.5, run: 3.2, height: 2.5, uprangeFade: 10 });
 
-const setbackNoise = fbm(101), topNoise = fbm(102), faceNoise = fbm(103);
+const setbackNoise = fbm(101), topNoise = fbm(102), faceNoise = fbm(103), blendNoise = fbm(104);
 const clamp01 = (v) => Math.min(1, Math.max(0, v));
 
-export function heightAt(x, z, bay) {
+// How far a point is past the foot of the banks (metres; negative on the floor).
+function bankDistance(x, z, bay) {
   const wobble = setbackNoise(x * 0.08, z * 0.08) * 0.8;                  // the bank line wanders
   const sb = BERM.setback + wobble;
   const side = Math.abs(x) - (bay.width / 2 + sb);
   const behind = z - (bay.depth + sb);
-  const d = Math.max(side, behind);
+  return { d: Math.max(side, behind), behind };
+}
+
+/**
+ * How much of the banks' raw earth colour a point gets (0 floor … 1 bank): it starts about 2 m
+ * out on the floor and builds up over the foot of the bank, along an irregular edge, so there is
+ * no line where the floor meets the bank.
+ */
+export function bankBlend(x, z, bay) {
+  const { d } = bankDistance(x, z, bay);
+  const edge = d + blendNoise(x * 0.35, z * 0.35) * 0.6;
+  const t = clamp01((edge + 2) / 4.2);
+  return t * t * (3 - 2 * t);
+}
+
+export function heightAt(x, z, bay) {
+  const { d, behind } = bankDistance(x, z, bay);
   if (d <= 0) return 0;
   // Fade the side banks out up range, where the shooters stand.
   const rise = z < 0 && behind <= 0 ? 1 - clamp01(-z / BERM.uprangeFade) : 1;
   const f = clamp01(d / BERM.run);
-  const profile = f * f * (3 - 2 * f) * (0.85 + 0.15 * f);              // steep face, rounded lip
+  // Smootherstep: the slope starts at zero with no crease at the foot, and rounds off at the lip.
+  const profile = f * f * f * (f * (6 * f - 15) + 10) * (0.85 + 0.15 * f);
   const top = BERM.height * (1 + 0.15 * topNoise(x * 0.06, z * 0.06));
   const crest = Math.min(0.3, Math.max(0, d - BERM.run) * 0.1);         // gentle rise behind the lip
-  const face = faceNoise(x * 0.5, z * 0.5) * 0.12 * f * (1 - f) * 4;    // lumpy dug earth on the face
+  const face = faceNoise(x * 0.5, z * 0.5) * 0.12 * f * f * (1 - f) * 6.75;   // lumpy dug earth on the face, fading in from the foot
   return Math.max(0, (top * profile + (f >= 1 ? crest : 0) + face) * rise);
 }
 

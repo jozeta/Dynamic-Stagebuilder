@@ -30,7 +30,7 @@ export function technical(bay) {
     const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), wallMat);
     m.position.set(x, h / 2, z);
     m.receiveShadow = true;
-    m.castShadow = true;
+    m.castShadow = false;           // only props cast sun shadows
     group.add(m);
   };
   wall(bay.width + 1, 4, 0.5, 0, bay.depth + 1.25);                    // backstop

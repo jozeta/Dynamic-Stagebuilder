@@ -5,8 +5,8 @@ import { startFigure, startFacing } from "../../model/start-pose.js";
 import { getMaterial } from "../materials.js";
 import { box, group } from "./parts.js";
 
-const BAR_W = 0.1;   // red-painted timber, 10 × 8 cm
-const BAR_H = 0.08;
+const BAR_W = 0.05;  // red-painted timber, 5 × 4 cm
+const BAR_H = 0.04;
 
 export function buildLine(line) {
   const g = group(line.id);

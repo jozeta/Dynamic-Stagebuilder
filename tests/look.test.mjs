@@ -1,13 +1,14 @@
 // Environment look settings: defaults, cleaning untrusted values, and the sun from the time of day.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { LOOK_DEFAULTS, cleanLook, sunFromHour } from "../js/model/look.js";
+import { LOOK_DEFAULTS, TECHNICAL_LOOK, cleanLook, sunFromHour } from "../js/model/look.js";
 import { createEditor } from "../js/editor.js";
 import { createStage } from "../js/model/stage.js";
 import { validateStage } from "../js/model/schema.js";
 
 test("defaults", () => {
-  assert.deepEqual({ ...LOOK_DEFAULTS }, { hour: 15.75, sun: 0.5, ambient: 1, shadows: true, softness: 4, shadowStrength: 0.5, haze: 0.35, exposure: 1, ground: "sand", clouds: 0.35, cloudSpeed: 1, wind: 60, sunAuto: true, sunElevation: 35, sunAzimuth: 20, sunColor: 0.8 });
+  assert.deepEqual({ ...LOOK_DEFAULTS }, { hour: 15.75, sun: 0.6, ambient: 0.65, shadows: true, softness: 3, shadowStrength: 0.55, haze: 0.1, exposure: 1.1, ground: "sand",
+    clouds: 0.75, cloudSpeed: 1.3, wind: 70, sunAuto: false, sunElevation: 36, sunAzimuth: 30, sunColor: 0.78 });
   assert.ok(Object.isFrozen(LOOK_DEFAULTS));
 });
 
@@ -88,12 +89,12 @@ test("Outdoor grounds: sand, light sand, dark sand, red dirt and gravel; unknown
 
 test("the Outdoor sky has clouds by default; their amount, speed and wind are checked", async () => {
   const { cloudDrift, CLOUD_TILE } = await import("../js/model/look.js");
-  assert.equal(LOOK_DEFAULTS.clouds, 0.35);
-  assert.equal(LOOK_DEFAULTS.cloudSpeed, 1);
-  assert.equal(LOOK_DEFAULTS.wind, 60);
+  assert.equal(LOOK_DEFAULTS.clouds, 0.75);
+  assert.equal(LOOK_DEFAULTS.cloudSpeed, 1.3);
+  assert.equal(LOOK_DEFAULTS.wind, 70);
   const c = cleanLook({ clouds: 3, cloudSpeed: -1, wind: 400 });
   assert.equal(c.clouds, 1); assert.equal(c.cloudSpeed, 0); assert.equal(c.wind, 359);
-  assert.equal(cleanLook({ clouds: "lots" }).clouds, 0.35);
+  assert.equal(cleanLook({ clouds: "lots" }).clouds, 0.75);
   // Drift: the cloud pattern moves with the wind, by speed × time, in tiles of the texture.
   assert.deepEqual(cloudDrift({ cloudSpeed: 1, wind: 0 }, 0), [0, 0]);
   const [u, v] = cloudDrift({ cloudSpeed: 1, wind: 0 }, 10);
@@ -108,8 +109,9 @@ test("the Outdoor sky has clouds by default; their amount, speed and wind are ch
 
 test("time of day can be turned off: then the sun's height, direction and colour are set by hand", async () => {
   const { sunFromLook, sunColorAt } = await import("../js/model/look.js");
-  assert.equal(LOOK_DEFAULTS.sunAuto, true, "time of day is on by default");
-  const byClock = sunFromLook({ ...LOOK_DEFAULTS, hour: 12 });
+  assert.equal(LOOK_DEFAULTS.sunAuto, false, "Outdoor: the sun is set by hand by default");
+  assert.equal(TECHNICAL_LOOK.sunAuto, true, "Technical: time of day on");
+  const byClock = sunFromLook({ ...LOOK_DEFAULTS, sunAuto: true, hour: 12 });
   assert.deepEqual(byClock, sunFromHour(12), "with time of day on, the clock decides");
   const manual = sunFromLook({ ...LOOK_DEFAULTS, sunAuto: false, sunElevation: 30, sunAzimuth: 0, sunColor: 1 });
   assert.ok(Math.abs(manual.elevation - 30) < 1e-9);
@@ -125,5 +127,5 @@ test("time of day can be turned off: then the sun's height, direction and colour
   assert.ok(r1 > 0.95 && g1 > 0.75 && b1 < 0.5, "yellow");
   assert.deepEqual([r2, g2, b2], [1, 1, 1], "bright white");
   const c = cleanLook({ sunAuto: "no", sunElevation: 500, sunAzimuth: -5, sunColor: 2 });
-  assert.equal(c.sunAuto, true); assert.equal(c.sunElevation, 90); assert.equal(c.sunAzimuth, 0); assert.equal(c.sunColor, 1);
+  assert.equal(c.sunAuto, false, "not a yes or no: the Outdoor default"); assert.equal(c.sunElevation, 90); assert.equal(c.sunAzimuth, 0); assert.equal(c.sunColor, 1);
 });

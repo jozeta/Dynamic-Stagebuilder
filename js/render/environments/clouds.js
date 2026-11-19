@@ -35,7 +35,7 @@ function noiseField(seed) {
   return field;
 }
 
-export function createClouds(bay = { width: 20, depth: 30 }) {
+export function createClouds(bay = { width: 20, depth: 30 }, ground = null) {
   if (!hasDom) return null;
   const field = noiseField(29);
   const canvas = document.createElement("canvas");
@@ -83,14 +83,25 @@ export function createClouds(bay = { width: 20, depth: 30 }) {
   const horizonRow = RING.h * (RING.top / (RING.top - RING.bottom));
 
   // Cloud shadows on the floor: the same pattern in black, at a fraction of its opacity.
+  // Laid over the ground's own surface (banks included) when it's given, so there is no edge where
+  // a flat sheet would end; else a sheet over the bay.
   const shadowMap = map.clone();
-  const floorW = bay.width + 16, floorD = bay.depth + 16;
-  shadowMap.repeat.set(floorW / CLOUD_TILE, floorD / CLOUD_TILE);
   const shadowMat = new THREE.MeshBasicMaterial({ color: 0x000000, map: shadowMap, transparent: true, opacity: 0.3, depthWrite: false,
-    polygonOffset: true, polygonOffsetFactor: -2 });
-  const shadow = new THREE.Mesh(new THREE.PlaneGeometry(floorW, floorD), shadowMat);
-  shadow.rotation.x = -Math.PI / 2;
-  shadow.position.set(0, 0.02, bay.depth / 2);
+    polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+  let shadow;
+  if (ground?.geometry) {
+    ground.geometry.computeBoundingBox();
+    const b = ground.geometry.boundingBox;
+    shadowMap.repeat.set((b.max.x - b.min.x) / CLOUD_TILE, (b.max.z - b.min.z) / CLOUD_TILE);
+    shadow = new THREE.Mesh(ground.geometry, shadowMat);           // shares the ground's shape (the ground owns it)
+    shadow.userData.sharedGeometry = true;
+  } else {
+    const floorW = bay.width + 16, floorD = bay.depth + 16;
+    shadowMap.repeat.set(floorW / CLOUD_TILE, floorD / CLOUD_TILE);
+    shadow = new THREE.Mesh(new THREE.PlaneGeometry(floorW, floorD), shadowMat);
+    shadow.rotation.x = -Math.PI / 2;
+    shadow.position.set(0, 0.02, bay.depth / 2);
+  }
   shadow.renderOrder = 1;
   shadow.name = "cloud-shadows";
 
@@ -143,6 +154,6 @@ export function createClouds(bay = { width: 20, depth: 30 }) {
       ringMap.offset.x = (u + v) * 0.06;               // far away, the ring creeps slowly sideways
       shadowMap.offset.set(-u, v);                     // on the floor (turned the other way up), the same drift
     },
-    dispose() { map.dispose(); alphaMap.dispose(); material.dispose(); mesh.geometry.dispose(); ringMap.dispose(); ringMat.dispose(); ring.geometry.dispose(); shadowMap.dispose(); shadowMat.dispose(); shadow.geometry.dispose(); },
+    dispose() { map.dispose(); alphaMap.dispose(); material.dispose(); mesh.geometry.dispose(); ringMap.dispose(); ringMat.dispose(); ring.geometry.dispose(); shadowMap.dispose(); shadowMat.dispose(); if (!shadow.userData.sharedGeometry) shadow.geometry.dispose(); },
   };
 }
