@@ -2,6 +2,7 @@
 // fresh stage from known keys only, so unknown and "__proto__" keys never get through, and it
 // rejects the whole stage on any error: nothing is ever applied halfway.
 import { PROPS, TARGET_STYLES } from "./props.js";
+import { canBeActivated, isActivator } from "./activation.js";
 import { cleanLook } from "./look.js";
 
 export const SCHEMA_VERSION = 1;
@@ -88,12 +89,23 @@ export function validateStage(json) {
       if (!Array.isArray(o.via) || o.via.length > 50) err(`${path}.via`, "must be a list of at most 50 points");
       else via = o.via.map((p, j) => inBay(p, `${path}.via[${j}]`));
     }
+    // A moving target's activator (checked against the other objects below).
+    let activatedBy;
+    if (o.activatedBy !== undefined) activatedBy = str(o.activatedBy, `${path}.activatedBy`, 64);
     return {
+      ...(activatedBy ? { activatedBy } : {}),
       id: id(o.id, `${path}.id`), type: o.type, label, labelManual: o.labelManual === true,
       position: inBay(o.position, `${path}.position`), rotation: num(o.rotation, `${path}.rotation`, -1e6, 1e6), params,
       ...(via ? { via } : {}),
     };
   });
+
+  // Activation links must point at an activator on this stage, from a target that can be started.
+  for (const o of objects) {
+    if (o.activatedBy === undefined) continue;
+    const a = objects.find((x) => x.id === o.activatedBy);
+    if (!canBeActivated(o.type) || !a || a.id === o.id || !isActivator(a.type)) delete o.activatedBy;
+  }
 
   const linesIn = Array.isArray(json.lines) ? json.lines : (err("lines", "must be a list"), []);
   if (linesIn.length > LIMITS.lines) err("lines", `more than ${LIMITS.lines} lines`);

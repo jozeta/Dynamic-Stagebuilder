@@ -1,4 +1,4 @@
-// The shooter's route on the ground: a dashed blue ribbon from the start through each shooting
+// The shooter's route on the ground: a dashed light grey ribbon (like the figures) from the start through each shooting
 // position, with arrows showing the way, lying on the ground, ramps and platforms; round handles at
 // the grab points; and an invisible wider strip under the line so it's easy to click.
 import * as THREE from "three";

@@ -2,6 +2,7 @@
 // of usual wordings plus "Custom text…" (model/briefing-options.js). Counted values are shown
 // read-only because they come from the stage.
 import { h } from "./dom.js";
+import { activationText } from "../model/activation.js";
 import { stageStats } from "../model/stats.js";
 import { targetsText } from "../model/briefing.js";
 import { BRIEFING_OPTIONS, choiceFor } from "../model/briefing-options.js";
@@ -81,6 +82,7 @@ export function createBriefing({ editor }) {
       h("dt", { text: "Targets" }), h("dd", { text: targetsText(s) }),
       h("dt", { text: "Minimum rounds" }), h("dd", { class: "lg-num", text: String(s.minRounds) }),
       h("dt", { text: "Maximum points" }), h("dd", { class: "lg-num", text: String(s.maxPoints) }),
+      ...(activationText(stage) ? [h("dt", { text: "Activated" }), h("dd", { text: activationText(stage) })] : []),
     ]);
     body.replaceChildren(
       h("p", { class: "lg-muted wsb-wide", text: "Targets, rounds and points are counted from the stage." }),

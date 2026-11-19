@@ -1,6 +1,7 @@
 // The Written Stage Briefing as rows for the editor and the printed brief. Counted values (targets,
 // rounds, points, suggested type) always come from the stage, so they can't drift from it.
 import { stageStats } from "./stats.js";
+import { activationText } from "./activation.js";
 
 const plural = (n, one, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 const dash = (v) => (String(v ?? "").trim() ? String(v).trim() : "–");
@@ -32,6 +33,7 @@ export function briefingRows(stage) {
     counted("Targets", targetsText(s)),
     counted("Minimum rounds", s.minRounds),
     counted("Maximum points", s.maxPoints),
+    ...(activationText(stage) ? [counted("Activated", activationText(stage))] : []),
     free("Start signal", b.startSignal),
     free("Start position", b.startPosition),
     free("Gun condition", b.gunCondition),

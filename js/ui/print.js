@@ -109,7 +109,8 @@ export function renderPrint(root, stage, snapshot) {
     h("section", { class: "print-grid" }, [
       cell("Targets"), cell("Scoring"), cell("Start signal"), cell("Stop time"),
       cell("Start position", true), cell("Gun condition", true),
-    ]),
+      row.Activated ? cell("Activated", true) : null,
+    ].filter(Boolean)),
     h("section", { class: "print-text print-procedure" }, [h("h2", { text: "Procedure" }), h("p", { text: procedure.trim() || "–" })]),
     notes.trim() ? h("section", { class: "print-text" }, [h("h2", { text: "Notes" }), h("p", { text: notes })]) : null,
     h("figure", { class: "print-map" }, [mapSvg(stage), h("figcaption", {}, [legend()])]),

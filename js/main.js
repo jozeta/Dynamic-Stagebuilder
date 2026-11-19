@@ -33,6 +33,7 @@ import { takeBuildingPieces } from "./model/surroundings.js";
 import { libraryStage } from "./model/stage-library.js";
 import { loadHidden, saveHidden, loadView, saveView, loadWalkSpeed, saveWalkSpeed } from "./ui/prefs.js";
 import { walkSpeed } from "./model/route.js";
+import { activationLinks } from "./model/activation.js";
 import { createAutosave } from "./storage/autosave.js";
 
 const canvas = document.getElementById("viewport");
@@ -100,6 +101,15 @@ function render(state) {
   for (const id of state.selection) {
     const node = view.objectFor(id);
     if (node) highlight.add(new THREE.BoxHelper(node, ACCENT));
+  }
+  // Activation links of the selection: an orange dashed line on the ground, activator → target.
+  for (const { target, activator } of activationLinks(stage)) {
+    if (!state.selection.includes(target.id) && !state.selection.includes(activator.id)) continue;
+    const pts = [activator.position, target.position].map(([x, z]) => new THREE.Vector3(x, 0.03, z));
+    const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineDashedMaterial({ color: 0xff9a2e, dashSize: 0.3, gapSize: 0.18, depthTest: false }));
+    line.computeLineDistances();
+    line.renderOrder = 5;
+    highlight.add(line);
   }
 
   // The line being drawn.

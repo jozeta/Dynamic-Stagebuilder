@@ -12,6 +12,7 @@ import { getProp } from "./model/props.js";
 import { snapToObjects, SNAP_RADIUS } from "./model/objsnap.js";
 import { cleanLook, lookDefaults, lookAfterSwitch } from "./model/look.js";
 import { stepFrom } from "./model/positions.js";
+import { canBeActivated, isActivator } from "./model/activation.js";
 
 const STAGE_TYPES = ["", "Short", "Medium", "Long"];
 const BRIEFING_TEXT = ["matchName", "designer", "startSignal", "startPosition", "gunCondition", "procedure", "stopTime", "notes", "scoring"];
@@ -276,6 +277,21 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
       const view = { yaw: Math.round(rotation * 10) / 10, pitch: Math.round(Math.max(-89, Math.min(89, pitch)) * 10) / 10 };
       if (st.view && st.view.yaw === view.yaw && st.view.pitch === view.pitch) return;
       edit({ ...present(), start: { ...st, view } });
+    },
+    // A moving target started by an activator on the stage (by: its id, or null to unlink).
+    setActivator({ id, by }) {
+      const o = present().objects.find((x) => x.id === id);
+      if (!o || !canBeActivated(o.type)) return;
+      if (by === null) {
+        if (o.activatedBy === undefined) return;
+        const rest = { ...o };
+        delete rest.activatedBy;
+        edit({ ...present(), objects: present().objects.map((x) => (x.id === id ? rest : x)) });
+        return;
+      }
+      const a = present().objects.find((x) => x.id === by);
+      if (!a || a.id === id || !isActivator(a.type) || o.activatedBy === by) return;
+      edit({ ...present(), objects: present().objects.map((x) => (x.id === id ? { ...x, activatedBy: by } : x)) });
     },
     setStart({ position, facing = 0 }) {
       edit(setStart(present(), fit(position), snapAngle(facing, present().settings.angleSnap)));

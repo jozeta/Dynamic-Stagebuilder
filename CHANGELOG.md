@@ -4,6 +4,12 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Activation links: a swinger, drop turner, clamshell, mover, bobber, twister, Texas star or
+  shuttered port can be *Activated by* a popper, plate, step pad or pull lever on the stage
+  (inspector). Selecting either shows an orange dashed line between them, and the briefing and
+  the printed brief list them ("T5 (swinger) by P1 (IPSC popper)").
+- The route line on the ground is light grey, like the figures.
+
 - Walks between shooting positions are faster (3.4 m/s, a quick IPSC move, by default) and
   smoother: stepping onto a platform or a ramp rises over a stride instead of jumping.
 - Settings → Light and view: Shooter's eye walking speed (slow walk, walk, quick move, sprint),

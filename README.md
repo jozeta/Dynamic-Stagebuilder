@@ -54,6 +54,8 @@ training, and want a clear briefing sheet without drawing the map by hand.
 - **Help** guide with a drawing for every main task, and side panels that fold away and resize.
 - **Your own surroundings** from a blueprint or site plan, measured with one known length, plus
   building pieces (walls, pillars, columns, berms, containers, fences, barriers), saved as templates.
+- **Activation links** from poppers, plates, step pads and pull levers to the moving targets they
+  start, listed in the briefing.
 - **Animated moving targets** (swingers, drop turners, clamshells, movers, Texas stars, plate racks,
   dueling trees, poppers) with a per-prop switch and one Play / Pause button.
 - **Three surroundings,** Outdoor (a dirt range with earth banks, bushes and trees, stones, and a
@@ -243,6 +245,11 @@ sliders to move, turn and fade it until it lines up. Then rebuild what's really 
 press *Save pieces to these surroundings*. The template then shows up under *My surroundings* for
 every stage. *Edit the pieces on the stage* brings them back to change. Templates live in this
 browser only; a stage opened on another device shows a plain floor until you make the template there.
+
+**Link activators.** Select a moving target (swinger, drop turner, clamshell, mover, bobber,
+twister, Texas star or shuttered port) and choose what starts it under *Activated by*: a popper,
+plate, step pad or pull lever on the stage. Selecting either one shows an orange dashed line
+between them; the briefing and the printed brief list every link.
 
 **Animate moving targets.** Select a swinger, drop turner, clamshell, mover, Texas star, plate rack,
 dueling tree or popper and switch on *Animate*. The *Play / Pause* button over the 3D view (it

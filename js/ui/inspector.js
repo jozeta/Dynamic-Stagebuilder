@@ -4,6 +4,7 @@ import { h, icon } from "./dom.js";
 import { getProp } from "../model/props.js";
 import { labelPrefix } from "../model/numbering.js";
 import { PRESENTATIONS, HARD_COVERS, arrayIssues } from "../model/arrays.js";
+import { canBeActivated, isActivator, activatorsFor, activatorOf, activationLinks, describe } from "../model/activation.js";
 
 const PARAM_LABELS = {
   presentation: "Presentation", hardCover: "Hard cover", mountHeight: "Stand height (m)", style: "Target style", baseHeight: "Base height (m)", size: "Size (m)", length: "Length (m)",
@@ -37,7 +38,7 @@ export function createInspector(root, { editor }) {
   const d = (action) => editor.dispatch(action);
   let lastKey = "";
 
-  function objectPanel(o, angle) {
+  function objectPanel(o, angle, stage) {
     const def = getProp(o.type);
     const nodes = [h("h2", { class: "lg-subtitle panel-title", text: def.name })];
     if (labelPrefix(o) !== null) {
@@ -63,6 +64,16 @@ export function createInspector(root, { editor }) {
       nodes.push(field(PARAM_LABELS[k] || k, spec.options
         ? select(k, o.params[k], spec.options.map((v) => [v, OPTION_LABELS[v] || v]), set)
         : numberInput(k, o.params[k], spec, set)));
+    }
+    // Activation: what starts a moving target, and what an activator starts.
+    if (canBeActivated(o.type)) {
+      const options = [["", "Nothing (moves by itself)"], ...activatorsFor(stage, o.id).map((a) => [a.id, describe(a)])];
+      nodes.push(field("Activated by", select("activatedBy", activatorOf(stage, o)?.id ?? "", options, (v) => d({ type: "setActivator", id: o.id, by: v || null }))));
+      if (options.length === 1) nodes.push(h("p", { class: "lg-muted hint-text", text: "Place a popper, plate, step pad or pull lever to activate it." }));
+    }
+    if (isActivator(o.type)) {
+      const starts = activationLinks(stage).filter((l) => l.activator.id === o.id).map((l) => describe(l.target));
+      if (starts.length) nodes.push(h("p", { class: "lg-muted hint-text", text: `Activates ${starts.join(", ")}.` }));
     }
     // Rule problems with a paper target array (cited from the Target Array Handbook).
     if (def.note) nodes.splice(1, 0, h("p", { class: "lg-muted hint-text", text: def.note }));
@@ -91,14 +102,15 @@ export function createInspector(root, { editor }) {
     const sel = state.selection;
     const objs = stage.objects.filter((o) => sel.includes(o.id));
     const lines = stage.lines.filter((l) => sel.includes(l.id));
-    const key = JSON.stringify([sel, objs, lines, sel.length ? null : [stage.bay, stage.settings.grid, stage.settings.angleSnap]]);
+    const links = stage.objects.filter((o) => isActivator(o.type) || o.activatedBy).map((o) => [o.id, o.label, o.activatedBy]);
+    const key = JSON.stringify([sel, objs, lines, links, sel.length ? null : [stage.bay, stage.settings.grid, stage.settings.angleSnap]]);
     if (key === lastKey) return;
     lastKey = key;
     const focused = root.contains(document.activeElement) ? document.activeElement.dataset.field : null;
 
     let nodes;
     if (!sel.length) nodes = stagePanel(stage);
-    else if (objs.length === 1 && sel.length === 1) nodes = [...objectPanel(objs[0], stage.settings.angleSnap), actions()];
+    else if (objs.length === 1 && sel.length === 1) nodes = [...objectPanel(objs[0], stage.settings.angleSnap, stage), actions()];
     else if (lines.length === 1 && sel.length === 1) {
       const l = lines[0];
       nodes = [h("h2", { class: "lg-subtitle panel-title", text: l.type === "fault-line" ? "Fault line" : "Shooting area" }),
