@@ -3,6 +3,7 @@
 // helper (selection, gizmos) groups. Environments never touch the stage group.
 import * as THREE from "three";
 import { createEnvironment, applyLook } from "./environments/index.js";
+import { cloudDrift } from "../model/look.js";
 
 export function createEngine(canvas) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
@@ -83,6 +84,13 @@ export function createEngine(canvas) {
   return {
     scene, camera, renderer, groups, requestRender, resize, setEnvironment, setLook,
     onRender(fn) { renderHooks.push(fn); },
+    /** Move the clouds to where `seconds` of Play have drifted them; true if they are there and moving. */
+    driftClouds(look, seconds) {
+      const c = env?.clouds;
+      if (!c || !c.mesh.visible) return false;
+      c.setDrift(cloudDrift(look, seconds));
+      return (look.cloudSpeed ?? 0) > 0;
+    },
     dispose() { observer.disconnect(); renderer.dispose(); },
   };
 }

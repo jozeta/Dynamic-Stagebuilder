@@ -5,6 +5,7 @@ import * as THREE from "three";
 import { canvasTexture, sun, rng } from "./common.js";
 import { heightAt } from "./terrain.js";
 import { buildGround } from "./ground.js";
+import { createClouds } from "./clouds.js";
 
 // The sky: blue overhead fading to a warm horizon; warmer and deeper toward sunset.
 function paintSky(g, s, warmth) {
@@ -150,7 +151,10 @@ export function outdoor(bay, { onUpdate } = {}) {
   const hemiLight = new THREE.HemisphereLight(0x9db4d0, 0xb8946a, 0.85);
   const sunLight = sun(bay, 0xffe0b8, 3.1, [-16, 15, 16]);
   const skyTex = canvasTexture(256, (g, s) => paintSky(g, s, 0.5), [1, 1]);
+  const clouds = createClouds();
+  if (clouds) group.add(clouds.mesh);
   return {
+    clouds,
     group, lights: [hemiLight, sunLight], hemiLight, sunLight, sunStrength: 5.4, hemiStrength: 0.95, warmth: 1,
     reflectionSky: reflectionSky(), reflectionStrength: 0.35,
     hazeColor: 0xd9c3a0, background: skyTex ?? new THREE.Color(0xb9cfe0), fog: new THREE.Fog(0xe6d6bb, 55, 150), exposure: 1.05,

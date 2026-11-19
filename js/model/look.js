@@ -2,7 +2,13 @@
 // colour from the time of day. Pure: no DOM, no Three.js.
 const SPEC = {
   hour: [6, 20], sun: [0, 2], ambient: [0, 2], softness: [0, 8], shadowStrength: [0, 1], haze: [0, 1], exposure: [0.5, 1.6],
+  clouds: [0, 1], cloudSpeed: [0, 3], wind: [0, 359],
 };
+// Clouds (Outdoor only): how much of the sky they cover, how fast they drift (1 = about 8 m/s) and
+// the wind they drift with (degrees, 0 = down range, 90 = toward +x). They move only with Play on.
+const CLOUDS = { clouds: 0.35, cloudSpeed: 1, wind: 60 };
+export const CLOUD_TILE = 340;            // metres across one tile of the cloud texture
+const CLOUD_MPS = 8;
 
 // The Outdoor range floor: the same photo-scanned ground, graded to each look (render/environments/ground.js).
 export const GROUNDS = Object.freeze([
@@ -12,12 +18,12 @@ export const GROUNDS = Object.freeze([
 ]);
 const GROUND_IDS = GROUNDS.map((g) => g.id);
 
-export const LOOK_DEFAULTS = Object.freeze({ hour: 15.75, sun: 0.5, ambient: 1, shadows: true, softness: 4, shadowStrength: 0.5, haze: 0.35, exposure: 1, ground: "sand" });
+export const LOOK_DEFAULTS = Object.freeze({ hour: 15.75, sun: 0.5, ambient: 1, shadows: true, softness: 4, shadowStrength: 0.5, haze: 0.35, exposure: 1, ground: "sand", ...CLOUDS });
 // The Technical surroundings: brighter afternoon light with softer, lighter shadows.
-export const TECHNICAL_LOOK = Object.freeze({ hour: 16, sun: 1.15, ambient: 1.1, shadows: true, softness: 3, shadowStrength: 0.55, haze: 0.2, exposure: 1, ground: "sand" });
+export const TECHNICAL_LOOK = Object.freeze({ hour: 16, sun: 1.15, ambient: 1.1, shadows: true, softness: 3, shadowStrength: 0.55, haze: 0.2, exposure: 1, ground: "sand", ...CLOUDS });
 
 // Blueprint: late-morning light with soft shadows; no haze.
-export const BLUEPRINT_LOOK = Object.freeze({ hour: 11, sun: 1, ambient: 1.15, shadows: true, softness: 4, shadowStrength: 0.7, haze: 0, exposure: 1.05, ground: "sand" });
+export const BLUEPRINT_LOOK = Object.freeze({ hour: 11, sun: 1, ambient: 1.15, shadows: true, softness: 4, shadowStrength: 0.7, haze: 0, exposure: 1.05, ground: "sand", ...CLOUDS });
 
 /** The light defaults for a surroundings name ("outdoor", "technical" or "blueprint"). */
 export const lookDefaults = (environment) => (environment === "technical" || String(environment).startsWith("custom:") ? TECHNICAL_LOOK
@@ -59,4 +65,11 @@ export function sunFromHour(hour) {
   const hl = Math.hypot(...horiz);
   const direction = [(horiz[0] / hl) * Math.cos(e), Math.sin(e), (horiz[1] / hl) * Math.cos(e)];
   return { elevation, direction, warmth: 1 - elevation / MAX_ELEVATION, strength: 0.3 + 0.7 * Math.sqrt(Math.sin(e)) };
+}
+
+/** How far the cloud pattern has drifted after `seconds` of Play: a texture offset [u, v] in tiles. */
+export function cloudDrift(look, seconds) {
+  const metres = (look.cloudSpeed ?? CLOUDS.cloudSpeed) * CLOUD_MPS * seconds;
+  const a = ((look.wind ?? CLOUDS.wind) * Math.PI) / 180;
+  return [(Math.sin(a) * metres) / CLOUD_TILE, (Math.cos(a) * metres) / CLOUD_TILE];
 }

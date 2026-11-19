@@ -87,6 +87,16 @@ function animationFrame() {
   engine.requestRender();
 }
 engine.onRender(animationFrame);
+// Clouds drift with the wind while Play is on (and hold still on Pause); they keep the view
+// drawing while they move.
+let cloudTime = 0, lastFrame = performance.now();
+engine.onRender(() => {
+  const now = performance.now();
+  const playing = animator.playing();
+  if (playing) cloudTime += Math.min(0.1, (now - lastFrame) / 1000);
+  lastFrame = now;
+  if (engine.driftClouds(editor.stage().settings.look, cloudTime) && playing) engine.requestRender();
+});
 engine.onRender(() => fadeFigures(engine.groups.stage, engine.camera));   // figures fade as the camera comes close
 
 function render(state) {
@@ -339,11 +349,13 @@ playButton = (() => {
   let pausedAt = 0;
   b.update = () => {
     // Shown when props are animated, or when there are shooting positions to walk between.
-    const positions = editor.stage().objects.some((o) => o.type === "shooting-position");
-    b.hidden = animator.count() === 0 && !positions;
+    const st = editor.stage();
+    const positions = st.objects.some((o) => o.type === "shooting-position");
+    const clouds = st.settings.environment === "outdoor" && (st.settings.look?.clouds ?? 0) > 0.01 && (st.settings.look?.cloudSpeed ?? 0) > 0;
+    b.hidden = animator.count() === 0 && !positions && !clouds;
     b.setAttribute("aria-pressed", String(animator.playing()));
     b.replaceChildren(icon(animator.playing() ? "pause" : "play"), animator.playing() ? "Pause" : "Play");
-    b.title = animator.playing() ? "Pause: animated props stop, and Shooter's eye jumps between positions" : "Play: animated props move, and Shooter's eye walks between positions";
+    b.title = animator.playing() ? "Pause: animated props and clouds stop, and Shooter's eye jumps between positions" : "Play: animated props and clouds move, and Shooter's eye walks between positions";
   };
   document.querySelector(".camera-bar")?.append(b);
   b.update();

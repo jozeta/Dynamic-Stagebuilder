@@ -22,7 +22,12 @@ const SLIDERS = [
   ["shadowStrength", "Shadow strength", 0, 1, 0.05, (v) => `${Math.round(v * 100)} %`],
   ["haze", "Haze", 0, 1, 0.05, (v) => (v ? `${Math.round(v * 100)} %` : "Clear")],
   ["exposure", "Exposure", 0.5, 1.6, 0.05, (v) => v.toFixed(2)],
+  // Outdoor clouds; they drift with Play on.
+  ["clouds", "Clouds", 0, 1, 0.05, (v) => (v > 0.01 ? `${Math.round(v * 100)} %` : "Clear")],
+  ["cloudSpeed", "Cloud speed", 0, 3, 0.1, (v) => (v ? `${Math.round(v * 100)} %` : "Still")],
+  ["wind", "Wind (0° = toward down range)", 0, 359, 5, (v) => `${Math.round(v)}°`],
 ];
+const OUTDOOR_ONLY = new Set(["haze", "clouds", "cloudSpeed", "wind"]);
 
 export function createSettings({ editor, panel, hide = [], onToggle = () => {}, getHidden = () => ({ categories: [], props: [] }), onHidden = () => {}, mine = null,
   getSpeed = () => "quick", onSpeed = () => {}, getRunLook = () => null, onRunLook = () => {} }) {
@@ -202,10 +207,10 @@ export function createSettings({ editor, panel, hide = [], onToggle = () => {}, 
     }
     const rows = SLIDERS.map(([key, label, min, max, step, show]) => {
       const id = `set-${key}`;
-      const off = key === "haze" && st.environment !== "outdoor";     // haze is for the Outdoor range only
+      const off = OUTDOOR_ONLY.has(key) && st.environment !== "outdoor";     // haze and clouds are for the Outdoor range only
       const out = h("output", { for: id, class: "lg-mono settings-value", text: show(look[key]) });
       const input = h("input", { type: "range", class: "lg-slider", id, min, max, step, value: String(look[key]), disabled: off,
-        title: off ? "Haze applies to the Outdoor surroundings" : null,
+        title: off ? `${label} applies to the Outdoor surroundings` : null,
         oninput: (e) => { const v = Number(e.target.value); out.textContent = show(v); d({ type: "setLook", patch: { [key]: v } }); } });
       return h("div", { class: "settings-row" }, [h("label", { for: id, text: label }), input, out]);
     });

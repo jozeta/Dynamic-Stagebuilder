@@ -21,6 +21,7 @@ export function createEnvironment(name, bay, options = {}) {
     ...env,
     hazeFog: null,
     dispose() {
+      env.clouds?.dispose();
       disposeGroup(env.group);
       if (env.background?.isTexture) env.background.dispose();
       env.reflectionSky?.dispose();

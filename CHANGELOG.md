@@ -4,6 +4,11 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Clouds over the Outdoor range: a soft cloud layer painted in code, thinning out toward the
+  horizon and warmed by the evening sun. With Play on they drift with the wind; Pause holds them.
+  Settings → Environment: Clouds (amount, 0 % = clear), Cloud speed and Wind direction, saved
+  with the stage.
+
 - Settings has three tabs: Environment (was Light and view), View and Props. View holds the
   Shooter's eye walking speed and, for the figures, the position marks and the route line each:
   show or hide, a colour (seven swatches or your own) and opacity. Kept in this browser.

@@ -63,7 +63,8 @@ training, and want a clear briefing sheet without drawing the map by hand.
   Blueprint (an endless, worn blue drafting sheet with grid, title block, comments, arrows and stamps). Switching never moves
   anything on the stage.
 - **Environment settings:** time of day (the sun moves and warms toward evening), sunlight,
-  ambient light, shadows and their softness, haze and exposure, saved with the stage.
+  ambient light, shadows and their softness, haze, exposure and drifting clouds (amount, speed,
+  wind), saved with the stage.
 - **The shooter's run:** numbered shooting positions with a stance (standing, crouching,
   kneeling, sitting, prone), facing and look angle, each shown as a detailed see-through grey man
   holding a pistol; the shooter at the start is posed as the briefing's start position says
@@ -189,6 +190,9 @@ Stage settings are in the inspector when nothing is selected. They are saved wit
 | Shadow strength | *Settings*: 0–100 %; lower makes shadows lighter | Outdoor 50 %, Technical 55 % |
 | Haze | *Settings*: 0 (clear) – 100 % (Outdoor only) | Outdoor 35 % |
 | Exposure | *Settings*: 0.5–1.6 | 1.00 |
+| Clouds | *Settings → Environment* (Outdoor): 0 % (clear) – 100 % | 35 % |
+| Cloud speed | *Settings → Environment* (Outdoor): 0 (still) – 300 %; 100 % ≈ 8 m/s; they move only with Play on | 100 % |
+| Wind direction | *Settings → Environment* (Outdoor): which way the clouds drift, 0° = toward down range, 90° = toward +x | 60° |
 | Hidden props | *Settings → Props*: groups and single props the props panel leaves out (per browser) | None |
 | Folded panels | The arrow at the top of each side panel (per browser) | Both open |
 | Panel sizes | Drag a side panel's inner edge, or arrow keys on it; double-click resets (per browser) | 232 / 280 px |
