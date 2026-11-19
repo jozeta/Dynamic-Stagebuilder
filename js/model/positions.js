@@ -68,6 +68,7 @@ export function walkBetween(a, b, t) {
   const k = easeInOut(Math.min(1, Math.max(0, t)));
   const turn = ((((b.yaw - a.yaw) % 360) + 540) % 360) - 180;
   return {
+    eased: k,
     eye: a.eye.map((v, i) => v + (b.eye[i] - v) * k),
     yaw: a.yaw + turn * k,
     pitch: (a.pitch ?? 0) + ((b.pitch ?? 0) - (a.pitch ?? 0)) * k,

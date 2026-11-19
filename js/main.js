@@ -285,7 +285,7 @@ const library = createLibrary(document.getElementById("library-body"), { editor,
 updaters.push(
   createToolbar(document.getElementById("toolbar"), {
     editor, rig, status, onAbout: () => about.open(), onHelp: () => help.open(), onBriefing: () => briefing.open(), onPrint: () => printBrief(),
-    onProjects: () => projects.open(), onSettings: () => settings.open(), onViewing: viewingFrom,
+    onProjects: () => projects.open(), onSettings: () => settings.open(), onViewing: viewingFrom, walking: () => animator.playing(),
   }),
   library,
   createInspector(document.getElementById("inspector-body"), { editor }),
@@ -305,10 +305,12 @@ playButton = (() => {
     } });
   let pausedAt = 0;
   b.update = () => {
-    b.hidden = animator.count() === 0;
+    // Shown when props are animated, or when there are shooting positions to walk between.
+    const positions = editor.stage().objects.some((o) => o.type === "shooting-position");
+    b.hidden = animator.count() === 0 && !positions;
     b.setAttribute("aria-pressed", String(animator.playing()));
     b.replaceChildren(icon(animator.playing() ? "pause" : "play"), animator.playing() ? "Pause" : "Play");
-    b.title = `${animator.playing() ? "Stop" : "Start"} the animated props (${animator.count()})`;
+    b.title = animator.playing() ? "Pause: animated props stop, and Shooter's eye jumps between positions" : "Play: animated props move, and Shooter's eye walks between positions";
   };
   document.querySelector(".camera-bar")?.append(b);
   b.update();

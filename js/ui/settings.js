@@ -73,11 +73,12 @@ export function createSettings({ editor, panel, hide = [], onToggle = () => {}, 
   panel.append(
     h("div", { class: "settings-head" }, [
       h("h2", { class: "lg-subtitle panel-title", id: "settings-title", text: "Settings" }),
-      h("button", { type: "button", class: "lg-btn lg-btn-primary", onclick: () => close(), text: "Done" }),
     ]),
     tabs,
     lookPane,
     propsPane,
+    // Done at the bottom, staying in view while the panel scrolls.
+    h("div", { class: "settings-foot" }, [h("button", { type: "button", class: "lg-btn lg-btn-primary", onclick: () => close(), text: "Done" })]),
   );
   panel.setAttribute("aria-labelledby", "settings-title");
   panel.hidden = true;

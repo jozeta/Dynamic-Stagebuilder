@@ -1,13 +1,15 @@
 // Shooter's eye through the stage: ‹ and › walk from the start position to shooting position 1, 2,
-// 3… (and back), at each one's eye height, facing and look angle; Play run walks the whole course,
-// pausing at every position. "Save view" stores where you're looking as that position's facing and
-// look angle. Keys: [ and ]. With no positions yet, the bar says how to add them.
+// 3… (and back) along the route drawn on the ground (bending at its grab points, standing on ramps
+// and platforms), at each one's eye height, facing and look angle; Play run walks the whole course,
+// pausing at every position. At a position, looking around saves the view to it (an undo step) when
+// you let go. Keys: [ and ]. With no positions yet, the bar says how to add them.
 import { h, icon } from "./dom.js";
 import { shootingPositions } from "../model/positions.js";
+import { routeLegs } from "../model/route.js";
 
 const PAUSE_MS = 1400;     // time at each position during Play run
 
-export function createEyeSteps({ editor, rig, bar, onViewing = () => {} }) {
+export function createEyeSteps({ editor, rig, bar, onViewing = () => {}, walking = () => true }) {
   let index = -1;                                    // −1 = the start position, else a shooting position
   let running = false;
   const label = h("span", { class: "eye-step-label", "aria-live": "polite", text: "Start" });
@@ -15,20 +17,28 @@ export function createEyeSteps({ editor, rig, bar, onViewing = () => {} }) {
   const next = h("button", { type: "button", class: "lg-btn lg-btn-ghost lg-btn-icon tool-text", "aria-label": "Next shooting position (])", title: "Next position (])", onclick: () => step(1) }, [icon("chevr")]);
   const run = h("button", { type: "button", class: "lg-btn lg-btn-ghost tool-text", "aria-pressed": "false", title: "Walk the whole run, start to the last position",
     onclick: () => (running ? stopRun() : playRun()) }, [icon("play"), "Play run"]);
-  const save = h("button", { type: "button", class: "lg-btn lg-btn-ghost tool-text", title: "Store where you're looking as this position's facing and look angle",
-    onclick: () => saveView() }, [icon("check"), "Save view"]);
   const hint = h("span", { class: "eye-step-hint", text: "Add shooting positions: Stage markings → Shooting position" });
-  const box = h("div", { class: "eye-steps", role: "group", "aria-label": "Shooting positions", hidden: true }, [prev, label, next, run, save, hint]);
+  const saved = h("span", { class: "eye-step-hint", text: "Look around: the view is saved" });
+  const box = h("div", { class: "eye-steps", role: "group", "aria-label": "Shooting positions", hidden: true }, [prev, label, next, run, saved, hint]);
   bar.append(box);
 
   const list = () => shootingPositions(editor.stage());
-  const viewOf = (i, ps) => (i < 0 ? rig.startView(editor.stage()) : rig.positionView(ps[i]));
+  const viewOf = (i, ps) => (i < 0 ? rig.startView(editor.stage()) : rig.positionView(ps[i], editor.stage()));
+  // The route between two neighbouring stops (−1 = the start), in walking order, or null.
+  function pathBetween(from, to, ps) {
+    const idOf = (i) => (i < 0 ? "start" : ps[i]?.id);
+    const legs = routeLegs(editor.stage());
+    const fwd = legs.find((l) => l.from === idOf(from) && l.to === idOf(to));
+    if (fwd) return fwd.points;
+    const back = legs.find((l) => l.from === idOf(to) && l.to === idOf(from));
+    return back ? [...back.points].reverse() : null;
+  }
   function describe(ps) {
     const has = ps.length > 0;
     for (const el of [prev, next, run]) el.disabled = !has;
     hint.hidden = has;
     label.hidden = !has;
-    save.hidden = index < 0 || !has;
+    saved.hidden = index < 0 || !has;
     if (index < 0) label.textContent = "Start";
     else {
       const o = ps[index];
@@ -36,13 +46,17 @@ export function createEyeSteps({ editor, rig, bar, onViewing = () => {} }) {
     }
   }
   // Walk to the current index (or jump there when not already in the shooter's eye).
+  let at = -1;                                       // where the camera is now
   async function go({ walk = true } = {}) {
     const ps = list();
     if (index >= ps.length) index = ps.length - 1;
     onViewing(index < 0 ? null : ps[index].id);
     describe(ps);
-    if (!walk) { if (index < 0) rig.preset("shooter", editor.stage()); else rig.viewFrom(ps[index]); return true; }
-    return rig.walkTo(viewOf(index, ps));
+    const from = at;
+    at = index;
+    // Play / Pause decides: playing walks the route, paused jumps straight to the position.
+    if (!walk || !walking()) { rig.jumpTo(viewOf(index, ps)); return true; }
+    return rig.walkTo(viewOf(index, ps), { path: pathBetween(from, index, ps), stage: editor.stage() });
   }
   function step(d) {
     stopRun();
@@ -78,10 +92,13 @@ export function createEyeSteps({ editor, rig, bar, onViewing = () => {} }) {
     const a = rig.currentAngles();
     editor.dispatch({ type: "setView", id: o.id, rotation: a.rotation, pitch: a.pitch });
   }
+  // Looking around at a position saves the view to it when you let go (not while walking a run).
+  rig.controls.addEventListener("end", () => { if (!box.hidden && index >= 0 && !running) saveView(); });
+
   return {
     step,
     /** The Shooter's eye button: back to the start and show the bar (with a hint if there are no positions). */
-    reset() { stopRun(); rig.stopWalk(); index = -1; box.hidden = false; go({ walk: false }); },
+    reset() { stopRun(); rig.stopWalk(); index = -1; at = -1; box.hidden = false; go({ walk: false }); },
     update() { if (!box.hidden) describe(list()); },
     hide() { stopRun(); rig.stopWalk(); box.hidden = true; onViewing(null); },
   };

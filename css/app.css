@@ -76,6 +76,9 @@ body { background: var(--lg-bg); overflow: hidden; }
 .side-head .panel-title { padding-right: 0; }
 .settings-head { padding-right: 44px; }
 .settings-tabs { display: flex; margin-bottom: var(--lg-space-m); }
+.settings-foot { position: sticky; bottom: calc(-1 * var(--lg-space-m)); display: flex; justify-content: flex-end; margin: var(--lg-space-m) calc(-1 * var(--lg-space-m)) calc(-1 * var(--lg-space-m));
+  padding: var(--lg-space-s) var(--lg-space-m); background: color-mix(in srgb, var(--lg-bg) 88%, transparent); border-top: 1px solid var(--lg-border); }
+.settings-foot .lg-btn { min-width: 96px; }
 .settings-tabs .lg-tab { flex: 1; }
 .vis-group { border: 1px solid var(--lg-border); border-radius: var(--lg-radius-control); padding: 6px 10px 8px; margin: 0 0 var(--lg-space-s); min-width: 0; }
 .vis-head { display: flex; align-items: center; justify-content: space-between; gap: var(--lg-space-s); width: 100%; padding: 0; float: left; min-height: 36px; }

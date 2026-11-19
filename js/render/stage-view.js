@@ -2,6 +2,7 @@
 // child, keyed by id; sync() rebuilds a child only when its JSON changed. Shared materials are never
 // disposed here; geometries (and label textures) are.
 import { buildProp, buildLine, buildStartMarker } from "./builders/index.js";
+import { buildRoute, routeKey } from "./builders/route.js";
 import { dimensionsOf, getProp } from "../model/props.js";
 
 const LABEL_GAP = 0.22;
@@ -43,6 +44,8 @@ export function createStageView(group, { labelFactory = null } = {}) {
     for (const o of stage.objects) { seen.add(o.id); put(o.id, JSON.stringify(o), () => place(o)); }
     for (const l of stage.lines) { seen.add(l.id); put(l.id, JSON.stringify(l), () => buildLine(l)); }
     if (stage.start) { seen.add("start"); put("start", JSON.stringify(stage.start), () => buildStartMarker(stage.start)); }
+    // The shooter's route (start → shooting positions), when there is one.
+    if (stage.objects.some((o) => o.type === "shooting-position")) { seen.add("route"); put("route", routeKey(stage), () => buildRoute(stage)); }
     for (const [id, { node }] of items) {
       if (seen.has(id)) continue;
       group.remove(node);

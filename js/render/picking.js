@@ -9,6 +9,7 @@ import * as THREE from "three";
 import { TransformControls } from "three/addons/controls/TransformControls.js";
 import { groundPoint, createDragTracker } from "./ground.js";
 import { yawDegrees } from "./rotation.js";
+import { insertIndex } from "../model/route.js";
 
 const TAP_PX = 6;
 
@@ -48,7 +49,17 @@ export function attachPicking({ engine, stageView, editor, cameraRig, canvas, on
     const hits = raycaster.intersectObject(engine.groups.stage, true);
     for (const h of hits) {
       const id = stageView.idFor(h.object);
-      if (id && id !== "start") return id;
+      if (id && id !== "start" && id !== "route") return id;
+    }
+    return null;
+  }
+  // The shooter's route under the pointer: a grab point's handle, or the line itself (and where).
+  function routeAt(e) {
+    setPointer(e);
+    for (const h of raycaster.intersectObject(engine.groups.stage, true)) {
+      if (h.object.userData.via) return { via: h.object.userData.via };
+      if (h.object.userData.routeLeg) return { leg: h.object.userData.routeLeg, point: [h.point.x, h.point.z] };
+      if (stageView.idFor(h.object) !== "route" && h.object.visible) return null;     // something else is in front
     }
     return null;
   }
@@ -60,6 +71,12 @@ export function attachPicking({ engine, stageView, editor, cameraRig, canvas, on
     const mode = editor.state.mode;
     press = { x: e.clientX, y: e.clientY, pointerId: e.pointerId, id: null, ground: groundAt(e), dragging: false, shift: e.shiftKey };
     if (mode === "select") {
+      const r = routeAt(e);
+      if (r) {                       // the route: drag a grab point, tap it to remove it, tap the line to add one
+        press.route = r;
+        cameraRig.controls.enabled = false;
+        return;
+      }
       press.id = objectAt(e);
       if (press.id) {
         cameraRig.controls.enabled = false;
@@ -71,6 +88,12 @@ export function attachPicking({ engine, stageView, editor, cameraRig, canvas, on
 
   canvas.addEventListener("pointermove", (e) => {
     if (!press) { if (editor.state.mode !== "select") onHover(groundAt(e)); return; }
+    if (press.route?.via && e.pointerId === press.pointerId) {
+      const moved = Math.hypot(e.clientX - press.x, e.clientY - press.y) > TAP_PX;
+      if (!press.dragging && moved) { press.dragging = true; editor.dispatch({ type: "viaDragStart", ...press.route.via }); }
+      if (press.dragging) { const g = groundAt(e); if (g) editor.dispatch({ type: "viaDragMove", point: g }); }
+      return;
+    }
     if (e.pointerId !== press.pointerId || !press.id || !press.ground) return;
     const moved = Math.hypot(e.clientX - press.x, e.clientY - press.y) > TAP_PX;
     if (!press.dragging && moved) {
@@ -92,6 +115,13 @@ export function attachPicking({ engine, stageView, editor, cameraRig, canvas, on
     const p = press;
     press = null;
     cameraRig.controls.enabled = true;
+    if (p.route) {
+      if (p.dragging) { editor.dispatch({ type: "viaDragEnd" }); return; }
+      if (Math.hypot(e.clientX - p.x, e.clientY - p.y) > TAP_PX || e.type === "pointercancel") return;
+      if (p.route.via) editor.dispatch({ type: "removeVia", ...p.route.via });
+      else editor.dispatch({ type: "addVia", id: p.route.leg.to, index: insertIndex(p.route.leg.points, p.route.point), point: p.route.point });
+      return;
+    }
     if (p.dragging) { editor.dispatch({ type: "dragEnd" }); return; }
     const tap = Math.hypot(e.clientX - p.x, e.clientY - p.y) <= TAP_PX;
     if (!tap || e.type === "pointercancel") return;

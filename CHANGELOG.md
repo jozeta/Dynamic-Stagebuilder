@@ -4,6 +4,16 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- **The shooter's route:** a dashed line with arrows on the ground runs from the start through the
+  shooting positions, lying on ramps, platforms and step boxes. Click the line to add a grab
+  point; drag one to reshape the route; click one to remove it (each an undo step, saved with the
+  stage). Shooter's eye walks along the route, up and down ramps.
+- **Play / Pause** also decides how Shooter's eye moves: playing walks between positions, paused
+  jumps. It shows whenever the stage has shooting positions.
+- At a shooting position in Shooter's eye, looking around saves the view to that position when you
+  let go (no Save view button needed).
+- Settings: *Done* moved to the bottom of the panel and stays in view.
+
 - **Shooter's eye walks the run:** stepping between the start and the shooting positions now walks
   the camera from one to the next (turning the short way, changing eye height with the stance),
   and *Play run* walks the whole course, pausing at every position. Grab the view to stop. The

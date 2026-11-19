@@ -235,7 +235,10 @@ appears once something is animated) starts and stops all of them together.
 shooter shoots from; they are numbered 1, 2, 3…. In the inspector set the stance (standing,
 crouching, kneeling, sitting, prone), the facing and the look up/down angle. Click *Shooter's eye*:
 the arrows under the view buttons (or [ and ]) walk the camera from the start to each position,
-at that stance's eye height, and *Play run* walks the whole course, pausing at each position. Look around and press *Save view* to store the facing and angle.
+at that stance's eye height, and *Play run* walks the whole course, pausing at each position. A dashed line on the ground shows the route between them: click it to add a grab point, drag a
+grab point to reshape the route, click one to remove it. The walk follows the route over the
+ground, ramps and platforms; with *Pause* on, the camera jumps instead. At a position, look around
+and let go: that view is saved to the position.
 
 **Number targets.** Targets are numbered as you place them: T1… for paper, P1… for steel, NS1… for
 a lone no-shoot (an array with a target is one T label; its targets and no-shoots all count in the

@@ -17,6 +17,12 @@ const BRIEFING_TEXT = ["matchName", "designer", "startSignal", "startPosition", 
 const LINE_MIN = { "fault-line": 2, "shooting-area": 3 };
 const clampNum = (v, min, max) => Math.min(max, Math.max(min, v));
 
+// A copy of the stage with one shooting position's grab points changed by fn(via) (at most 50).
+function withVia(stage, id, fn) {
+  return { ...stage, objects: stage.objects.map((o) => (o.id === id && o.type === "shooting-position"
+    ? { ...o, via: fn(o.via || []).slice(0, 50).map((p) => [Math.round(p[0] * 1000) / 1000, Math.round(p[1] * 1000) / 1000]) } : o)) };
+}
+
 export function createEditor({ stage = createStage(), onChange = () => {} } = {}) {
   const state = { history: createHistory(assignLabels(stage)), selection: [], mode: "select", drag: null };
   const present = () => state.history.present;
@@ -160,6 +166,21 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
     // Your own surroundings: building pieces leave the stage for the template, or come back to edit.
     takeBuilding() { edit(takeBuildingPieces(present()).stage); state.selection = []; },
     putBackBuilding({ pieces }) { edit(putBackPieces(present(), pieces)); },
+    // The shooter's route: grab points on the stretch leading to a shooting position.
+    addVia({ id, index, point }) { edit(withVia(present(), id, (v) => [...v.slice(0, index), clampToBay(point, present().bay), ...v.slice(index)])); },
+    removeVia({ id, index }) { edit(withVia(present(), id, (v) => v.filter((_, i) => i !== index))); },
+    viaDragStart({ id, index }) { state.drag = { base: state.history, via: { id, index } }; },
+    viaDragMove({ point }) {
+      if (!state.drag?.via) return;
+      const { id, index } = state.drag.via, base = state.drag.base.present;
+      state.history = replacePresent(state.drag.base, withVia(base, id, (v) => v.map((p, i) => (i === index ? clampToBay(point, base.bay) : p))));
+    },
+    viaDragEnd() {
+      if (!state.drag?.via) return;
+      const { base } = state.drag;
+      state.drag = null;
+      state.history = state.history.present !== base.present ? commit(base, state.history.present) : base;
+    },
     // Shooter's eye → Save view: the facing and look angle of a shooting position, one undo step.
     setView({ id, rotation, pitch }) {
       const o = present().objects.find((x) => x.id === id);

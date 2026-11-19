@@ -569,6 +569,9 @@ const specs = {
   "noshoot-head-mini": card(NOSHOOT_INK, "head", "mini"),
   "panel-grey": () => mapped(steelSheet, 0xc9ced2, { roughness: 0.55, metalness: 0.12 }),
   "card-edge": () => std({ color: 0x8b6a45, roughness: 1 }),
+  "route-line": () => new THREE.MeshBasicMaterial({ color: 0x2f7bff, side: THREE.DoubleSide, transparent: true, opacity: 0.95, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4 }),
+  "route-handle": () => std({ color: 0xffffff, emissive: 0x2f7bff, emissiveIntensity: 0.5, roughness: 0.4 }),
+  "route-pick": () => new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false, side: THREE.DoubleSide }),
   "position-ring": () => new THREE.MeshBasicMaterial({ color: 0x2f7bff, side: THREE.DoubleSide, transparent: true, opacity: 0.9, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4 }),
   "position-ghost": () => new THREE.MeshStandardMaterial({ color: 0x4d8dff, transparent: true, opacity: 0.32, roughness: 0.6, depthWrite: false }),
   // Building pieces.

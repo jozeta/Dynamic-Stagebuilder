@@ -82,9 +82,16 @@ export function validateStage(json) {
       params[k] = v;
     }
     const label = o.label === null || o.label === undefined ? null : str(o.label, `${path}.label`, LIMITS.label);
+    // A shooting position's grab points on the route that leads to it.
+    let via;
+    if (o.type === "shooting-position" && o.via !== undefined) {
+      if (!Array.isArray(o.via) || o.via.length > 50) err(`${path}.via`, "must be a list of at most 50 points");
+      else via = o.via.map((p, j) => inBay(p, `${path}.via[${j}]`));
+    }
     return {
       id: id(o.id, `${path}.id`), type: o.type, label, labelManual: o.labelManual === true,
       position: inBay(o.position, `${path}.position`), rotation: num(o.rotation, `${path}.rotation`, -1e6, 1e6), params,
+      ...(via ? { via } : {}),
     };
   });
 
