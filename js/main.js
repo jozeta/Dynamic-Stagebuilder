@@ -27,6 +27,7 @@ import { createProjects } from "./ui/projects.js";
 import { makeCollapsible, makeResizable } from "./ui/panels.js";
 import { createHelp } from "./ui/help.js";
 import { createAnimator } from "./render/animate.js";
+import { fadeFigures } from "./render/figure-fade.js";
 import { createSurroundings } from "./ui/surroundings.js";
 import { takeBuildingPieces } from "./model/surroundings.js";
 import { libraryStage } from "./model/stage-library.js";
@@ -77,7 +78,8 @@ function animationFrame() {
   animator.update((performance.now() - animStart) / 1000);
   engine.requestRender();
 }
-engine.onRender(animationFrame);       // bumped when your own surroundings change, so the 3D view rebuilds them
+engine.onRender(animationFrame);
+engine.onRender(() => fadeFigures(engine.groups.stage, engine.camera));   // figures fade as the camera comes close       // bumped when your own surroundings change, so the 3D view rebuilds them
 
 function render(state) {
   const stage = state.history.present;

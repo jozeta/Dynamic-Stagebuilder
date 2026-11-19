@@ -4,6 +4,9 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Figures (at the start and the shooting positions) fade out as the camera comes close and are
+  gone when it is inside one, so Shooter's eye never looks out from inside a body.
+
 - The start position has the shooter in it, posed as the briefing's start position says (wrists
   above the shoulders, arms hanging, hands on the head, palms on the wall, seated, kneeling), with
   the pistol in a holster on the belt unless it starts on a table or in a case; "facing up range"

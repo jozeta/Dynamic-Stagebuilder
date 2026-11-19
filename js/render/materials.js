@@ -673,3 +673,15 @@ export function getMaterial(name) {
 }
 
 export const materials = { get: getMaterial };
+
+// The see-through grey of the figures at fade step `level` of `levels` (shared, made once each).
+const ghosts = new Map();
+export function ghostAt(level, levels) {
+  if (level >= levels) return getMaterial("position-ghost");
+  if (!ghosts.has(level)) {
+    const m = getMaterial("position-ghost").clone();
+    m.opacity *= level / levels;
+    ghosts.set(level, m);
+  }
+  return ghosts.get(level);
+}

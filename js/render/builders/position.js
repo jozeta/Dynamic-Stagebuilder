@@ -4,7 +4,7 @@
 // one merged mesh drawn after a depth-only pass, so only its outer surface shows, as one even
 // translucent grey. It casts no shadow.
 import * as THREE from "three";
-import { STANCES, MARKER_RADIUS, positionSize } from "../../model/positions.js";
+import { STANCES, MARKER_RADIUS, positionSize, partsSize } from "../../model/positions.js";
 import { getMaterial } from "../materials.js";
 import { group } from "./parts.js";
 
@@ -76,6 +76,7 @@ export function figureMeshes(parts) {
   depth.renderOrder = 1;
   skin.renderOrder = 2;
   for (const m of [depth, skin]) { m.castShadow = false; m.receiveShadow = false; }
+  skin.userData.fade = { depth, height: partsSize(parts).h };      // render/figure-fade.js
   return [depth, skin];
 }
 

@@ -242,3 +242,17 @@ export function stepFrom(pos, rotation, dir, step = STEP) {
   const v = { forward: f, back: [-f[0], -f[1]], left: l, right: [-l[0], -l[1]] }[dir];
   return v ? [pos[0] + v[0] * step, pos[1] + v[1] * step] : null;
 }
+
+/** How close the camera is to a figure standing at [x, z], `height` tall: metres to its upright axis. */
+export function distanceToFigure(eye, at, height) {
+  const across = Math.hypot(eye[0] - at[0], eye[2] - at[1]);
+  const up = eye[1] > height ? eye[1] - height : eye[1] < 0 ? -eye[1] : 0;
+  return Math.hypot(across, up);
+}
+export const FADE_LEVELS = 12;        // the fade is drawn in this many steps of see-through
+const FADE_NEAR = 0.4, FADE_FAR = 1.3;
+/** A figure's visibility (0 gone – 1 shown) at that distance: gone within 0.4 m, full from 1.3 m. */
+export function figureFade(d) {
+  const t = Math.min(1, Math.max(0, (d - FADE_NEAR) / (FADE_FAR - FADE_NEAR)));
+  return t * t * (3 - 2 * t);
+}

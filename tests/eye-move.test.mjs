@@ -42,3 +42,17 @@ test("a remembered camera view is used only if it is well formed", () => {
     assert.equal(cleanCameraView(bad), null, JSON.stringify(bad));
   }
 });
+
+test("a figure fades out as the camera comes close, and is gone inside it", async () => {
+  const { figureFade, distanceToFigure, FADE_LEVELS } = await import("../js/model/positions.js");
+  assert.equal(figureFade(0), 0);
+  assert.equal(figureFade(0.3), 0, "inside or touching: gone");
+  assert.equal(figureFade(2), 1, "a step away: fully shown");
+  const mid = figureFade(0.8);
+  assert.ok(mid > 0 && mid < 1);
+  for (let d = 0; d < 2; d += 0.05) assert.ok(figureFade(d + 0.05) >= figureFade(d), "fades smoothly with distance");
+  assert.equal(distanceToFigure([0, 1.6, 0], [0, 0], 1.8), 0, "the eye at his head: inside");
+  assert.ok(Math.abs(distanceToFigure([3, 1, 4], [0, 0], 1.8) - 5) < 1e-9, "beside him: across");
+  assert.ok(Math.abs(distanceToFigure([0, 3.8, 0], [0, 0], 1.8) - 2) < 1e-9, "above his head");
+  assert.ok(FADE_LEVELS >= 8, "enough steps that the fade looks smooth");
+});
