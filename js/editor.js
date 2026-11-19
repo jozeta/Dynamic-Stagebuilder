@@ -8,6 +8,7 @@ import { assignLabels, renumber, setLabel } from "./model/numbering.js";
 import { fitStand, arrayCounts, arrayExtent } from "./model/arrays.js";
 import { takeBuildingPieces, putBackPieces } from "./model/surroundings.js";
 import { snapPoint, snapAngle, clampToBay } from "./model/snap.js";
+import { isRect, insideBay } from "./model/bay.js";
 import { getProp } from "./model/props.js";
 import { snapToObjects, SNAP_RADIUS } from "./model/objsnap.js";
 import { cleanLook, lookDefaults, lookAfterSwitch } from "./model/look.js";
@@ -80,7 +81,13 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
       dx = Math.min(Math.max(dx, -half - x), half - x);
       dz = Math.min(Math.max(dz, -z), base.bay.depth - z);
     }
-    return [dx, dz];
+    if (isRect(base.bay)) return [dx, dz];
+    // A shaped bay: shorten the move until every point stays on the floor (the group as a whole).
+    const fits = (k) => pts.every(([x, z]) => insideBay([x + dx * k, z + dz * k], base.bay));
+    if (fits(1)) return [dx, dz];
+    let lo = 0, hi = 1;
+    for (let i = 0; i < 16; i++) { const mid = (lo + hi) / 2; if (fits(mid)) lo = mid; else hi = mid; }
+    return [dx * lo, dz * lo];
   }
 
   function moved(base, ids, rawDelta, fine = false) {
@@ -104,6 +111,8 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
   function keepEnvironment(step) {
     const { environment: env, look } = present().settings;
     state.history = step(state.history);
+    // A match's name and stage number belong to the match, not the undo history.
+    if (state.matchFields) state.history = replacePresent(state.history, setBriefing(present(), state.matchFields));
     if (present().settings.environment !== env) state.history = replacePresent(state.history, setSetting(present(), "environment", env));
     if (present().settings.look !== look) state.history = replacePresent(state.history, setSetting(present(), "look", look));
     state.selection = pruneSelection(state.selection, present());
@@ -314,6 +323,11 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
         else if (k === "stageType") { if (STAGE_TYPES.includes(v)) clean[k] = v; }
         else if (BRIEFING_TEXT.includes(k)) clean[k] = String(v ?? "").slice(0, 4000);
       }
+      // Typed by hand: an ordinary edit again (undo covers it), no longer kept for the match.
+      if (state.matchFields) {
+        const rest = Object.fromEntries(Object.entries(state.matchFields).filter(([k]) => !(k in clean)));
+        state.matchFields = Object.keys(rest).length ? rest : null;
+      }
       edit(setBriefing(present(), clean));
     },
     rename({ name }) { edit({ ...present(), name: String(name ?? "").trim().slice(0, 120) || "Untitled stage" }); },
@@ -330,7 +344,16 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
         start: s.start && { ...s.start, position: clampToBay(s.start.position, bay) } };
       edit(s);
     },
+    // The open stage's match name and number, written by its match: no undo step, and undo keeps them.
+    applyMatch({ patch }) {
+      const clean = {};
+      if (typeof patch.matchName === "string") clean.matchName = patch.matchName.slice(0, 4000);
+      if (Number.isFinite(patch.stageNumber)) clean.stageNumber = clampNum(Math.round(patch.stageNumber), 0, 999);
+      state.matchFields = { ...state.matchFields, ...clean };
+      state.history = replacePresent(state.history, setBriefing(present(), clean));
+    },
     load({ stage }) {
+      state.matchFields = null;
       state.history = createHistory(assignLabels(stage));
       state.selection = [];
       state.mode = "select";

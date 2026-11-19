@@ -123,7 +123,7 @@ export function createInspector(root, { editor }) {
   }
 
   // Align and spread buttons for two or more selected props, and mirror.
-  const ARRANGE = [["left", "alignl", "Align left edges (shooter's right)"], ["centre-x", "alignc", "Centre across"], ["right", "alignr", "Align right (shooter's left)"],
+  const ARRANGE = [["left", "alignl", "Line up on the shooter's left"], ["centre-x", "alignc", "Centre across"], ["right", "alignr", "Line up on the shooter's right"],
     ["front", "alignf", "Align fronts (nearest the shooter)"], ["back", "alignb", "Align backs"]];
   function arrangeTools(count) {
     return h("div", { class: "lg-stack arrange" }, [

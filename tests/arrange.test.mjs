@@ -50,10 +50,10 @@ test("mirroring a selection flips it about its own centre and swaps hinge sides"
   assert.equal(m.objects[1].params.hinge, "right");
 });
 
-test("align lines props up by their left, centre or right (x) or front, middle or back (z)", () => {
+test("align lines props up on the shooter's left, centre or right (x) or front, middle or back (z)", () => {
   const { s, ids } = three();
-  assert.deepEqual(alignObjects(s, ids, "left").objects.map((o) => o.position[0]), [-4, -4, -4]);
-  assert.deepEqual(alignObjects(s, ids, "right").objects.map((o) => o.position[0]), [5, 5, 5]);
+  assert.deepEqual(alignObjects(s, ids, "left").objects.map((o) => o.position[0]), [5, 5, 5], "the shooter's left is + x");
+  assert.deepEqual(alignObjects(s, ids, "right").objects.map((o) => o.position[0]), [-4, -4, -4]);
   assert.deepEqual(alignObjects(s, ids, "front").objects.map((o) => o.position[1]), [6, 6, 6], "front = up range, nearest the shooter");
   assert.deepEqual(alignObjects(s, ids, "back").objects.map((o) => o.position[1]), [14, 14, 14]);
   assert.deepEqual(alignObjects(s, ids, "centre-x").objects.map((o) => o.position[0]), [0.5, 0.5, 0.5]);
@@ -72,7 +72,7 @@ test("the editor's arrange actions skip locked props and are one undo step each"
   for (const p of [[-4, 6], [1, 9], [5, 14]]) ed.dispatch({ type: "place", propType: "paper-ipsc", position: p });
   const ids = ed.stage().objects.map((o) => o.id);
   ed.dispatch({ type: "setLocked", ids: [ids[1]], locked: true });
-  ed.dispatch({ type: "align", ids, edge: "left" });
+  ed.dispatch({ type: "align", ids, edge: "right" });
   assert.deepEqual(ed.stage().objects.map((o) => o.position[0]), [-4, 1, -4]);
   ed.dispatch({ type: "undo" });
   assert.deepEqual(ed.stage().objects.map((o) => o.position[0]), [-4, 1, 5]);

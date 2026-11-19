@@ -61,3 +61,15 @@ export function cleanMatch(v) {
   const num = (x) => (typeof x === "number" && Number.isFinite(x) ? x : 0);
   return { kind: "match", id: v.id, name: (typeof v.name === "string" ? v.name.trim() : "").slice(0, NAME_MAX) || "Match", stageIds: ids, created: num(v.created), modified: num(v.modified) };
 }
+
+/** Stage ids in matches other than this one: Map(stageId → that match's name). */
+export function inOtherMatches(matches, matchId) {
+  const out = new Map();
+  for (const m of matches) if (m.id !== matchId) for (const id of m.stageIds) if (!out.has(id)) out.set(id, m.name);
+  return out;
+}
+
+/** A deleted stage leaves every match it was in: the changed matches (renumbered by their order). */
+export function dropStageEverywhere(matches, stageId, now = Date.now()) {
+  return matches.filter((m) => m.stageIds.includes(stageId)).map((m) => removeStage(m, stageId, now));
+}

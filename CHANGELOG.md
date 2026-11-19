@@ -4,6 +4,16 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Fix: the app no longer hangs at start-up when an older copy is open in another tab or window; it
+  says to close the other copies (and a newer copy opened elsewhere reloads this one).
+- Fix: *Line up on the shooter's left / right* went the wrong way.
+- Fix: mirroring now also swaps no-shoots over one side and left/right half hard cover.
+- Fix: a share link pasted into a tab where the app is open now opens the stage.
+- Fix: a stage can be in one match only; *Add stages you made…* shows the match a stage is already in.
+- Fix: a match's name and stage number on the open stage are no longer undo steps (Undo keeps them).
+- Fix: deleting a project takes it out of its match and renumbers the stages after it.
+- Fix: dragging a group in a shaped bay stops the group as a whole at the floor's edge.
+
 ## 0.5.0 (2026-11-19)
 
 - Safety distances: select a paper or steel target and switch on *Show safety distances* to draw the

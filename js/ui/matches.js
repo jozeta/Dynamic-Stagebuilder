@@ -4,7 +4,7 @@
 // The stages stay ordinary projects; each one in the match gets its name and number in the briefing.
 // Names come from storage and are only ever shown with textContent.
 import { h, icon } from "./dom.js";
-import { createMatch, addStages, removeStage, moveStage, renameMatch, briefingFor, matchSummary, cleanMatch } from "../model/match.js";
+import { createMatch, addStages, removeStage, moveStage, renameMatch, briefingFor, matchSummary, cleanMatch, inOtherMatches } from "../model/match.js";
 import { sortProjects } from "../storage/projects.js";
 
 export function createMatches({ store, currentId, onOpen, onNewStage, onApplyBriefing, onPrint, onExport = () => {}, onViewChange = () => {}, onChanged = async () => {} }) {
@@ -102,9 +102,13 @@ export function createMatches({ store, currentId, onOpen, onNewStage, onApplyBri
     let picker = null;
     if (adding) {
       const others = records.filter((r) => !m.stageIds.includes(r.id));
+      // A stage belongs to one match (its briefing carries that match's name and number).
+      const taken = inOtherMatches(await listMatches(), m.id);
       const checks = others.map((r) => {
-        const cb = h("input", { type: "checkbox", value: r.id, id: `add-${r.id}` });
-        return h("label", { class: "vis-item", for: `add-${r.id}` }, [cb, h("span", { text: r.name || "Untitled stage" })]);
+        const inMatch = taken.get(r.id);
+        const cb = h("input", { type: "checkbox", value: r.id, id: `add-${r.id}`, disabled: Boolean(inMatch) });
+        return h("label", { class: `vis-item${inMatch ? " is-taken" : ""}`, for: `add-${r.id}` }, [cb,
+          h("span", { text: r.name || "Untitled stage" }), inMatch ? h("span", { class: "lg-muted proj-meta", text: ` · in ${inMatch}` }) : null]);
       });
       picker = h("fieldset", { class: "vis-group match-picker" }, [
         h("legend", { class: "vis-head" }, [h("span", { class: "vis-name", text: "Add stages you already made" })]),
@@ -114,7 +118,7 @@ export function createMatches({ store, currentId, onOpen, onNewStage, onApplyBri
             const ids = [...picker.querySelectorAll("input:checked")].map((c) => c.value);
             adding = false;
             await update(addStages(m, ids));
-          }, "lg-btn lg-btn-primary", null, { disabled: !checks.length }),
+          }, "lg-btn lg-btn-primary", null, { disabled: !others.some((r) => !taken.has(r.id)) }),
           btn("Cancel", async () => { adding = false; await fill(); }),
         ]),
       ]);

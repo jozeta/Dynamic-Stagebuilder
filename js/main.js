@@ -22,6 +22,7 @@ import { createStage } from "./model/stage.js";
 import { validateStage } from "./model/schema.js";
 import { openStore, memoryStore } from "./storage/db.js";
 import { decodeShare, encodeShare, shareHash, MAX_LINK } from "./storage/share.js";
+import { cleanMatch, briefingFor, dropStageEverywhere } from "./model/match.js";
 import { projectRecord, sortProjects, nextProjectAfterDelete } from "./storage/projects.js";
 import { exportFileName, stageToJson, matchToJson, matchFileName } from "./storage/files.js";
 
@@ -384,6 +385,26 @@ const freshStage = () => {
   return { ...s, settings: { ...s.settings, environment: cur.environment, look: cur.look } };
 };
 
+// A match writes its name and the stage's number into the stage's briefing. The open stage gets it
+// through the editor (so autosave keeps it); others in their saved record. With onlyIf, only when
+// the stage still carries that match name (taking it out of a match).
+async function applyBriefing(id, patch, { onlyIf = null } = {}) {
+  if (!patch) return;
+  if (id === editor.stage().id) {
+    const b = editor.stage().briefing;
+    if (onlyIf !== null && b.matchName !== onlyIf) return;
+    if (Object.entries(patch).every(([k, v]) => b[k] === v)) return;
+    editor.dispatch({ type: "applyMatch", patch });          // not an undo step
+    return;
+  }
+  const rec = await store.get(id);
+  if (!rec) return;
+  const b = rec.stage.briefing || {};
+  if (onlyIf !== null && b.matchName !== onlyIf) return;
+  if (Object.entries(patch).every(([k, v]) => b[k] === v)) return;
+  await store.put({ ...rec, modified: Date.now(), stage: { ...rec.stage, briefing: { ...b, ...patch } } });
+}
+
 let dock = null;                   // the side panels' dock (Låda Glass), set up below
 const projects = createProjects({
   onOpenLibrary: (spec) => addProject(withView(libraryStage(spec))),
@@ -399,25 +420,7 @@ const projects = createProjects({
   },
   // A new stage made from a match's page: saved and opened like New stage; its id goes in the match.
   onNewStage: async () => { const st = freshStage(); await addProject(st); return st.id; },
-  // A match writes its name and the stage's number into the stage's briefing. The open stage gets it
-  // through the editor (so autosave keeps it); others in their saved record. With onlyIf, only when
-  // the stage still carries that match name (taking it out of a match).
-  onApplyBriefing: async (id, patch, { onlyIf = null } = {}) => {
-    if (!patch) return;
-    if (id === editor.stage().id) {
-      const b = editor.stage().briefing;
-      if (onlyIf !== null && b.matchName !== onlyIf) return;
-      if (Object.entries(patch).every(([k, v]) => b[k] === v)) return;
-      editor.dispatch({ type: "setBriefing", patch });
-      return;
-    }
-    const rec = await store.get(id);
-    if (!rec) return;
-    const b = rec.stage.briefing || {};
-    if (onlyIf !== null && b.matchName !== onlyIf) return;
-    if (Object.entries(patch).every(([k, v]) => b[k] === v)) return;
-    await store.put({ ...rec, modified: Date.now(), stage: { ...rec.stage, briefing: { ...b, ...patch } } });
-  },
+  onApplyBriefing: applyBriefing,
   // Print a match: a cover page, then each stage's brief page (the open stage as it is now).
   onPrintMatch: (match, stages) => {
     const now = stages.map((st) => (st.id === editor.stage().id ? editor.stage() : st));
@@ -440,6 +443,11 @@ const projects = createProjects({
     if (open) { autosave.cancel(); autosave.markSaved(editor.stage()); }   // no pending save may bring it back
     const all = await store.list();
     await store.remove(id);
+    // It leaves every match it was in; the stages after it move up a number.
+    for (const m of dropStageEverywhere((await store.matches.list()).map(cleanMatch).filter(Boolean), id)) {
+      await store.matches.put(m);
+      for (const sid of m.stageIds) await applyBriefing(sid, briefingFor(m, sid));
+    }
     if (!open) return;
     const next = nextProjectAfterDelete(all, id);
     if (!(next && await openProject(next))) await addProject(freshStage());
@@ -589,6 +597,18 @@ rig.controls.addEventListener("change", () => { clearTimeout(viewTimer); viewTim
 addEventListener("pagehide", keepView);
 rig.preset("iso", editor.stage());
 
+// A share link (#stage=…) opens its stage as a new project, and the link leaves the address bar.
+// true when it opened one.
+async function openSharedLink() {
+  const shared = await decodeShare(location.hash);
+  if (!shared) return false;
+  history.replaceState(null, "", location.pathname + location.search);
+  if (!shared.ok) { globalThis.LadaGlass?.toast?.(shared.error, { type: "bad", duration: 8000 }); return false; }
+  await addProject(shared.stage);
+  globalThis.LadaGlass?.toast?.(`Opened the shared stage "${shared.stage.name}" as a new project.`, { type: "ok" });
+  return true;
+}
+
 // Open the last project, else the newest, else save the example stage as the first project.
 (async () => {
   try { store = await openStore(); } catch (err) { console.warn(err); store = memoryStore(); }
@@ -600,15 +620,9 @@ rig.preset("iso", editor.stage());
   const last = recall();
   const pick = all.find((r) => r.id === last) ?? all[0];
   // A share link (#stage=…) opens its stage as a new project; the link leaves the address bar.
-  const shared = await decodeShare(location.hash);
-  if (shared) history.replaceState(null, "", location.pathname + location.search);
-  if (shared?.ok) {
-    await addProject(shared.stage);
-    globalThis.LadaGlass?.toast?.(`Opened the shared stage "${shared.stage.name}" as a new project.`, { type: "ok" });
-  } else {
-    if (shared) globalThis.LadaGlass?.toast?.(shared.error, { type: "bad", duration: 8000 });
-    if (!(pick && await openProject(pick.id))) await addProject(demoStage());
-  }
+  if (!(await openSharedLink()) && !(pick && await openProject(pick.id))) await addProject(demoStage());
+  // A share link pasted into this tab while it is open changes only the hash: open it too.
+  addEventListener("hashchange", () => { openSharedLink(); });
   viewReady = true;                        // from now on the camera belongs to an opened project
   syncDockTabs();                          // a Settings or Projects tab still shown after a reload is filled in
 })();

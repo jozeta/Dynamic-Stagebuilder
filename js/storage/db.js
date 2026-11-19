@@ -22,7 +22,13 @@ export async function openStore() {
     if (!names.contains(SURROUNDINGS)) open.result.createObjectStore(SURROUNDINGS, { keyPath: "id" });
     if (!names.contains(MATCHES)) open.result.createObjectStore(MATCHES, { keyPath: "id" });
   };
-  const db = await done(open);
+  // An older copy of the app open in another tab or window keeps the old version: say so instead of
+  // waiting for ever (main.js then works unsaved and tells the user).
+  open.onblocked = () => { const e = new Error("Close the other Dynamic-Stagebuilder tabs or windows, then reload."); e.name = "BlockedError"; open.onsuccess = () => open.result.close(); rejectBlocked(e); };
+  let rejectBlocked = () => {};
+  const db = await new Promise((resolve, reject) => { rejectBlocked = reject; done(open).then(resolve, reject); });
+  // A newer copy opened elsewhere asks to upgrade: let it (this tab reloads to use it).
+  db.onversionchange = () => { db.close(); globalThis.location?.reload?.(); };
   try { await navigator.storage?.persist?.(); } catch { /* optional */ }
   const tx = (mode, store = STORE) => db.transaction(store, mode).objectStore(store);
   return {

@@ -3,6 +3,15 @@
 const r3 = (v) => Math.round(v * 1000) / 1000 + 0;          // + 0 turns −0 into 0
 const norm = (deg) => ((Math.round(deg) % 360) + 360) % 360;
 const SWAP = { left: "right", right: "left" };
+// Left/right parameter values that a mirror swaps: door hinges, no-shoots over one side, side hard cover.
+const MIRRORED = { "ns-left": "ns-right", "ns-right": "ns-left", "left-1/2": "right-1/2", "right-1/2": "left-1/2" };
+const PARAM_SWAPS = { hinge: SWAP, presentation: MIRRORED, hardCover: MIRRORED };
+function mirroredParams(params) {
+  if (!params) return params;
+  let out = params;
+  for (const [k, map] of Object.entries(PARAM_SWAPS)) if (map[params[k]]) out = { ...out, [k]: map[params[k]] };
+  return out;
+}
 
 /**
  * Mirror left to right. With ids null or empty: the whole stage about the bay centre (x = 0), with
@@ -23,7 +32,7 @@ export function mirrorStage(stage, ids, skip = new Set()) {
   const fx = (x) => r3(2 * c - x);
   const objects = stage.objects.map((o) => {
     if (!takes(o.id)) return o;
-    const params = o.params && SWAP[o.params.hinge] ? { ...o.params, hinge: SWAP[o.params.hinge] } : o.params;
+    const params = mirroredParams(o.params);
     return { ...o, position: [fx(o.position[0]), o.position[1]], rotation: norm(-o.rotation), params,
       ...(o.via ? { via: o.via.map(([x, z]) => [fx(x), z]) } : {}) };
   });
@@ -34,7 +43,8 @@ export function mirrorStage(stage, ids, skip = new Set()) {
 }
 
 const EDGES = {
-  left: [0, (v) => Math.min(...v)], "centre-x": [0, (v) => (Math.min(...v) + Math.max(...v)) / 2], right: [0, (v) => Math.max(...v)],
+  // + x is the shooter's left: "left" lines up on the largest x, "right" on the smallest.
+  left: [0, (v) => Math.max(...v)], "centre-x": [0, (v) => (Math.min(...v) + Math.max(...v)) / 2], right: [0, (v) => Math.min(...v)],
   front: [1, (v) => Math.min(...v)], "middle-z": [1, (v) => (Math.min(...v) + Math.max(...v)) / 2], back: [1, (v) => Math.max(...v)],
 };
 export const ALIGN_EDGES = Object.keys(EDGES);
