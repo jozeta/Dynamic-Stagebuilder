@@ -86,14 +86,19 @@ export function buildShootingPosition(obj) {
   const ring = new THREE.Mesh(new THREE.RingGeometry(MARKER_RADIUS - 0.07, MARKER_RADIUS, 40), getMaterial("position-ring"));
   ring.rotation.x = -Math.PI / 2;
   ring.position.y = 0.0015;
+  ring.userData.runPart = "mark";               // Settings → View can hide the marks
   g.add(ring);
   // The facing: a small chevron on the ring's rim.
   const arrow = new THREE.Shape([new THREE.Vector2(0, -0.47), new THREE.Vector2(0.09, -0.36), new THREE.Vector2(0, -0.39), new THREE.Vector2(-0.09, -0.36)]);
   const a = new THREE.Mesh(new THREE.ShapeGeometry(arrow), getMaterial("position-ring"));
   a.rotation.x = -Math.PI / 2;                     // shape −y → world +z: points the way the shooter faces
   a.position.y = 0.002;
+  a.userData.runPart = "mark";
   g.add(a);
-  g.add(...figureMeshes(st.parts));
+  const man = new THREE.Group();
+  man.userData.runPart = "figure";              // …and the figures
+  man.add(...figureMeshes(st.parts));
+  g.add(man);
   g.userData.size = positionSize(st.id);
   return g;
 }

@@ -31,7 +31,9 @@ import { fadeFigures } from "./render/figure-fade.js";
 import { createSurroundings } from "./ui/surroundings.js";
 import { takeBuildingPieces } from "./model/surroundings.js";
 import { libraryStage } from "./model/stage-library.js";
-import { loadHidden, saveHidden, loadView, saveView, loadWalkSpeed, saveWalkSpeed } from "./ui/prefs.js";
+import { loadHidden, saveHidden, loadView, saveView, loadWalkSpeed, saveWalkSpeed, loadRunLook, saveRunLook } from "./ui/prefs.js";
+import { withRunPart } from "./model/run-look.js";
+import { setRunLook } from "./render/materials.js";
 import { walkSpeed } from "./model/route.js";
 import { activationLinks } from "./model/activation.js";
 import { createAutosave } from "./storage/autosave.js";
@@ -58,6 +60,8 @@ function showViewportError(err) {
 const view = createStageView(engine.groups.stage, { labelFactory: createLabel });
 const rig = createCameraRig(engine, canvas);
 let speed = loadWalkSpeed();                     // Shooter's eye walking speed (per browser)
+let runLook = loadRunLook();                     // how the shooter's run is drawn (per browser)
+setRunLook(runLook);
 rig.setPace(walkSpeed(speed).pace);
 const about = createAbout();
 
@@ -72,7 +76,7 @@ const hint = document.getElementById("hint");
 const updaters = [];
 let playButton = null;
 const folds = {};                  // the side panels' fold controls (panels.js)
-let surroundingsVersion = 0;
+let surroundingsVersion = 0;       // bumped when your own surroundings change, so the 3D view rebuilds them
 // Animated props: the animator moves the ones switched on while Play is on; the view then draws
 // every frame, and only then.
 const animator = createAnimator(engine.groups.stage);
@@ -83,7 +87,7 @@ function animationFrame() {
   engine.requestRender();
 }
 engine.onRender(animationFrame);
-engine.onRender(() => fadeFigures(engine.groups.stage, engine.camera));   // figures fade as the camera comes close       // bumped when your own surroundings change, so the 3D view rebuilds them
+engine.onRender(() => fadeFigures(engine.groups.stage, engine.camera));   // figures fade as the camera comes close
 
 function render(state) {
   const stage = state.history.present;
@@ -91,7 +95,7 @@ function render(state) {
   animator.sync(stage);
   playButton?.update();
   if (animator.active()) engine.requestRender();
-  if (viewing) { const v = viewing.split(" "); viewing = ""; viewingFrom(v); }   // rebuilt nodes: keep the viewed markers hidden
+  if (editor) applyVisibility();            // rebuilt nodes: keep the viewed markers (and a hidden run) hidden
   const key = `${stage.settings.environment}|${stage.bay.width}|${stage.bay.depth}|${surroundingsVersion}`;
   if (key !== envKey) { envKey = key; lookShown = stage.settings.look; engine.setEnvironment(stage.settings.environment, stage.bay, stage.settings.look); }
   else if (stage.settings.look !== lookShown) { lookShown = stage.settings.look; engine.setLook(stage.settings.look, stage.bay); }
@@ -192,16 +196,26 @@ window.addEventListener("beforeprint", () => {
 
 // While Shooter's eye looks from the start ("start") or a shooting position, that marker (with its
 // man) and the selection helpers are hidden, as they would sit right round the camera; walking from
-// one to the next, both are hidden until it arrives.
+// one to the next, both are hidden until it arrives. Settings → View can hide the figures, the
+// position marks or the route (the start box stays).
 let viewing = "";
+let viewingList = [];
+function applyVisibility() {
+  for (const node of engine.groups.stage.children) {
+    const id = node.userData.id;
+    node.visible = !viewingList.includes(id) && (id !== "route" || runLook.route.show);
+    node.traverse((c) => { const part = c.userData.runPart; if (part) c.visible = runLook[part].show; });
+  }
+  engine.groups.helper.visible = !viewingList.length;
+  engine.requestRender();
+}
 function viewingFrom(ids) {
   const list = [].concat(ids ?? []).filter(Boolean);
   const key = list.join(" ");
   if (viewing === key) return;
   viewing = key;
-  for (const node of engine.groups.stage.children) node.visible = !list.includes(node.userData.id);
-  engine.groups.helper.visible = !list.length;
-  engine.requestRender();
+  viewingList = list;
+  applyVisibility();
 }
 
 let picking = null;
@@ -377,6 +391,12 @@ settings = createSettings({
   onHidden: (next) => { hiddenProps = next; saveHidden(next); library.setHidden(next); },
   getSpeed: () => speed,
   onSpeed: (id) => { speed = walkSpeed(id).id; saveWalkSpeed(speed); rig.setPace(walkSpeed(speed).pace); },
+  getRunLook: () => runLook,
+  onRunLook: (part, patch) => {
+    runLook = saveRunLook(withRunPart(runLook, part, patch));
+    setRunLook(runLook);
+    applyVisibility();
+  },
 });
 
 render(editor.state);

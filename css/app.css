@@ -328,3 +328,15 @@ body { background: var(--lg-bg); overflow: hidden; }
 .eye-pad-btn:focus-visible { outline: 2px solid var(--lg-accent); outline-offset: 1px; }
 .eye-pad-btn svg { width: 22px; height: 22px; }
 .eye-pad-forward { grid-area: f; } .eye-pad-left { grid-area: l; } .eye-pad-right { grid-area: r; } .eye-pad-back { grid-area: d; }
+
+/* Settings → View: colour swatches and your own colour for each part of the shooter's run. */
+.settings-sub { font-size: var(--lg-fs-small); text-transform: uppercase; letter-spacing: 0.06em; color: var(--lg-muted); margin: var(--lg-space-m) 0 var(--lg-space-s); }
+.run-colors { clear: both; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 4px 0 6px; }
+.run-part .settings-row { clear: both; }
+.run-swatches { display: flex; gap: 6px; flex-wrap: wrap; }
+.run-swatch { width: 28px; height: 28px; border-radius: 50%; padding: 0; cursor: pointer; background: var(--swatch);
+  border: 2px solid var(--lg-border); box-shadow: inset 0 0 0 2px rgb(0 0 0 / 0.15); }
+.run-swatch[aria-checked="true"] { border-color: var(--lg-accent); box-shadow: 0 0 0 2px var(--lg-accent); }
+.run-swatch:focus-visible, .run-color:focus-visible { outline: 2px solid var(--lg-accent); outline-offset: 2px; }
+.run-color { width: 40px; height: 28px; padding: 0; border: 1px solid var(--lg-border); border-radius: 8px; background: none; cursor: pointer; }
+@media (pointer: coarse) { .run-swatch { width: var(--lg-touch); height: var(--lg-touch); } .run-color { width: 56px; height: var(--lg-touch); } }

@@ -4,6 +4,10 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Settings has three tabs: Environment (was Light and view), View and Props. View holds the
+  Shooter's eye walking speed and, for the figures, the position marks and the route line each:
+  show or hide, a colour (seven swatches or your own) and opacity. Kept in this browser.
+
 - Activation links: a swinger, drop turner, clamshell, mover, bobber, twister, Texas star or
   shuttered port can be *Activated by* a popper, plate, step pad or pull lever on the stage
   (inspector). Selecting either shows an orange dashed line between them, and the briefing and

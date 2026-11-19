@@ -674,14 +674,24 @@ export function getMaterial(name) {
 
 export const materials = { get: getMaterial };
 
-// The see-through grey of the figures at fade step `level` of `levels` (shared, made once each).
+// The figures' see-through material at fade step `level` of `levels` (shared, made once each,
+// following the run's colour and opacity).
 const ghosts = new Map();
 export function ghostAt(level, levels) {
-  if (level >= levels) return getMaterial("position-ghost");
-  if (!ghosts.has(level)) {
-    const m = getMaterial("position-ghost").clone();
-    m.opacity *= level / levels;
-    ghosts.set(level, m);
-  }
-  return ghosts.get(level);
+  const base = getMaterial("position-ghost");
+  if (level >= levels) return base;
+  if (!ghosts.has(level)) ghosts.set(level, base.clone());
+  const m = ghosts.get(level);
+  m.color.copy(base.color);
+  m.opacity = (base.opacity * level) / levels;
+  return m;
+}
+
+/** Settings → View: each part's colour and see-through (look from model/run-look.js). */
+export function setRunLook(look) {
+  const paint = (name, { color, opacity }) => { const m = getMaterial(name); m.color.set(color); m.opacity = opacity; };
+  paint("position-ghost", look.figure);
+  paint("position-ring", look.mark);
+  paint("route-line", look.route);
+  getMaterial("route-handle").emissive.set(look.route.color);
 }

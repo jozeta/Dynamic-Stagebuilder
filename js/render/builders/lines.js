@@ -49,6 +49,7 @@ export function buildStartMarker(start, stage = null) {
   g.add(a);
   if (stage) {
     const man = new THREE.Group();
+    man.userData.runPart = "figure";            // Settings → View can hide the figures
     man.add(...figureMeshes(startFigure(stage.briefing || {})));
     man.rotation.y = (-(startFacing(stage) - (start.facing || 0)) * Math.PI) / 180;
     g.add(man);

@@ -2,9 +2,12 @@
 // haze and exposure. It opens in the right-hand panel in place of the inspector (toolbar
 // *Settings* toggles it, *Done* or Escape closes it), so the 3D view stays visible and live.
 // Sliders apply while dragging; settings are saved with the stage but aren't undo steps.
-// The Props tab hides library groups and single props (a per-browser preference).
+// The View tab: Shooter's eye walking speed, and how the figures, position marks and route are
+// drawn (shown, colour, see-through). The Props tab hides library groups and single props. Both
+// are per-browser preferences.
 import { h } from "./dom.js";
 import { WALK_SPEEDS } from "../model/route.js";
+import { RUN_PARTS, RUN_COLORS } from "../model/run-look.js";
 import { LIBRARY_GROUPS, MARKINGS, isShown, setShown } from "../model/visibility.js";
 import { PROPS } from "../model/props.js";
 import { GROUNDS } from "../model/look.js";
@@ -22,7 +25,7 @@ const SLIDERS = [
 ];
 
 export function createSettings({ editor, panel, hide = [], onToggle = () => {}, getHidden = () => ({ categories: [], props: [] }), onHidden = () => {}, mine = null,
-  getSpeed = () => "quick", onSpeed = () => {} }) {
+  getSpeed = () => "quick", onSpeed = () => {}, getRunLook = () => null, onRunLook = () => {} }) {
   const d = (a) => editor.dispatch(a);
   const body = h("div", { class: "settings-body" });
   const lookPane = h("div", { id: "settings-look", role: "tabpanel", "aria-labelledby": "settings-tab-look" }, [
@@ -31,21 +34,62 @@ export function createSettings({ editor, panel, hide = [], onToggle = () => {}, 
       h("button", { type: "button", class: "lg-btn", onclick: () => { d({ type: "setLook", reset: true }); fill(); }, text: "Reset light to defaults" }),
     ]),
   ]);
+  const viewPane = h("div", { id: "settings-view", role: "tabpanel", "aria-labelledby": "settings-tab-view", hidden: true });
   const propsPane = h("div", { id: "settings-props", role: "tabpanel", "aria-labelledby": "settings-tab-props", hidden: true });
-  const tabButtons = [["look", "Light and view"], ["props", "Props"]].map(([id, label]) =>
+  const tabButtons = [["look", "Environment"], ["view", "View"], ["props", "Props"]].map(([id, label]) =>
     h("button", { type: "button", class: "lg-tab", role: "tab", id: `settings-tab-${id}`, "aria-controls": `settings-${id}`, "aria-selected": String(id === "look"),
       onclick: () => selectTab(id), text: label }));
   const tabs = h("div", { class: "lg-tabs settings-tabs", role: "tablist", "aria-label": "Settings" }, tabButtons);
   tabs.addEventListener("keydown", (e) => {
     if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
-    const next = tabButtons[(tabButtons.indexOf(document.activeElement) + 1) % 2];
+    const n = tabButtons.length, step = e.key === "ArrowRight" ? 1 : n - 1;
+    const next = tabButtons[(tabButtons.indexOf(document.activeElement) + step) % n];
     next.focus(); next.click();
   });
   function selectTab(id) {
     for (const b of tabButtons) b.setAttribute("aria-selected", String(b.id === `settings-tab-${id}`));
     lookPane.hidden = id !== "look";
+    viewPane.hidden = id !== "view";
     propsPane.hidden = id !== "props";
     if (id === "props") fillProps();
+    if (id === "view") fillView();
+  }
+
+  // View tab: the walking speed, then each part of the shooter's run: show, colour, see-through.
+  function fillView() {
+    const look = getRunLook();
+    const speedSel = h("select", { class: "lg-select", id: "set-walk-speed", onchange: (e) => onSpeed(e.target.value) },
+      WALK_SPEEDS.map((s) => h("option", { value: s.id, text: `${s.name} (${s.pace.toFixed(1)} m/s)` })));
+    speedSel.value = getSpeed();
+    const part = ({ id, name }) => {
+      const p = look[id];
+      const set = (patch) => { onRunLook(id, patch); fillView(); viewPane.querySelector(`#run-${id}-show`)?.focus(); };
+      const show = h("input", { type: "checkbox", class: "lg-toggle", id: `run-${id}-show`, onchange: (e) => set({ show: e.target.checked }) });
+      show.checked = p.show;
+      const swatches = h("div", { class: "run-swatches", role: "radiogroup", "aria-label": `${name} colour` }, RUN_COLORS.map((c) => {
+        const b = h("button", { type: "button", class: "run-swatch", role: "radio", "aria-checked": String(p.color === c.hex), "aria-label": c.name, title: c.name,
+          onclick: () => set({ color: c.hex }) });
+        b.style.setProperty("--swatch", c.hex);
+        return b;
+      }));
+      const own = h("input", { type: "color", class: "run-color", id: `run-${id}-color`, value: p.color, "aria-label": `${name}: your own colour`, title: "Your own colour",
+        onchange: (e) => set({ color: e.target.value }) });
+      const out = h("output", { for: `run-${id}-opacity`, class: "lg-mono settings-value", text: `${Math.round(p.opacity * 100)} %` });
+      const slider = h("input", { type: "range", class: "lg-slider", id: `run-${id}-opacity`, min: "0.1", max: "1", step: "0.05", value: String(p.opacity), disabled: !p.show,
+        oninput: (e) => { const v = Number(e.target.value); out.textContent = `${Math.round(v * 100)} %`; onRunLook(id, { opacity: v }); } });
+      return h("fieldset", { class: "vis-group run-part" }, [
+        h("legend", { class: "vis-head" }, [h("label", { for: `run-${id}-show`, class: "vis-name", text: `Show ${name.toLowerCase()}` }), show]),
+        h("div", { class: "run-colors" }, [swatches, own]),
+        h("div", { class: "settings-row" }, [h("label", { for: `run-${id}-opacity`, text: "Opacity" }), slider, out]),
+      ]);
+    };
+    viewPane.replaceChildren(
+      h("div", { class: "settings-row" }, [h("label", { for: "set-walk-speed", text: "Shooter's eye walking speed" }), speedSel]),
+      h("p", { class: "lg-muted hint-text", text: "How fast Shooter's eye moves between positions when Play is on." }),
+      h("h3", { class: "settings-sub", text: "The shooter's run" }),
+      ...RUN_PARTS.map(part),
+      h("p", { class: "lg-muted hint-text", text: "Figures are the shooter at the start and at each shooting position; marks are the rings with the facing arrow. Kept in this browser, not saved with the stage." }),
+    );
   }
 
   // Props tab: a switch per group, a checkbox per prop. Hidden props stay on stages that use them.
@@ -78,6 +122,7 @@ export function createSettings({ editor, panel, hide = [], onToggle = () => {}, 
     ]),
     tabs,
     lookPane,
+    viewPane,
     propsPane,
     // Done at the bottom, staying in view while the panel scrolls.
     h("div", { class: "settings-foot" }, [h("button", { type: "button", class: "lg-btn lg-btn-primary", onclick: () => close(), text: "Done" })]),
@@ -178,9 +223,6 @@ export function createSettings({ editor, panel, hide = [], onToggle = () => {}, 
     const groundSel = h("select", { class: "lg-select", id: "set-ground", onchange: (e) => d({ type: "setLook", patch: { ground: e.target.value } }) },
       GROUNDS.map((g) => h("option", { value: g.id, text: g.name })));
     groundSel.value = look.ground || "sand";
-    const speedSel = h("select", { class: "lg-select", id: "set-walk-speed", onchange: (e) => onSpeed(e.target.value) },
-      WALK_SPEEDS.map((s) => h("option", { value: s.id, text: `${s.name} (${s.pace.toFixed(1)} m/s)` })));
-    speedSel.value = getSpeed();
     body.replaceChildren(...[
       h("div", { class: "settings-row" }, [h("span", { class: "settings-label", text: "Surroundings" }), env]),
       st.environment === "outdoor" ? h("div", { class: "settings-row" }, [h("label", { for: "set-ground", text: "Ground" }), groundSel]) : null,
@@ -190,8 +232,6 @@ export function createSettings({ editor, panel, hide = [], onToggle = () => {}, 
       h("div", { class: "settings-row" }, [h("label", { for: "set-shadows", text: "Shadows" }), shadows]),
       ...rows.slice(3),
       h("p", { class: "lg-muted", text: "Saved with this stage and used for the printed 3D view. Changing these is not an undo step." }),
-      h("div", { class: "settings-row" }, [h("label", { for: "set-walk-speed", text: "Shooter's eye walking speed" }), speedSel]),
-      h("p", { class: "lg-muted", text: "How fast Shooter's eye moves between positions when Play is on. Kept in this browser." }),
     ].filter(Boolean));
   }
 
