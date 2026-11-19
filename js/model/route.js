@@ -97,7 +97,7 @@ const smooth = (x) => { const t = Math.min(1, Math.max(0, x)); return t * t * (3
 /**
  * Where the shooter looks at fraction k (0–1) of a walk along route `pts`, from view `from` to view
  * `to` ({ yaw, pitch } in degrees, the shooting-position convention): turning into the way they walk
- * over the first metre or so, looking level along the route (a metre ahead, so bends turn smoothly),
+ * over the first metre or so, looking level along the route (1.5 m ahead, so bends turn smoothly),
  * then turning to the position's own view over the last stretch. Returns { yaw, pitch }.
  */
 export function walkLook(pts, k, from, to) {
@@ -105,7 +105,7 @@ export function walkLook(pts, k, from, to) {
   if (total < 0.05) return { yaw: turnTo(from.yaw, to.yaw, smooth(k)), pitch: from.pitch + (to.pitch - from.pitch) * smooth(k) };
   const s = k * total;
   const here = pointAlong(pts, k);
-  let ahead = pointAlong(pts, Math.min(1, (s + 1) / total));
+  let ahead = pointAlong(pts, Math.min(1, (s + 1.5) / total));      // look 1.5 m ahead: turns begin early
   let dir = [ahead[0] - here[0], ahead[1] - here[1]];
   if (Math.hypot(...dir) < 1e-6) { const a = pts.at(-2), b = pts.at(-1); dir = [b[0] - a[0], b[1] - a[1]]; }
   const heading = (Math.atan2(-dir[0], dir[1]) * 180) / Math.PI;
@@ -114,4 +114,50 @@ export function walkLook(pts, k, from, to) {
   const yaw = turnTo(turnTo(from.yaw, heading, wIn), to.yaw, wOut);
   const pitch = (from.pitch + (0 - from.pitch) * wIn) * (1 - wOut) + to.pitch * wOut;
   return { yaw, pitch };
+}
+
+/**
+ * The route with each corner rounded into an arc (starting up to `r` metres before the corner),
+ * so a walk along it turns smoothly. The ends stay where they are.
+ */
+export function smoothRoute(pts, r = 0.9, steps = 10) {
+  if (pts.length < 3) return pts.map((p) => [p[0], p[1]]);
+  const out = [[pts[0][0], pts[0][1]]];
+  for (let i = 1; i < pts.length - 1; i++) {
+    const [a, c, b] = [pts[i - 1], pts[i], pts[i + 1]];
+    const la = Math.hypot(c[0] - a[0], c[1] - a[1]), lb = Math.hypot(b[0] - c[0], b[1] - c[1]);
+    const k = Math.min(r, la / 2, lb / 2);
+    if (k < 1e-6) { out.push([c[0], c[1]]); continue; }
+    const p0 = [c[0] + ((a[0] - c[0]) * k) / la, c[1] + ((a[1] - c[1]) * k) / la], p2 = [c[0] + ((b[0] - c[0]) * k) / lb, c[1] + ((b[1] - c[1]) * k) / lb];
+    for (let j = 0; j <= steps; j++) {                       // a quadratic curve with the corner as its control point
+      const t = j / steps, u = 1 - t;
+      out.push([u * u * p0[0] + 2 * u * t * c[0] + t * t * p2[0], u * u * p0[1] + 2 * u * t * c[1] + t * t * p2[1]]);
+    }
+  }
+  out.push([pts.at(-1)[0], pts.at(-1)[1]]);
+  return out;
+}
+
+/**
+ * How a walk of `total` metres moves in time: easing in over the first metre, then a steady jog
+ * (2.6 m/s), easing out over the last metre (a smooth speed curve, no jolts).
+ * { duration: seconds, at(t): metres walked at t seconds }.
+ */
+export function walkMotion(total, pace = 2.6) {
+  if (!(total > 0)) return { duration: 0.5, at: () => 0 };
+  const ease = Math.min(1, total / 2);                 // metres to speed up, and to slow down
+  // Speed rises as a smooth S over the easing time T: walking `ease` metres takes T = 2·ease/pace.
+  const T = (2 * ease) / pace, cruise = (total - 2 * ease) / pace;
+  const rise = (t) => { const x = t / T; return pace * T * (x ** 3 - x ** 4 / 2); };   // ∫ of pace·(3x² − 2x³)
+  const duration = Math.max(0.5, 2 * T + cruise);
+  const scale = (2 * T + cruise) / duration;           // a very short step: stretched to 0.5 s
+  return {
+    duration,
+    at(time) {
+      const t = Math.min(Math.max(time * scale, 0), 2 * T + cruise);
+      if (t <= T) return rise(t);
+      if (t <= T + cruise) return ease + (t - T) * pace;
+      return total - rise(2 * T + cruise - t);
+    },
+  };
 }

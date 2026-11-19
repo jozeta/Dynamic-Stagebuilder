@@ -85,7 +85,7 @@ function render(state) {
   animator.sync(stage);
   playButton?.update();
   if (animator.active()) engine.requestRender();
-  if (viewing) { const v = viewing; viewing = null; viewingFrom(v); }   // rebuilt nodes: keep the viewed marker hidden
+  if (viewing) { const v = viewing.split(" "); viewing = ""; viewingFrom(v); }   // rebuilt nodes: keep the viewed markers hidden
   const key = `${stage.settings.environment}|${stage.bay.width}|${stage.bay.depth}|${surroundingsVersion}`;
   if (key !== envKey) { envKey = key; lookShown = stage.settings.look; engine.setEnvironment(stage.settings.environment, stage.bay, stage.settings.look); }
   else if (stage.settings.look !== lookShown) { lookShown = stage.settings.look; engine.setLook(stage.settings.look, stage.bay); }
@@ -175,14 +175,17 @@ window.addEventListener("beforeprint", () => {
   renderPrint(document.getElementById("print"), printedStage, snapshot());
 });
 
-// While Shooter's eye looks from a shooting position, that position's own marker and the selection
-// helpers are hidden (they would sit right in front of the camera).
-let viewing = null;
-function viewingFrom(id) {
-  if (viewing === id) return;
-  viewing = id;
-  for (const node of engine.groups.stage.children) node.visible = !id || node.userData.id !== id;
-  engine.groups.helper.visible = !id;
+// While Shooter's eye looks from the start ("start") or a shooting position, that marker (with its
+// man) and the selection helpers are hidden, as they would sit right round the camera; walking from
+// one to the next, both are hidden until it arrives.
+let viewing = "";
+function viewingFrom(ids) {
+  const list = [].concat(ids ?? []).filter(Boolean);
+  const key = list.join(" ");
+  if (viewing === key) return;
+  viewing = key;
+  for (const node of engine.groups.stage.children) node.visible = !list.includes(node.userData.id);
+  engine.groups.helper.visible = !list.length;
   engine.requestRender();
 }
 

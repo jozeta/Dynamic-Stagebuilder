@@ -1,5 +1,7 @@
 // Fault lines and shooting areas as red bars on the ground (world coordinates), and the start marker.
 import * as THREE from "three";
+import { figureMeshes } from "./position.js";
+import { startFigure, startFacing } from "../../model/start-pose.js";
 import { getMaterial } from "../materials.js";
 import { box, group } from "./parts.js";
 
@@ -31,7 +33,9 @@ export function buildLine(line) {
 }
 
 /** A 1 × 1 m square with an arrow pointing in the facing direction (0° = down range, +z). */
-export function buildStartMarker(start) {
+// The start box, with the shooter in it (posed from the briefing; turned round when the text
+// says he faces up range). `stage` is optional (no figure without it).
+export function buildStartMarker(start, stage = null) {
   const g = group("start");
   const t = 0.05, h = 0.01;
   g.add(box(1, h, t, "start-marker", 0, h / 2, -0.5 + t / 2));
@@ -43,6 +47,12 @@ export function buildStartMarker(start) {
   a.rotation.x = Math.PI / 2;
   a.position.y = 0.004;
   g.add(a);
+  if (stage) {
+    const man = new THREE.Group();
+    man.add(...figureMeshes(startFigure(stage.briefing || {})));
+    man.rotation.y = (-(startFacing(stage) - (start.facing || 0)) * Math.PI) / 180;
+    g.add(man);
+  }
   g.position.set(start.position[0], 0, start.position[1]);
   g.rotation.y = (-(start.facing || 0) * Math.PI) / 180;
   return g;

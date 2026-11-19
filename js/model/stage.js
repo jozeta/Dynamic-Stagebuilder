@@ -72,8 +72,10 @@ export function updateLine(stage, id, points) {
   return { ...stage, lines: stage.lines.map((l) => l.id !== id ? l : { ...l, points: points.map((p) => [p[0], p[1]]) }) };
 }
 
+// Moving the start box keeps a saved Shooter's eye view ({ yaw, pitch }); turning it drops it.
 export function setStart(stage, position, facing) {
-  return { ...stage, start: { position: [position[0], position[1]], facing } };
+  const keep = stage.start?.view && stage.start.facing === facing ? { view: stage.start.view } : {};
+  return { ...stage, start: { position: [position[0], position[1]], facing, ...keep } };
 }
 
 export function setSetting(stage, key, value) {

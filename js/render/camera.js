@@ -1,12 +1,14 @@
 // Camera navigation (orbit, pan, zoom; one finger rotates, two pan and zoom on touch) and presets.
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { obliqueView, stageArea, VIEW } from "./view-math.js";
-import { viewFromPosition, anglesFromView, walkBetween, walkDuration } from "../model/positions.js";
-import { surfaceHeight, pointAlong, legLength, walkLook } from "../model/route.js";
+import { viewFromPosition, anglesFromView } from "../model/positions.js";
+
+const RUN_EYE = 1.6;          // eye height while moving between positions (standing)
+import { surfaceHeight, pointAlong, legLength, walkLook, smoothRoute, walkMotion } from "../model/route.js";
+import { startLook, startEye } from "../model/start-pose.js";
 
 export const PRESETS = ["iso", "top", "front", "shooter"];
 export const PRESET_LABELS = { iso: "Isometric", top: "Top", front: "Front", shooter: "Shooter's eye" };
-const EYE = 1.6;
 
 export function createCameraRig(engine, domElement) {
   const camera = engine.camera;
@@ -44,12 +46,7 @@ export function createCameraRig(engine, domElement) {
     switch (name) {
       case "top": look([0, d * 1.05, depth / 2 - 0.01], mid); break;
       case "front": look([0, 1.7, -4], [0, 1, depth / 2]); break;
-      case "shooter": {
-        const p = stage.start?.position ?? [0, 0.5];
-        const f = ((stage.start?.facing ?? 0) * Math.PI) / 180;
-        look([p[0], EYE, p[1]], [p[0] + Math.sin(f) * 0.1, EYE - 0.004, p[1] + Math.cos(f) * 0.1]);
-        break;
-      }
+      case "shooter": lookFrom(startView(stage)); break;
       default: {
         const v = obliqueView(stageArea(stage), camera.aspect || 1.6);
         look(v.position, v.target);
@@ -100,10 +97,18 @@ export function createCameraRig(engine, domElement) {
     const reduce = typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
     const ground = (x, z) => (stage ? surfaceHeight(stage, x, z) : 0);
     const eyeFrom = from.eye[1] - ground(from.eye[0], from.eye[2]), eyeTo = to.eye[1] - ground(to.eye[0], to.eye[2]);
-    // Always a route on the ground: the drawn one, else straight from here to there.
-    const route = path && path.length >= 2 ? path : [[from.eye[0], from.eye[2]], [to.eye[0], to.eye[2]]];
+    // Always a route on the ground: the drawn one (corners rounded), else straight from here to there.
+    const route = smoothRoute(path && path.length >= 2 ? path : [[from.eye[0], from.eye[2]], [to.eye[0], to.eye[2]]]);
     const dist = legLength(route);
-    const ms = reduce ? 0 : walkDuration([0, 0, 0], [dist, 0, 0]) * 1000;
+    const motion = walkMotion(dist);
+    const ms = reduce ? 0 : motion.duration * 1000;
+    // Get up into a standing run over the first 0.8 m, drop into the next stance over the last.
+    const smooth = (x) => { const u = Math.min(1, Math.max(0, x)); return u * u * (3 - 2 * u); };
+    const eyeAt = (s) => {
+      const up = smooth(s / 0.8), down = smooth((s - (dist - 0.8)) / 0.8);
+      const mid = eyeFrom + (RUN_EYE - eyeFrom) * up;
+      return mid + (eyeTo - mid) * down;
+    };
     return new Promise((done) => {
       const t0 = performance.now();
       const w = { done, frame: 0 };
@@ -111,11 +116,10 @@ export function createCameraRig(engine, domElement) {
       const step = () => {
         const t = ms ? (performance.now() - t0) / ms : 1;
         // The shooter looks the way they walk (as on the course), turning to the view on arrival.
-        const v = walkBetween(from, to, t);
-        const k = v.eased;
+        const s = t >= 1 ? dist : motion.at((t * ms) / 1000);
+        const k = dist > 0 ? s / dist : 1;
         const [x, z] = pointAlong(route, k);
-        v.eye = [x, ground(x, z) + eyeFrom + (eyeTo - eyeFrom) * k, z];
-        Object.assign(v, walkLook(route, k, from, to));
+        const v = { eye: [x, ground(x, z) + eyeAt(s), z], ...walkLook(route, k, from, to) };
         if (t >= 1) Object.assign(v, { yaw: to.yaw, pitch: to.pitch ?? 0 });
         lookFrom(v);
         if (t < 1) w.frame = requestAnimationFrame(step);
@@ -124,11 +128,11 @@ export function createCameraRig(engine, domElement) {
       step();
     });
   }
-  /** The view from the start position, or from a shooting position. */
-  const startView = (stage) => {
+  /** The view from the start position (the pose's eye height; its saved view, else its facing). */
+  function startView(stage) {
     const p = stage.start?.position ?? [0, 0.5];
-    return { eye: [p[0], EYE + surfaceHeight(stage, p[0], p[1]), p[1]], yaw: -(stage.start?.facing ?? 0), pitch: 0 };
-  };
+    return { eye: [p[0], startEye(stage.briefing || {}) + surfaceHeight(stage, p[0], p[1]), p[1]], ...startLook(stage) };
+  }
   // Standing on whatever is under the position (a platform, a ramp).
   const positionView = (o, stage) => {
     const e = viewFromPosition(o).eye;

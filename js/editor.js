@@ -269,6 +269,14 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
       state.selection = [r.id];
     },
     beginStart() { state.mode = "start"; },
+    // Looking around in Shooter's eye at the start saves the view (one undo step).
+    setStartView({ rotation, pitch }) {
+      const st = present().start;
+      if (!st || !Number.isFinite(rotation) || !Number.isFinite(pitch)) return;
+      const view = { yaw: Math.round(rotation * 10) / 10, pitch: Math.round(Math.max(-89, Math.min(89, pitch)) * 10) / 10 };
+      if (st.view && st.view.yaw === view.yaw && st.view.pitch === view.pitch) return;
+      edit({ ...present(), start: { ...st, view } });
+    },
     setStart({ position, facing = 0 }) {
       edit(setStart(present(), fit(position), snapAngle(facing, present().settings.angleSnap)));
       state.mode = "select";

@@ -73,15 +73,27 @@ function head([hx, hy, hz]) {
 // A shoe from a foot box [x, y, z, w, h, d]: a sole and a rounded upper.
 const shoe = ([x, y, z, w, h, d]) => [box([x, y - h / 2 + 0.012, z], [w, 0.024, d]), ball([x, y - h / 2 + 0.045, z - d * 0.06], [w / 2, Math.min(0.04, h / 2 + 0.01), d * 0.44])];
 
-function figureParts(p) {
+/**
+ * A man from a skeleton p: { pelvis, chest, head, shoulder: [y, z], legs, feet } and either
+ * hand: [y, z] (a pistol held out in both hands) or arms: { left, right } each { elbow, wrist,
+ * hand: [x, y, z], palm: [rx, ry, rz] } (open hands, no pistol), plus extra parts (a holster…).
+ */
+export function figureParts(p) {
   const pelvis = p.pelvis, chest = p.chest, d = unit(chest.map((v, i) => v - pelvis[i]));
   const V = unit([0, -d[2], d[1]]), X = [1, 0, 0];
   const s0 = add(pelvis, d, -0.08), s1 = add(chest, d, 0.02);
   const torso = { kind: "loft", sections: TORSO.map(([t, rx, rz]) => ({ c: s0.map((v, i) => v + (s1[i] - v) * t), rx, rz, X, V })) };
-  const G = [0, ...p.hand];
+  const G = p.hand ? [0, ...p.hand] : null;
   const parts = [torso, limb(add(chest, d, -0.03), add(p.head, [0, -0.07, -0.01]), [[0, 0.06], [1, 0.05]]), ...head(p.head)];
   for (const side of [1, -1]) {
-    const sh = [0.19 * side, ...p.shoulder], el = [0.12 * side, ...p.elbow];
+    const sh = [0.19 * side, ...p.shoulder];
+    if (p.arms) {
+      const arm = p.arms[side > 0 ? "left" : "right"];
+      parts.push(ball([0.18 * side, sh[1] - 0.01, sh[2]], [0.058, 0.055, 0.058]),
+        limb(sh, arm.elbow, PROF.upperArm), ball(arm.elbow, 0.037), limb(arm.elbow, arm.wrist, PROF.forearm), ball(arm.hand, arm.palm));
+      continue;
+    }
+    const el = [0.12 * side, ...p.elbow];
     const wrist = side > 0 ? [0.03, p.hand[0], p.hand[1] - 0.02] : [-0.026, p.hand[0] + 0.005, p.hand[1] - 0.034];
     parts.push(ball([0.18 * side, sh[1] - 0.01, sh[2]], [0.058, 0.055, 0.058]),       // shoulder (deltoid)
       limb(sh, el, PROF.upperArm), ball(el, 0.037), limb(el, wrist, PROF.forearm));
@@ -90,7 +102,9 @@ function figureParts(p) {
     const thigh = p.legs[i], shin = p.legs[i + 1];
     parts.push(limb(thigh.a, thigh.b, PROF.thigh), ball(thigh.b, 0.053), limb(shin.a, shin.b, PROF.shin), ball(shin.b, 0.034));
   }
-  parts.push(...p.feet.flatMap(shoe), ...grip(G), ...pistol(G));
+  parts.push(...p.feet.flatMap(shoe));
+  if (G) parts.push(...grip(G), ...pistol(G));
+  if (p.extra) parts.push(...p.extra);
   return parts;
 }
 
@@ -155,11 +169,13 @@ const stance_ = (id) => STANCES.find((s) => s.id === id) || STANCES[0];
 export const eyeHeight = (id) => stance_(id).eye;
 
 /** The marker's size { w, h, d } at rotation 0: the ring and the figure. */
-export function positionSize(id) {
-  const st = stance_(id);
+export function positionSize(id) { return partsSize(stance_(id).parts); }
+
+/** The size of a figure (with its 0.4 m ring) from its parts. */
+export function partsSize(figure) {
   let x0 = -MARKER_RADIUS, x1 = MARKER_RADIUS, z0 = -MARKER_RADIUS, z1 = MARKER_RADIUS, h = 0.01;
   const grow = (x, y, z, ex, ey, ez) => { x0 = Math.min(x0, x - ex); x1 = Math.max(x1, x + ex); z0 = Math.min(z0, z - ez); z1 = Math.max(z1, z + ez); h = Math.max(h, y + ey); };
-  for (const part of st.parts) for (const [c, e] of partExtents(part)) grow(...c, ...e);
+  for (const part of figure) for (const [c, e] of partExtents(part)) grow(...c, ...e);
   // The figure is drawn centred across (x) on the marker, so the width is symmetric.
   return { w: 2 * Math.max(-x0, x1), h, d: z1 - z0, zMin: z0, zMax: z1 };
 }

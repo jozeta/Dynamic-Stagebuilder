@@ -28,7 +28,7 @@ export const HELP_TOPICS = Object.freeze([
     tips: ["Turn Objects off in the toolbar to place walls freely.", "Port size and height are set in the inspector."] },
   { id: "markings", title: "Fault lines, areas and the start", icon: "line", art: "markings",
     text: ["Stage markings are at the top of the props panel. Fault line: tap the points on the ground, then press Enter or tap Finish. Shooting area: tap the corners and finish the same way.",
-      "Start position: tap where the shooter starts. Shooting position: tap each place the shooter shoots from; they are numbered 1, 2, 3… and each has a facing, a look up/down angle and a stance (standing, crouching, kneeling, sitting or prone).",
+      "Start position: tap where the shooter starts; the figure in it takes the pose the briefing's start position describes (hands up, arms hanging, seated…), with the pistol holstered unless it starts on a table or in a case. Shooting position: tap each place the shooter shoots from; they are numbered 1, 2, 3… and each has a facing, a look up/down angle and a stance (standing, crouching, kneeling, sitting or prone).",
       "In Shooter's eye, the arrows under the view buttons (or [ and ]) walk the camera from the start to each shooting position, at that stance's eye height; Play run walks the whole course, pausing at each one. A dashed line on the ground shows the route: click it to add a grab point, drag one to reshape the route, click one to remove it. Pause makes the camera jump instead of walk. At a position, look around and let go: the view is saved to it."],
     tips: ["Escape or Cancel stops drawing.", "Drag a finished line or area to move it."] },
   { id: "targets", title: "Targets, no-shoots and arrays", icon: "hash", art: "arrays",

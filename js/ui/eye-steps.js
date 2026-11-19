@@ -53,7 +53,7 @@ export function createEyeSteps({ editor, rig, bar, onViewing = () => {}, walking
     for (const el of [prev, next, run]) el.disabled = !has;
     hint.hidden = has;
     label.hidden = !has;
-    saved.hidden = index < 0 || !has;
+    saved.hidden = !has;
     pad.hidden = box.hidden || index < 0 || !has || running;
     if (index < 0) label.textContent = "Start";
     else {
@@ -66,13 +66,16 @@ export function createEyeSteps({ editor, rig, bar, onViewing = () => {}, walking
   async function go({ walk = true } = {}) {
     const ps = list();
     if (index >= ps.length) index = ps.length - 1;
-    onViewing(index < 0 ? null : ps[index].id);
+    const idOf = (i) => (i < 0 ? "start" : ps[i]?.id);
     describe(ps);
     const from = at;
     at = index;
     // Play / Pause decides: playing walks the route, paused jumps straight to the position.
-    if (!walk || !walking()) { rig.jumpTo(viewOf(index, ps)); return true; }
-    return rig.walkTo(viewOf(index, ps), { path: pathBetween(from, index, ps), stage: editor.stage() });
+    if (!walk || !walking()) { onViewing(idOf(index)); rig.jumpTo(viewOf(index, ps)); return true; }
+    onViewing([idOf(from), idOf(index)]);
+    const arrived = await rig.walkTo(viewOf(index, ps), { path: pathBetween(from, index, ps), stage: editor.stage() });
+    if (at === index) onViewing(idOf(index));
+    return arrived;
   }
   function step(d) {
     stopRun();
@@ -105,18 +108,27 @@ export function createEyeSteps({ editor, rig, bar, onViewing = () => {}, walking
     describe(list());
   }
   function saveView() {
-    const o = list()[index];
-    if (!o) return;
     const a = rig.currentAngles();
-    editor.dispatch({ type: "setView", id: o.id, rotation: a.rotation, pitch: a.pitch });
+    if (index < 0) { editor.dispatch({ type: "setStartView", rotation: a.rotation, pitch: a.pitch }); return; }
+    const o = list()[index];
+    if (o) editor.dispatch({ type: "setView", id: o.id, rotation: a.rotation, pitch: a.pitch });
   }
-  // Looking around at a position saves the view to it when you let go (not while walking a run).
-  rig.controls.addEventListener("end", () => { if (!box.hidden && index >= 0 && !running) saveView(); });
+  // Looking around at the start or a position saves the view to it when you let go (not while
+  // walking a run).
+  rig.controls.addEventListener("end", () => { if (!box.hidden && !running && (index >= 0 || editor.stage().start)) saveView(); });
 
   return {
     step,
-    /** The Shooter's eye button: back to the start and show the bar (with a hint if there are no positions). */
-    reset() { stopRun(); rig.stopWalk(); index = -1; at = -1; box.hidden = false; go({ walk: false }); },
+    /**
+     * The Shooter's eye button: show the bar (with a hint if there are no positions) and stand at
+     * the selected shooting position, else at the start.
+     */
+    reset() {
+      stopRun(); rig.stopWalk();
+      const sel = editor.state?.selection ?? [];
+      const i = sel.length === 1 ? list().findIndex((p) => p.id === sel[0]) : -1;
+      index = i; at = i; box.hidden = false; go({ walk: false });
+    },
     update() { if (!box.hidden) describe(list()); },
     hide() { stopRun(); rig.stopWalk(); box.hidden = true; pad.hidden = true; onViewing(null); },
   };

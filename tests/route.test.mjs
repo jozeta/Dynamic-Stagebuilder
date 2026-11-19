@@ -98,3 +98,33 @@ test("walking a route, the shooter looks the way they walk, then turns to the po
   const mid = walkLook([[0, 0], [0, 10]], 0.5, { yaw: 180, pitch: 0 }, { yaw: 0, pitch: 0 });
   assert.ok(Math.abs(((mid.yaw % 360) + 360) % 360) < 1e-6, "turned into the walk by mid-route");
 });
+
+test("the walk rounds the route's corners and keeps its ends", async () => {
+  const { smoothRoute, legLength } = await import("../js/model/route.js");
+  const r = smoothRoute([[0, 0], [0, 6], [6, 6]]);
+  assert.deepEqual(r[0], [0, 0]);
+  assert.deepEqual(r.at(-1), [6, 6]);
+  assert.ok(!r.some((p) => p[0] === 0 && p[1] === 6), "the corner itself is cut");
+  for (let i = 2; i < r.length; i++) {
+    const a = Math.atan2(r[i - 1][0] - r[i - 2][0], r[i - 1][1] - r[i - 2][1]), b = Math.atan2(r[i][0] - r[i - 1][0], r[i][1] - r[i - 1][1]);
+    assert.ok(Math.abs(b - a) < 0.25, "no sharp turn");
+  }
+  assert.ok(legLength(r) < 12 && legLength(r) > 11);
+  assert.deepEqual(smoothRoute([[0, 0], [0, 5]]), [[0, 0], [0, 5]]);
+});
+
+test("the walk eases in, keeps a steady pace, eases out", async () => {
+  const { walkMotion } = await import("../js/model/route.js");
+  const m = walkMotion(13);
+  assert.ok(m.duration > 5 && m.duration < 6.5, `13 m at a jog: ${m.duration}`);
+  assert.equal(m.at(0), 0);
+  assert.ok(Math.abs(m.at(m.duration) - 13) < 1e-9);
+  let last = 0, lastV = 0;
+  for (let t = 0.02; t <= m.duration; t += 0.02) {
+    const s = m.at(t), v = (s - last) / 0.02;
+    assert.ok(s >= last - 1e-12, "never goes back");
+    assert.ok(Math.abs(v - lastV) < 0.2, `no jolt at ${t.toFixed(2)} s`);
+    last = s; lastV = v;
+  }
+  assert.ok(walkMotion(0.3).duration >= 0.5, "even a short step takes a moment");
+});

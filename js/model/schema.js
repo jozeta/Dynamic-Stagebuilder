@@ -109,7 +109,13 @@ export function validateStage(json) {
   let start = null;
   if (json.start !== null && json.start !== undefined) {
     if (!isObj(json.start)) err("start", "must be an object or null");
-    else start = { position: inBay(json.start.position, "start.position"), facing: num(json.start.facing, "start.facing", -1e6, 1e6) };
+    else {
+      start = { position: inBay(json.start.position, "start.position"), facing: num(json.start.facing, "start.facing", -1e6, 1e6) };
+      if (json.start.view !== undefined) {
+        if (!isObj(json.start.view)) err("start.view", "must be an object");
+        else start.view = { yaw: num(json.start.view.yaw, "start.view.yaw", -1e6, 1e6), pitch: num(json.start.view.pitch, "start.view.pitch", -89, 89) };
+      }
+    }
   }
 
   const b = isObj(json.briefing) ? json.briefing : (err("briefing", "missing"), {});

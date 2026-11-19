@@ -4,6 +4,16 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- The start position has the shooter in it, posed as the briefing's start position says (wrists
+  above the shoulders, arms hanging, hands on the head, palms on the wall, seated, kneeling), with
+  the pistol in a holster on the belt unless it starts on a table or in a case; "facing up range"
+  turns him round. Shooter's eye at the start uses the pose's eye height, and looking around
+  there saves the view (one undo step).
+- With a shooting position selected, Shooter's eye opens at that position.
+- Smoother walks between positions: rounded corners, a steady jogging pace that eases in and out,
+  getting up and dropping into the next stance at the ends, and turns that begin a little early.
+- Fix: Shooter's eye at a start turned sideways looked the mirror-image way from the box's arrow.
+
 - Shooting positions show a detailed, see-through grey man in the stance: a shaped torso and
   tapered limbs, a cap, shooting glasses and ear muffs, shoes, and both hands round a pistol with
   slide, frame, angled grip, trigger guard, trigger and sights. Only its outer surface is drawn,

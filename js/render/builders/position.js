@@ -68,6 +68,17 @@ function merge(geoms) {
   return g;
 }
 
+/** A see-through grey figure from its parts (model/positions.js figureParts): two meshes, one geometry. */
+export function figureMeshes(parts) {
+  const body = merge(parts.map(partGeometry).filter(Boolean));
+  const depth = new THREE.Mesh(body, getMaterial("position-ghost-depth"));
+  const skin = new THREE.Mesh(body, getMaterial("position-ghost"));
+  depth.renderOrder = 1;
+  skin.renderOrder = 2;
+  for (const m of [depth, skin]) { m.castShadow = false; m.receiveShadow = false; }
+  return [depth, skin];
+}
+
 export function buildShootingPosition(obj) {
   const st = STANCES.find((s) => s.id === obj.params.stance) || STANCES[0];
   const g = group(obj.id);
@@ -81,12 +92,7 @@ export function buildShootingPosition(obj) {
   a.rotation.x = -Math.PI / 2;                     // shape −y → world +z: points the way the shooter faces
   a.position.y = 0.002;
   g.add(a);
-  const body = merge(st.parts.map(partGeometry).filter(Boolean));
-  const depth = new THREE.Mesh(body, getMaterial("position-ghost-depth"));
-  const skin = new THREE.Mesh(body, getMaterial("position-ghost"));
-  depth.renderOrder = 1;
-  skin.renderOrder = 2;
-  for (const m of [depth, skin]) { m.castShadow = false; m.receiveShadow = false; g.add(m); }
+  g.add(...figureMeshes(st.parts));
   g.userData.size = positionSize(st.id);
   return g;
 }
