@@ -4,6 +4,7 @@
 import { h } from "./dom.js";
 import { mapModel, mapRegion } from "../model/map.js";
 import { briefingRows, briefingText } from "../model/briefing.js";
+import { setupRows, setupLines } from "../model/setup.js";
 
 const SVG = "http://www.w3.org/2000/svg";
 const MAP_WIDTH = 186;
@@ -89,7 +90,24 @@ function legend() {
   return h("ul", { class: "print-legend" }, entries.map(([label, draw]) => h("li", {}, [sw(draw), h("span", { text: label })])));
 }
 
-export function renderPrint(root, stage, snapshot, { threeD = true } = {}) {
+// The setup sheet page: where each prop goes, from the shooter's-left side line and the up-range
+// edge, and to both up-range corners (two tapes).
+function setupSheet(stage) {
+  const m = (v) => v.toFixed(2);
+  const lines = setupLines(stage);
+  return h("section", { class: "print-setup" }, [
+    h("h2", { text: `Stage ${stage.briefing.stageNumber} – ${stage.name}: setup sheet` }),
+    h("p", { class: "print-meta", text: `Bay ${stage.bay.width} × ${stage.bay.depth} m. Measured from the up-range edge, looking down range: "from left" is from the left side line; the corners are the two up-range corners. Rotation 0° faces up range.` }),
+    h("table", { class: "print-stages print-setup-table" }, [
+      h("thead", {}, [h("tr", {}, ["", "Prop", "From left", "Down range", "To left corner", "To right corner", "Rotation"].map((t) => h("th", { text: t })))]),
+      h("tbody", {}, setupRows(stage).map((r) => h("tr", {}, [h("td", { text: r.label }), h("td", { text: r.name }),
+        ...[r.fromLeft, r.downRange, r.toLeftCorner, r.toRightCorner].map((v) => h("td", { class: "num", text: m(v) })), h("td", { class: "num", text: `${r.rotation}°` })]))),
+    ]),
+    lines.length ? h("ul", { class: "print-setup-lines" }, lines.map((l) => h("li", { text: `${l.name}: ${l.points.map(([a, b]) => `(${m(a)}, ${m(b)})`).join(" → ")}` }))) : null,
+  ]);
+}
+
+export function renderPrint(root, stage, snapshot, { threeD = true, setup = true } = {}) {
   const b = stage.briefing;
   const { procedure, notes } = briefingText(stage);
   const row = Object.fromEntries(briefingRows(stage).map((r) => [r.label, r.value]));
@@ -119,6 +137,7 @@ export function renderPrint(root, stage, snapshot, { threeD = true } = {}) {
       h("h2", { text: `Stage ${b.stageNumber} – ${stage.name}: 3D view` }),
       snapshot ? h("img", { src: snapshot, alt: "3D view of the stage" }) : h("p", { text: "3D view not available." }),
     ]) : null,
+    setup ? setupSheet(stage) : null,
   ];
   root.replaceChildren(...nodes.filter(Boolean));
 }
@@ -144,6 +163,6 @@ export function renderMatchPrint(root, match, stages) {
       h("tbody", {}, rows),
     ]),
   ]);
-  const pages = stages.map((st) => { const el = h("div", { class: "print-stage" }); renderPrint(el, st, null, { threeD: false }); return el; });
+  const pages = stages.map((st) => { const el = h("div", { class: "print-stage" }); renderPrint(el, st, null, { threeD: false, setup: false }); return el; });
   root.replaceChildren(cover, ...pages);
 }

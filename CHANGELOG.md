@@ -4,6 +4,10 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Setup sheet: the printed brief ends with a page listing where each prop goes, measured from the
+  left side line and the up-range edge and to both up-range corners (two tapes), with its rotation,
+  and the corner points of the fault lines and shooting areas.
+
 - Sight lines: select a shooting position to see which targets it sees (at its stance's eye
   height) and which are hidden, in the inspector, with a green sight line to each target seen.
 
