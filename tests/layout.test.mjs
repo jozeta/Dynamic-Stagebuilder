@@ -14,3 +14,13 @@ test("panel sizes are clamped to their limits and leave the 3D view at least 360
   assert.equal(clampPanel("inspectorHeight", 1000, 800), Math.round(800 * 0.6));
   assert.equal(clampPanel("inspectorHeight", 50, 800), PANEL_LIMITS.inspectorHeight[0]);
 });
+
+test("a new selection reveals the inspector; the same selection or clearing it doesn't", async () => {
+  const { revealOnSelect } = await import("../js/model/layout.js");
+  assert.equal(revealOnSelect([], ["a"]), true);
+  assert.equal(revealOnSelect(["a"], ["b"]), true);
+  assert.equal(revealOnSelect(["a"], ["a", "b"]), true);
+  assert.equal(revealOnSelect(["a"], ["a"]), false, "unchanged: you can fold it away while it's selected");
+  assert.equal(revealOnSelect(["a"], []), false);
+  assert.equal(revealOnSelect(["a", "b"], ["b", "a"]), false, "same items in another order");
+});

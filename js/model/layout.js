@@ -13,3 +13,9 @@ export function clampPanel(name, px, room, other = null) {
   else hi = Math.min(hi0, Math.max(lo, room - MIN_VIEW - (other ?? DEFAULT_SIZES[name === "library" ? "inspector" : "library"])));
   return Math.round(Math.min(hi, Math.max(lo, px)));
 }
+
+/** Should a selection change unfold the inspector? Yes when something new is selected. */
+export function revealOnSelect(prev, next) {
+  if (!next.length) return false;
+  return next.some((id) => !prev.includes(id));
+}

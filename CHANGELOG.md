@@ -4,6 +4,9 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Selecting a prop brings its settings into view: a folded inspector unfolds, and Settings (which
+  shares that panel) closes. Folding it again while the prop stays selected keeps it folded.
+
 - Clouds over the Outdoor range: a soft cloud layer painted in code, thinning out toward the
   horizon and warmed by the evening sun. With Play on they drift with the wind; Pause holds them.
   Settings → Environment: Clouds (amount, 0 % = clear), Cloud speed and Wind direction, saved

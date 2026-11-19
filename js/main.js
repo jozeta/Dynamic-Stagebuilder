@@ -35,6 +35,7 @@ import { loadHidden, saveHidden, loadView, saveView, loadWalkSpeed, saveWalkSpee
 import { withRunPart } from "./model/run-look.js";
 import { setRunLook } from "./render/materials.js";
 import { walkSpeed } from "./model/route.js";
+import { revealOnSelect } from "./model/layout.js";
 import { activationLinks } from "./model/activation.js";
 import { createAutosave } from "./storage/autosave.js";
 
@@ -99,8 +100,20 @@ engine.onRender(() => {
 });
 engine.onRender(() => fadeFigures(engine.groups.stage, engine.camera));   // figures fade as the camera comes close
 
+// Selecting something new brings its settings into view: the inspector unfolds, and Settings (which
+// shares that panel) closes.
+let shownSelection = [];
+function revealInspector(selection) {
+  const reveal = revealOnSelect(shownSelection, selection);
+  shownSelection = [...selection];
+  if (!reveal) return;
+  if (settings?.isOpen) settings.close();
+  if (folds.inspector?.collapsed) folds.inspector.set(false);
+}
+
 function render(state) {
   const stage = state.history.present;
+  revealInspector(state.selection);
   view.sync(stage);
   animator.sync(stage);
   playButton?.update();
