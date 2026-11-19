@@ -5,9 +5,23 @@
 // IPSC Popper 85 cm tall with a 30 cm head, Mini Popper 2/3 of that (Appendix C2); plates 15–30 cm
 // (Appendix C3a). The appendix drawings are images, so these are the commonly published sizes.
 
+// Paper target card sizes per style (see render/builders/target-shape.js): the octagonal Classic
+// 45 × 57 cm (mini 30 × 37.5 cm) and the tall target with a head 46 × 76 cm (mini 31 × 51 cm).
+export const PAPER_SIZES = Object.freeze({
+  classic: Object.freeze({ ipsc: Object.freeze({ w: 0.45, h: 0.57 }), mini: Object.freeze({ w: 0.3, h: 0.375 }) }),
+  head: Object.freeze({ ipsc: Object.freeze({ w: 0.46, h: 0.76 }), mini: Object.freeze({ w: 0.31, h: 0.51 }) }),
+});
+export const TARGET_STYLES = ["classic", "head"];
+
+/** The card size { w, h } of a paper target or no-shoot, for its style. */
+export function paperSize(obj) {
+  const style = obj.params?.style === "head" ? "head" : "classic";
+  return PAPER_SIZES[style][obj.type.endsWith("mini") ? "mini" : "ipsc"];
+}
+
 export const TARGET_SIZES = Object.freeze({
-  ipsc: Object.freeze({ w: 0.46, h: 0.58 }),
-  mini: Object.freeze({ w: 0.31, h: 0.39 }),
+  ipsc: PAPER_SIZES.classic.ipsc,
+  mini: PAPER_SIZES.classic.mini,
   popper: Object.freeze({ w: 0.30, h: 0.85, d: 0.30 }),
   miniPopper: Object.freeze({ w: 0.20, h: 0.57, d: 0.25 }),
 });
@@ -27,7 +41,8 @@ export const TABLE = Object.freeze({ height: 0.75, depth: 0.75 });
 export const TYRE = Object.freeze({ diameter: 0.65, height: 0.22 });
 export const BARREL = Object.freeze({ diameter: 0.58, height: 0.88 });
 
-const mount = { mountHeight: { default: 0.7, min: 0.1, max: 2.0, step: 0.05 } };
+// Paper targets: the stand height (how high the sticks hold the card's bottom edge) and the style.
+const mount = { mountHeight: { default: 0.7, min: 0.1, max: 2.0, step: 0.05 }, style: { default: "classic", options: TARGET_STYLES } };
 const paint = (d) => ({ paint: { default: d, options: ["white", "yellow"] } });
 const meshLook = { mesh: { default: "orange", options: ["orange", "black", "blue"] }, frame: { default: "wood", options: ["wood", "black"] } };
 const port = {
@@ -111,10 +126,10 @@ export function dimensionsOf(obj) {
   const p = { ...defaultParams(obj.type), ...obj.params };
   let w, h, d;
   switch (obj.type) {
-    case "paper-ipsc": case "noshoot":
-      [w, h, d] = [Math.max(TARGET_SIZES.ipsc.w, STAND.w), p.mountHeight + TARGET_SIZES.ipsc.h, STAND.d]; break;
-    case "paper-mini": case "noshoot-mini":
-      [w, h, d] = [Math.max(TARGET_SIZES.mini.w, STAND.w), p.mountHeight + TARGET_SIZES.mini.h, STAND.d]; break;
+    case "paper-ipsc": case "noshoot": case "paper-mini": case "noshoot-mini": {
+      const c = paperSize({ type: obj.type, params: p });
+      [w, h, d] = [Math.max(c.w, STAND.w), p.mountHeight + c.h, STAND.d]; break;
+    }
     case "popper": {
       const s = TARGET_SIZES.popper; [w, h, d] = [s.w, p.baseHeight + s.h, s.d]; break;
     }

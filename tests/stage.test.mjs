@@ -10,7 +10,7 @@ test("createStage defaults", () => {
   assert.equal(s.schema, 1);
   assert.equal(s.name, "Stage 1");
   assert.deepEqual(s.bay, { width: 20, depth: 30 });
-  assert.deepEqual(s.settings, { grid: 0.25, angleSnap: 15, environment: "outdoor", objectSnap: true, look: { ...LOOK_DEFAULTS } });
+  assert.deepEqual(s.settings, { grid: 0.25, angleSnap: 15, environment: "outdoor", objectSnap: true, look: { ...LOOK_DEFAULTS }, targetStyle: "classic" });
   assert.deepEqual(s.objects, []);
   assert.deepEqual(s.lines, []);
   assert.equal(s.start, null);

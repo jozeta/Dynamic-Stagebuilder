@@ -1,7 +1,7 @@
 // The prop library: search plus Paper, Steel, Walls and Obstacles. Tap an item to arm it, then tap
 // the ground; with a mouse, items can also be dragged onto the 3D view.
 import { h } from "./dom.js";
-import { PROPS, defaultParams, TARGET_SIZES, BARREL, TYRE, CAR, PALLET } from "../model/props.js";
+import { PROPS, defaultParams, TARGET_SIZES, BARREL, TYRE, CAR, PALLET, paperSize } from "../model/props.js";
 import { icon } from "./dom.js";
 
 const CATEGORIES = [["paper", "Paper"], ["steel", "Steel"], ["wall", "Walls"], ["structure", "Structures"], ["obstacle", "Obstacles and range furniture"]];
@@ -12,8 +12,7 @@ function sizeText(type) {
   const p = defaultParams(type);
   const face = (s) => `${cm(s.w)} × ${cm(s.h)} cm`;
   switch (type) {
-    case "paper-ipsc": case "noshoot": return face(TARGET_SIZES.ipsc);
-    case "paper-mini": case "noshoot-mini": return face(TARGET_SIZES.mini);
+    case "paper-ipsc": case "noshoot": case "paper-mini": case "noshoot-mini": return `${face(paperSize({ type, params: p }))}, classic or with head`;
     case "popper": return `${cm(TARGET_SIZES.popper.h)} cm tall`;
     case "mini-popper": return `${cm(TARGET_SIZES.miniPopper.h)} cm tall`;
     case "plate-round": return `Ø ${cm(p.size)} cm`;

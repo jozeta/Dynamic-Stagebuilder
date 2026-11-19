@@ -99,7 +99,9 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
       else for (const id of ids) state.selection = state.selection.includes(id) ? state.selection.filter((x) => x !== id) : [...state.selection, id];
     },
     place({ propType, position, rotation = 0 }) {
-      const r = addObject(present(), propType, position, snapAngle(rotation, present().settings.angleSnap));
+      // Paper targets take the stage's default style (Settings → Default target style).
+      const extra = getProp(propType).params.style ? { style: present().settings.targetStyle || "classic" } : {};
+      const r = addObject(present(), propType, position, snapAngle(rotation, present().settings.angleSnap), extra);
       const obj = r.stage.objects.find((o) => o.id === r.id);
       edit(updateObject(r.stage, r.id, { position: landing(r.stage, obj, position) }));
       state.selection = [r.id];
@@ -153,6 +155,7 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
     },
     setEnvironment({ name }) { state.history = replacePresent(state.history, setSetting(present(), "environment", name)); },
     setSetting({ key, value }) {
+      if (key === "targetStyle" && value !== "classic" && value !== "head") return;
       if (key === "grid" && value) lastGrid = value;
       edit(setSetting(present(), key, value));
     },

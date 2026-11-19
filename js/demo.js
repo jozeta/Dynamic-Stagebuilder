@@ -27,7 +27,10 @@ export function demoStage() {
   add("wall-wood", [-0.5, 12.5], 0, { length: 1.2, height: 1.2 });
 
   // Targets on stands behind the walls.
-  for (const [p, r] of [[[-6.4, 11], 0], [[-5, 11.6], 10], [[-2.4, 14.5], 0], [[0.9, 15.4], -10], [[3.4, 16.2], 0], [[7.2, 15.6], -20]]) add("paper-ipsc", p, r);
+  // Classic octagon targets, and two with a head, so both IPSC versions show.
+  for (const [p, r, style] of [[[-6.4, 11], 0], [[-5, 11.6], 10], [[-2.4, 14.5], 0, "head"], [[0.9, 15.4], -10, "head"], [[3.4, 16.2], 0], [[7.2, 15.6], -20]]) {
+    add("paper-ipsc", p, r, style ? { style } : {});
+  }
   add("noshoot", [-1.6, 14.7]);
   add("barrel", [5.3, 12.6]);
   add("paper-mini", [5.3, 12.05], 0, { mountHeight: 0.95 });

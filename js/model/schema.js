@@ -1,7 +1,7 @@
 // Validation for stage JSON from untrusted places (imported files, browser storage). It builds a
 // fresh stage from known keys only, so unknown and "__proto__" keys never get through, and it
 // rejects the whole stage on any error: nothing is ever applied halfway.
-import { PROPS } from "./props.js";
+import { PROPS, TARGET_STYLES } from "./props.js";
 import { cleanLook } from "./look.js";
 
 export const SCHEMA_VERSION = 1;
@@ -50,6 +50,8 @@ export function validateStage(json) {
 
   const settings = isObj(json.settings) ? json.settings : (err("settings", "missing"), {});
   if (!ENVIRONMENTS.includes(settings.environment)) err("settings.environment", `unknown environment ${JSON.stringify(settings.environment)}`);
+  const targetStyle = settings.targetStyle ?? "classic";
+  if (!TARGET_STYLES.includes(targetStyle)) err("settings.targetStyle", `must be one of ${TARGET_STYLES.join(", ")}`);
 
   const objectsIn = Array.isArray(json.objects) ? json.objects : (err("objects", "must be a list"), []);
   if (objectsIn.length > LIMITS.objects) err("objects", `more than ${LIMITS.objects} objects`);
@@ -110,7 +112,7 @@ export function validateStage(json) {
     name: str(json.name, "name", LIMITS.name),
     bay: { width, depth },
     settings: { grid: num(settings.grid, "settings.grid", 0, 5), angleSnap: num(settings.angleSnap, "settings.angleSnap", 0, 90),
-      environment: settings.environment, objectSnap: settings.objectSnap !== false, look: cleanLook(settings.look) },
+      environment: settings.environment, objectSnap: settings.objectSnap !== false, look: cleanLook(settings.look), targetStyle },
     objects, lines, start, briefing, camera,
   };
   return errors.length ? { ok: false, errors } : { ok: true, stage };

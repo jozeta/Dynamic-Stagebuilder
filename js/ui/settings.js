@@ -1,4 +1,5 @@
-// The environment settings dialog: surroundings, time of day, light, shadows, haze and exposure.
+// The settings dialog: surroundings, the default IPSC target style, time of day, light, shadows,
+// haze and exposure.
 // Sliders apply live while dragging; settings are saved with the stage but aren't undo steps.
 import { h } from "./dom.js";
 import { ENVIRONMENT_NAMES, ENVIRONMENT_LABELS } from "../render/environments/index.js";
@@ -16,7 +17,7 @@ export function createSettings({ editor }) {
   const d = (a) => editor.dispatch(a);
   const body = h("div", { class: "lg-modal-body settings-body" });
   const dialog = h("dialog", { class: "lg-modal", id: "settings", "aria-labelledby": "settings-title" }, [
-    h("h2", { class: "lg-modal-title", id: "settings-title", text: "Environment settings" }),
+    h("h2", { class: "lg-modal-title", id: "settings-title", text: "Settings" }),
     body,
     h("div", { class: "lg-modal-actions" }, [
       h("button", { type: "button", class: "lg-btn", onclick: () => { d({ type: "setLook", reset: true }); fill(); }, text: "Reset to defaults" }),
@@ -47,8 +48,17 @@ export function createSettings({ editor }) {
     });
     const shadows = h("input", { type: "checkbox", class: "lg-toggle", id: "set-shadows", onchange: (e) => d({ type: "setLook", patch: { shadows: e.target.checked } }) });
     shadows.checked = look.shadows;
+    // Default style for new IPSC paper targets (each target can still be switched in its properties).
+    const ts = h("div", { class: "lg-segmented", role: "radiogroup", "aria-label": "Default target style" });
+    for (const [value, label] of [["classic", "Classic (octagon)"], ["head", "With head"]]) {
+      const id = `set-ts-${value}`;
+      const input = h("input", { type: "radio", name: "set-ts", id, value, onchange: () => d({ type: "setSetting", key: "targetStyle", value }) });
+      input.checked = (st.targetStyle || "classic") === value;
+      ts.append(input, h("label", { for: id, text: label }));
+    }
     body.replaceChildren(
       h("div", { class: "settings-row" }, [h("span", { class: "settings-label", text: "Surroundings" }), env]),
+      h("div", { class: "settings-row" }, [h("span", { class: "settings-label", text: "Default target style" }), ts]),
       ...rows.slice(0, 3),
       h("div", { class: "settings-row" }, [h("label", { for: "set-shadows", text: "Shadows" }), shadows]),
       ...rows.slice(3),

@@ -4,6 +4,14 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Two IPSC target versions at their real sizes: **Classic** (octagon, 45 × 57 cm; mini 30 ×
+  37.5 cm) and **With head** (46 × 76 cm; mini 31 × 51 cm), each with printed dotted A/C zone
+  outlines and letters on corrugated card. Each paper target and no-shoot has a *Target style*
+  switch; *Settings → Default target style* sets the style of new targets (Classic by default).
+  Older stages' targets read as Classic.
+- The paper targets' height setting is now called *Stand height* (how high the sticks hold the
+  card's bottom edge, 0.1–2 m).
+
 - Ground: a photo-scanned sand-and-gravel texture (Poly Haven "Gravelly Sand", CC0, kept in
   `vendor/textures/`) with colour, normal, roughness and AO, graded toward a dusty tan; many
   more random stones in four sizes, the larger ones broken and angular, scattered everywhere.

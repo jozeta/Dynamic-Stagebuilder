@@ -5,7 +5,7 @@ import { defaultParams, getProp } from "./props.js";
 import { LOOK_DEFAULTS } from "./look.js";
 
 const newId = () => crypto.randomUUID();
-const SETTINGS = ["grid", "angleSnap", "environment", "objectSnap", "look"];
+const SETTINGS = ["grid", "angleSnap", "environment", "objectSnap", "look", "targetStyle"];
 
 export function createStage({ name = "Stage 1", width = 20, depth = 30 } = {}) {
   return {
@@ -13,7 +13,7 @@ export function createStage({ name = "Stage 1", width = 20, depth = 30 } = {}) {
     id: newId(),
     name,
     bay: { width, depth },
-    settings: { grid: 0.25, angleSnap: 15, environment: "outdoor", objectSnap: true, look: { ...LOOK_DEFAULTS } },
+    settings: { grid: 0.25, angleSnap: 15, environment: "outdoor", objectSnap: true, look: { ...LOOK_DEFAULTS }, targetStyle: "classic" },
     objects: [],
     lines: [],
     start: null,

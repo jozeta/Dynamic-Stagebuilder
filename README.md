@@ -16,7 +16,8 @@ training, and want a clear briefing sheet without drawing the map by hand.
 
 - **Shooting bay** at real scale: width × depth in metres (default 20 × 30 m), 1 m grid.
 - **Prop library**, every prop drawn in 3D at real dimensions:
-  - paper: IPSC target, mini target, no-shoot, mini no-shoot (on sticks, adjustable height)
+  - paper: IPSC target, mini target, no-shoot, mini no-shoot, each in two versions, Classic
+    (octagon, 45 × 57 cm) or With head (46 × 76 cm), on sticks with an adjustable stand height
   - steel: IPSC popper, mini popper, round plate, square plate
   - walls: mesh wall and mesh wall with port (orange safety netting, or black or blue wire mesh,
     in a light pine or black frame on feet),
@@ -147,9 +148,10 @@ Stage settings are in the inspector when nothing is selected. They are saved wit
 | Shadows, Shadow softness | *Settings*: on/off, 0 (sharp) – 8 | On, 1 |
 | Haze | *Settings*: 0 (clear) – 100 % (Outdoor only) | 20 % |
 | Exposure | *Settings*: 0.5–1.6 | 1.00 |
+| Default target style | *Settings*: Classic (octagon) or With head, for new paper targets | Classic |
 
-Prop settings (inspector, one prop selected): label (targets), rotation, and per prop: mount height
-for paper targets (0.1–2 m, default 0.7 m to the target's bottom), base height for steel, plate size
+Prop settings (inspector, one prop selected): label (targets), rotation, and per prop: stand height
+for paper targets (0.1–2 m, default 0.7 m to the card's bottom), target style (Classic or With head), base height for steel, plate size
 (15–30 cm), wall length (0.5–4 m) and height (0.5–2.5 m), mesh colour (black/blue), frame
 (wood/black), port width, height and bottom edge, door width and height, paint for poppers and
 plates (white/yellow), barrel and car colour, ramp and platform length, width and height, table

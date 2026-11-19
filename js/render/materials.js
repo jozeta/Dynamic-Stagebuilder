@@ -2,8 +2,8 @@
 // painted on canvases in code (no downloads): square wire mesh, pine, plywood, cardboard. In Node
 // (tests) there is no canvas, so plain colours are used.
 import * as THREE from "three";
-import { OUTLINE, ZONES, GRID } from "./builders/target-shape.js";
-import { TARGET_SIZES } from "../model/props.js";
+import { STYLES } from "./builders/target-shape.js";
+import { PAPER_SIZES } from "../model/props.js";
 
 const cache = new Map();
 const hasDom = typeof document !== "undefined";
@@ -256,25 +256,29 @@ function coneTexture() {
   }, { seed: 23 });
 }
 
-// The printed face of a cardboard target: tan board with darker brown scoring-zone outlines.
+// The printed face of a cardboard target: corrugated tan board (or off-white for no-shoots) with
+// darker dotted scoring-zone outlines and their letters, for the given style (classic / head).
 // Extrude cap UVs are in metres, so the texture is placed with repeat/offset over the card size.
-function cardTexture({ base, line, fibres }, size) {
-  const W = 512, H = Math.round((W * GRID.h) / GRID.w);
+function cardTexture({ base, line, fibres }, style, size) {
+  const { grid, outline, zones, letters } = STYLES[style];
+  const W = 512, H = Math.round((W * grid.h) / grid.w);
   const c = document.createElement("canvas");
   c.width = W; c.height = H;
   const g = c.getContext("2d");
   const r = (() => { let x = 7; return () => ((x = (x * 1664525 + 1013904223) >>> 0) / 4294967296); })();
-  const px = ([x, y]) => [((x + GRID.w / 2) / GRID.w) * W, H - (y / GRID.h) * H];
+  const px = ([x, y]) => [((x + grid.w / 2) / grid.w) * W, H - (y / grid.h) * H];
   g.fillStyle = base; g.fillRect(0, 0, W, H);
+  for (let x = 0; x < W; x += 6) { g.fillStyle = `rgba(0,0,0,${0.03 + r() * 0.03})`; g.fillRect(x, 0, 2, H); }  // corrugation
   for (let i = 0; i < 2600; i++) { const v = r() > 0.5 ? 255 : 70; g.fillStyle = `rgba(${v},${v * 0.82},${v * 0.6},${fibres})`; g.fillRect(r() * W, r() * H, 2, 2); }
-  g.strokeStyle = line; g.lineJoin = "round";
-  g.lineWidth = 5;
-  g.beginPath(); OUTLINE.forEach((p, i) => { const [x, y] = px(p); i ? g.lineTo(x, y) : g.moveTo(x, y); }); g.closePath(); g.stroke();
-  g.lineWidth = 4;
-  for (const [x, y, w, h] of ZONES) {
-    const [x0, y0] = px([x, y + h]), [x1, y1] = px([x + w, y]);
-    g.strokeRect(x0, y0, x1 - x0, y1 - y0);
-  }
+  const poly = (pts) => { g.beginPath(); pts.forEach((p, i) => { const [x, y] = px(p); i ? g.lineTo(x, y) : g.moveTo(x, y); }); g.closePath(); g.stroke(); };
+  g.strokeStyle = line; g.lineJoin = "round"; g.lineWidth = 4;
+  poly(outline);
+  g.setLineDash([7, 5]); g.lineWidth = 3.2;
+  for (const z of zones) poly(z);
+  g.setLineDash([]);
+  g.fillStyle = line; g.font = `600 ${Math.round(W * 0.05)}px -apple-system, "Segoe UI", sans-serif`;
+  g.textAlign = "center"; g.textBaseline = "middle";
+  for (const [t, x, y] of letters) { const [cx, cy] = px([x, y]); g.fillText(t, cx, cy); }
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
   t.anisotropy = 8;
@@ -282,6 +286,10 @@ function cardTexture({ base, line, fibres }, size) {
   t.offset.set(0.5, 0);
   return t;
 }
+
+const CARD_INK = { base: "#d0a16a", line: "#7d5430", fibres: 0.05 };
+const NOSHOOT_INK = { base: "#ece8de", line: "#8f8a80", fibres: 0.03 };
+const card = (ink, style, size) => () => std({ roughness: 0.95, ...(hasDom ? { map: cardTexture(ink, style, PAPER_SIZES[style][size]) } : { color: ink.base }) });
 
 function steelSheet() {
   return canvasTexture(256, (g, s, r) => {
@@ -304,10 +312,14 @@ const mapped = (tex, fallback, extra = {}) => std({ roughness: 0.85, ...(hasDom 
 
 const specs = {
   "target-tan": () => mapped(cardboard, 0xcfa06a, { roughness: 0.95 }),
-  "card-ipsc": () => std({ roughness: 0.95, ...(hasDom ? { map: cardTexture({ base: "#d0a16a", line: "#8a5d33", fibres: 0.05 }, TARGET_SIZES.ipsc) } : { color: 0xd0a16a }) }),
-  "card-mini": () => std({ roughness: 0.95, ...(hasDom ? { map: cardTexture({ base: "#d0a16a", line: "#8a5d33", fibres: 0.05 }, TARGET_SIZES.mini) } : { color: 0xd0a16a }) }),
-  "noshoot-ipsc": () => std({ roughness: 0.95, ...(hasDom ? { map: cardTexture({ base: "#f2efe6", line: "#9a958a", fibres: 0.03 }, TARGET_SIZES.ipsc) } : { color: 0xf2efe6 }) }),
-  "noshoot-mini": () => std({ roughness: 0.95, ...(hasDom ? { map: cardTexture({ base: "#f2efe6", line: "#9a958a", fibres: 0.03 }, TARGET_SIZES.mini) } : { color: 0xf2efe6 }) }),
+  "card-classic-ipsc": card(CARD_INK, "classic", "ipsc"),
+  "card-classic-mini": card(CARD_INK, "classic", "mini"),
+  "card-head-ipsc": card(CARD_INK, "head", "ipsc"),
+  "card-head-mini": card(CARD_INK, "head", "mini"),
+  "noshoot-classic-ipsc": card(NOSHOOT_INK, "classic", "ipsc"),
+  "noshoot-classic-mini": card(NOSHOOT_INK, "classic", "mini"),
+  "noshoot-head-ipsc": card(NOSHOOT_INK, "head", "ipsc"),
+  "noshoot-head-mini": card(NOSHOOT_INK, "head", "mini"),
   "panel-grey": () => mapped(steelSheet, 0xc9ced2, { roughness: 0.55, metalness: 0.12 }),
   "card-edge": () => std({ color: 0x8b6a45, roughness: 1 }),
   "steel-white": () => std({ color: 0xeeece4, roughness: 0.55, metalness: 0.15 }),
