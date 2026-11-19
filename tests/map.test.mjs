@@ -57,3 +57,32 @@ test("the scale bar is 5 m, or 2 m for a small bay", () => {
   near(bar.length, 5 * m.scale);
   assert.equal(mapModel(createStage({ width: 8, depth: 8 }), BOX).items.find((i) => i.kind === "scalebar").metres, 2);
 });
+
+test("the printed map can crop to what is on the stage, at a larger scale", async () => {
+  const { addObject } = await import("../js/model/stage.js");
+  let s = createStage({ width: 30, depth: 40 });
+  s = addObject(s, "paper-ipsc", [2, 10]).stage;
+  s = addObject(s, "barrel", [-3, 14]).stage;
+  const bay = mapModel(s, BOX), crop = mapModel(s, { ...BOX, region: "content" });
+  assert.ok(crop.scale > bay.scale * 2, `${crop.scale} vs ${bay.scale}`);
+  for (const it of crop.items.filter((i) => i.kind === "rect" || i.kind === "circle")) {
+    assert.ok(it.x > 0 && it.x < BOX.width && it.y > 0 && it.y < BOX.height, "objects stay inside the box");
+  }
+});
+
+test("labels of targets standing close together don't overlap", async () => {
+  const { addObject } = await import("../js/model/stage.js");
+  const { assignLabels } = await import("../js/model/numbering.js");
+  let s = createStage({ width: 20, depth: 30 });
+  for (const x of [0, 0.4, 0.8, 1.2]) s = addObject(s, "popper", [x, 10]).stage;
+  s = addObject(s, "paper-ipsc", [0.2, 10.3]).stage;
+  const labels = mapModel(assignLabels(s), { ...BOX, region: "content" }).items.filter((i) => i.kind === "label");
+  assert.equal(labels.length, 5);
+  assert.ok(labels.every((l) => l.w > 0 && l.h > 0), "labels carry their size");
+  const box = (l) => ({ x0: l.x - l.w / 2, x1: l.x + l.w / 2, y0: l.y - l.h, y1: l.y });
+  for (let i = 0; i < labels.length; i++) for (let j = i + 1; j < labels.length; j++) {
+    const a = box(labels[i]), b = box(labels[j]);
+    const overlap = a.x0 < b.x1 && b.x0 < a.x1 && a.y0 < b.y1 && b.y0 < a.y1;
+    assert.ok(!overlap, `${labels[i].text} and ${labels[j].text} overlap`);
+  }
+});
