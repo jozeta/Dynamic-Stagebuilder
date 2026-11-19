@@ -20,7 +20,8 @@ export const TECHNICAL_LOOK = Object.freeze({ hour: 16, sun: 1.15, ambient: 1.1,
 export const BLUEPRINT_LOOK = Object.freeze({ hour: 13, sun: 0.9, ambient: 1.3, shadows: true, softness: 4, shadowStrength: 0.4, haze: 0, exposure: 1, ground: "sand" });
 
 /** The light defaults for a surroundings name ("outdoor", "technical" or "blueprint"). */
-export const lookDefaults = (environment) => (environment === "technical" ? TECHNICAL_LOOK : environment === "blueprint" ? BLUEPRINT_LOOK : LOOK_DEFAULTS);
+export const lookDefaults = (environment) => (environment === "technical" || String(environment).startsWith("custom:") ? TECHNICAL_LOOK
+  : environment === "blueprint" ? BLUEPRINT_LOOK : LOOK_DEFAULTS);
 const sameLook = (a, b) => Object.keys(b).every((k) => a?.[k] === b[k]);
 /** The look to use after switching surroundings: an untouched look follows to the new defaults. */
 export function lookAfterSwitch(look, from, to) {

@@ -6,6 +6,7 @@ import { createStage, addObject, updateObject, removeObjects, duplicateObjects, 
 import { createHistory, commit, replacePresent, undo, redo } from "./model/history.js";
 import { assignLabels, renumber, setLabel } from "./model/numbering.js";
 import { fitStand, arrayCounts, arrayExtent } from "./model/arrays.js";
+import { takeBuildingPieces, putBackPieces } from "./model/surroundings.js";
 import { snapPoint, snapAngle, clampToBay } from "./model/snap.js";
 import { getProp } from "./model/props.js";
 import { snapToObjects, SNAP_RADIUS } from "./model/objsnap.js";
@@ -153,6 +154,9 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
       const relabel = paper && !o.labelManual && arrayCounts({ type: o.type, params: next }).paper !== arrayCounts(o).paper;
       edit(updateObject(present(), id, { params: next, ...(relabel ? { label: null } : {}) }));
     },
+    // Your own surroundings: building pieces leave the stage for the template, or come back to edit.
+    takeBuilding() { edit(takeBuildingPieces(present()).stage); state.selection = []; },
+    putBackBuilding({ pieces }) { edit(putBackPieces(present(), pieces)); },
     // Shooter's eye → Save view: the facing and look angle of a shooting position, one undo step.
     setView({ id, rotation, pitch }) {
       const o = present().objects.find((x) => x.id === id);

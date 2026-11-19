@@ -3,7 +3,7 @@
 import { PROPS } from "./props.js";
 
 const CATEGORY_NAMES = [["paper", "Paper"], ["steel", "Steel"], ["moving", "Moving and reactive"], ["wall", "Walls"],
-  ["structure", "Structures"], ["obstacle", "Obstacles and range furniture"]];
+  ["structure", "Structures"], ["obstacle", "Obstacles and range furniture"], ["building", "Buildings and surroundings"]];
 
 // The stage markings (drawn on the ground) come first; then the prop categories.
 export const MARKINGS = Object.freeze([

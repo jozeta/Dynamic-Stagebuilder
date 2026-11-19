@@ -26,6 +26,8 @@ import { exportFileName, stageToJson } from "./storage/files.js";
 import { createProjects } from "./ui/projects.js";
 import { makeCollapsible } from "./ui/panels.js";
 import { createHelp } from "./ui/help.js";
+import { createSurroundings } from "./ui/surroundings.js";
+import { takeBuildingPieces } from "./model/surroundings.js";
 import { libraryStage } from "./model/stage-library.js";
 import { loadHidden, saveHidden } from "./ui/prefs.js";
 import { createAutosave } from "./storage/autosave.js";
@@ -62,12 +64,13 @@ const ACCENT = 0x5a93c4;
 
 const hint = document.getElementById("hint");
 const updaters = [];
+let surroundingsVersion = 0;       // bumped when your own surroundings change, so the 3D view rebuilds them
 
 function render(state) {
   const stage = state.history.present;
   view.sync(stage);
   if (viewing) { const v = viewing; viewing = null; viewingFrom(v); }   // rebuilt nodes: keep the viewed marker hidden
-  const key = `${stage.settings.environment}|${stage.bay.width}|${stage.bay.depth}`;
+  const key = `${stage.settings.environment}|${stage.bay.width}|${stage.bay.depth}|${surroundingsVersion}`;
   if (key !== envKey) { envKey = key; lookShown = stage.settings.look; engine.setEnvironment(stage.settings.environment, stage.bay, stage.settings.look); }
   else if (stage.settings.look !== lookShown) { lookShown = stage.settings.look; engine.setLook(stage.settings.look, stage.bay); }
 
@@ -274,7 +277,32 @@ const appEl = document.querySelector(".app");
 makeCollapsible(document.getElementById("library"), { app: appEl, name: "library", label: "props" });
 makeCollapsible(document.getElementById("inspector"), { app: appEl, name: "inspector", label: "inspector" });
 briefing = createBriefing({ editor });
+// Your own surroundings (templates in this browser); the store is ready once projects have opened.
+let mine = null;
+const mineApi = {
+  list: () => mine?.list() ?? [],
+  get: (id) => mine?.get(id) ?? null,
+  newFromPlan: () => mine?.newFromPlan() ?? Promise.resolve(null),
+  update: (id, patch) => mine?.update(id, patch),
+  remove: (id) => mine?.remove(id),
+  // Save: the building pieces leave the stage (one undo step) and join the template.
+  async savePieces(id) {
+    const t = mine?.get(id);
+    if (!t) return;
+    const { pieces } = takeBuildingPieces(editor.stage());
+    await mine.update(id, { pieces: [...t.pieces, ...pieces] });
+    editor.dispatch({ type: "takeBuilding" });
+  },
+  // Edit: the template's pieces come back onto the stage as ordinary props.
+  async editPieces(id) {
+    const t = mine?.get(id);
+    if (!t) return;
+    editor.dispatch({ type: "putBackBuilding", pieces: t.pieces });
+    await mine.update(id, { pieces: [] });
+  },
+};
 settings = createSettings({
+  mine: mineApi,
   editor,
   panel: document.getElementById("settings-panel"),
   hide: [document.getElementById("inspector-body"), document.getElementById("stats")],
@@ -290,6 +318,8 @@ rig.preset("iso", editor.stage());
 // Open the last project, else the newest, else save the example stage as the first project.
 (async () => {
   try { store = await openStore(); } catch (err) { console.warn(err); store = memoryStore(); }
+  mine = createSurroundings({ store: store.surroundings, onChange: () => { surroundingsVersion++; render(editor.state); } });
+  try { await mine.load(); surroundingsVersion++; } catch (err) { console.warn(err); }
   autosave = createAutosave({ store, getStage: () => editor.stage(), onStatus: onSaveStatus });
   autosave.markSaved(editor.stage());   // the example stage on screen is not a project until chosen below
   const all = sortProjects(await store.list());

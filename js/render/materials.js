@@ -501,6 +501,42 @@ function steelSheet() {
   }, { seed: 43 });
 }
 
+// Building surfaces: board-formed concrete, brick courses, corrugated steel, chain link.
+function concreteTex() {
+  return canvasTexture(512, (g, s, r) => {
+    g.fillStyle = "#b8b6b0"; g.fillRect(0, 0, s, s);
+    for (let i = 0; i < 3000; i++) { const v = 150 + r() * 70; g.fillStyle = `rgba(${v},${v},${v - 4},0.25)`; g.fillRect(r() * s, r() * s, 1 + r() * 3, 1 + r() * 3); }
+    g.strokeStyle = "rgba(70,70,70,0.25)"; g.lineWidth = 2;
+    for (let y = 0; y <= s; y += s / 4) { g.beginPath(); g.moveTo(0, y); g.lineTo(s, y); g.stroke(); }
+    for (let i = 0; i < 10; i++) { g.fillStyle = "rgba(90,85,80,0.12)"; g.beginPath(); g.ellipse(r() * s, r() * s, 30 + r() * 60, 8 + r() * 20, 0, 0, 7); g.fill(); }
+  }, { seed: 91, repeat: 0.5 });
+}
+function brickTex() {
+  return canvasTexture(512, (g, s, r) => {
+    g.fillStyle = "#c8c2b6"; g.fillRect(0, 0, s, s);
+    const bh = s / 8, bw = s / 4;
+    for (let row = 0; row < 8; row++) for (let i = -1; i < 5; i++) {
+      const x = i * bw + (row % 2 ? bw / 2 : 0), t = 0.8 + r() * 0.35;
+      g.fillStyle = `rgb(${Math.round(150 * t)},${Math.round(72 * t)},${Math.round(52 * t)})`;
+      g.fillRect(x + 3, row * bh + 3, bw - 6, bh - 6);
+    }
+  }, { seed: 92, repeat: 1 });
+}
+function corrugated(paint) {
+  return canvasTexture(256, (g, s, r) => {
+    g.fillStyle = paint; g.fillRect(0, 0, s, s);
+    for (let x = 0; x < s; x += 16) { const grd = g.createLinearGradient(x, 0, x + 16, 0); grd.addColorStop(0, "rgba(0,0,0,0.25)"); grd.addColorStop(0.5, "rgba(255,255,255,0.12)"); grd.addColorStop(1, "rgba(0,0,0,0.25)"); g.fillStyle = grd; g.fillRect(x, 0, 16, s); }
+    for (let i = 0; i < 300; i++) { g.fillStyle = `rgba(120,70,40,${r() * 0.15})`; g.fillRect(r() * s, r() * s, 2 + r() * 6, 1 + r() * 4); }
+  }, { seed: paint.length * 7, repeat: 1 });
+}
+function chainLink() {
+  return canvasTexture(128, (g, s) => {
+    g.clearRect(0, 0, s, s);
+    g.strokeStyle = "#c4c9cc"; g.lineWidth = 3;
+    g.beginPath(); g.moveTo(0, s / 2); g.lineTo(s / 2, 0); g.lineTo(s, s / 2); g.lineTo(s / 2, s); g.closePath(); g.stroke();
+  }, { seed: 93, repeat: 8, alpha: true });
+}
+
 const std = (o) => new THREE.MeshStandardMaterial(o);
 const carPaint = (color, roughness, clearcoat) => new THREE.MeshPhysicalMaterial({
   roughness: roughness + 0.12, metalness: 0.5, clearcoat: clearcoat * 0.6, clearcoatRoughness: 0.3,
@@ -535,6 +571,19 @@ const specs = {
   "card-edge": () => std({ color: 0x8b6a45, roughness: 1 }),
   "position-ring": () => new THREE.MeshBasicMaterial({ color: 0x2f7bff, side: THREE.DoubleSide, transparent: true, opacity: 0.9, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4 }),
   "position-ghost": () => new THREE.MeshStandardMaterial({ color: 0x4d8dff, transparent: true, opacity: 0.32, roughness: 0.6, depthWrite: false }),
+  // Building pieces.
+  "bld-concrete": () => mapped(concreteTex, 0xb4b2ac, { roughness: 0.95 }),
+  "bld-brick": () => mapped(brickTex, 0x9a4b34, { roughness: 0.9 }),
+  "bld-wood": () => mapped(roughBoards, 0xb08a5a, { roughness: 0.9 }),
+  "bld-metal": () => mapped(() => corrugated("#8d949a"), 0x8d949a, { roughness: 0.55, metalness: 0.5 }),
+  "bld-earth": () => std({ color: 0x8a6a4a, roughness: 1 }),
+  "container-blue": () => mapped(() => corrugated("#2f5a8a"), 0x2f5a8a, { roughness: 0.6, metalness: 0.4 }),
+  "container-red": () => mapped(() => corrugated("#8e2f25"), 0x8e2f25, { roughness: 0.6, metalness: 0.4 }),
+  "container-green": () => mapped(() => corrugated("#3f5f3a"), 0x3f5f3a, { roughness: 0.6, metalness: 0.4 }),
+  "container-grey": () => mapped(() => corrugated("#8a8f93"), 0x8a8f93, { roughness: 0.6, metalness: 0.4 }),
+  "container-rust": () => mapped(() => corrugated("#7c4a2e"), 0x7c4a2e, { roughness: 0.75, metalness: 0.3 }),
+  "fence-mesh": () => std({ color: 0xffffff, roughness: 0.6, metalness: 0.5, side: THREE.DoubleSide, alphaTest: 0.3, alphaToCoverage: true,
+    ...(hasDom ? { map: chainLink() } : { color: 0x9aa0a4, transparent: true, opacity: 0.4 }) }),
   "hard-cover": () => std({ color: 0x141414, roughness: 0.95, side: THREE.DoubleSide }),
   "steel-white": () => mapped(() => steelPaint("#e2ded4"), 0xe2ded4, { roughness: 0.7, metalness: 0.1 }),
   "steel-yellow": () => mapped(() => steelPaint("#dcb52a"), 0xdcb52a, { roughness: 0.65, metalness: 0.1 }),

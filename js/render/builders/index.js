@@ -5,6 +5,7 @@ import { buildPopper, buildPlate } from "./steel.js";
 import { buildMeshWall, buildMeshPortWall, buildWoodWall, buildPortWall, buildDoorWall, buildSolidWall } from "./walls.js";
 import { buildRamp, buildPlatform, buildTable, buildChair, buildPallet, buildSandbags, buildCone } from "./furniture.js";
 import { buildCar } from "./car.js";
+import { buildBuildingWall, buildPillar, buildColumn, buildBerm, buildContainer, buildFence, buildBarrier } from "./building.js";
 import { buildShootingPosition } from "./position.js";
 import { buildSwinger, buildDropTurner, buildClamshell, buildMover, buildTexasStar, buildPlateRack, buildDuelingTree } from "./moving.js";
 import { buildBarrel, buildTyre, buildCrate, buildPlant } from "./obstacles.js";
@@ -19,6 +20,7 @@ const BUILDERS = {
   ramp: buildRamp, platform: buildPlatform, car: buildCar, table: buildTable, chair: buildChair,
   pallet: buildPallet, sandbags: buildSandbags, cone: buildCone,
   "shooting-position": buildShootingPosition,
+  "building-wall": buildBuildingWall, pillar: buildPillar, column: buildColumn, berm: buildBerm, container: buildContainer, fence: buildFence, barrier: buildBarrier,
   swinger: buildSwinger, "drop-turner": buildDropTurner, clamshell: buildClamshell, mover: buildMover,
   "texas-star": buildTexasStar, "plate-rack": buildPlateRack, "dueling-tree": buildDuelingTree,
 };

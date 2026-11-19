@@ -56,7 +56,8 @@ export function validateStage(json) {
   };
 
   const settings = isObj(json.settings) ? json.settings : (err("settings", "missing"), {});
-  if (!ENVIRONMENTS.includes(settings.environment)) err("settings.environment", `unknown environment ${JSON.stringify(settings.environment)}`);
+  // Built-in surroundings, or your own ("custom:<id>", Settings → Surroundings → New from a plan).
+  if (!ENVIRONMENTS.includes(settings.environment) && !/^custom:[A-Za-z0-9-]{1,64}$/.test(String(settings.environment))) err("settings.environment", `unknown environment ${JSON.stringify(settings.environment)}`);
   const targetStyle = settings.targetStyle ?? "classic";
   if (!TARGET_STYLES.includes(targetStyle)) err("settings.targetStyle", `must be one of ${TARGET_STYLES.join(", ")}`);
 

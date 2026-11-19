@@ -35,6 +35,13 @@ function sizeText(type) {
     case "texas-star": return `${p.plates} plates, not IPSC`;
     case "plate-rack": return `${p.plates} plates, not IPSC`;
     case "dueling-tree": return "6 paddles, not IPSC";
+    case "building-wall": return `${p.length} × ${p.height} m, concrete, brick, wood or metal`;
+    case "pillar": return `${cm(p.size)} cm square, ${p.height} m`;
+    case "column": return `Ø ${cm(p.diameter)} cm, ${p.height} m`;
+    case "berm": return `${p.length} m long, ${p.height} m high`;
+    case "container": return "20 ft or 40 ft";
+    case "fence": return `${p.length} × ${p.height} m`;
+    case "barrier": return `${p.length} m jersey barrier`;
     case "wall-door": return `${p.length} × ${p.height} m, door ${cm(p.doorWidth)} cm`;
     default: return `${p.length} × ${p.height} m`;
   }

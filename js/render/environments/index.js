@@ -3,6 +3,8 @@
 import { technical } from "./technical.js";
 import { outdoor } from "./outdoor.js";
 import { blueprint } from "./blueprint.js";
+import { custom } from "./custom.js";
+export { setTemplate, removeTemplate, getTemplate } from "./custom.js";
 import { disposeGroup } from "./common.js";
 export { applyLook } from "./common.js";
 
@@ -11,7 +13,8 @@ export const ENVIRONMENT_NAMES = Object.keys(FACTORIES);
 export const ENVIRONMENT_LABELS = { technical: "Technical", outdoor: "Outdoor", blueprint: "Blueprint" };
 
 export function createEnvironment(name, bay, options = {}) {
-  const make = FACTORIES[name];
+  // Your own surroundings: "custom:<id>" (an unknown id still gives a plain floor).
+  const make = name.startsWith("custom:") ? (b, o) => custom(b, { ...o, templateId: name.slice(7) }) : FACTORIES[name];
   if (!make) throw new Error(`Unknown environment: ${name}`);
   const env = make(bay, options);
   return {

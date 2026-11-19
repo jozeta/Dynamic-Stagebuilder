@@ -87,6 +87,11 @@ export function starPlates(plates) {
   return out;
 }
 
+// Building pieces, to rebuild your own range on a plan (Settings → Surroundings → New from a plan).
+const MATERIAL = { material: { default: "concrete", options: ["concrete", "brick", "wood", "metal"] } };
+export const CONTAINERS = deepFreeze({ "20ft": { length: 6.06, width: 2.44, height: 2.59 }, "40ft": { length: 12.19, width: 2.44, height: 2.59 } });
+export const BARRIER = Object.freeze({ height: 0.81, base: 0.6 });
+
 const CARNIVAL = "USPSA and club matches; not allowed in IPSC matches (IPSC Target Array Handbook, January 2019 Edition, 4.1).";
 
 // Paper targets: the stand height (how high the sticks hold the card's bottom edge) and the style.
@@ -138,6 +143,21 @@ const defs = [
     params: { plates: { default: 6, min: 4, max: 8, step: 1 }, ...paint("white") }, note: `Falling plates in a row. ${CARNIVAL}` },
   { type: "dueling-tree", name: "Dueling tree", category: "moving", scoring: "steel", plates: () => 6,
     params: { ...paint("white") }, note: `Six paddles that swing over from one side of the post to the other. ${CARNIVAL}` },
+  { type: "building-wall", name: "Building wall", category: "building", scoring: null,
+    params: { length: { default: 5, min: 0.5, max: 30, step: 0.1 }, height: { default: 3, min: 0.5, max: 8, step: 0.1 },
+      thickness: { default: 0.25, min: 0.1, max: 0.8, step: 0.05 }, ...MATERIAL } },
+  { type: "pillar", name: "Pillar", category: "building", scoring: null,
+    params: { size: { default: 0.4, min: 0.15, max: 1.5, step: 0.05 }, height: { default: 3, min: 0.5, max: 8, step: 0.1 }, ...MATERIAL } },
+  { type: "column", name: "Round column", category: "building", scoring: null,
+    params: { diameter: { default: 0.4, min: 0.15, max: 1.5, step: 0.05 }, height: { default: 3, min: 0.5, max: 8, step: 0.1 }, ...MATERIAL } },
+  { type: "berm", name: "Earth berm", category: "building", scoring: null,
+    params: { length: { default: 10, min: 2, max: 60, step: 0.5 }, height: { default: 2.5, min: 0.5, max: 8, step: 0.1 }, depth: { default: 5, min: 1, max: 16, step: 0.5 } } },
+  { type: "container", name: "Shipping container", category: "building", scoring: null,
+    params: { size: { default: "20ft", options: ["20ft", "40ft"] }, color: { default: "blue", options: ["blue", "red", "green", "grey", "rust"] } } },
+  { type: "fence", name: "Chain-link fence", category: "building", scoring: null,
+    params: { length: { default: 5, min: 1, max: 30, step: 0.5 }, height: { default: 2, min: 1, max: 4, step: 0.1 } } },
+  { type: "barrier", name: "Concrete barrier", category: "building", scoring: null,
+    params: { length: { default: 2, min: 1, max: 4, step: 0.5 } } },
   { type: "wall-mesh", name: "Mesh wall", category: "wall", scoring: null,
     params: { ...wallSize, ...meshLook } },
   { type: "wall-mesh-port", name: "Mesh wall with port", category: "wall", scoring: null,
@@ -223,6 +243,13 @@ export function dimensionsOf(obj) {
     case "pallet": [w, h, d] = [PALLET.length, PALLET.height * p.count, PALLET.width]; break;
     case "sandbags": [w, h, d] = [p.length, SANDBAG.height * p.rows, SANDBAG.depth]; break;
     case "cone": [w, h, d] = [CONE.diameter, CONE.height, CONE.diameter]; break;
+    case "building-wall": [w, h, d] = [p.length, p.height, p.thickness]; break;
+    case "pillar": [w, h, d] = [p.size, p.height, p.size]; break;
+    case "column": [w, h, d] = [p.diameter, p.height, p.diameter]; break;
+    case "berm": [w, h, d] = [p.length, p.height, p.depth]; break;
+    case "container": { const c = CONTAINERS[p.size] || CONTAINERS["20ft"]; [w, h, d] = [c.length, c.height, c.width]; break; }
+    case "fence": [w, h, d] = [p.length, p.height, 0.5]; break;
+    case "barrier": [w, h, d] = [p.length, BARRIER.height, BARRIER.base]; break;
     case "shooting-position": { const s = positionSize(p.stance); [w, h, d] = [s.w, s.h, s.d]; break; }
     case "texas-star": {
       const s = MOVING.star, pts = starPlates(p.plates);
