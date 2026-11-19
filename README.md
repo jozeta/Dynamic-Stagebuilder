@@ -23,8 +23,12 @@ training, and want a clear briefing sheet without drawing the map by hand.
     no-shoot or a common competition array (no-shoots over a side or the lower half, between two
     no-shoots, overlapping targets, two targets with a no-shoot between, stacked), with painted
     hard cover (lower ¼, ⅓ or ½, left or right half, lower diagonal)
-  - moving and reactive: swinger, drop turner, clamshell, mover on a track, Texas star (5 or 10
-    plates), plate rack, dueling tree (the last three are marked as not allowed in IPSC)
+  - moving and reactive: swinger, drop turner, clamshell, mover on a track (up to four cards),
+    bobber, twister, Texas star (5 or 10 plates), plate rack, dueling tree (the last three are
+    marked as not allowed in IPSC)
+  - activators: step pads and pull levers; start X marks
+  - a door that opens, a wall with a shuttered port, hard-cover panels, raised barricades, a wobble
+    platform, a balance rope and a step box
   - steel: IPSC popper, mini popper, round plate, square plate
   - walls: mesh wall and mesh wall with port (orange safety netting, or black or blue wire mesh,
     in a light pine or black frame on feet),
@@ -60,7 +64,8 @@ training, and want a clear briefing sheet without drawing the map by hand.
   ambient light, shadows and their softness, haze and exposure, saved with the stage.
 - **Cameras:** orbit, pan, zoom, Top, Isometric, Front and a shooter's-eye view from the start position.
 - **Projects** saved in the browser automatically, with JSON export and import, and a **stage
-  library** of 34 ready-made drills and IPSC/USPSA stages to open and edit.
+  library** of 58 ready-made drills and IPSC/USPSA stages (including 24 after the 2012 US IPSC
+  Nationals) to open and edit.
 - **Works offline** and can be installed as an app (PWA).
 
 Not in v1 (ideas for later): matches with several stages, a build sheet with coordinates, sight-line
@@ -268,7 +273,7 @@ procedure carries on to the next page instead of being cut. In the print dialog 
 the toolbar says *Saved*). *Projects* opens in the left-hand panel and lists your stages: open, duplicate or delete them, start a
 *New stage*, *Export this stage* as a `.json` file, or *Import file…* to add a stage from a file.
 An import always becomes a new project, so it never overwrites one. Below your projects is the
-*Stage library*: 34 ready-made stages (drills and standards, short, medium and long IPSC courses,
+*Stage library*: 58 ready-made stages (drills and standards, short, medium and long IPSC courses,
 USPSA and club stages with moving targets). Search or pick a category, then *Open as new project*
 to get your own copy to change. A project with changes that
 aren't in an exported file shows a hint, so you know when to export a backup.

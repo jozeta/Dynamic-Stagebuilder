@@ -66,6 +66,7 @@ const ACCENT = 0x5a93c4;
 const hint = document.getElementById("hint");
 const updaters = [];
 let playButton = null;
+const folds = {};                  // the side panels' fold controls (panels.js)
 let surroundingsVersion = 0;
 // Animated props: the animator moves the ones switched on while Play is on; the view then draws
 // every frame, and only then.
@@ -240,7 +241,10 @@ const projects = createProjects({
   onOpenLibrary: (spec) => addProject(withView(libraryStage(spec))),
   panel: document.getElementById("projects"),
   hide: [document.getElementById("library-body")],
-  onToggle: (open) => document.querySelector('[aria-label="Projects"].tool')?.setAttribute("aria-pressed", String(open)),
+  onToggle: (open) => {
+    document.querySelector('[aria-label="Projects"].tool')?.setAttribute("aria-pressed", String(open));
+    if (open && folds.library?.collapsed) folds.library.set(false);      // never open a view inside a folded panel
+  },
   store: { list: () => store.list() },
   currentId: () => editor.stage().id,
   onOpen: openProject,
@@ -310,8 +314,8 @@ playButton = (() => {
   b.update();
   return b;
 })();
-makeCollapsible(document.getElementById("library"), { app: appEl, name: "library", label: "props" });
-makeCollapsible(document.getElementById("inspector"), { app: appEl, name: "inspector", label: "inspector" });
+folds.library = makeCollapsible(document.getElementById("library"), { app: appEl, name: "library", label: "props" });
+folds.inspector = makeCollapsible(document.getElementById("inspector"), { app: appEl, name: "inspector", label: "inspector" });
 makeResizable(document.getElementById("library"), { app: appEl, name: "library", label: "props" });
 makeResizable(document.getElementById("inspector"), { app: appEl, name: "inspector", label: "inspector" });
 briefing = createBriefing({ editor });
@@ -344,7 +348,10 @@ settings = createSettings({
   editor,
   panel: document.getElementById("settings-panel"),
   hide: [document.getElementById("inspector-body"), document.getElementById("stats")],
-  onToggle: (open) => document.querySelector('[aria-label="Settings"].tool')?.setAttribute("aria-pressed", String(open)),
+  onToggle: (open) => {
+    document.querySelector('[aria-label="Settings"].tool')?.setAttribute("aria-pressed", String(open));
+    if (open && folds.inspector?.collapsed) folds.inspector.set(false);
+  },
   getHidden: () => hiddenProps,
   onHidden: (next) => { hiddenProps = next; saveHidden(next); library.setHidden(next); },
 });

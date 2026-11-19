@@ -4,6 +4,28 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- **From the 2012 US IPSC Nationals stage diagrams:**
+  - 24 match stages in the library (original layouts and wording after the Nationals' stages)
+  - new props:
+    - step pads (one or three)
+    - pull levers
+    - start X marks
+    - a wall with a shuttered port (Animate drops it open)
+    - black hard-cover panels
+    - raised barricades with a gap underneath
+    - bobbers that rise from behind hard cover
+    - twisters that spin on their post
+    - movers carrying up to four cards
+    - a wobble platform
+    - a balance rope
+    - a step box
+  - barrels stacked two high
+  - tables with a pistol, magazines or a gun case for table starts
+  - map colours as on stage diagrams (steel blue, hard cover black)
+  - more start positions and gun conditions in the briefing
+- Fixed: opening Projects or Settings while its side panel was folded opened it out of sight; the
+  panel now unfolds.
+
 - **Door:** a wooden door in a frame (Walls group, snaps onto wall runs) with door width, height,
   how far it stands open, hinge side and whether it opens away from or toward the shooter;
   *Animate* opens and shuts it.
