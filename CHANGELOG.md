@@ -4,6 +4,8 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Paper target stands have dark brown feet instead of blue ones.
+
 ## 0.3.0 (2026-11-19)
 
 - Matches: under Projects, *New match* starts a match of one or more stages in order. On its page,

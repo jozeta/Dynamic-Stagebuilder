@@ -106,9 +106,9 @@ test("steel paint comes from the prop's own setting", () => {
   assert.ok(uses(buildProp(obj("plate-square")), "steel-white"));
 });
 
-test("paper targets stand in a blue steel base", () => {
+test("paper targets stand in a dark brown base", () => {
   const uses = (g, name) => { let found = false; g.traverse((c) => { if (c.material === getMaterial(name)) found = true; }); return found; };
-  assert.ok(uses(buildProp(obj("paper-ipsc")), "stand-blue"));
+  assert.ok(uses(buildProp(obj("paper-ipsc")), "stand-foot"), "dark brown stand feet");
 });
 
 // --- Detail update: new props, proportions ---

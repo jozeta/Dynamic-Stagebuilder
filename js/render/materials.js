@@ -595,7 +595,7 @@ const specs = {
   "steel-white": () => mapped(() => steelPaint("#e2ded4"), 0xe2ded4, { roughness: 0.7, metalness: 0.1 }),
   "steel-yellow": () => mapped(() => steelPaint("#dcb52a"), 0xdcb52a, { roughness: 0.65, metalness: 0.1 }),
   "steel-dark": () => mapped(rawSteel, 0x3b3c3f, { roughness: 0.7, metalness: 0.55 }),
-  "stand-blue": () => std({ color: 0x2a58c0, roughness: 0.45, metalness: 0.35 }),
+  "stand-foot": () => std({ color: 0x3e2a1c, roughness: 0.7, metalness: 0.15 }),            // dark brown painted feet
   "stick-wood": () => mapped(pine, 0xd8b47e),
   // Alpha-to-coverage keeps the thin wires visible (and smooth) at a distance, where plain alpha
   // testing would mip them away; alphaTest also gives the lattice shadow on the ground.

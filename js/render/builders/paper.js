@@ -46,10 +46,10 @@ function coverCut(cover, w, h) {
 
 function stand(g, x) {
   const { w, d, h } = STAND;
-  g.add(box(0.035, h, d, "stand-blue", x - w / 2 + 0.0175, h / 2, 0));
-  g.add(box(0.035, h, d, "stand-blue", x + w / 2 - 0.0175, h / 2, 0));
-  g.add(box(w - 0.07, h * 0.75, 0.035, "stand-blue", x, (h * 0.75) / 2, 0));
-  for (const sx of [-0.11, 0.11]) g.add(box(0.05, 0.09, 0.05, "stand-blue", x + sx, h + 0.045, 0));   // stick sockets
+  g.add(box(0.035, h, d, "stand-foot", x - w / 2 + 0.0175, h / 2, 0));
+  g.add(box(0.035, h, d, "stand-foot", x + w / 2 - 0.0175, h / 2, 0));
+  g.add(box(w - 0.07, h * 0.75, 0.035, "stand-foot", x, (h * 0.75) / 2, 0));
+  for (const sx of [-0.11, 0.11]) g.add(box(0.05, 0.09, 0.05, "stand-foot", x + sx, h + 0.045, 0));   // stick sockets
 }
 
 /** One cardboard card, origin at its bottom centre, the printed face toward −z at z = 0. */
