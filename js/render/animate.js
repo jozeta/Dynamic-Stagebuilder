@@ -1,6 +1,6 @@
 // Moves the animated props (those with Animate switched on) in the 3D view: swingers swing, drop
 // turners turn, clamshells drop and reset, movers run their track, Texas stars spin, plates and
-// poppers fall and reset, dueling-tree paddles swing across. Only pivot groups the builders mark
+// poppers fall and reset, dueling-tree paddles swing round the post to the other side. Only pivot groups the builders mark
 // (userData.anim) move; the stage data never changes. One global play/pause stops or starts them.
 import { ANIMATED_TYPES } from "../model/animation.js";
 
@@ -23,7 +23,9 @@ const MOTIONS = {
   slide: (n, t, a) => { n.position.x = Math.sin(t * 0.9) * a.range; },
   spin: (n, t) => { n.rotation.z = -t * 1.1; },
   fall: (n, t, a) => { n.rotation.x = fallAngle(t, a.delay, a.period); },
-  flip: (n, t, a) => { n.rotation.z = a.side * (fallAngle(t, a.delay, a.period) / 1.45) * Math.PI; },
+  // Dueling tree: the paddle's arm turns round the vertical post, swinging back behind it to the
+  // other side at the same height (−side: a paddle on +x passes through +z, away from the shooter).
+  flip: (n, t, a) => { n.rotation.y = -a.side * (fallAngle(t, a.delay, a.period) / 1.45) * Math.PI; },
 };
 
 export function createAnimator(stageGroup) {

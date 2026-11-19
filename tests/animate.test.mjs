@@ -62,3 +62,25 @@ test("the animator moves only the props whose switch is on, and only while playi
   animator.setPlaying(true);
   assert.equal(animator.active(), true);
 });
+
+test("dueling-tree paddles swing round the post, behind it, at the same height (not up over the top)", async () => {
+  const { Vector3 } = await import("three");
+  let s = createStage();
+  s = addObject(s, "dueling-tree", [0, 10], 0, { animate: true }).stage;
+  const group = new Group();
+  createStageView(group).sync(s);
+  const animator = createAnimator(group);
+  animator.sync(s);
+  const paddles = [];
+  group.traverse((c) => { if (c.userData.part === "plate") paddles.push(c); });
+  const at = (p) => p.getWorldPosition(new Vector3());
+  const rest = paddles.map(at);
+  animator.update(0.25);                      // the first paddle is part way across
+  const mid = at(paddles[0]);
+  assert.ok(Math.abs(mid.y - rest[0].y) < 1e-6, `height kept: ${mid.y} vs ${rest[0].y}`);
+  assert.ok(mid.z > 10 + 0.05, `swings behind the post (z ${mid.z.toFixed(3)})`);
+  assert.ok(Math.abs(mid.x) < Math.abs(rest[0].x), "on its way to the other side");
+  animator.update(1.5);                       // the first paddle has crossed over
+  const done = at(paddles[0]);
+  assert.ok(Math.sign(done.x) === -Math.sign(rest[0].x) && Math.abs(Math.abs(done.x) - Math.abs(rest[0].x)) < 1e-3, "now on the other side");
+});

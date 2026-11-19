@@ -4,6 +4,9 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Fixed: dueling-tree paddles now swing round the post, behind it, to the other side at the same
+  height, instead of flipping up over the top.
+
 - **Your own surroundings:** Settings → Surroundings → *New from a plan…* takes a blueprint or site
   plan (PNG, JPEG or WebP). Click both ends of something you know the length of and type it (for
   example a 5.2 m wall), and the plan is laid on the ground at true scale. Sliders move, turn and
