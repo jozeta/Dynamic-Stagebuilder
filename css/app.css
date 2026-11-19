@@ -334,3 +334,7 @@ body { background: var(--lg-bg); overflow: hidden; }
 .sun-color-slider::-webkit-slider-runnable-track { background: linear-gradient(90deg, #c74d14, #ffd160 50%, #ffffff); }
 .sun-color-slider::-moz-range-track { background: linear-gradient(90deg, #c74d14, #ffd160 50%, #ffffff); }
 .sun-color-slider::-moz-range-progress { background: transparent; }
+/* Settings → Environment, Blueprint and Technical: the hue slider's track is the colour wheel. */
+.hue-slider::-webkit-slider-runnable-track { background: linear-gradient(90deg, #f00, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00); }
+.hue-slider::-moz-range-track { background: linear-gradient(90deg, #f00, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00); }
+.hue-slider::-moz-range-progress { background: transparent; }

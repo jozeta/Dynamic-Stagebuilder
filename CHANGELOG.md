@@ -4,6 +4,14 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Settings → Environment, Blueprint and Technical: the ground's colour, as hue, intensity and
+  brightness (Blueprint's white lines stay white). Saved with the stage; unchanged, each keeps its
+  own blue paper or grey floor.
+- Technical: *Show walls* hides the backstop and side walls, and the floor now runs on to the
+  horizon, fading into a background of its own colour (so the background is a darker grey).
+- Outdoor: *Cloud shadows* sets how dark the clouds' shadows on the ground are (0–100 %, 50 % as
+  before).
+
 - New Outdoor defaults: the sun set by hand (36° high, 30°, warm white), sunlight 60 %, ambient
   65 %, shadow softness 3, shadow strength 55 %, haze 10 %, exposure 1.10, clouds 75 % at 130 %
   speed, wind 70°. Stages keep their own light; *Reset light to defaults* takes the new one.

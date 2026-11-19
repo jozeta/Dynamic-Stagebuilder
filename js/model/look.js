@@ -2,15 +2,34 @@
 // colour from the time of day. Pure: no DOM, no Three.js.
 const SPEC = {
   hour: [6, 20], sun: [0, 2], ambient: [0, 2], softness: [0, 8], shadowStrength: [0, 1], haze: [0, 1], exposure: [0.5, 1.6],
-  clouds: [0, 1], cloudSpeed: [0, 3], wind: [0, 359],
+  clouds: [0, 1], cloudSpeed: [0, 3], wind: [0, 359], cloudShadow: [0, 1],
   sunElevation: [2, 90], sunAzimuth: [0, 359], sunColor: [0, 1],
+  groundHue: [0, 359], groundIntensity: [0, 1], groundBrightness: [0.4, 1.6],
 };
 // Clouds (Outdoor only): how much of the sky they cover, how fast they drift (1 = about 8 m/s) and
 // the wind they drift with (degrees, 0 = down range, 90 = toward +x). They move only with Play on.
-const CLOUDS = { clouds: 0.35, cloudSpeed: 1, wind: 60 };
+const CLOUDS = { clouds: 0.35, cloudSpeed: 1, wind: 60, cloudShadow: 0.5 };       // cloudShadow: how dark their shadows on the ground are
 // The sun by hand (time of day off): height above the horizon, direction (0 = behind the shooter,
 // up range; 90 = toward +x, the shooter's left) and colour (0 dark orange … 0.5 yellow … 1 white).
 const SUN = { sunAuto: true, sunElevation: 35, sunAzimuth: 20, sunColor: 0.8 };
+// The Blueprint paper and the Technical floor can take a colour (null: the surroundings' own), and
+// the Technical walls can be hidden (then its floor runs on to the horizon).
+const TONE = { groundHue: null, groundIntensity: null, groundBrightness: null, walls: true };
+/** Each surroundings' own ground colour: Blueprint's Prussian blue paper, Technical's grey floor. */
+export const GROUND_TONE_DEFAULTS = Object.freeze({
+  blueprint: Object.freeze({ hue: 216, intensity: 0.8, brightness: 1 }),
+  technical: Object.freeze({ hue: 210, intensity: 0, brightness: 1 }),
+});
+/** The ground colour a look asks for in a surroundings: its own values, else that surroundings' default. */
+export function groundTone(look, environment) {
+  const d = GROUND_TONE_DEFAULTS[environment] || GROUND_TONE_DEFAULTS.technical;
+  return { hue: look.groundHue ?? d.hue, intensity: look.groundIntensity ?? d.intensity, brightness: look.groundBrightness ?? d.brightness };
+}
+/** HSV (hue in degrees, saturation and value 0–1) as [r, g, b] 0–1. */
+export function hsvToRgb(h, s, v) {
+  const f = (n) => { const k = (n + h / 60) % 6; return v - v * s * Math.max(0, Math.min(k, 4 - k, 1)); };
+  return [f(5), f(3), f(1)].map((x) => Math.round(x * 1e6) / 1e6);
+}
 export const CLOUD_TILE = 340;            // metres across one tile of the cloud texture
 const CLOUD_MPS = 8;
 
@@ -32,12 +51,12 @@ const FOLIAGE_IDS = FOLIAGE.map((f) => f.id);
 
 // Outdoor (the user's chosen look): the sun set by hand, high and warm white, 75 % cloud.
 export const LOOK_DEFAULTS = Object.freeze({ hour: 15.75, sun: 0.6, ambient: 0.65, shadows: true, softness: 3, shadowStrength: 0.55, haze: 0.1, exposure: 1.1, ground: "gravel", foliage: "mixed",
-  clouds: 0.75, cloudSpeed: 1.3, wind: 70, sunAuto: false, sunElevation: 36, sunAzimuth: 30, sunColor: 0.78 });
+  clouds: 0.75, cloudSpeed: 1.3, wind: 70, cloudShadow: 0.5, sunAuto: false, sunElevation: 36, sunAzimuth: 30, sunColor: 0.78, ...TONE });
 // The Technical surroundings: brighter afternoon light with softer, lighter shadows.
-export const TECHNICAL_LOOK = Object.freeze({ hour: 16, sun: 1.15, ambient: 1.1, shadows: true, softness: 3, shadowStrength: 0.55, haze: 0.2, exposure: 1, ground: "sand", foliage: "mixed", ...CLOUDS, ...SUN });
+export const TECHNICAL_LOOK = Object.freeze({ hour: 16, sun: 1.15, ambient: 1.1, shadows: true, softness: 3, shadowStrength: 0.55, haze: 0.2, exposure: 1, ground: "sand", foliage: "mixed", ...CLOUDS, ...SUN, ...TONE });
 
 // Blueprint: late-morning light with soft shadows; no haze.
-export const BLUEPRINT_LOOK = Object.freeze({ hour: 11, sun: 1, ambient: 1.15, shadows: true, softness: 4, shadowStrength: 0.7, haze: 0, exposure: 1.05, ground: "sand", foliage: "mixed", ...CLOUDS, ...SUN });
+export const BLUEPRINT_LOOK = Object.freeze({ hour: 11, sun: 1, ambient: 1.15, shadows: true, softness: 4, shadowStrength: 0.7, haze: 0, exposure: 1.05, ground: "sand", foliage: "mixed", ...CLOUDS, ...SUN, ...TONE });
 
 /** The light defaults for a surroundings name ("outdoor", "technical" or "blueprint"). */
 export const lookDefaults = (environment) => (environment === "technical" || String(environment).startsWith("custom:") ? TECHNICAL_LOOK
@@ -56,6 +75,7 @@ export function cleanLook(look) {
     if (k === "ground") out[k] = GROUND_IDS.includes(v) ? v : def;
     else if (k === "foliage") out[k] = FOLIAGE_IDS.includes(v) ? v : def;
     else if (typeof def === "boolean") out[k] = typeof v === "boolean" ? v : def;
+    else if (def === null) out[k] = typeof v === "number" && Number.isFinite(v) ? Math.min(SPEC[k][1], Math.max(SPEC[k][0], v)) : null;
     else out[k] = typeof v === "number" && Number.isFinite(v) ? Math.min(SPEC[k][1], Math.max(SPEC[k][0], v)) : def;
   }
   return out;

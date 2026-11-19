@@ -74,7 +74,7 @@ test("the look moves the sun with the hour and switches shadows, never touching 
     applyLook(env, { ...LOOK_DEFAULTS, sunAuto: true, hour: 19, shadows: false, haze: 0 }, stage.bay);
     assert.ok(env.sunLight.position.y < noonY, name);
     assert.equal(env.sunLight.castShadow, false);
-    assert.equal(env.fog, name === "blueprint" ? env.baseFog : null, "no haze: only Blueprint's distance fade");
+    assert.equal(env.fog, name === "outdoor" ? null : env.baseFog, "no haze: Blueprint and Technical keep their distance fade");
     env.dispose();
   }
   assert.deepEqual(stage, before);

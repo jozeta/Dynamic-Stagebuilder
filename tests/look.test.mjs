@@ -8,7 +8,8 @@ import { validateStage } from "../js/model/schema.js";
 
 test("defaults", () => {
   assert.deepEqual({ ...LOOK_DEFAULTS }, { hour: 15.75, sun: 0.6, ambient: 0.65, shadows: true, softness: 3, shadowStrength: 0.55, haze: 0.1, exposure: 1.1, ground: "gravel", foliage: "mixed",
-    clouds: 0.75, cloudSpeed: 1.3, wind: 70, sunAuto: false, sunElevation: 36, sunAzimuth: 30, sunColor: 0.78 });
+    clouds: 0.75, cloudSpeed: 1.3, wind: 70, cloudShadow: 0.5, sunAuto: false, sunElevation: 36, sunAzimuth: 30, sunColor: 0.78,
+    groundHue: null, groundIntensity: null, groundBrightness: null, walls: true });
   assert.ok(Object.isFrozen(LOOK_DEFAULTS));
 });
 
@@ -57,7 +58,7 @@ test("old files read with the default look; a saved look round-trips", () => {
 
 test("Technical surroundings have their own light defaults; reset and switching use them", async () => {
   const { lookDefaults, TECHNICAL_LOOK } = await import("../js/model/look.js");
-  assert.deepEqual({ ...TECHNICAL_LOOK }, { hour: 16, sun: 1.15, ambient: 1.1, shadows: true, softness: 3, shadowStrength: 0.55, haze: 0.2, exposure: 1, ground: "sand", foliage: "mixed", clouds: 0.35, cloudSpeed: 1, wind: 60, sunAuto: true, sunElevation: 35, sunAzimuth: 20, sunColor: 0.8 });
+  assert.deepEqual({ ...TECHNICAL_LOOK }, { hour: 16, sun: 1.15, ambient: 1.1, shadows: true, softness: 3, shadowStrength: 0.55, haze: 0.2, exposure: 1, ground: "sand", foliage: "mixed", clouds: 0.35, cloudSpeed: 1, wind: 60, cloudShadow: 0.5, sunAuto: true, sunElevation: 35, sunAzimuth: 20, sunColor: 0.8, groundHue: null, groundIntensity: null, groundBrightness: null, walls: true });
   assert.deepEqual(lookDefaults("technical"), TECHNICAL_LOOK);
   assert.deepEqual(lookDefaults("outdoor"), LOOK_DEFAULTS);
   const ed = createEditor();
@@ -74,7 +75,7 @@ test("Technical surroundings have their own light defaults; reset and switching 
 test("Blueprint has its own light defaults: 11:00, ambient 115 %, softness 4, shadows 70 %, no haze, exposure 1.05", async () => {
   const { lookDefaults, BLUEPRINT_LOOK } = await import("../js/model/look.js");
   assert.deepEqual(lookDefaults("blueprint"), BLUEPRINT_LOOK);
-  assert.deepEqual({ ...BLUEPRINT_LOOK }, { hour: 11, sun: 1, ambient: 1.15, shadows: true, softness: 4, shadowStrength: 0.7, haze: 0, exposure: 1.05, ground: "sand", foliage: "mixed", clouds: 0.35, cloudSpeed: 1, wind: 60, sunAuto: true, sunElevation: 35, sunAzimuth: 20, sunColor: 0.8 });
+  assert.deepEqual({ ...BLUEPRINT_LOOK }, { hour: 11, sun: 1, ambient: 1.15, shadows: true, softness: 4, shadowStrength: 0.7, haze: 0, exposure: 1.05, ground: "sand", foliage: "mixed", clouds: 0.35, cloudSpeed: 1, wind: 60, cloudShadow: 0.5, sunAuto: true, sunElevation: 35, sunAzimuth: 20, sunColor: 0.8, groundHue: null, groundIntensity: null, groundBrightness: null, walls: true });
   const { ENVIRONMENTS } = await import("../js/model/schema.js");
   assert.ok(ENVIRONMENTS.includes("blueprint"));
 });
@@ -128,4 +129,30 @@ test("time of day can be turned off: then the sun's height, direction and colour
   assert.deepEqual([r2, g2, b2], [1, 1, 1], "bright white");
   const c = cleanLook({ sunAuto: "no", sunElevation: 500, sunAzimuth: -5, sunColor: 2 });
   assert.equal(c.sunAuto, false, "not a yes or no: the Outdoor default"); assert.equal(c.sunElevation, 90); assert.equal(c.sunAzimuth, 0); assert.equal(c.sunColor, 1);
+});
+
+test("Blueprint and Technical grounds take a colour: hue, intensity and brightness; Technical walls can go", async () => {
+  const { groundTone, hsvToRgb, GROUND_TONE_DEFAULTS } = await import("../js/model/look.js");
+  // Not set: each surroundings keeps its own ground (Blueprint blue, Technical grey).
+  assert.equal(LOOK_DEFAULTS.groundHue, null);
+  assert.deepEqual(groundTone({}, "blueprint"), GROUND_TONE_DEFAULTS.blueprint);
+  assert.deepEqual(groundTone({}, "technical"), GROUND_TONE_DEFAULTS.technical);
+  assert.equal(GROUND_TONE_DEFAULTS.technical.intensity, 0, "Technical: a grey floor");
+  assert.deepEqual(groundTone({ groundHue: 120, groundIntensity: 0.5, groundBrightness: 1.2 }, "technical"), { hue: 120, intensity: 0.5, brightness: 1.2 });
+  const c = cleanLook({ groundHue: 400, groundIntensity: -1, groundBrightness: 9, walls: "no" });
+  assert.equal(c.groundHue, 359); assert.equal(c.groundIntensity, 0); assert.equal(c.groundBrightness, 1.6);
+  assert.equal(c.walls, true, "walls shown unless switched off");
+  assert.equal(cleanLook({ groundHue: "red" }).groundHue, null, "not a number: back to the surroundings' own");
+  assert.equal(cleanLook({ walls: false }).walls, false);
+  // HSV → RGB, for the floor colour.
+  assert.deepEqual(hsvToRgb(0, 1, 1), [1, 0, 0]);
+  assert.deepEqual(hsvToRgb(120, 1, 1), [0, 1, 0]);
+  assert.deepEqual(hsvToRgb(210, 0, 1), [1, 1, 1], "no intensity: white (the floor's own grey shows)");
+});
+
+test("cloud shadows have their own strength, 0 (none) to 100 %", () => {
+  assert.equal(LOOK_DEFAULTS.cloudShadow, 0.5);
+  assert.equal(cleanLook({ cloudShadow: 3 }).cloudShadow, 1);
+  assert.equal(cleanLook({ cloudShadow: -1 }).cloudShadow, 0);
+  assert.equal(cleanLook({ cloudShadow: "dark" }).cloudShadow, 0.5);
 });

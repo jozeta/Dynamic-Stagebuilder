@@ -1,7 +1,7 @@
 // Shared pieces for environments: a ground plane, canvas textures and a shadow-casting sun sized to
 // the bay. Environments only ever build into their own group.
 import * as THREE from "three";
-import { sunFromLook } from "../../model/look.js";
+import { sunFromLook, groundTone } from "../../model/look.js";
 
 export const hasDom = typeof document !== "undefined";
 
@@ -95,8 +95,10 @@ export function applyLook(env, look, bay) {
   env.paintSky?.(s.warmth);
   env.clouds?.setCoverage(look.clouds ?? 0);
   env.clouds?.setWarmth(s.warmth);
-  env.clouds?.setShadow(look.shadows ? s.strength : 0);       // shadow strength is for the props' shadows only
+  env.clouds?.setShadow(look.shadows ? s.strength * (look.cloudShadow ?? 0.5) * 2 : 0);   // its own slider; shadow strength is for the props
   if (env.setGround && look.ground && look.ground !== env.ground) env.setGround(look.ground);
   if (env.setFoliage && look.foliage && look.foliage !== env.foliage) env.setFoliage(look.foliage);
+  if (env.setWalls && look.walls !== undefined && look.walls !== env.walls) env.setWalls(look.walls !== false);
+  if (env.setGroundTone) env.setGroundTone(groundTone(look, env.toneName || "technical"));
   return env;
 }

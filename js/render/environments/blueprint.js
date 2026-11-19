@@ -6,6 +6,7 @@
 // Everything is drawn in code on canvases; no stage data is read.
 import * as THREE from "three";
 import { canvasTexture, ground, sun, hasDom } from "./common.js";
+import { GROUND_TONE_DEFAULTS } from "../../model/look.js";
 
 const PAPER = "#1f63cc";
 const BG = 0x3a78d0;
@@ -45,7 +46,39 @@ const arrowHead = (g, x, y, a, s) => {
 };
 const fmt = (m) => m.toFixed(2);
 
+// Recolouring the paper (Settings: ground hue, intensity, brightness): after the texture, the
+// colour's hue is turned, its saturation scaled and its value scaled, so white ink stays white.
+const TONE_GLSL = `
+uniform vec3 uTone;                      // x: hue turn (0–1), y: saturation scale, z: brightness
+vec3 lgRgb2hsv(vec3 c) {
+  vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+  vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
+  vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));
+  float d = q.x - min(q.w, q.y);
+  return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + 1.0e-10)), d / (q.x + 1.0e-10), q.x);
+}
+vec3 lgHsv2rgb(vec3 c) {
+  vec3 p = abs(fract(c.xxx + vec3(1.0, 2.0 / 3.0, 1.0 / 3.0)) * 6.0 - 3.0);
+  return c.z * mix(vec3(1.0), clamp(p - 1.0, 0.0, 1.0), c.y);
+}
+vec3 lgTone(vec3 c) {
+  vec3 h = lgRgb2hsv(c);
+  h.x = fract(h.x + uTone.x); h.y = clamp(h.y * uTone.y, 0.0, 1.0); h.z *= uTone.z;
+  return lgHsv2rgb(h);
+}
+`;
+function toned(mat, uTone) {
+  mat.onBeforeCompile = (sh) => {
+    sh.uniforms.uTone = uTone;
+    sh.fragmentShader = sh.fragmentShader.replace("void main() {", `${TONE_GLSL}\nvoid main() {`)
+      .replace("#include <map_fragment>", "#include <map_fragment>\n  diffuseColor.rgb = lgTone(diffuseColor.rgb);");
+  };
+  mat.customProgramCacheKey = () => "lg-blueprint-tone";
+  return mat;
+}
+
 export function blueprint(bay) {
+  const uTone = { value: new THREE.Vector3(0, 1, 1) };
   const group = new THREE.Group();
   const W = bay.width, D = bay.depth;
 
@@ -68,7 +101,7 @@ export function blueprint(bay) {
   }, [SIZE / TILE, SIZE / TILE], { seed: 7 });
   if (grid) grid.anisotropy = 16;
   // Toned down so the lit paper reads as deep Prussian blue, not bright royal blue.
-  const paper = new THREE.MeshStandardMaterial({ color: grid ? 0xdce6f6 : 0x2a6fd6, map: grid, roughness: 0.95 });
+  const paper = toned(new THREE.MeshStandardMaterial({ color: grid ? 0xdce6f6 : 0x2a6fd6, map: grid, roughness: 0.95 }), uTone);
   const g0 = ground(SIZE, SIZE, paper, D / 2);
   // Line the grid up with the world: whole metres on whole metres, a bold line on the bay's centre.
   if (grid) grid.offset.set(((SIZE / 2) % TILE) / TILE, ((SIZE / 2 - D / 2) % TILE) / TILE);
@@ -88,7 +121,7 @@ export function blueprint(bay) {
       map.anisotropy = 16;
     }
     const sheet = new THREE.Mesh(new THREE.PlaneGeometry(S, S),
-      new THREE.MeshBasicMaterial({ map, transparent: true, opacity: map ? 1 : 0, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1 }));
+      toned(new THREE.MeshBasicMaterial({ map, transparent: true, opacity: map ? 1 : 0, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1 }), uTone));
     sheet.rotation.set(-Math.PI / 2, 0, Math.PI);
     sheet.position.set(0, 0.003, cz);
     sheet.userData.sheet = true;
@@ -199,8 +232,20 @@ export function blueprint(bay) {
   const sunLight = sun(bay, 0xffffff, 1.5, [-10, 34, -12]);
   const background = new THREE.Color(BG);
   const fog = new THREE.Fog(BG, 70, 320);           // the endless paper fades into the background
+  const bgHsl = new THREE.Color(BG).getHSL({});
   return { group, lights: [hemiLight, sunLight], hemiLight, sunLight, sunStrength: 1.5, hemiStrength: 1.8, warmth: 0,
-    hazeColor: null, background, fog, baseFog: fog, exposure: 1 };
+    hazeColor: null, background, fog, baseFog: fog, exposure: 1,
+    toneName: "blueprint",
+    // The paper's colour: hue turned from its own Prussian blue, saturation and brightness scaled;
+    // the background and the distance fade follow.
+    setGroundTone({ hue, intensity, brightness }) {
+      const d = GROUND_TONE_DEFAULTS.blueprint;
+      const turn = (((hue - d.hue) % 360) + 360) % 360 / 360, sat = intensity / d.intensity;
+      uTone.value.set(turn, sat, brightness);
+      background.setHSL((bgHsl.h + turn) % 1, Math.min(1, bgHsl.s * sat), Math.min(1, bgHsl.l * brightness));
+      fog.color.copy(background);
+    },
+  };
 }
 
 // ---------------------------------------------------------------------------------------------

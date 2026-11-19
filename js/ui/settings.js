@@ -10,7 +10,7 @@ import { WALK_SPEEDS } from "../model/route.js";
 import { RUN_PARTS, RUN_COLORS } from "../model/run-look.js";
 import { LIBRARY_GROUPS, MARKINGS, isShown, setShown } from "../model/visibility.js";
 import { PROPS } from "../model/props.js";
-import { GROUNDS, FOLIAGE } from "../model/look.js";
+import { GROUNDS, FOLIAGE, groundTone } from "../model/look.js";
 import { customId, customEnv, BUILDING_TYPES } from "../model/surroundings.js";
 import { ENVIRONMENT_NAMES, ENVIRONMENT_LABELS } from "../render/environments/index.js";
 
@@ -26,13 +26,14 @@ const SLIDERS = [
   ["clouds", "Clouds", 0, 1, 0.05, (v) => (v > 0.01 ? `${Math.round(v * 100)} %` : "Clear")],
   ["cloudSpeed", "Cloud speed", 0, 3, 0.1, (v) => (v ? `${Math.round(v * 100)} %` : "Still")],
   ["wind", "Wind (0° = toward down range)", 0, 359, 5, (v) => `${Math.round(v)}°`],
+  ["cloudShadow", "Cloud shadows", 0, 1, 0.05, (v) => (v ? `${Math.round(v * 100)} %` : "None")],
   // The sun by hand, when Time of day is off.
   ["sunElevation", "Sun height", 2, 90, 1, (v) => `${Math.round(v)}°`],
   ["sunAzimuth", "Sun direction (0° = behind the shooter)", 0, 359, 5, (v) => `${Math.round(v)}°`],
   ["sunColor", "Sun colour", 0, 1, 0.02, (v) => (v < 0.25 ? "Dark orange" : v < 0.4 ? "Orange" : v < 0.62 ? "Yellow" : v < 0.85 ? "Warm white" : "White")],
 ];
 const SUN_KEYS = ["sunElevation", "sunAzimuth", "sunColor"];
-const OUTDOOR_ONLY = new Set(["haze", "clouds", "cloudSpeed", "wind"]);
+const OUTDOOR_ONLY = new Set(["haze", "clouds", "cloudSpeed", "wind", "cloudShadow"]);
 
 export function createSettings({ editor, panel, docked = false, hide = [], onToggle = () => {}, getHidden = () => ({ categories: [], props: [] }), onHidden = () => {}, mine = null,
   getSpeed = () => "sprint", onSpeed = () => {}, getRunLook = () => null, onRunLook = () => {} }) {
@@ -251,16 +252,40 @@ export function createSettings({ editor, panel, docked = false, hide = [], onTog
     const foliageSel = h("select", { class: "lg-select", id: "set-foliage", onchange: (e) => d({ type: "setLook", patch: { foliage: e.target.value } }) },
       FOLIAGE.map((f) => h("option", { value: f.id, text: f.name })));
     foliageSel.value = look.foliage || "mixed";
+    // Blueprint and Technical: the ground's colour; Technical: its walls.
+    const toneRows = [];
+    if (st.environment === "blueprint" || st.environment === "technical") {
+      const tone = groundTone(look, st.environment);
+      const slider = (key, field, label, min, max, step, show, cls) => {
+        const id = `set-${key}`;
+        const out = h("output", { for: id, class: "lg-mono settings-value", text: show(tone[field]) });
+        const input = h("input", { type: "range", class: `lg-slider${cls ? ` ${cls}` : ""}`, id, min, max, step, value: String(tone[field]),
+          oninput: (e) => { const v = Number(e.target.value); out.textContent = show(v); d({ type: "setLook", patch: { [key]: v } }); } });
+        return h("div", { class: "settings-row" }, [h("label", { for: id, text: label }), input, out]);
+      };
+      const name = st.environment === "blueprint" ? "Paper" : "Floor";
+      toneRows.push(
+        slider("groundHue", "hue", `${name} hue`, 0, 359, 1, (v) => `${Math.round(v)}°`, "hue-slider"),
+        slider("groundIntensity", "intensity", `${name} intensity`, 0, 1, 0.02, (v) => `${Math.round(v * 100)} %`),
+        slider("groundBrightness", "brightness", `${name} brightness`, 0.4, 1.6, 0.02, (v) => `${Math.round(v * 100)} %`));
+      if (st.environment === "technical") {
+        const walls = h("input", { type: "checkbox", class: "lg-toggle", id: "set-walls", onchange: (e) => d({ type: "setLook", patch: { walls: e.target.checked } }) });
+        walls.checked = look.walls !== false;
+        toneRows.push(h("div", { class: "settings-row" }, [h("label", { for: "set-walls", text: "Show walls" }), walls]),
+          h("p", { class: "lg-muted hint-text", text: "The floor runs on to the horizon; without walls nothing stands round the bay." }));
+      }
+    }
     body.replaceChildren(...[
       h("div", { class: "settings-row" }, [h("span", { class: "settings-label", text: "Surroundings" }), env]),
       st.environment === "outdoor" ? h("div", { class: "settings-row" }, [h("label", { for: "set-ground", text: "Ground" }), groundSel]) : null,
       st.environment === "outdoor" ? h("div", { class: "settings-row" }, [h("label", { for: "set-foliage", text: "Foliage" }), foliageSel]) : null,
+      ...toneRows,
       ...myRows,
       h("div", { class: "settings-row" }, [h("label", { for: "set-sun-auto", text: "Time of day" }), clock]),
       ...(auto ? [row.hour] : SUN_KEYS.map((k) => row[k])),
       row.sun, row.ambient,
       h("div", { class: "settings-row" }, [h("label", { for: "set-shadows", text: "Shadows" }), shadows]),
-      ...["softness", "shadowStrength", "haze", "exposure", "clouds", "cloudSpeed", "wind"].map((k) => row[k]),
+      ...["softness", "shadowStrength", "haze", "exposure", "clouds", "cloudShadow", "cloudSpeed", "wind"].map((k) => row[k]),
       h("p", { class: "lg-muted", text: "Saved with this stage and used for the printed 3D view. Changing these is not an undo step." }),
     ].filter(Boolean));
   }
