@@ -54,10 +54,19 @@ function frame(g, length, height, material) {
 function meshRect(x0, x1, y0, y1, material) {
   const w = x1 - x0, h = y1 - y0;
   if (w <= 0.001 || h <= 0.001) return null;
-  const geo = new THREE.PlaneGeometry(w, h);
+  // Subdivided so the netting can sag and bow a little between its fixings.
+  const segX = Math.max(2, Math.round(w / 0.25)), segY = Math.max(2, Math.round(h / 0.25));
+  const geo = new THREE.PlaneGeometry(w, h, segX, segY);
   geo.translate(x0 + w / 2, y0 + h / 2, -STICK / 2 - 0.003);   // stapled to the front of the frame
   const pos = geo.attributes.position, uv = geo.attributes.uv;
-  for (let i = 0; i < uv.count; i++) uv.setXY(i, pos.getX(i) / MESH_TILE, pos.getY(i) / MESH_TILE);
+  for (let i = 0; i < uv.count; i++) {
+    uv.setXY(i, pos.getX(i) / MESH_TILE, pos.getY(i) / MESH_TILE);
+    const u = (pos.getX(i) - x0) / w, v = (pos.getY(i) - y0) / h;
+    const bow = Math.sin(Math.PI * u) * Math.sin(Math.PI * v);
+    pos.setZ(i, pos.getZ(i) - bow * Math.min(0.025, w * 0.012));          // bulges a couple of cm
+    pos.setY(i, pos.getY(i) - bow * 0.012 * (1 - v));                      // and sags slightly
+  }
+  geo.computeVertexNormals();
   const m = new THREE.Mesh(geo, getMaterial(material));
   m.castShadow = true;
   return m;

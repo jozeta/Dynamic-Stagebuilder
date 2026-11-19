@@ -15,6 +15,7 @@ export function createEnvironment(name, bay, options = {}) {
   const env = make(bay, options);
   return {
     ...env,
+    hazeFog: null,
     dispose() {
       disposeGroup(env.group);
       if (env.background?.isTexture) env.background.dispose();

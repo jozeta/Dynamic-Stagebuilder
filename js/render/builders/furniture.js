@@ -43,53 +43,110 @@ export function buildPlatform(obj) {
   return g;
 }
 
-// A saloon car: body, cabin with windows, wheels, lights and bumpers; fitted to the catalogue size.
+// A saloon car: one smooth body traced from a side profile with real wheel arches, rounded edges
+// (bevel) and sides that lean in above the beltline (tumblehome); printed sides with windows,
+// pillars, door seams and handles; tinted windscreen and rear window; treaded tyres on five-spoke
+// alloys; headlights, tail lights, grille, bumpers, number plates and mirrors. Fitted exactly to
+// the catalogue size.
+function carProfile() {
+  const s = new THREE.Shape();
+  s.moveTo(-2.16, 0.24);
+  s.lineTo(-1.74, 0.24);
+  s.lineTo(-1.74, 0.31);
+  s.absarc(-1.35, 0.31, 0.39, Math.PI, 0, true);          // rear wheel arch
+  s.lineTo(-0.96, 0.22);
+  s.lineTo(0.96, 0.22);
+  s.lineTo(0.96, 0.31);
+  s.absarc(1.35, 0.31, 0.39, Math.PI, 0, true);           // front wheel arch
+  s.lineTo(1.74, 0.24);
+  s.lineTo(2.14, 0.26);
+  s.quadraticCurveTo(2.27, 0.3, 2.26, 0.5);               // front bumper
+  s.quadraticCurveTo(2.25, 0.68, 2.12, 0.74);
+  s.quadraticCurveTo(1.6, 0.82, 1.06, 0.88);              // bonnet
+  s.quadraticCurveTo(0.8, 1.15, 0.5, 1.41);               // windscreen
+  s.quadraticCurveTo(-0.1, 1.48, -0.76, 1.43);            // roof
+  s.quadraticCurveTo(-1.2, 1.2, -1.55, 0.99);             // rear window
+  s.quadraticCurveTo(-1.85, 0.95, -2.12, 0.93);           // boot lid
+  s.quadraticCurveTo(-2.27, 0.9, -2.26, 0.62);            // rear
+  s.quadraticCurveTo(-2.26, 0.3, -2.16, 0.24);
+  return s;
+}
+
+function wheel(x, z, side) {
+  const w = new THREE.Group();
+  const R = 0.31, Wd = 0.2;
+  const tyre = new THREE.LatheGeometry([[0.2, -Wd / 2], [0.26, -Wd / 2], [R - 0.01, -Wd / 2 + 0.02], [R, -Wd / 2 + 0.05], [R, Wd / 2 - 0.05], [R - 0.01, Wd / 2 - 0.02], [0.26, Wd / 2], [0.2, Wd / 2]].map(([r, y]) => new THREE.Vector2(r, y)), 36);
+  const t = mesh(tyre, "tread");
+  t.rotation.x = Math.PI / 2;
+  w.add(t);
+  const rim = new THREE.Group();
+  rim.userData.rim = true;
+  const disc = mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.05, 28), "alloy");
+  disc.rotation.x = Math.PI / 2;
+  rim.add(disc);
+  for (let i = 0; i < 5; i++) {
+    const spoke = box(0.045, 0.16, 0.02, "alloy", 0, 0, 0);
+    spoke.position.set(Math.cos((i / 5) * Math.PI * 2) * 0.1, Math.sin((i / 5) * Math.PI * 2) * 0.1, 0.03);
+    spoke.rotation.z = (i / 5) * Math.PI * 2 - Math.PI / 2;
+    rim.add(spoke);
+  }
+  const hub = mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.07, 16), "chrome");
+  hub.rotation.x = Math.PI / 2;
+  rim.add(hub);
+  rim.position.z = side * 0.06;
+  rim.scale.z = side;
+  w.add(rim);
+  w.position.set(x, R, z);
+  return w;
+}
+
 export function buildCar(obj) {
   const g = group(obj.id);
   const inner = new THREE.Group();
-  const paint = `car-${obj.params.color || "white"}`;
-  const W = 1.8;
-  const side = new THREE.Shape();
-  side.moveTo(-2.2, 0.3); side.lineTo(2.1, 0.3); side.quadraticCurveTo(2.22, 0.32, 2.2, 0.55);
-  side.lineTo(2.15, 0.78); side.quadraticCurveTo(1.8, 0.86, 1.2, 0.86); side.lineTo(-1.5, 0.86);
-  side.quadraticCurveTo(-2.15, 0.84, -2.2, 0.62); side.closePath();
-  const bodyGeo = new THREE.ExtrudeGeometry(side, { depth: W - 0.1, bevelEnabled: true, bevelSize: 0.05, bevelThickness: 0.05, bevelSegments: 3 });
-  bodyGeo.translate(0, 0, -(W - 0.1) / 2);
-  inner.add(mesh(bodyGeo, paint));
-  const cab = new THREE.Shape();
-  cab.moveTo(-1.35, 0.86); cab.lineTo(1.05, 0.86); cab.lineTo(0.55, 1.42); cab.lineTo(-0.9, 1.42); cab.closePath();
-  const cabGeo = new THREE.ExtrudeGeometry(cab, { depth: W - 0.3, bevelEnabled: true, bevelSize: 0.03, bevelThickness: 0.03, bevelSegments: 2 });
-  cabGeo.translate(0, 0, -(W - 0.3) / 2);
-  inner.add(mesh(cabGeo, paint));
-  // Windows: side glass and windscreens, slightly proud of the cabin.
-  const glassSide = new THREE.Shape();
-  glassSide.moveTo(-1.22, 0.92); glassSide.lineTo(0.95, 0.92); glassSide.lineTo(0.5, 1.36); glassSide.lineTo(-0.84, 1.36); glassSide.closePath();
-  for (const z of [-(W - 0.3) / 2 - 0.035, (W - 0.3) / 2 + 0.035]) {
-    const gl = mesh(new THREE.ShapeGeometry(glassSide), "glass");
-    gl.position.z = z;
-    if (z < 0) gl.rotation.y = Math.PI, gl.scale.x = -1;
-    inner.add(gl);
+  const color = obj.params.color || "white";
+  const W = 1.8, bevel = 0.07, depth = W - 2 * bevel;
+  const geo = new THREE.ExtrudeGeometry(carProfile(), { depth, bevelEnabled: true, bevelThickness: bevel, bevelSize: 0.05, bevelSegments: 5, curveSegments: 24 });
+  geo.translate(0, 0, -depth / 2);
+  // Tumblehome (the greenhouse leans in) and a gentle taper toward the bumpers in plan view.
+  const p = geo.attributes.position;
+  for (let i = 0; i < p.count; i++) {
+    const x = p.getX(i), y = p.getY(i);
+    const lean = Math.min(1, Math.max(0, (y - 0.9) / 0.55));
+    const taper = 1 - 0.07 * Math.abs(x / 2.3) ** 6;
+    p.setZ(i, p.getZ(i) * (1 - 0.2 * lean) * taper);
   }
-  const ws = mesh(new THREE.PlaneGeometry(W - 0.4, 0.66), "glass");
-  ws.position.set(0.8, 1.14, 0); ws.rotation.set(0, Math.PI / 2, -0.85, "YXZ");
-  const rs = mesh(new THREE.PlaneGeometry(W - 0.4, 0.6), "glass");
-  rs.position.set(-1.12, 1.14, 0); rs.rotation.set(0, -Math.PI / 2, -0.7, "YXZ");
-  inner.add(ws, rs);
-  // Wheels.
-  for (const [x, z] of [[1.35, 1], [-1.35, 1], [1.35, -1], [-1.35, -1]]) {
-    const wheel = mesh(new THREE.CylinderGeometry(0.32, 0.32, 0.22, 24), "tread");
-    wheel.rotation.x = Math.PI / 2;
-    wheel.position.set(x, 0.32, z * (W / 2 - 0.12));
-    const hub = mesh(new THREE.CylinderGeometry(0.17, 0.17, 0.225, 16), "chrome");
-    hub.rotation.x = Math.PI / 2;
-    hub.position.copy(wheel.position);
-    inner.add(wheel, hub);
+  geo.computeVertexNormals();
+  // Group 0 = the two side caps (printed sides), group 1 = the swept surface (paint).
+  inner.add(mesh(geo, [`car-side-${color}`, `car-${color}`]));
+
+  // Windscreen and rear window: quads from the profile's slope, as wide as the leaning body is at
+  // each end, set just proud of the surface.
+  const halfAt = (y) => (W / 2 - 0.1) * (1 - 0.2 * Math.min(1, Math.max(0, (y - 0.9) / 0.55)));
+  const pane = (x0, y0, x1, y1) => {
+    const n = new THREE.Vector2(-(y1 - y0), x1 - x0).normalize().multiplyScalar(x1 < x0 ? 0.015 : -0.015);
+    const a = [x0 + n.x, y0 + n.y], b = [x1 + n.x, y1 + n.y], ha = halfAt(y0), hb = halfAt(y1);
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.Float32BufferAttribute([a[0], a[1], -ha, a[0], a[1], ha, b[0], b[1], hb, b[0], b[1], -hb], 3));
+    geo.setIndex([0, 1, 2, 0, 2, 3]);
+    geo.computeVertexNormals();
+    return mesh(geo, "glass");
+  };
+  inner.add(pane(1.04, 0.9, 0.52, 1.39), pane(-0.78, 1.41, -1.5, 1.0));
+
+  for (const [x, z] of [[1.35, 1], [-1.35, 1], [1.35, -1], [-1.35, -1]]) inner.add(wheel(x, z * (W / 2 - 0.16), z));
+
+  // Lights, grille, bumpers, plates and mirrors.
+  for (const z of [-0.6, 0.6]) {
+    inner.add(box(0.05, 0.1, 0.32, "light-white", 2.22, 0.62, z));
+    inner.add(box(0.05, 0.12, 0.3, "light-red", -2.24, 0.72, z));
+    const mirror = box(0.12, 0.08, 0.1, `car-${color}`, 0.92, 1.0, z > 0 ? W / 2 - 0.12 : -(W / 2 - 0.12));
+    inner.add(mirror);
   }
-  for (const z of [-0.62, 0.62]) {
-    inner.add(box(0.04, 0.12, 0.3, "light-white", 2.23, 0.66, z));
-    inner.add(box(0.04, 0.12, 0.3, "light-red", -2.23, 0.68, z));
-  }
-  inner.add(box(0.12, 0.14, W - 0.1, "plastic-dark", 2.2, 0.38, 0), box(0.12, 0.14, W - 0.1, "plastic-dark", -2.22, 0.4, 0));
+  inner.add(box(0.05, 0.12, 0.62, "plastic-dark", 2.23, 0.55, 0));               // grille
+  inner.add(box(0.14, 0.14, W - 0.18, "plastic-dark", 2.2, 0.34, 0));             // front bumper
+  inner.add(box(0.14, 0.14, W - 0.18, "plastic-dark", -2.21, 0.36, 0));           // rear bumper
+  inner.add(box(0.02, 0.11, 0.48, "plate-white", 2.29, 0.36, 0));
+  inner.add(box(0.02, 0.11, 0.48, "plate-white", -2.3, 0.58, 0));
   g.add(fitTo(inner, CAR.length, CAR.height, CAR.width));
   return g;
 }

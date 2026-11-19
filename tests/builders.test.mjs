@@ -176,3 +176,22 @@ test("orange netting is the default mesh, and walls have corner gussets and feet
   g.traverse((c) => { if (c.userData.gusset) gussets++; });
   assert.equal(gussets, 4);
 });
+
+test("the car has four treaded wheels with alloy rims, tinted glass and printed sides", () => {
+  for (const color of ["white", "red", "blue", "grey", "rust"]) {
+    const g = buildProp(obj("car", { color }));
+    let tread = 0, glass = 0, sides = 0, rims = 0;
+    g.traverse((c) => {
+      const mats = Array.isArray(c.material) ? c.material : [c.material];
+      if (mats.includes(getMaterial("tread"))) tread++;
+      if (mats.includes(getMaterial("glass"))) glass++;
+      if (mats.includes(getMaterial(`car-side-${color}`))) sides++;
+      if (c.userData.rim) rims++;
+    });
+    assert.equal(tread, 4, `${color}: tyres`);
+    assert.equal(rims, 4, `${color}: rims`);
+    assert.ok(glass >= 2, `${color}: windscreen and rear window`);
+    assert.equal(sides, 1, `${color}: one body with printed sides`);
+  }
+  checkSize("car", { color: "rust" });
+});

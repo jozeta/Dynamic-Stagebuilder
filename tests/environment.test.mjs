@@ -62,3 +62,14 @@ test("the look moves the sun with the hour and switches shadows, never touching 
   }
   assert.deepEqual(stage, before);
 });
+
+test("haze thickens the air at stage distances and shadow strength lightens shadows", () => {
+  const env = createEnvironment("outdoor", { width: 20, depth: 30 });
+  const fogAt = (haze, d) => { applyLook(env, { ...LOOK_DEFAULTS, haze }, { width: 20, depth: 30 }); return env.fog ? 1 - Math.exp(-((env.fog.density * d) ** 2)) : 0; };
+  assert.equal(fogAt(0, 60), 0);
+  assert.ok(fogAt(0.2, 60) > 0.05 && fogAt(0.2, 60) < 0.3, `light haze ${fogAt(0.2, 60)}`);
+  assert.ok(fogAt(1, 60) > 0.4, `thick haze ${fogAt(1, 60)}`);
+  applyLook(env, { ...LOOK_DEFAULTS, shadowStrength: 0.4 }, { width: 20, depth: 30 });
+  assert.equal(env.sunLight.shadow.intensity, 0.4);
+  env.dispose();
+});

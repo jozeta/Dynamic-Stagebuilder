@@ -146,6 +146,7 @@ Stage settings are in the inspector when nothing is selected. They are saved wit
 | Time of day | *Settings*: 06:00–20:00; the sun's height, direction and colour follow it | 18:15 |
 | Sunlight, Ambient light | *Settings*: 0–200 % | 100 % |
 | Shadows, Shadow softness | *Settings*: on/off, 0 (sharp) – 8 | On, 1 |
+| Shadow strength | *Settings*: 0–100 %; lower makes shadows lighter | 85 % |
 | Haze | *Settings*: 0 (clear) – 100 % (Outdoor only) | 20 % |
 | Exposure | *Settings*: 0.5–1.6 | 1.00 |
 | Default target style | *Settings*: Classic (octagon) or With head, for new paper targets | Classic |
@@ -188,8 +189,9 @@ scroll or pinch to zoom. The buttons over the view jump to Isometric, Top, Front
 frame everything. *Isometric* is a high oblique "drone" overview (45° down, slightly turned, a
 long 32° lens) that fits the whole bay; *Shooter's eye* and *Front* use a natural 55° lens.
 
-**Change the light and surroundings.** *Settings* switches between Outdoor and Technical and sets
-the time of day, sunlight, ambient light, shadows, haze and exposure. Changes show as you drag the
+**Change the light and surroundings.** *Settings* opens in the right-hand panel (the 3D view stays
+live; *Done* or Escape returns to the inspector). It switches between Outdoor and Technical and sets
+the time of day, sunlight, ambient light, shadows (on/off, softness, strength), haze and exposure. Changes show as you drag the
 sliders; *Reset to defaults* goes back to a late-afternoon sun. Nothing on the stage moves, and
 the printed 3D view uses the same light.
 

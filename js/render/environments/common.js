@@ -80,10 +80,16 @@ export function applyLook(env, look, bay) {
   sunLight.intensity = env.sunStrength * look.sun * s.strength;
   sunLight.castShadow = look.shadows;
   sunLight.shadow.radius = look.softness;
+  sunLight.shadow.intensity = look.shadowStrength ?? 1;     // 1 = full shadows, lower = lighter
   hemi.intensity = env.hemiStrength * look.ambient * (0.7 + 0.3 * s.strength);
-  env.fog = look.haze > 0.01 && env.hazeColor
-    ? new THREE.Fog(env.hazeColor, 30 + (1 - look.haze) * 140, 90 + (1 - look.haze) * 260)
-    : null;
+  // Haze: atmospheric (exponential-squared) fog that thickens with distance, tuned so it is
+  // visible across a stage seen from 30–80 m: light at 20 %, thick at 100 %. One fog object is
+  // kept and only its density changes, so dragging the slider doesn't rebuild every shader.
+  if (look.haze > 0.01 && env.hazeColor) {
+    env.hazeFog ??= new THREE.FogExp2(env.hazeColor, 0.01);
+    env.hazeFog.density = 0.002 + look.haze * 0.0135;
+    env.fog = env.hazeFog;
+  } else env.fog = null;
   env.exposure = look.exposure;
   env.paintSky?.(s.warmth);
   return env;

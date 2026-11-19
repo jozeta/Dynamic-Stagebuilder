@@ -1,6 +1,7 @@
-// The settings dialog: surroundings, the default IPSC target style, time of day, light, shadows,
-// haze and exposure.
-// Sliders apply live while dragging; settings are saved with the stage but aren't undo steps.
+// The settings panel: surroundings, the default IPSC target style, time of day, light, shadows,
+// haze and exposure. It opens in the right-hand panel in place of the inspector (toolbar
+// *Settings* toggles it, *Done* or Escape closes it), so the 3D view stays visible and live.
+// Sliders apply while dragging; settings are saved with the stage but aren't undo steps.
 import { h } from "./dom.js";
 import { ENVIRONMENT_NAMES, ENVIRONMENT_LABELS } from "../render/environments/index.js";
 
@@ -9,23 +10,35 @@ const SLIDERS = [
   ["sun", "Sunlight", 0, 2, 0.05, (v) => `${Math.round(v * 100)} %`],
   ["ambient", "Ambient light", 0, 2, 0.05, (v) => `${Math.round(v * 100)} %`],
   ["softness", "Shadow softness", 0, 8, 0.5, (v) => (v ? `${v}` : "Sharp")],
+  ["shadowStrength", "Shadow strength", 0, 1, 0.05, (v) => `${Math.round(v * 100)} %`],
   ["haze", "Haze", 0, 1, 0.05, (v) => (v ? `${Math.round(v * 100)} %` : "Clear")],
   ["exposure", "Exposure", 0.5, 1.6, 0.05, (v) => v.toFixed(2)],
 ];
 
-export function createSettings({ editor }) {
+export function createSettings({ editor, panel, hide = [], onToggle = () => {} }) {
   const d = (a) => editor.dispatch(a);
-  const body = h("div", { class: "lg-modal-body settings-body" });
-  const dialog = h("dialog", { class: "lg-modal", id: "settings", "aria-labelledby": "settings-title" }, [
-    h("h2", { class: "lg-modal-title", id: "settings-title", text: "Settings" }),
-    body,
-    h("div", { class: "lg-modal-actions" }, [
-      h("button", { type: "button", class: "lg-btn", onclick: () => { d({ type: "setLook", reset: true }); fill(); }, text: "Reset to defaults" }),
-      h("button", { type: "button", class: "lg-btn lg-btn-primary", onclick: () => dialog.close(), text: "Done" }),
+  const body = h("div", { class: "settings-body" });
+  panel.append(
+    h("div", { class: "settings-head" }, [
+      h("h2", { class: "lg-subtitle panel-title", id: "settings-title", text: "Settings" }),
+      h("button", { type: "button", class: "lg-btn lg-btn-primary", onclick: () => close(), text: "Done" }),
     ]),
-  ]);
-  dialog.addEventListener("click", (e) => { if (e.target === dialog) dialog.close(); });
-  document.body.append(dialog);
+    body,
+    h("div", { class: "lg-row settings-actions" }, [
+      h("button", { type: "button", class: "lg-btn", onclick: () => { d({ type: "setLook", reset: true }); fill(); }, text: "Reset light to defaults" }),
+    ]),
+  );
+  panel.setAttribute("aria-labelledby", "settings-title");
+  panel.hidden = true;
+  let isOpen = false;
+  function show(open) {
+    isOpen = open;
+    panel.hidden = !open;
+    for (const el of hide) el.hidden = open;
+    onToggle(open);
+  }
+  function close() { show(false); }
+  panel.addEventListener("keydown", (e) => { if (e.key === "Escape") { e.stopPropagation(); close(); } });
 
   function fill() {
     const st = editor.stage().settings;
@@ -66,5 +79,9 @@ export function createSettings({ editor }) {
     );
   }
 
-  return { open() { fill(); dialog.showModal(); } };
+  return {
+    open() { if (isOpen) return close(); fill(); show(true); panel.querySelector("input, button")?.focus(); },
+    close,
+    get isOpen() { return isOpen; },
+  };
 }

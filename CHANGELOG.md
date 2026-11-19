@@ -4,6 +4,19 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Cars rebuilt: one smooth body traced from a side profile with real wheel arches, rounded edges
+  and leaning sides; printed sides with tinted windows, pillars, door seams and handles; tinted
+  windscreen and rear window; treaded tyres on five-spoke alloys; lights, grille, bumpers,
+  number plates and mirrors; clear-coated paint (the rusty car faded with rust patches).
+- Worn props: barrels in muted, faded colours with more scratches, rust patches and runs; all
+  timber (wall frames, target sticks, plywood, crates, pallets, platform, ramp, table)
+  weathered with sun-greying, soft water stains, dirt, splits and rust under nails; orange
+  netting faded and grimy with a few snapped strands and a slight sag; wire mesh rusty and dusty;
+  poppers and plates with bullet splash, chipped paint and rusty bases.
+- Settings open in the right-hand panel (instead of a pop-up) while the 3D view stays live.
+- Haze now works at stage distances (distance fog that thickens with the slider), and a new
+  *Shadow strength* slider lightens shadows (default 85 %).
+
 - Two IPSC target versions at their real sizes: **Classic** (octagon, 45 × 57 cm; mini 30 ×
   37.5 cm) and **With head** (46 × 76 cm; mini 31 × 51 cm), each with printed dotted A/C zone
   outlines and letters on corrugated card. Each paper target and no-shoot has a *Target style*

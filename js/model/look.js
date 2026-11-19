@@ -1,10 +1,10 @@
 // Environment look settings (saved with the stage, not part of undo) and the sun's position and
 // colour from the time of day. Pure: no DOM, no Three.js.
 const SPEC = {
-  hour: [6, 20], sun: [0, 2], ambient: [0, 2], softness: [0, 8], haze: [0, 1], exposure: [0.5, 1.6],
+  hour: [6, 20], sun: [0, 2], ambient: [0, 2], softness: [0, 8], shadowStrength: [0, 1], haze: [0, 1], exposure: [0.5, 1.6],
 };
 
-export const LOOK_DEFAULTS = Object.freeze({ hour: 18.25, sun: 1, ambient: 1, shadows: true, softness: 1, haze: 0.2, exposure: 1 });
+export const LOOK_DEFAULTS = Object.freeze({ hour: 18.25, sun: 1, ambient: 1, shadows: true, softness: 1, shadowStrength: 0.85, haze: 0.2, exposure: 1 });
 
 export function cleanLook(look) {
   const src = look && typeof look === "object" ? look : {};

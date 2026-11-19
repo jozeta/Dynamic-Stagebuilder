@@ -116,9 +116,18 @@ body { background: var(--lg-bg); overflow: hidden; }
 .proj-buttons { gap: var(--lg-space-xs); }
 .proj-confirm { overflow-wrap: anywhere; }
 
-.settings-body { display: grid; gap: var(--lg-space-m); min-width: min(440px, 80vw); }
-.settings-row { display: grid; grid-template-columns: 9.5em minmax(0, 1fr) 4.5em; align-items: center; gap: var(--lg-space-m); }
-.settings-row .lg-segmented, .settings-row .lg-toggle { grid-column: 2 / -1; justify-self: start; }
+.settings-head { display: flex; align-items: center; justify-content: space-between; gap: var(--lg-space-s); margin-bottom: var(--lg-space-s); }
+.settings-head .panel-title { margin: 0; }
+.settings-body { display: grid; gap: var(--lg-space-s); }
+.settings-row { display: grid; grid-template-columns: minmax(0, 1fr) 4em; grid-template-areas: "label value" "control control"; align-items: center; gap: 2px var(--lg-space-s); }
+.settings-row > label, .settings-row > .settings-label { grid-area: label; }
+.settings-row > input[type=range], .settings-row > .lg-segmented { grid-area: control; }
+.settings-row > output { grid-area: value; }
+.settings-row > .lg-toggle { grid-area: value; justify-self: end; }
+.settings-actions { margin-top: var(--lg-space-m); }
+.settings-panel .lg-muted { font-size: var(--lg-fs-small); }
+.settings-row .lg-segmented { justify-self: stretch; }
+.settings-row .lg-segmented label { flex: 1; text-align: center; }
 .settings-row input[type=range] { width: 100%; min-height: var(--lg-touch); }
 .settings-value { text-align: right; color: var(--lg-muted); }
 
@@ -135,3 +144,5 @@ body { background: var(--lg-bg); overflow: hidden; }
 .lib-count { font-size: var(--lg-fs-small); }
 @media (pointer: coarse) { .lib-summary { min-height: var(--lg-touch); } }
 @media (prefers-reduced-motion: reduce) { .lib-summary::before { transition: none; } }
+
+.inspector .settings-panel { grid-column: 1 / -1; }

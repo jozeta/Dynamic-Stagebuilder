@@ -35,7 +35,7 @@ export function createToolbar(root, { editor, rig, status, onAbout, onBriefing, 
     h("div", { class: "toolgroup", role: "group", "aria-label": "Draw" }, [lineB, areaB, startB, numB]),
     h("div", { class: "toolgroup", role: "group", "aria-label": "Snapping" }, [gridB, magB]),
     h("div", { class: "toolgroup", role: "group", "aria-label": "Brief" }, [wsbB, printB]),
-    h("div", { class: "toolgroup end" }, [status, btn("sliders", "Settings", onSettings), btn("info", "About", onAbout)]),
+    h("div", { class: "toolgroup end" }, [status, btn("sliders", "Settings", onSettings, { "aria-pressed": "false" }), btn("info", "About", onAbout)]),
   );
 
   return function update(state) {

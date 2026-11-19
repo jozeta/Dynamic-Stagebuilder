@@ -220,7 +220,12 @@ updaters.push(
 );
 attachShortcuts({ editor, rig });
 briefing = createBriefing({ editor });
-settings = createSettings({ editor });
+settings = createSettings({
+  editor,
+  panel: document.getElementById("settings-panel"),
+  hide: [document.getElementById("inspector-body"), document.getElementById("stats")],
+  onToggle: (open) => document.querySelector('[aria-label="Settings"].tool')?.setAttribute("aria-pressed", String(open)),
+});
 
 render(editor.state);
 document.getElementById("boot-state")?.remove();
