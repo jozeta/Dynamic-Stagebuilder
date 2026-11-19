@@ -4,6 +4,8 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+## 0.3.0 (2026-11-19)
+
 - Matches: under Projects, *New match* starts a match of one or more stages in order. On its page,
   add a new stage to it or add stages you already made, move them up and down, take one out, open
   one, rename the match and *Print the match* (a cover page with every stage's rounds and points,

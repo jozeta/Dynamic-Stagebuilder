@@ -4,7 +4,7 @@ A browser-based 3D stage builder for IPSC practical shooting. Lay out a stage at
 it from any angle, and print a Written Stage Briefing with a stage map for range officers and
 competitors.
 
-**Version:** 0.2.0 · **Try it:** [jozeta.github.io/Dynamic-Stagebuilder](https://jozeta.github.io/Dynamic-Stagebuilder/)
+**Version:** 0.3.0 · **Try it:** [jozeta.github.io/Dynamic-Stagebuilder](https://jozeta.github.io/Dynamic-Stagebuilder/)
 (runs in the browser; nothing to install, nothing leaves your device) · Started 2026-11-18 (see the
 [v1 design](docs/superpowers/specs/2026-11-18-stage-builder-v1-design.md)).
 
@@ -91,24 +91,16 @@ not supported: below 768 px wide the app asks you to use a larger screen. Englis
 
 ## What's new
 
-### 0.2.0 (2026-11-19)
+### 0.3.0 (2026-11-19)
 
-- **The shooter's run:** shooting positions with stances, shown as detailed see-through figures; a
-  posed shooter in the start box; a route on the ground with grab points; Shooter's eye walks it
-  (looking the way the shooter moves) or jumps between positions, with move arrows and a speed setting.
-- **Stage library:** 58 drills and IPSC/USPSA stages, each with suggested shooting positions worked out
-  from its sight lines.
-- **Props:** realistic cars, target arrays and hard cover, moving and reactive targets (swingers, drop
-  turners, clamshells, movers, Texas stars, plate racks, dueling trees), doors, ports, barricades;
-  activation links from poppers, plates, step pads and levers, which Play acts out.
-- **On stage panel and right-click menu:** every prop in a list with groups, hide and lock, multi-select,
-  copy and paste.
-- **Panels you arrange:** dock any panel on the left, right or under the view, as tabs or on its own;
-  everything about the view comes back after a reload.
-- **Surroundings:** Outdoor with drifting clouds, ground and foliage choices (Nordic, desert, savanna,
-  tropical…) and a sun set by hand or by the clock; Blueprint and Technical with their own ground and
-  grid colours; your own range from a plan.
-- **Briefing and print:** common wordings or free text, a redesigned two-page A4 brief.
+- **Matches:** under Projects, a match of one or more stages in order. Add new stages or ones you
+  already made, reorder them, and print the whole match; each stage gets the match name and its
+  number in its briefing.
+- **Measuring tool:** tap two points to see the distance, snapped to props (toolbar *Measure* or M).
+- **Looks:** new Blueprint defaults (deep blue paper, faint white grid) and a muted red for fault
+  lines and shooting areas.
+- **Fixes:** CI runs the tests on Node 22; a Projects tab shown after a reload fills only once
+  projects have loaded. Development tools updated (ESLint 10).
 
 Older versions are listed in [CHANGELOG.md](CHANGELOG.md).
 
