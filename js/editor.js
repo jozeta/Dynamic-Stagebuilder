@@ -13,6 +13,7 @@ import { snapToObjects, SNAP_RADIUS } from "./model/objsnap.js";
 import { cleanLook, lookDefaults, lookAfterSwitch } from "./model/look.js";
 import { stepFrom } from "./model/positions.js";
 import { snapMeasure } from "./model/measure.js";
+import { mirrorStage, alignObjects, distributeObjects } from "./model/arrange.js";
 import { canBeActivated, isActivator } from "./model/activation.js";
 import { isLocked, isHidden, setFlag, pruneGroups, groupObjects, ungroup, moveToGroup, updateGroup, copyObjects, pasteObjects } from "./model/layers.js";
 
@@ -163,6 +164,21 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
       }
       edit(s);
     },
+    // A position typed in: used exactly (no grid or object snap), kept inside the bay.
+    setPosition({ id, x, z }) {
+      const o = present().objects.find((v) => v.id === id);
+      if (!o || isLocked(present(), o)) return;
+      const num = (v, old) => (v === "" || v === null || v === undefined || !Number.isFinite(Number(v)) ? old : Math.round(Number(v) * 1000) / 1000);
+      edit(updateObject(present(), id, { position: clampToBay([num(x, o.position[0]), num(z, o.position[1])], present().bay) }));
+    },
+    // Mirror left to right: the selection about its centre, or (nothing selected) the whole stage.
+    mirror({ ids = state.selection } = {}) {
+      const locked = new Set(present().objects.filter((o) => isLocked(present(), o)).map((o) => o.id));
+      const next = mirrorStage(present(), ids, locked);
+      if (next !== present()) edit({ ...next, objects: next.objects.map((o) => ({ ...o, position: clampToBay(o.position, next.bay) })) });
+    },
+    align({ ids = state.selection, edge }) { const next = alignObjects(present(), unlocked(objIds(ids)), edge); if (next !== present()) edit(next); },
+    distribute({ ids = state.selection, axis }) { const next = distributeObjects(present(), unlocked(objIds(ids)), axis); if (next !== present()) edit(next); },
     setRotation({ id, value }) { edit(updateObject(present(), id, { rotation: snapAngle(Number(value) || 0, present().settings.angleSnap) })); },
     setParams({ id, params }) {
       const o = present().objects.find((x) => x.id === id);

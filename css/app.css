@@ -353,3 +353,8 @@ body { background: var(--lg-bg); overflow: hidden; }
 .match-stage .proj-buttons .lg-btn-icon { width: 32px; min-width: 32px; padding: 0; }
 @media (pointer: coarse) { .match-stage .proj-buttons .lg-btn-icon { width: var(--lg-touch); min-width: var(--lg-touch); } }
 .match-picker .vis-items { max-height: 240px; overflow: auto; }
+
+/* Exact position fields side by side; the arrange buttons for a selection. */
+.pos-fields { display: grid; grid-template-columns: 1fr 1fr; gap: var(--lg-space-s); }
+.arrange { margin-top: var(--lg-space-s); }
+.arrange-row { flex-wrap: wrap; gap: 4px; }

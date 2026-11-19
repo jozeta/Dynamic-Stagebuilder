@@ -58,6 +58,14 @@ const PATHS = {
   eye: ["M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z", "M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"],
   help: ["M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z", "M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6", "M12 17h.01"],
   chevr: ["M9 5l7 7-7 7"],
+  mirror: ["M12 3v18", "M9 7 3 17h6z", "M15 7l6 10h-6z"],
+  alignl: ["M4 3v18", "M8 7h10v4H8zM8 14h6v4H8z"],
+  alignc: ["M12 3v18", "M6 7h12v4H6zM8 14h8v4H8z"],
+  alignr: ["M20 3v18", "M6 7h10v4H6zM10 14h6v4h-6z"],
+  alignf: ["M3 20h18", "M7 6h4v10H7zM14 10h4v6h-4z"],
+  alignb: ["M3 4h18", "M7 8h4v10H7zM14 8h4v6h-4z"],
+  spreadx: ["M4 4v16M20 4v16", "M10 8h4v8h-4z"],
+  spreadz: ["M4 4h16M4 20h16", "M8 10h8v4H8z"],
 };
 
 export function icon(name) {

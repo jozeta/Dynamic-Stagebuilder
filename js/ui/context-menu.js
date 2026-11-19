@@ -63,7 +63,13 @@ export function createContextMenu({ editor, rig, onShooterEye = () => {} }) {
         sep(),
         item(`Rotate ${step}° left`, "rotl", () => d({ type: "rotate", by: -step }), { disabled: allLocked }),
         item(`Rotate ${step}° right`, "rotr", () => d({ type: "rotate", by: step }), { disabled: allLocked }),
+        item("Mirror left to right", "mirror", () => d({ type: "mirror" }), { disabled: allLocked }),
       );
+      if (sel.length >= 2) out.push(
+        item("Align fronts", "alignf", () => d({ type: "align", edge: "front" })),
+        item("Centre across", "alignc", () => d({ type: "align", edge: "centre-x" })),
+      );
+      if (sel.length >= 3) out.push(item("Spread evenly across", "spreadx", () => d({ type: "distribute", axis: "x" })));
       if (one) out.push(item(`Select all: ${getProp(one.type).name}`, "check", () => d({ type: "selectAll", propType: one.type })));
       out.push(item("Frame the selection", "frame", () => rig.frameAll({ ...s, objects: sel, lines: [] })));
       if (one?.type === "shooting-position") out.push(item("Shooter's eye from here", "eye", () => onShooterEye()));
@@ -71,6 +77,7 @@ export function createContextMenu({ editor, rig, onShooterEye = () => {} }) {
       out.push(
         item("Select all", "check", () => d({ type: "selectAll" }), { kbd: key("A") }),
         item("Frame all", "frame", () => rig.frameAll(s), { kbd: "F" }),
+        item("Mirror the stage", "mirror", () => d({ type: "mirror", ids: [] }), { disabled: !s.objects.length && !s.lines.length }),
       );
     }
     return out;

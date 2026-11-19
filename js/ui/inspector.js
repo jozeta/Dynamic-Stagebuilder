@@ -46,6 +46,11 @@ export function createInspector(root, { editor }) {
       nodes.push(field("Label", h("input", { class: "lg-input", value: o.label ?? "", maxlength: "12", dataset: { field: "label" },
         placeholder: "Automatic", onchange: (e) => d({ type: "setLabel", id: o.id, text: e.target.value }) })));
     }
+    // The exact position, typed in: across the bay (+ is the shooter's left, from the centre line)
+    // and down range (from the up-range edge). Used as typed, without grid snap.
+    const pos = (k, i, label) => field(label, h("input", { class: "lg-input", type: "number", inputmode: "decimal", step: "0.01", value: String(o.position[i]),
+      dataset: { field: k }, disabled: isLocked(stage, o), onchange: (e) => d({ type: "setPosition", id: o.id, [k]: e.target.value }) }));
+    nodes.push(h("div", { class: "pos-fields" }, [pos("x", 0, "Across (m, + left)"), pos("z", 1, "Down range (m)")]));
     const step = angle || 15;
     nodes.push(field("Rotation (°)", h("div", { class: "lg-row rot-row" }, [
       h("button", { type: "button", class: "lg-btn lg-btn-icon", "aria-label": `Rotate −${step}°`, onclick: () => d({ type: "rotate", by: -step }) }, [icon("rotl")]),
@@ -93,6 +98,21 @@ export function createInspector(root, { editor }) {
     return nodes;
   }
 
+  // Align and spread buttons for two or more selected props, and mirror.
+  const ARRANGE = [["left", "alignl", "Align left edges (shooter's right)"], ["centre-x", "alignc", "Centre across"], ["right", "alignr", "Align right (shooter's left)"],
+    ["front", "alignf", "Align fronts (nearest the shooter)"], ["back", "alignb", "Align backs"]];
+  function arrangeTools(count) {
+    return h("div", { class: "lg-stack arrange" }, [
+      h("span", { class: "lg-label", text: "Arrange" }),
+      h("div", { class: "lg-row arrange-row" }, [
+        ...ARRANGE.map(([edge, ic, label]) => h("button", { type: "button", class: "lg-btn lg-btn-icon", "aria-label": label, title: label, onclick: () => d({ type: "align", edge }) }, [icon(ic)])),
+        h("button", { type: "button", class: "lg-btn lg-btn-icon", "aria-label": "Spread evenly across", title: count < 3 ? "Select three or more to spread them" : "Spread evenly across", disabled: count < 3, onclick: () => d({ type: "distribute", axis: "x" }) }, [icon("spreadx")]),
+        h("button", { type: "button", class: "lg-btn lg-btn-icon", "aria-label": "Spread evenly down range", title: count < 3 ? "Select three or more to spread them" : "Spread evenly down range", disabled: count < 3, onclick: () => d({ type: "distribute", axis: "z" }) }, [icon("spreadz")]),
+      ]),
+      h("button", { type: "button", class: "lg-btn", onclick: () => d({ type: "mirror" }) }, [icon("mirror"), "Mirror left to right"]),
+    ]);
+  }
+
   function stagePanel(stage) {
     return [
       h("h2", { class: "lg-subtitle panel-title", text: "Stage" }),
@@ -101,6 +121,7 @@ export function createInspector(root, { editor }) {
       field("Bay depth (m)", numberInput("bayDepth", stage.bay.depth, { min: 1, max: 200, step: 0.5 }, (v) => d({ type: "setBay", width: stage.bay.width, depth: v }))),
       field("Grid snap", select("grid", stage.settings.grid, GRID_OPTIONS, (v) => d({ type: "setSetting", key: "grid", value: Number(v) }))),
       field("Angle snap", select("angle", stage.settings.angleSnap, ANGLE_OPTIONS, (v) => d({ type: "setSetting", key: "angleSnap", value: Number(v) }))),
+      h("button", { type: "button", class: "lg-btn", title: "Flip every prop, line and the start left to right about the centre line", onclick: () => d({ type: "mirror", ids: [] }) }, [icon("mirror"), "Mirror the stage"]),
     ];
   }
 
@@ -135,6 +156,7 @@ export function createInspector(root, { editor }) {
         h("div", { class: "lg-row" }, [
           h("button", { type: "button", class: "lg-btn", onclick: () => d({ type: "rotate", by: -step }) }, [icon("rotl"), `−${step}°`]),
           h("button", { type: "button", class: "lg-btn", onclick: () => d({ type: "rotate", by: step }) }, [icon("rotr"), `+${step}°`])]),
+        arrangeTools(objs.length),
         actions()];
     }
     root.replaceChildren(...nodes);

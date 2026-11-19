@@ -4,6 +4,12 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Exact positions: the inspector shows a prop's position (across, + to the shooter's left, and down
+  range, in metres); type a value to place it exactly, without grid snap.
+- Mirror, align and spread: *Mirror the stage* flips everything left to right (Stage panel or the
+  right-click menu); with props selected, mirror them, line them up (left, centre, right, front,
+  back) or spread three or more evenly across or down range. Locked props stay put.
+
 - Paper target stands have dark brown feet instead of blue ones.
 
 ## 0.3.0 (2026-11-19)
