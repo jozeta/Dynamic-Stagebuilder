@@ -4,6 +4,14 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Draw your own bay shape: *Bay shape → Draw a new shape…* opens a white sheet with a 1 m grid (down
+  range at the top). Set the width and depth, raise ground with the black pencil and make floor again
+  with the white one (pencil 1–5 m), name it and save it to *My shapes* in the list. Raised ground is
+  2.5 m high with a 1.5 m slope down to the floor, which stays flat; Outdoor grows grass, bushes,
+  stones and (on large raised areas) trees on it, Technical and Blueprint show it as a relief, and
+  the printed map shades it. A stage keeps its own copy of the drawing, so it travels in files and
+  share links; *Edit this shape…* changes it.
+
 ## 0.6.0 (2026-11-19)
 
 - More bay shapes: L and reverse L (full width at the front, one side carries on to the back), T (a

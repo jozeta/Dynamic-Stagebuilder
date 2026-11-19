@@ -4,6 +4,7 @@ import { cleanHidden } from "../model/visibility.js";
 import { cleanCameraView } from "../model/camera-view.js";
 import { walkSpeed } from "../model/route.js";
 import { cleanRunLook } from "../model/run-look.js";
+import { cleanShapeList } from "../model/bay.js";
 
 const KEY = "dsb:hidden-props";
 export function loadHidden() { try { return cleanHidden(JSON.parse(localStorage.getItem(KEY) || "null")); } catch { return cleanHidden(null); } }
@@ -23,3 +24,9 @@ export function saveWalkSpeed(id) { try { localStorage.setItem(SPEED, walkSpeed(
 const RUN = "dsb:run-look";
 export function loadRunLook() { try { return cleanRunLook(JSON.parse(localStorage.getItem(RUN) || "null")); } catch { return cleanRunLook(null); } }
 export function saveRunLook(v) { const c = cleanRunLook(v); try { localStorage.setItem(RUN, JSON.stringify(c)); } catch { /* private mode */ } return c; }
+
+// My shapes: drawn bay shapes saved in this browser (offered in the Bay shape list).
+const SHAPES = "dsb:bay-shapes";
+export function loadShapes() { try { return cleanShapeList(JSON.parse(localStorage.getItem(SHAPES) || "[]")); } catch { return []; } }
+/** Save the list; false when the browser's storage is full or unavailable. */
+export function saveShapes(list) { try { localStorage.setItem(SHAPES, JSON.stringify(cleanShapeList(list))); return true; } catch { return false; } }

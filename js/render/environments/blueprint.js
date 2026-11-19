@@ -5,7 +5,7 @@
 // detail callout and handwritten notes. No bay floor and no walls; props keep their own colours.
 // Everything is drawn in code on canvases; no stage data is read.
 import * as THREE from "three";
-import { canvasTexture, ground, sun, hasDom } from "./common.js";
+import { canvasTexture, ground, sun, hasDom, reliefMesh } from "./common.js";
 import { GROUND_TONE_DEFAULTS } from "../../model/look.js";
 import { bayOutline } from "../../model/bay.js";
 
@@ -243,6 +243,9 @@ export function blueprint(bay) {
   }
 
   const hemiLight = new THREE.HemisphereLight(0xffffff, 0x355d97, 1.8);
+  // A drawn bay's raised ground: pale sheet colour, toned with the paper.
+  const relief = reliefMesh(bay, toned(new THREE.MeshStandardMaterial({ color: 0xc9d6ea, roughness: 0.9 }), uTone));
+  if (relief) group.add(relief);
   const sunLight = sun(bay, 0xffffff, 1.5, [-10, 34, -12]);
   const background = new THREE.Color(BG);
   const fog = new THREE.Fog(BG, 70, 320);           // the endless paper fades into the background

@@ -10,6 +10,8 @@ import { getProp } from "./model/props.js";
 import { demoStage } from "./demo.js";
 import { createToolbar } from "./ui/toolbar.js";
 import { createLibrary } from "./ui/library.js";
+import { createBayDrawer } from "./ui/bay-draw.js";
+import { MAX_SHAPES } from "./model/bay.js";
 import { createInspector } from "./ui/inspector.js";
 import { createStats } from "./ui/stats.js";
 import { attachShortcuts } from "./ui/shortcuts.js";
@@ -42,7 +44,7 @@ import { fadeFigures } from "./render/figure-fade.js";
 import { createSurroundings } from "./ui/surroundings.js";
 import { takeBuildingPieces } from "./model/surroundings.js";
 import { libraryStage } from "./model/stage-library.js";
-import { loadHidden, saveHidden, loadView, saveView, loadWalkSpeed, saveWalkSpeed, loadRunLook, saveRunLook } from "./ui/prefs.js";
+import { loadHidden, saveHidden, loadView, saveView, loadWalkSpeed, saveWalkSpeed, loadRunLook, saveRunLook, loadShapes, saveShapes } from "./ui/prefs.js";
 import { withRunPart } from "./model/run-look.js";
 import { setRunLook } from "./render/materials.js";
 import { walkSpeed } from "./model/route.js";
@@ -405,6 +407,26 @@ async function applyBriefing(id, patch, { onlyIf = null } = {}) {
   await store.put({ ...rec, modified: Date.now(), stage: { ...rec.stage, briefing: { ...b, ...patch } } });
 }
 
+// My shapes: drawn bay shapes saved in this browser. Saving one puts it on the stage too (a stage
+// keeps its own copy, so it travels in files and share links).
+const myShapes = (() => {
+  let list = loadShapes(), version = 0;
+  const changed = () => { version++; render(editor.state); };
+  const drawer = createBayDrawer({
+    async onSave(bay, id) {
+      const shapeId = id || crypto.randomUUID();
+      const next = [...list.filter((x) => x.id !== shapeId), { id: shapeId, ...bay }];
+      if (next.length > MAX_SHAPES) { globalThis.LadaGlass?.toast?.(`My shapes holds ${MAX_SHAPES}; delete one first.`, { type: "bad" }); return; }
+      if (!saveShapes(next)) globalThis.LadaGlass?.toast?.("The shape is on this stage, but this browser couldn't save it to My shapes (storage full or blocked).", { type: "bad", duration: 8000 });
+      else list = loadShapes();
+      editor.dispatch({ type: "setBay", ...bay, shapeId });
+      changed();
+    },
+    async onDelete(id) { list = list.filter((x) => x.id !== id); saveShapes(list); changed(); },
+  });
+  return { list: () => list, get version() { return version; }, draw: (opts) => drawer.open(opts) };
+})();
+
 let dock = null;                   // the side panels' dock (Låda Glass), set up below
 const projects = createProjects({
   onOpenLibrary: (spec) => addProject(withView(libraryStage(spec))),
@@ -495,7 +517,7 @@ updaters.push(
   }),
   library,
   layers.update,
-  createInspector(document.getElementById("inspector-body"), { editor }),
+  createInspector(document.getElementById("inspector-body"), { editor, shapes: myShapes }),
   createStats(document.getElementById("stats")),
 );
 attachShortcuts({ editor, rig });

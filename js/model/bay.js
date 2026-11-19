@@ -55,8 +55,68 @@ export const bayShapeFields = (bay) => SPEC[bay.shape || "rect"].fields.map((f) 
   : { key: f.key, label: f.label, min: r2(Math.max(1, f.min(bay))), max: r2(Math.max(1, f.max(bay))) }));
 export const BAY_SHAPE_NAMES = Object.freeze(SPECS.map((s) => [s.id, s.name]));
 
+// Drawn bays: a grid of 1 m cells, one string per row ("0" floor, "1" raised ground). Row 0 is the
+// up-range row; column 0 is on the shooter's left (+ x), as the drawing is seen from above with down
+// range at the top. Raised ground rises over RAISE.slope metres from the floor's edge (the floor
+// stays flat) to RAISE.height. The outer rectangle's banks still run round the outside.
+export const RAISE = Object.freeze({ height: 2.5, slope: 1.5 });
+const DRAWN_MAX = 200;
+export const isDrawn = (bay) => bay.shape === "drawn";
+/** A drawn bay from its name, size and rows (cleaned). */
+export const drawnBay = ({ width, depth, name, rows }) => cleanBay({ width, depth, shape: "drawn", name, rows });
+function cleanDrawn(bay) {
+  const cols = clamp(Math.round(num(bay.width, 20)), 1, DRAWN_MAX), n = clamp(Math.round(num(bay.depth, 30)), 1, DRAWN_MAX);
+  const src = Array.isArray(bay.rows) ? bay.rows : [];
+  const rows = Array.from({ length: n }, (_, r) => {
+    const row = typeof src[r] === "string" ? src[r] : "";
+    return Array.from({ length: cols }, (_, c) => (row[c] === "1" ? "1" : "0")).join("");
+  });
+  const name = (typeof bay.name === "string" ? bay.name.trim() : "").slice(0, 60) || "Drawn shape";
+  const shapeId = typeof bay.shapeId === "string" && /^[\w-]{1,64}$/.test(bay.shapeId) ? { shapeId: bay.shapeId } : {};   // which of My shapes it came from
+  return { width: cols, depth: n, shape: "drawn", name, rows, ...shapeId };
+}
+
+// My shapes: the drawn shapes saved in this browser, offered in the Bay shape list.
+export const MAX_SHAPES = 30;
+/** A stored list of drawn shapes, checked: each { id, name, width, depth, shape: "drawn", rows }. */
+export function cleanShapeList(v) {
+  const out = [], seen = new Set();
+  for (const x of Array.isArray(v) ? v : []) {
+    if (!x || typeof x !== "object" || typeof x.id !== "string" || !/^[\w-]{1,64}$/.test(x.id) || seen.has(x.id)) continue;
+    seen.add(x.id);
+    const b = cleanDrawn(x);
+    delete b.shapeId;                                                   // the list's own id says which it is
+    out.push({ id: x.id, ...b });
+    if (out.length >= MAX_SHAPES) break;
+  }
+  return out;
+}
+/** 1 when the point is on a raised cell, 0 on floor or outside the grid. */
+export function cellAt(bay, x, z) {
+  const c = Math.floor(bay.width / 2 - x), r = Math.floor(z);
+  return r >= 0 && r < bay.depth && c >= 0 && c < bay.width && bay.rows[r][c] === "1" ? 1 : 0;
+}
+// The ground area of cell (c, r): x from x0 to x1, z from z0 to z1.
+const cellBox = (bay, c, r) => ({ x0: bay.width / 2 - c - 1, x1: bay.width / 2 - c, z0: r, z1: r + 1 });
+const toBox = (p, b) => [clamp(p[0], b.x0, b.x1), clamp(p[1], b.z0, b.z1)];
+/** The height of raised ground at a point (0 on the floor): a smooth slope up from the floor's edge. */
+export function raisedHeight(bay, x, z) {
+  if (!cellAt(bay, x, z)) return 0;
+  const c0 = Math.floor(bay.width / 2 - x), r0 = Math.floor(z), k = Math.ceil(RAISE.slope) + 1;
+  let d = RAISE.slope;
+  for (let r = r0 - k; r <= r0 + k; r++) for (let c = c0 - k; c <= c0 + k; c++) {
+    const raised = r >= 0 && r < bay.depth && c >= 0 && c < bay.width && bay.rows[r][c] === "1";
+    if (raised) continue;                                              // outside the grid counts as floor
+    const q = toBox([x, z], cellBox(bay, c, r));
+    d = Math.min(d, Math.hypot(x - q[0], z - q[1]));
+  }
+  const t = clamp(d / RAISE.slope, 0, 1);
+  return r2(RAISE.height * t * t * (3 - 2 * t) * 1000) / 1000;
+}
+
 /** A bay with only the fields its shape uses, each kept inside the rectangle. */
 export function cleanBay(bay) {
+  if (bay.shape === "drawn") return cleanDrawn(bay);
   const { width, depth } = bay;
   const spec = SPEC[bay.shape];
   if (!spec || spec.id === "rect") return { width, depth };
@@ -70,7 +130,7 @@ export function cleanBay(bay) {
 
 /** The floor's outline: [x, z] corners, anticlockwise seen from above, starting up range. */
 export function bayOutline(bay) {
-  const spec = SPEC[bay.shape] || SPEC.rect;
+  const spec = (!isDrawn(bay) && SPEC[bay.shape]) || SPEC.rect;          // a drawn bay: its outer rectangle
   return spec.outline(bay.width / 2, bay.depth, bay).map(([x, z]) => [r2(x), r2(z)]);
 }
 export const isRect = (bay) => !bay.shape || bay.shape === "rect";
@@ -96,12 +156,31 @@ function nearestOnEdges(p, poly) {
 
 /** Is a point on the floor (edges included)? */
 export function insideBay(p, bay) {
+  if (isDrawn(bay)) {
+    const [x, z] = p;
+    if (Math.abs(x) > bay.width / 2 + 1e-6 || z < -1e-6 || z > bay.depth + 1e-6) return false;
+    // On a floor cell, or on the edge of one.
+    for (const [dx, dz] of [[0, 0], [1e-6, 0], [-1e-6, 0], [0, 1e-6], [0, -1e-6]]) {
+      const q = [clamp(x + dx, -bay.width / 2 + 1e-9, bay.width / 2 - 1e-9), clamp(z + dz, 1e-9, bay.depth - 1e-9)];
+      if (!cellAt(bay, q[0], q[1])) return true;
+    }
+    return false;
+  }
   const o = bayOutline(bay);
   return inside(p, o) || nearestOnEdges(p, o).dist < 1e-6;
 }
 /** The nearest point on the floor (the point itself when it is on it). */
 export function nearestInBay(p, bay) {
   if (insideBay(p, bay)) return p;
+  if (isDrawn(bay)) {
+    let best = null, bd = Infinity;
+    for (let r = 0; r < bay.depth; r++) for (let c = 0; c < bay.width; c++) {
+      if (bay.rows[r][c] === "1") continue;
+      const q = toBox(p, cellBox(bay, c, r)), d = Math.hypot(p[0] - q[0], p[1] - q[1]);
+      if (d < bd) { bd = d; best = q; }
+    }
+    return (best || [clamp(p[0], -bay.width / 2, bay.width / 2), clamp(p[1], 0, bay.depth)]).map(r2);
+  }
   return nearestOnEdges(p, bayOutline(bay)).point.map(r2);
 }
 

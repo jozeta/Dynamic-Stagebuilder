@@ -369,3 +369,21 @@ body { background: var(--lg-bg); overflow: hidden; }
 .ring-legend .ring-bad::before { border-color: #d9483b; }
 .ring-legend .ring-warn::before { border-color: #f0b93a; }
 
+
+/* Draw a bay shape: controls beside the sheet (white with a 1 m grid), which takes the rest. */
+.bay-draw { width: min(1100px, calc(100vw - 32px)); max-width: none; height: min(820px, calc(100vh - 32px)); max-height: none; }
+.bay-draw[open] { display: flex; flex-direction: column; }
+.bay-draw-body { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(240px, 300px) 1fr; gap: var(--lg-space-l, 20px); }
+.bay-draw-side { overflow: auto; }
+.bay-draw-sheet { min-height: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.bay-draw-box { flex: 1; min-height: 0; width: 100%; overflow: auto; display: grid; place-items: center; }
+.bay-draw-canvas { touch-action: none; cursor: crosshair; border: 1px solid #9aa3ad; border-radius: 4px; background: #fff; }
+.bay-draw-edge { font-size: var(--lg-fs-small); color: var(--lg-text-muted, inherit); }
+.bay-draw-tools .lg-btn { justify-content: flex-start; }
+.bay-tool[aria-pressed="true"] { outline: 2px solid var(--lg-accent); outline-offset: 1px; }
+.bay-swatch { display: inline-block; width: 14px; height: 14px; border-radius: 3px; margin-right: 6px; vertical-align: -2px; border: 1px solid #888; }
+.bay-swatch-black { background: #111; }
+.bay-swatch-white { background: #fff; }
+.bay-draw .is-gone { display: none; }
+@media (max-width: 900px) { .bay-draw-body { grid-template-columns: 1fr; grid-template-rows: auto 1fr; } .bay-draw-side { max-height: 40vh; } }
+.vis-item.is-taken { opacity: 0.6; }

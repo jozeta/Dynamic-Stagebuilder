@@ -2,7 +2,7 @@
 // The floor runs on to the horizon (fading into the background, like the Blueprint sheet); the
 // walls can be hidden (look.walls) and the floor tinted (look.groundHue / Intensity / Brightness).
 import * as THREE from "three";
-import { canvasTexture, ground, sun } from "./common.js";
+import { canvasTexture, ground, sun, reliefMesh } from "./common.js";
 import { hsvToRgb } from "../../model/look.js";
 import { bayOutline, isRect, isFrontEdge } from "../../model/bay.js";
 
@@ -73,6 +73,9 @@ export function technical(bay) {
   }
 
   const hemiLight = new THREE.HemisphereLight(0xffffff, 0x5c6066, 1.6);
+  // A drawn bay's raised ground, in the walls' light concrete.
+  const relief = reliefMesh(bay, wallMat);
+  if (relief) group.add(relief);
   const sunLight = sun(bay, 0xffffff, 1.6, [-12, 30, -10]);
   const fog = new THREE.Fog(BG, 60, 260);           // the endless floor fades into the background before its edge
   return { group, lights: [hemiLight, sunLight], hemiLight, sunLight, sunStrength: 1.8, hemiStrength: 1.6, warmth: 0.1,

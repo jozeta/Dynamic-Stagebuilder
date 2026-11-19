@@ -16,6 +16,7 @@ import * as THREE from "three";
 import { canvasTexture, rng, hasDom } from "./common.js";
 import { heightAt } from "./terrain.js";
 import { grassCards } from "./ground.js";
+import { isDrawn, raisedHeight, RAISE } from "../../model/bay.js";
 
 export const FOLIAGE_KINDS = ["mixed", "nordic", "desert", "savanna", "tropical", "none"];
 
@@ -492,6 +493,21 @@ function treeSpot(bay, r, i) {
   const z = side === 2 ? bay.depth + 12 + r() * 12 : r() * bay.depth * 1.1;
   return [x, z];
 }
+// Trees on the raised ground of a drawn bay: on the flat top (at full height), about one per 50 m²,
+// never closer than 3 m to another. [x, z] spots.
+export function raisedTreeSpots(bay, r) {
+  if (!isDrawn(bay)) return [];
+  const tops = [];
+  for (let z = 0.5; z < bay.depth; z += 1) for (let x = -bay.width / 2 + 0.5; x < bay.width / 2; x += 1) if (raisedHeight(bay, x, z) >= RAISE.height - 1e-6) tops.push([x, z]);
+  const want = Math.floor(tops.length / 50), out = [];
+  for (let i = 0; i < tops.length * 4 && out.length < want; i++) {
+    const [x, z] = tops[Math.floor(r() * tops.length) % tops.length];
+    const p = [x + (r() - 0.5) * 0.6, z + (r() - 0.5) * 0.6];
+    if (out.every((q) => Math.hypot(q[0] - p[0], q[1] - p[1]) >= 3)) out.push(p);
+  }
+  return out;
+}
+
 // Plants scattered on the banks (cacti, prickly pear): on the top and down the faces.
 function bankSpots(bay, r, count) {
   const out = [];
@@ -566,6 +582,15 @@ export function buildFoliage(bay, kind = "mixed") {
       t.position.set(x, heightAt(x, z, bay) - 0.1, z);
       group.add(t);
     }
+    // A drawn bay's raised ground grows trees of the same kind.
+    raisedTreeSpots(bay, r).forEach(([x, z], i) => {
+      const t = protos[(i + 2) % protos.length].clone();
+      const k = 0.7 + r() * 0.35;
+      t.scale.set(k, k * (0.9 + r() * 0.25), k);
+      t.rotation.y = r() * 6.28;
+      t.position.set(x, heightAt(x, z, bay) - 0.1, z);
+      group.add(t);
+    });
   }
   for (const { make, count, bodyMat } of spec.bank || []) {
     const protos = Array.from({ length: 4 }, () => { const made = make(r); made.bodyMat = bodyMat ? m[bodyMat] : null; return treeGroup(made, m, kind); });

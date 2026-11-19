@@ -5,6 +5,7 @@ import { h } from "./dom.js";
 import { mapModel, mapRegion } from "../model/map.js";
 import { briefingRows, briefingText } from "../model/briefing.js";
 import { setupRows, setupLines } from "../model/setup.js";
+import { isDrawn } from "../model/bay.js";
 
 const SVG = "http://www.w3.org/2000/svg";
 const MAP_WIDTH = 186;
@@ -32,6 +33,7 @@ export function mapSvg(stage) {
   const layers = { grid: s("g"), area: s("g"), obj: s("g"), line: s("g"), text: s("g") };
   for (const it of items) {
     switch (it.kind) {
+      case "raised": svg.append(s("rect", { x: it.x, y: it.y, width: it.w, height: it.h, fill: "#c9c3b6" })); break;
       case "bay": svg.append(it.points
         ? s("polygon", { points: it.points.map((p) => p.join(",")).join(" "), fill: "#ffffff", stroke: "#444", "stroke-width": 0.35 })
         : s("rect", { x: it.x, y: it.y, width: it.w, height: it.h, fill: "#ffffff", stroke: "#444", "stroke-width": 0.35 })); break;
@@ -75,7 +77,7 @@ export function mapSvg(stage) {
 }
 
 // The map legend: a small drawing per kind of thing on the map.
-function legend() {
+function legend(stage) {
   const sw = (draw) => { const g = s("svg", { viewBox: "0 0 8 4", width: "8mm", height: "4mm", "aria-hidden": "true" }); g.append(...draw()); return g; };
   const entries = [
     ["Paper target", () => [s("rect", { x: 2, y: 1.3, width: 4, height: 1.4, fill: FILL.paper })]],
@@ -87,6 +89,7 @@ function legend() {
     ["Fault line", () => [s("line", { x1: 0.5, y1: 2, x2: 7.5, y2: 2, stroke: "#d8322a", "stroke-width": 0.8 })]],
     ["Shooting area", () => [s("rect", { x: 0.8, y: 0.6, width: 6.4, height: 2.8, fill: "rgba(216,50,42,0.07)", stroke: "#d8322a", "stroke-width": 0.4, "stroke-dasharray": "1.2 0.8" })]],
     ["Shooting position", () => [s("circle", { cx: 4, cy: 2, r: 1.5, fill: "none", stroke: FILL.position, "stroke-width": 0.5 })]],
+    ...(isDrawn(stage.bay) ? [["Raised ground", () => [s("rect", { x: 1, y: 0.8, width: 6, height: 2.4, fill: "#c9c3b6" })]]] : []),
     ["Start", () => [s("rect", { x: 2.4, y: 0.4, width: 3.2, height: 3.2, fill: "none", stroke: "#111", "stroke-width": 0.3 }), s("path", { d: "M4 1 L4.8 3 L3.2 3Z", fill: "#111" })]],
   ];
   return h("ul", { class: "print-legend" }, entries.map(([label, draw]) => h("li", {}, [sw(draw), h("span", { text: label })])));
@@ -133,7 +136,7 @@ export function renderPrint(root, stage, snapshot, { threeD = true, setup = true
     ].filter(Boolean)),
     h("section", { class: "print-text print-procedure" }, [h("h2", { text: "Procedure" }), h("p", { text: procedure.trim() || "–" })]),
     notes.trim() ? h("section", { class: "print-text" }, [h("h2", { text: "Notes" }), h("p", { text: notes })]) : null,
-    h("figure", { class: "print-map" }, [mapSvg(stage), h("figcaption", {}, [legend()])]),
+    h("figure", { class: "print-map" }, [mapSvg(stage), h("figcaption", {}, [legend(stage)])]),
     h("p", { class: "print-foot", text: "Made with Dynamic-Stagebuilder. Counts follow the IPSC rules; check the stage before the match." }),
     threeD ? h("section", { class: "print-3d" }, [
       h("h2", { text: `Stage ${b.stageNumber} – ${stage.name}: 3D view` }),

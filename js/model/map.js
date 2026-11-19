@@ -3,7 +3,7 @@
 // is on the left, as in the 3D view.
 import { dimensionsOf, getProp, STICK } from "./props.js";
 import { arrayCounts } from "./arrays.js";
-import { bayOutline, isRect } from "./bay.js";
+import { bayOutline, isRect, isDrawn } from "./bay.js";
 
 const ROUND = new Set(["shooting-position", "barrel", "tyre", "tyre-stack", "plate-round", "plant-palm", "cone"]);
 const CARD_DEPTH = 0.03;   // paper targets are drawn as their thin face, not their stand
@@ -73,6 +73,13 @@ export function mapModel(stage, { width, height, margin = 4, region = "bay" }) {
 
   const [bx0, by0] = pt([bw / 2, bd]);
   items.push({ kind: "bay", x: bx0, y: by0, w: bw * scale, h: bd * scale, ...(isRect(stage.bay) ? {} : { points: bayOutline(stage.bay).map(pt) }) });
+  // A drawn bay's raised ground: a shaded strip for each run of raised cells in a row.
+  if (isDrawn(stage.bay)) stage.bay.rows.forEach((row, r) => {
+    for (const m of row.matchAll(/1+/g)) {
+      const [x0, y0] = pt([bw / 2 - m.index, r + 1]);
+      items.push({ kind: "raised", x: x0, y: y0, w: m[0].length * scale, h: scale });
+    }
+  });
   items.push({ kind: "frame", x: cx - (rw / 2) * scale, y: cy - (rd / 2) * scale, w: rw * scale, h: rd * scale });
   for (let x = Math.ceil(r.minX); x <= Math.floor(r.maxX); x++) items.push({ kind: "grid", points: [pt([x, r.minZ]), pt([x, r.maxZ])] });
   for (let z = Math.ceil(r.minZ); z <= Math.floor(r.maxZ); z++) items.push({ kind: "grid", points: [pt([r.minX, z]), pt([r.maxX, z])] });

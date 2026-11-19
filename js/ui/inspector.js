@@ -38,7 +38,7 @@ const select = (key, value, options, onchange) => {
   return s;
 };
 
-export function createInspector(root, { editor }) {
+export function createInspector(root, { editor, shapes = { list: () => [], draw: () => {} } }) {
   const d = (action) => editor.dispatch(action);
   let lastKey = "";
 
@@ -143,7 +143,28 @@ export function createInspector(root, { editor }) {
   function bayShapeFields(bay) {
     const set = (patch) => d({ type: "setBay", ...bay, ...patch });
     const shape = bay.shape || "rect";
-    const out = [field("Bay shape", select("bayShape", shape, BAY_SHAPE_NAMES, (v) => d({ type: "setBay", width: bay.width, depth: bay.depth, shape: v })))];
+    // The list: the built-in shapes, then My shapes (drawn and saved in this browser), then Draw.
+    const mine = shapes.list();
+    const current = shape === "drawn" ? (mine.some((m) => m.id === bay.shapeId) ? `my:${bay.shapeId}` : "drawn") : shape;
+    const sel = h("select", { class: "lg-select", dataset: { field: "bayShape" }, onchange: (e) => {
+      const v = e.target.value;
+      if (v === "draw") { e.target.value = current; shapes.draw({ size: { width: bay.width, depth: bay.depth } }); return; }
+      if (v.startsWith("my:")) { const m = mine.find((x) => `my:${x.id}` === v); if (m) { const { id, ...b } = m; d({ type: "setBay", ...b, shapeId: id }); } return; }
+      d({ type: "setBay", width: bay.width, depth: bay.depth, shape: v });
+    } }, [
+      ...BAY_SHAPE_NAMES.map(([v, label]) => h("option", { value: v, text: label })),
+      shape === "drawn" && current === "drawn" ? h("option", { value: "drawn", text: `${bay.name} (drawn)` }) : null,
+      mine.length ? h("optgroup", { label: "My shapes" }, mine.map((m) => h("option", { value: `my:${m.id}`, text: m.name }))) : null,
+      h("option", { value: "draw", text: "Draw a new shape…" }),
+    ].filter(Boolean));
+    sel.value = current;
+    const out = [field("Bay shape", sel)];
+    if (shape === "drawn") {
+      out.push(h("div", { class: "lg-row" }, [
+        h("button", { type: "button", class: "lg-btn", onclick: () => shapes.draw({ shape: bay, id: current.startsWith("my:") ? bay.shapeId : null }) }, [icon("ruler"), "Edit this shape…"]),
+      ]), h("p", { class: "lg-muted hint-text", text: `${bay.width} × ${bay.depth} m, drawn. Black squares are raised ground with a slope down to the floor.` }));
+      return out;
+    }
     const fields = shapeFieldsOf(bay).map((f) => field(f.label, f.options
       ? select(f.key, bay[f.key], f.options, (v) => set({ [f.key]: v }))
       : numberInput(f.key, bay[f.key], { min: f.min, max: f.max, step: 0.5 }, (v) => set({ [f.key]: v }))));
@@ -154,6 +175,7 @@ export function createInspector(root, { editor }) {
     if (shape !== "rect") out.push(h("p", { class: "lg-muted hint-text", text: "Width and depth are the outer rectangle; the shape is the floor inside it. Seen from behind the shooter, left is the shooter's left." }));
     return out;
   }
+
 
 
   function stagePanel(stage) {
@@ -182,7 +204,7 @@ export function createInspector(root, { editor }) {
     const links = stage.objects.filter((o) => isActivator(o.type) || o.activatedBy).map((o) => [o.id, o.label, o.activatedBy]);
     links.push(stage.groups ?? null);
     const sights = objs.length === 1 && objs[0].type === "shooting-position" ? stage.objects : null;     // what it sees changes with the rest
-    const key = JSON.stringify([sel, objs, lines, links, sights, sel.length ? null : [stage.bay, stage.settings.grid, stage.settings.angleSnap]]);
+    const key = JSON.stringify([sel, objs, lines, links, sights, sel.length ? null : [stage.bay, stage.settings.grid, stage.settings.angleSnap, shapes.version]]);     // My shapes changed: rebuilt
     if (key === lastKey) return;
     lastKey = key;
     const focused = root.contains(document.activeElement) ? document.activeElement.dataset.field : null;

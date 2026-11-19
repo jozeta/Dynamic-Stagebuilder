@@ -170,7 +170,7 @@ Stage settings are in the inspector when nothing is selected. They are saved wit
 |---|---|---|
 | Bay width | Width of the shooting bay across the range, 1–200 m | 20 m |
 | Bay depth | Depth of the bay down range, 1–200 m | 30 m |
-| Bay shape | Rectangle; *Tapered* (narrow end back or front, its width); *Corner cut away* (back left or right, cut width and depth); *L* / *Reverse L* (width of the back part, depth of the full-width front); *T* (width and depth of the front stem); *U* (arm width, depth of the full-width front); *Reverse U* (arm width, depth of the front arms); *Dogleg (Z)* / *Reverse dogleg (S)* (width of each part, where it bends). Width and depth stay the outer rectangle | Rectangle |
+| Bay shape | Rectangle; *Tapered* (narrow end back or front, its width); *Corner cut away* (back left or right, cut width and depth); *L* / *Reverse L* (width of the back part, depth of the full-width front); *T* (width and depth of the front stem); *U* (arm width, depth of the full-width front); *Reverse U* (arm width, depth of the front arms); *Dogleg (Z)* / *Reverse dogleg (S)* (width of each part, where it bends). Width and depth stay the outer rectangle. *Draw a new shape…* and *My shapes*: a drawn grid of raised ground and floor (see How to) | Rectangle |
 | Grid snap | Positions snap to this grid: off, 0.1, 0.25, 0.5 or 1 m (toolbar *Grid* turns it on/off) | 0.25 m |
 | Object snap | Toolbar *Objects*: a wall's end jumps onto another wall's end within 35 cm | On |
 | Angle snap | Rotations snap to this step: off, 5°, 15°, 45° or 90° | 15° |
@@ -321,7 +321,18 @@ rounds) and the hit factors they give with all A hits. A rule of thumb for desig
 **Shape the bay.** With nothing selected, *Bay shape* fits the bay to a range that isn't a
 rectangle: tapered, a back corner cut away, an L or reverse L, a T, a U (a berm jutting in from the
 back) or reverse U (from the front), or a dogleg (Z or S) where the back is shifted to one side. Each
-shape has its own sizes; "left" is the shooter's left. Props move onto the floor if
+shape has its own sizes; "left" is the shooter's left.
+
+**Draw a bay shape.** Choose *Draw a new shape…* in *Bay shape*: a white sheet with a 1 × 1 m grid,
+down range at the top and the shooter's left on the left. Set the width and depth in whole metres,
+then draw: the black pencil raises ground, the white pencil makes it floor again (the pencil can be
+1, 2, 3 or 5 m wide; *Clear the drawing* starts over). Name it and *Save shape*: it is put on the
+stage and saved under *My shapes* in the list, in this browser (up to 30). Raised ground is 2.5 m high
+and slopes down over 1.5 m to the floor, which stays flat; props can't stand on it. In Outdoor it
+gets grass, bushes and stones, and trees on large raised areas; Technical and Blueprint show it as a
+raised surface, and the printed map shades it grey. A stage keeps its own copy of the drawing, so it
+goes with exported files and share links. *Edit this shape…* reopens the drawing (and *Delete from My
+shapes* removes a saved one). Props move onto the floor if
 they would be off it; the Outdoor banks, Technical walls and the printed map follow the shape.
 
 **Number targets.** Targets are numbered as you place them: T1… for paper, P1… for steel, NS1… for

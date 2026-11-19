@@ -25,7 +25,7 @@ export function fbm(seed, octaves = 4) {
 /** Berms: a flat apron round the bay, then an earth bank 2–3 m high with an irregular face. */
 export const BERM = Object.freeze({ setback: 2.5, run: 3.2, height: 2.5, uprangeFade: 10 });
 
-import { isRect, outsideDistance } from "../../model/bay.js";
+import { isRect, isDrawn, outsideDistance, raisedHeight } from "../../model/bay.js";
 
 const setbackNoise = fbm(101), topNoise = fbm(102), faceNoise = fbm(103), blendNoise = fbm(104);
 const clamp01 = (v) => Math.min(1, Math.max(0, v));
@@ -36,7 +36,7 @@ function bankDistance(x, z, bay) {
   const sb = BERM.setback + wobble;
   const behind = z - (bay.depth + sb);
   // A tapered or notched bay: the banks follow its outline (sides and back).
-  if (!isRect(bay)) return { d: outsideDistance([x, z], bay) - sb, behind };
+  if (!isRect(bay) && !isDrawn(bay)) return { d: outsideDistance([x, z], bay) - sb, behind };     // a drawn bay: its rectangle
   const side = Math.abs(x) - (bay.width / 2 + sb);
   return { d: Math.max(side, behind), behind };
 }
@@ -50,10 +50,16 @@ export function bankBlend(x, z, bay) {
   const { d } = bankDistance(x, z, bay);
   const edge = d + blendNoise(x * 0.35, z * 0.35) * 0.6;
   const t = clamp01((edge + 2) / 4.2);
-  return t * t * (3 - 2 * t);
+  const bank = t * t * (3 - 2 * t);
+  // Raised ground in a drawn bay is raw earth too, blending in up its slope.
+  return isDrawn(bay) ? Math.max(bank, clamp01(raisedHeight(bay, x, z) / 0.9)) : bank;
 }
 
 export function heightAt(x, z, bay) {
+  const raised = isDrawn(bay) ? raisedHeight(bay, x, z) * (1 + 0.08 * topNoise(x * 0.11, z * 0.11)) : 0;      // drawn raised ground
+  return Math.max(raised, bankHeight(x, z, bay));
+}
+function bankHeight(x, z, bay) {
   const { d, behind } = bankDistance(x, z, bay);
   if (d <= 0) return 0;
   // Fade the side banks out up range, where the shooters stand.
