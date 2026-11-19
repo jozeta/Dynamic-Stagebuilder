@@ -37,6 +37,7 @@ import { walkSpeed } from "./model/route.js";
 import { revealOnSelect } from "./model/layout.js";
 import { activationLinks } from "./model/activation.js";
 import { isHidden } from "./model/layers.js";
+import { measureText } from "./model/measure.js";
 import { createContextMenu } from "./ui/context-menu.js";
 import { createLayers } from "./ui/layers.js";
 import { createAutosave } from "./storage/autosave.js";
@@ -72,7 +73,8 @@ let envKey = "";
 let lookShown = null;
 const highlight = new THREE.Group();
 const preview = new THREE.Group();
-engine.groups.helper.add(highlight, preview);
+const measuring = new THREE.Group();
+engine.groups.helper.add(highlight, preview, measuring);
 const ACCENT = 0x5a93c4;
 
 const hint = document.getElementById("hint");
@@ -141,6 +143,26 @@ function render(state) {
     highlight.add(line);
   }
 
+  // Measurements: a dashed line on the ground with its length over the middle, and the first point
+  // of the one being taken.
+  for (const c of [...measuring.children]) { measuring.remove(c); c.geometry?.dispose(); c.material?.map?.dispose(); c.material?.dispose(); }
+  for (const { a, b } of state.measures) {
+    const pts = [a, b].map(([x, z]) => new THREE.Vector3(x, 0.05, z));
+    const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineDashedMaterial({ color: 0xffd23f, dashSize: 0.25, gapSize: 0.12, depthTest: false }));
+    line.computeLineDistances();
+    line.renderOrder = 9;
+    const label = createLabel(measureText(a, b));
+    label.scale.multiplyScalar(3);             // readable from an overview, not only up close
+    label.position.set((a[0] + b[0]) / 2, 0.45, (a[1] + b[1]) / 2);
+    measuring.add(line, label);
+  }
+  if (state.mode?.measure && state.mode.from) {
+    const [x, z] = state.mode.from;
+    const dot = new THREE.Mesh(new THREE.RingGeometry(0.08, 0.14, 20), new THREE.MeshBasicMaterial({ color: 0xffd23f, depthTest: false }));
+    dot.rotation.x = -Math.PI / 2; dot.position.set(x, 0.06, z); dot.renderOrder = 9;
+    measuring.add(dot);
+  }
+
   // The line being drawn.
   for (const c of [...preview.children]) { preview.remove(c); c.geometry.dispose(); c.material.dispose(); }
   if (state.mode?.draw && state.mode.points.length) {
@@ -166,6 +188,13 @@ function updateHint(state) {
     nodes = [h("span", { text: `Tap to add points (${m.points.length}). Double-click, Enter or Finish to end.` }),
       h("button", { type: "button", class: "lg-btn lg-btn-primary", disabled: m.points.length < need, onclick: () => editor.dispatch({ type: "finishDraw" }), text: "Finish" }), cancel];
   } else if (m === "start") nodes = [h("span", { text: "Tap the ground to set the start position." }), cancel];
+  else if (m?.measure) {
+    const last = state.measures.at(-1);
+    const text = m.from ? "Tap the second point." : last ? `Last: ${measureText(last.a, last.b)}. Tap two more points for another.` : "Tap two points to measure. Near a prop they snap to it (Shift: don't).";
+    nodes = [h("span", { text }),
+      h("button", { type: "button", class: "lg-btn", disabled: !state.measures.length, onclick: () => editor.dispatch({ type: "clearMeasures" }), text: "Clear" }),
+      h("button", { type: "button", class: "lg-btn lg-btn-primary", onclick: () => editor.dispatch({ type: "cancel" }), text: "Done" })];
+  }
   else if (!stage.objects.length && !stage.lines.length) nodes = [h("span", { text: "Empty stage. Pick a prop on the left, then tap the ground to place it." })];
   hint.hidden = !nodes;
   if (nodes) hint.replaceChildren(...nodes);

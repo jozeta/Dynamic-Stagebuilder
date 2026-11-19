@@ -12,6 +12,7 @@ import { getProp } from "./model/props.js";
 import { snapToObjects, SNAP_RADIUS } from "./model/objsnap.js";
 import { cleanLook, lookDefaults, lookAfterSwitch } from "./model/look.js";
 import { stepFrom } from "./model/positions.js";
+import { snapMeasure } from "./model/measure.js";
 import { canBeActivated, isActivator } from "./model/activation.js";
 import { isLocked, isHidden, setFlag, pruneGroups, groupObjects, ungroup, moveToGroup, updateGroup, copyObjects, pasteObjects } from "./model/layers.js";
 
@@ -27,7 +28,7 @@ function withVia(stage, id, fn) {
 }
 
 export function createEditor({ stage = createStage(), onChange = () => {} } = {}) {
-  const state = { history: createHistory(assignLabels(stage)), selection: [], mode: "select", drag: null, clipboard: [] };
+  const state = { history: createHistory(assignLabels(stage)), selection: [], mode: "select", drag: null, clipboard: [], measures: [] };
   const present = () => state.history.present;
   const fit = (p, s = present()) => clampToBay(snapPoint(p, s.settings.grid), s.bay);
   let lastGrid = stage.settings.grid || 0.25;
@@ -109,7 +110,16 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
 
   const handlers = {
     setMode({ mode }) { state.mode = mode; },
-    cancel() { state.mode = "select"; },
+    cancel() { if (state.mode?.measure) state.measures = []; state.mode = "select"; },
+    // The measuring tool (a view aid: state.measures, never the stage).
+    beginMeasure() { state.mode = { measure: true, from: null }; state.selection = []; },
+    addMeasurePoint({ point, fine = false }) {
+      if (!state.mode?.measure) return;
+      const p = snapMeasure(present(), point, { fine }).point;
+      if (!state.mode.from) state.mode = { ...state.mode, from: p };
+      else { state.measures = [...state.measures, { a: state.mode.from, b: p }]; state.mode = { ...state.mode, from: null }; }
+    },
+    clearMeasures() { state.measures = []; if (state.mode?.measure) state.mode = { ...state.mode, from: null }; },
     select({ ids, add }) {
       if (!add) state.selection = [...ids];
       else for (const id of ids) state.selection = state.selection.includes(id) ? state.selection.filter((x) => x !== id) : [...state.selection, id];

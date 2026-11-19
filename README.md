@@ -294,6 +294,11 @@ or the list (long-press on an iPad) for cut, copy, paste, duplicate, delete, loc
 rotate 90°, select all of that kind, frame the selection and Shooter's eye from a shooting
 position; right-click the ground to paste there.
 
+**Measure distances.** Press *Measure* in the toolbar (or M), then tap two points on the ground: a
+dashed line shows the distance in metres. Near a prop or the start, a point snaps to its centre, so a
+shooting position to a target is exact; hold Shift to place it exactly where you tap. Take as many as
+you like; *Clear* removes them and *Done* or Escape ends measuring. Measurements aren't saved.
+
 **Number targets.** Targets are numbered as you place them: T1… for paper, P1… for steel, NS1… for
 a lone no-shoot (an array with a target is one T label; its targets and no-shoots all count in the
 statistics). Deleting a target leaves a gap until you press *Renumber*. To set a label by hand, type
@@ -352,6 +357,7 @@ aren't in an exported file shows a hint, so you know when to export a backup.
 | ⌘/Ctrl A | Select everything that isn't hidden or locked |
 | ⌘/Ctrl G, ⇧⌘/Ctrl G | Group the selection, ungroup |
 | L / H | Lock or unlock, hide or show the selection |
+| M | Measure distances on the ground |
 | Right-click (long-press) | The prop menu |
 
 ## Tests

@@ -38,6 +38,7 @@ export function attachShortcuts({ editor, rig, onEscape }) {
     if (k === "q") return d({ type: "rotate", by: -step });
     if (k === "e") return d({ type: "rotate", by: step });
     if (k === "f") { e.preventDefault(); rig.frameAll(editor.stage()); return; }
+    if (k === "m") return d({ type: editor.state.mode?.measure ? "cancel" : "beginMeasure" });
     if (k === "[" || k === "]") { e.preventDefault(); document.getElementById("toolbar")?.eyeSteps?.step(k === "]" ? 1 : -1); return; }
     const n = Number(k);
     if (n >= 1 && n <= PRESETS.length) {

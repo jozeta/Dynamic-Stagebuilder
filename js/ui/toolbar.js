@@ -17,6 +17,8 @@ export function createToolbar(root, { editor, rig, status, onViewing = () => {},
   const gridB = btn("grid", "Grid", () => editor.dispatch({ type: "toggleGrid" }), { "aria-pressed": "true", title: "Snap to the grid" });
   const magB = btn("magnet", "Objects", () => editor.dispatch({ type: "setSetting", key: "objectSnap", value: editor.stage().settings.objectSnap === false }),
     { "aria-pressed": "true", title: "Snap wall ends to other walls" });
+  const measureB = btn("ruler", "Measure (M)", () => editor.dispatch({ type: editor.state.mode?.measure ? "cancel" : "beginMeasure" }),
+    { "aria-pressed": "false", title: "Measure distances on the ground (M)" });
   const wsbB = btn("doc", "Briefing", onBriefing);
   const printB = btn("print", "Print", onPrint);
 
@@ -32,13 +34,14 @@ export function createToolbar(root, { editor, rig, status, onViewing = () => {},
   root.append(
     h("div", { class: "brand" }, [h("span", { class: "brand-name", text: "Dynamic-Stagebuilder" })]),
     h("div", { class: "toolgroup", role: "group", "aria-label": "Edit" }, [undoB, redoB, dupB, delB, numB]),
-    h("div", { class: "toolgroup", role: "group", "aria-label": "Snapping" }, [gridB, magB]),
+    h("div", { class: "toolgroup", role: "group", "aria-label": "Snapping and measuring" }, [gridB, magB, measureB]),
     h("div", { class: "toolgroup", role: "group", "aria-label": "Brief" }, [wsbB, printB]),
     h("div", { class: "toolgroup end" }, [status, btn("sliders", "Settings", onSettings, { "aria-pressed": "false" }), btn("help", "Help", onHelp), btn("info", "About", onAbout)]),
   );
 
   return function update(state) {
     eyeSteps.update();
+    measureB.setAttribute("aria-pressed", String(Boolean(state.mode?.measure)));
     undoB.disabled = !canUndo(state.history);
     redoB.disabled = !canRedo(state.history);
     const anyObj = state.selection.some((id) => state.history.present.objects.some((o) => o.id === id));

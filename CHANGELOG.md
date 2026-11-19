@@ -4,6 +4,10 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Measuring tool (toolbar *Measure* or M): tap two points on the ground to see the distance
+  between them; near a prop or the start a point snaps to its centre (Shift: exactly where you tap).
+  Take as many as you like; *Clear* or Escape removes them. Not saved with the stage.
+
 - Fault lines and shooting areas are a muted, weathered red instead of a bright one.
 
 - Fix: CI's test run (Node 22) names the test files by pattern instead of the folder.

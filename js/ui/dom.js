@@ -51,6 +51,7 @@ const PATHS = {
   paste: ["M9 4h6v3H9z", "M7 5H5v16h14V5h-2", "M9 12h6M9 16h4"],
   group: ["M3 3h7v7H3zM14 14h7v7h-7z", "M14 3h7v7h-7", "M3 14v7h7"],
   layers: ["M12 3l9 5-9 5-9-5z", "M3 13l9 5 9-5"],
+  ruler: ["M3 17 17 3l4 4L7 21z", "M7 13l2 2M10 10l2 2M13 7l2 2"],
   chevd: ["M5 9l7 7 7-7"],
   play: ["M7 4l13 8-13 8z"],
   pause: ["M7 4v16M17 4v16"],

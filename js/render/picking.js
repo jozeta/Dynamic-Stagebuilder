@@ -142,6 +142,7 @@ export function attachPicking({ engine, stageView, editor, cameraRig, canvas, on
     } else if (mode?.place && g) editor.dispatch({ type: "place", propType: mode.place, position: g });
     else if (mode?.draw && g) editor.dispatch({ type: "addPoint", point: g });
     else if (mode === "start" && g) editor.dispatch({ type: "setStart", position: g, facing: 0 });
+    else if (mode?.measure && g) editor.dispatch({ type: "addMeasurePoint", point: g, fine: e.shiftKey });
   }
   canvas.addEventListener("pointerup", release);
   canvas.addEventListener("pointercancel", release);
