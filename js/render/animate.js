@@ -2,7 +2,8 @@
 // turners turn, clamshells drop and reset, movers run their track, Texas stars spin, plates and
 // poppers fall and reset, dueling-tree paddles swing round the post to the other side. Only pivot groups the builders mark
 // (userData.anim) move; the stage data never changes. One global play/pause stops or starts them.
-import { ANIMATED_TYPES } from "../model/animation.js";
+import { ANIMATED_TYPES, triggered } from "../model/animation.js";
+import { activationLinks } from "../model/activation.js";
 
 const ease = (x) => x * x * (3 - 2 * x);
 const clamp01 = (x) => Math.min(1, Math.max(0, x));
@@ -33,6 +34,13 @@ const MOTIONS = {
   flip: (n, t, a) => { n.rotation.y = -a.side * (fallAngle(t, a.delay, a.period) / 1.45) * Math.PI; },
 };
 
+// Activated targets start from rest when their activator falls, so motions that don't begin at
+// rest get a variant that does.
+const FROM_REST = { ...MOTIONS, turn: (n, t) => { n.rotation.y = (0.5 - 0.5 * Math.cos(t * 1.4)) * (Math.PI / 2); } };
+// An activator with no motion of its own (a step pad, a pull lever) "goes" 1.5 s into a 7 s cycle.
+const PRESSED = { delay: 1.5, period: 7 };
+const pose = (n, into) => { into.p = n.position.toArray(); into.r = [n.rotation.x, n.rotation.y, n.rotation.z]; return into; };
+
 export function createAnimator(stageGroup) {
   let parts = [];             // [{ node, anim }]
   let playing = true;
@@ -42,14 +50,34 @@ export function createAnimator(stageGroup) {
     sync(stage) {
       const on = new Set(stage.objects.filter((o) => ANIMATED_TYPES.includes(o.type) && o.params.animate === true).map((o) => o.id));
       parts = [];
+      // When each activator falls: its own fall motion's timing, else the pressed default.
+      const fallOf = (id) => {
+        const root = stageGroup.children.find((c) => c.userData.id === id);
+        let fall = null;
+        root?.traverse((c) => { if (!fall && c.userData.anim?.kind === "fall") fall = c.userData.anim; });
+        return fall ? { delay: fall.delay, period: fall.period } : PRESSED;
+      };
+      const trigger = new Map(activationLinks(stage).map(({ target, activator }) => [target.id, fallOf(activator.id)]));
       for (const root of stageGroup.children) {
         if (!on.has(root.userData.id)) continue;
-        root.traverse((c) => { if (c.userData.anim && MOTIONS[c.userData.anim.kind]) parts.push({ node: c, anim: c.userData.anim }); });
+        const trig = trigger.get(root.userData.id) || null;
+        root.traverse((c) => { if (c.userData.anim && MOTIONS[c.userData.anim.kind]) parts.push({ node: c, anim: c.userData.anim, trig }); });
       }
     },
     update(t) {
       if (!playing) return;
-      for (const { node, anim } of parts) MOTIONS[anim.kind](node, t, anim);
+      const a = { p: [], r: [] }, b = { p: [], r: [] };
+      for (const { node, anim, trig } of parts) {
+        if (!trig) { MOTIONS[anim.kind](node, t, anim); continue; }
+        // Activated: still until the activator falls, then moving; easing back as it resets.
+        const { local, weight } = triggered(t, trig);
+        const move = FROM_REST[anim.kind];
+        move(node, 0, anim); pose(node, a);
+        move(node, local, anim); pose(node, b);
+        const mix = (i, key) => a[key][i] + (b[key][i] - a[key][i]) * weight;
+        node.position.set(mix(0, "p"), mix(1, "p"), mix(2, "p"));
+        node.rotation.set(mix(0, "r"), mix(1, "r"), mix(2, "r"));
+      }
     },
     setPlaying(v) { playing = Boolean(v); },
     playing: () => playing,

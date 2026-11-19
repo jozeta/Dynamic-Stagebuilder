@@ -4,6 +4,10 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- With Play on, an activated target (with Animate on) waits at rest until its activator falls,
+  then moves, and eases back to rest as the activator stands up again; a step pad or pull lever
+  goes 1.5 s into each 7 s cycle.
+
 - Settings → Environment, Blueprint and Technical: *Grid intensity* (0 hides it) and *Grid
   colour* (swatches or your own). The grid is drawn on its own layer, so the ground colour no
   longer changes it.

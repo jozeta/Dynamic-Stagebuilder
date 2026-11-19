@@ -263,7 +263,8 @@ browser only; a stage opened on another device shows a plain floor until you mak
 **Link activators.** Select a moving target (swinger, drop turner, clamshell, mover, bobber,
 twister, Texas star or shuttered port) and choose what starts it under *Activated by*: a popper,
 plate, step pad or pull lever on the stage. Selecting either one shows an orange dashed line
-between them; the briefing and the printed brief list every link.
+between them; the briefing and the printed brief list every link. With Play on (and Animate on for the
+target), the target waits until its popper or plate falls, then moves.
 
 **Animate moving targets.** Select a swinger, drop turner, clamshell, mover, Texas star, plate rack,
 dueling tree or popper and switch on *Animate*. The *Play / Pause* button over the 3D view (it

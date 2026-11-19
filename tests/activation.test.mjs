@@ -78,3 +78,38 @@ test("imported links are checked: kept when valid, dropped when they point at no
   json.objects.find((o) => o.id === swinger).activatedBy = 42;
   assert.equal(validateStage(json).ok, false, "not a string");
 });
+
+test("in Play, an activated target waits for its activator, moves, and eases back as it resets", async () => {
+  const { triggered, STAND_UP } = await import("../js/model/animation.js");
+  const trig = { delay: 2, period: 6 };
+  assert.deepEqual(triggered(1, trig), { local: 0, weight: 0 }, "before the popper falls: at rest");
+  const a = triggered(3, trig);
+  assert.equal(a.local, 1); assert.equal(a.weight, 1, "a second after it falls: moving");
+  const end = triggered(2 + 6 - STAND_UP / 2, trig);
+  assert.ok(end.weight > 0 && end.weight < 1, "while it stands up again, the target eases back");
+  assert.equal(triggered(2 + 6, trig).local, 0, "then the next cycle starts from rest");
+  assert.equal(triggered(2 + 6, trig).weight, 1);
+});
+
+test("the animator holds an activated swinger still until its popper falls", async () => {
+  const THREE = await import("three");
+  const { buildProp } = await import("../js/render/builders/index.js");
+  const { createAnimator } = await import("../js/render/animate.js");
+  const { s, swinger, popper } = stage();
+  const ed = createEditor({ stage: s });
+  ed.dispatch({ type: "setActivator", id: swinger, by: popper });
+  ed.dispatch({ type: "setParams", id: swinger, params: { animate: true } });
+  const st = ed.stage();
+  const root = new THREE.Group();
+  for (const o of st.objects) root.add(buildProp(o));
+  const anim = createAnimator(root);
+  anim.sync(st);
+  let fall = null, arm = null;
+  root.children.find((c) => c.userData.id === popper).traverse((c) => { if (c.userData.anim?.kind === "fall") fall = c.userData.anim; });
+  root.children.find((c) => c.userData.id === swinger).traverse((c) => { if (c.userData.anim) arm = c; });
+  assert.ok(fall && arm, "the popper falls and the swinger has a moving part");
+  anim.update(fall.delay - 0.2);
+  assert.ok(Math.abs(arm.rotation.z) < 1e-9, "still before the popper falls");
+  anim.update(fall.delay + 0.7);
+  assert.ok(Math.abs(arm.rotation.z) > 0.1, "swinging after it falls");
+});
