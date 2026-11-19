@@ -42,6 +42,7 @@ export function updateObject(stage, id, patch) {
       ...(patch.position ? { position: [patch.position[0], patch.position[1]] } : {}),
       ...(patch.rotation !== undefined ? { rotation: patch.rotation } : {}),
       ...(patch.params ? { params: { ...o.params, ...patch.params } } : {}),
+      ...(Object.hasOwn(patch, "label") ? { label: patch.label, labelManual: false } : {}),
     }),
   };
 }

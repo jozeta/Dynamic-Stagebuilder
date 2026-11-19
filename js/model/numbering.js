@@ -1,4 +1,5 @@
-// Target labels: T1… for paper targets, P1… for steel, NS1… for no-shoots, in placement order.
+// Target labels: T1… for paper targets, P1… for steel, NS1… for no-shoots, in placement order. A
+// paper array with two scoring targets takes two numbers and shows them as a range ("T2–3").
 // New targets get the next free number (gaps are kept until Renumber); hand-set labels are kept.
 import { getProp } from "./props.js";
 import { arrayCounts } from "./arrays.js";
@@ -14,9 +15,21 @@ export function labelPrefix(objOrType) {
   return PREFIX[kind] ?? null;
 }
 
+// How many numbers an object takes, and its label for a first number.
+const span = (o, p) => (p === PREFIX.paper ? Math.max(1, arrayCounts(o).paper) : 1);
+const labelFor = (p, n, k) => (k > 1 ? `${p}${n}–${n + k - 1}` : `${p}${n}`);
+
+// The last number a label uses ("T2–3" → 3), or null when it isn't an automatic-style label.
 function numberOf(label, prefix) {
-  const m = typeof label === "string" && label.match(/^([A-Z]+)(\d+)$/);
-  return m && m[1] === prefix ? Number(m[2]) : null;
+  const m = typeof label === "string" && label.match(/^([A-Z]+)(\d+)(?:–(\d+))?$/);
+  return m && m[1] === prefix ? Number(m[3] ?? m[2]) : null;
+}
+function numbersOf(label, prefix) {
+  const m = typeof label === "string" && label.match(/^([A-Z]+)(\d+)(?:–(\d+))?$/);
+  if (!m || m[1] !== prefix) return [];
+  const out = [];
+  for (let n = Number(m[2]); n <= Number(m[3] ?? m[2]); n++) out.push(n);
+  return out;
 }
 
 export function assignLabels(stage) {
@@ -31,8 +44,9 @@ export function assignLabels(stage) {
     const p = labelPrefix(o);
     if (!p || o.label !== null) return o;
     changed = true;
-    highest[p] = (highest[p] || 0) + 1;
-    return { ...o, label: `${p}${highest[p]}`, labelManual: false };
+    const k = span(o, p), n = (highest[p] || 0) + 1;
+    highest[p] = n + k - 1;
+    return { ...o, label: labelFor(p, n, k), labelManual: false };
   });
   return changed ? { ...stage, objects } : stage;
 }
@@ -41,17 +55,17 @@ export function renumber(stage) {
   const taken = {};
   for (const o of stage.objects) {
     const p = labelPrefix(o);
-    const n = p && o.labelManual && numberOf(o.label, p);
-    if (n) (taken[p] ||= new Set()).add(n);
+    if (p && o.labelManual) for (const n of numbersOf(o.label, p)) (taken[p] ||= new Set()).add(n);
   }
   const next = {};
   const objects = stage.objects.map((o) => {
     const p = labelPrefix(o);
     if (!p || o.labelManual) return o;
+    const k = span(o, p);
     let n = (next[p] || 0) + 1;
-    while (taken[p]?.has(n)) n++;
-    next[p] = n;
-    return { ...o, label: `${p}${n}` };
+    while ([...Array(k)].some((_, i) => taken[p]?.has(n + i))) n++;
+    next[p] = n + k - 1;
+    return { ...o, label: labelFor(p, n, k) };
   });
   return { ...stage, objects };
 }

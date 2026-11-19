@@ -88,6 +88,18 @@ export function arrayExtent(obj, standWidth = 0) {
   return { minX: Math.min(...xs), maxX: Math.max(...xs), top: Math.max(...cards.map((c) => c.y + h)) };
 }
 
+/**
+ * The stand height that keeps the array's top within the IPSC limit: the current one when it fits,
+ * else lowered (in 5 cm steps, not below 10 cm).
+ */
+export function fitStand(obj, rules = TARGET_ARRAY_RULES) {
+  const max = rules.maxTop[isMini(obj.type) ? "mini" : "ipsc"];
+  const mount = obj.params?.mountHeight ?? 0;
+  const top = arrayExtent(obj).top;
+  if (mount + top <= max + 1e-9) return mount;
+  return Math.max(0.1, Math.floor(((max - top) / 0.05) + 1e-9) * 0.05);
+}
+
 /** Rule problems with the array, as sentences citing the rule (empty when fine). */
 export function arrayIssues(obj, rules = TARGET_ARRAY_RULES) {
   const mini = isMini(obj.type);

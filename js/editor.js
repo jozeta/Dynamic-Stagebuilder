@@ -5,6 +5,7 @@ import { createStage, addObject, updateObject, removeObjects, duplicateObjects, 
   setSetting, setBay, setBriefing, pruneSelection } from "./model/stage.js";
 import { createHistory, commit, replacePresent, undo, redo } from "./model/history.js";
 import { assignLabels, renumber, setLabel } from "./model/numbering.js";
+import { fitStand, arrayCounts } from "./model/arrays.js";
 import { snapPoint, snapAngle, clampToBay } from "./model/snap.js";
 import { getProp } from "./model/props.js";
 import { snapToObjects, SNAP_RADIUS } from "./model/objsnap.js";
@@ -134,7 +135,17 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
     setRotation({ id, value }) { edit(updateObject(present(), id, { rotation: snapAngle(Number(value) || 0, present().settings.angleSnap) })); },
     setParams({ id, params }) {
       const o = present().objects.find((x) => x.id === id);
-      if (o) edit(updateObject(present(), id, { params: cleanParams(o.type, params) }));
+      if (!o) return;
+      let next = { ...o.params, ...cleanParams(o.type, params) };
+      const paper = o.type === "paper-ipsc" || o.type === "paper-mini";
+      // A new presentation or style that would put the top over the IPSC limit lowers the stand
+      // (a stand height set by hand is kept; the inspector then warns).
+      if (paper && !Object.hasOwn(params, "mountHeight") && (Object.hasOwn(params, "presentation") || Object.hasOwn(params, "style"))) {
+        next = { ...next, mountHeight: fitStand({ type: o.type, params: next }) };
+      }
+      // An automatic label follows a change in how many targets the array is.
+      const relabel = paper && !o.labelManual && arrayCounts({ type: o.type, params: next }).paper !== arrayCounts(o).paper;
+      edit(updateObject(present(), id, { params: next, ...(relabel ? { label: null } : {}) }));
     },
     delete({ ids = state.selection }) { edit(removeObjects(present(), ids)); state.selection = []; },
     duplicate({ ids = state.selection }) {

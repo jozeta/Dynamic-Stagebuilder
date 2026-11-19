@@ -95,3 +95,44 @@ test("old stages: no-shoot props open as targets presented as no-shoots", () => 
   assert.equal(b.params.presentation, "noshoot");
   assert.equal(a.label, "NS1");
 });
+
+test("choosing a tall presentation lowers the stand so the top stays within the IPSC limit", async () => {
+  const { createEditor } = await import("../js/editor.js");
+  const ed = createEditor({ stage: createStage() });
+  ed.dispatch({ type: "place", propType: "paper-ipsc", position: [0, 5] });
+  const id = ed.stage().objects.at(-1).id;
+  ed.dispatch({ type: "setParams", id, params: { presentation: "stacked" } });
+  const o = ed.stage().objects.find((x) => x.id === id);
+  assert.deepEqual(arrayIssues(o), [], "no height warning after choosing stacked");
+  assert.ok(o.params.mountHeight < 0.7 && o.params.mountHeight >= 0.1, `stand lowered to ${o.params.mountHeight}`);
+  // A stand height you set yourself is kept (the inspector then warns).
+  ed.dispatch({ type: "setParams", id, params: { mountHeight: 1.2 } });
+  assert.equal(ed.stage().objects.find((x) => x.id === id).params.mountHeight, 1.2);
+  assert.equal(arrayIssues(ed.stage().objects.find((x) => x.id === id)).length, 1);
+});
+
+test("an array with two targets is labelled with both numbers", async () => {
+  const { addObject } = await import("../js/model/stage.js");
+  const { assignLabels, renumber } = await import("../js/model/numbering.js");
+  let s = createStage();
+  s = addObject(s, "paper-ipsc", [0, 5]).stage;
+  s = addObject(s, "paper-ipsc", [1, 5], 0, { presentation: "two-ns-between" }).stage;
+  s = addObject(s, "paper-ipsc", [2, 5]).stage;
+  s = assignLabels(s);
+  assert.deepEqual(s.objects.map((o) => o.label), ["T1", "T2–3", "T4"]);
+  assert.deepEqual(renumber(s).objects.map((o) => o.label), ["T1", "T2–3", "T4"]);
+});
+
+test("changing how many targets an array has gives it fresh numbers", async () => {
+  const { createEditor } = await import("../js/editor.js");
+  const ed = createEditor({ stage: createStage() });
+  ed.dispatch({ type: "place", propType: "paper-ipsc", position: [0, 5] });
+  ed.dispatch({ type: "place", propType: "paper-ipsc", position: [1, 5] });
+  const [a] = ed.stage().objects;
+  ed.dispatch({ type: "setParams", id: a.id, params: { presentation: "two-overlap" } });
+  const labels = ed.stage().objects.map((o) => o.label);
+  assert.equal(new Set(labels).size, 2);
+  assert.match(labels[0], /^T\d+–\d+$/);
+  ed.dispatch({ type: "renumber" });
+  assert.deepEqual(ed.stage().objects.map((o) => o.label), ["T1–2", "T3"]);
+});
