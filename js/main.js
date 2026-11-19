@@ -356,7 +356,7 @@ const layers = createLayers(document.getElementById("layers"), { editor, menu })
 updaters.push(
   createToolbar(document.getElementById("toolbar"), {
     editor, rig, status, onAbout: () => about.open(), onHelp: () => help.open(), onBriefing: () => briefing.open(), onPrint: () => printBrief(),
-    onProjects: () => projects.open(), onSettings: () => settings.open(), onViewing: viewingFrom, walking: () => animator.playing(),
+    onSettings: () => settings.open(), onViewing: viewingFrom, walking: () => animator.playing(),
     onEyeState: (st) => { try { localStorage.setItem(`dsb:eye:${editor.stage().id}`, JSON.stringify(st)); } catch { /* private mode */ } },
   }),
   library,

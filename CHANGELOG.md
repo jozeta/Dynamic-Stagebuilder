@@ -4,6 +4,10 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Changing the Outdoor ground recolours the stones and the earth banks to match (sandstone on
+  sand, grey stones and banks on gravel, red-brown on red dirt).
+- The Projects button left the top toolbar; Projects is a tab in the left panel.
+
 - Settings → Environment, Blueprint and Technical: the ground's colour, as hue, intensity and
   brightness (Blueprint's white lines stay white). Saved with the stage; unchanged, each keeps its
   own blue paper or grey floor.

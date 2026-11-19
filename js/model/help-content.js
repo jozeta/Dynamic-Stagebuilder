@@ -67,7 +67,7 @@ export const HELP_TOPICS = Object.freeze([
       "Targets, minimum rounds and maximum points are counted from the stage. Print makes an A4 brief: the briefing and a map with a legend on page 1, the 3D view on page 2. Choose Save as PDF in the print dialog."],
     tips: ["On an iPad: Share → Print, pinch out on the preview, then Share → Save to Files.", "Stage type is suggested from the round count; you can set it yourself."] },
   { id: "projects", title: "Projects and files", icon: "folder", art: "files",
-    text: ["Projects opens in the left-hand panel. It lists every stage saved in this browser: open, duplicate or delete them, or start a new stage.",
+    text: ["The Projects tab in the left-hand panel lists every stage saved in this browser: open, duplicate or delete them, or start a new stage.",
       "Export this stage saves a .json file you can keep or move to another device; Import file… adds one as a new project, so nothing is ever overwritten."],
     tips: ["A project with changes that aren't exported yet says so.", "Stages are kept in this browser only; export a copy now and then."] },
   { id: "keys", title: "Keyboard shortcuts", icon: "doc", art: "keys",

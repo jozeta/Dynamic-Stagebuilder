@@ -82,6 +82,16 @@ const TONE = {
   wear: new THREE.Color("#fbf4e8"), earth: new THREE.Color("#c99a72"), grass: new THREE.Color("#8e9a56"),
 };
 
+// Each ground's bank earth and stones (Settings → Ground): the earth tone the banks blend to, and a
+// tint for every stone (sandstone on sand, grey stones on gravel, red-brown ones on red dirt).
+export const GROUND_PALETTE = Object.freeze({
+  sand: { earth: "#c99a72", stone: "#ffffff" },
+  "light-sand": { earth: "#dcb98f", stone: "#fff6e8" },
+  "dark-sand": { earth: "#9a7454", stone: "#b9a894" },
+  "red-dirt": { earth: "#b85c38", stone: "#d8907a" },
+  gravel: { earth: "#9b958c", stone: "#d4d9de" },
+});
+
 // Colour grades for the ground choices (Settings → Ground), applied to the photo scan: saturation,
 // gain, an added lift and a per-channel tint. The scan itself is a deep red-brown.
 const GRADES = {
@@ -155,6 +165,9 @@ export function buildGround(bay, { onUpdate } = {}) {
   const colors = new Float32Array(pos.count * 3);
   const grassPatch = fbm(301);
   const c = new THREE.Color(), tmp = new THREE.Color();
+  // Per vertex: the floor's tone, how much bank earth and how much grass it gets, kept so a ground
+  // change can recolour the banks.
+  const floorTone = new Float32Array(pos.count * 3), earthW = new Float32Array(pos.count), grassW = new Float32Array(pos.count);
   for (let i = 0; i < pos.count; i++) {
     const x = pos.getX(i), z = pos.getZ(i);
     const y = heightAt(x, z, bay);
@@ -162,12 +175,21 @@ export function buildGround(bay, { onUpdate } = {}) {
     const t = groundTone(x, z, bay);
     c.setRGB(0, 0, 0).add(tmp.copy(TONE.dry).multiplyScalar(t.dry)).add(tmp.copy(TONE.compact).multiplyScalar(t.compact)).add(tmp.copy(TONE.damp).multiplyScalar(t.damp));
     c.lerp(TONE.wear, t.wear * 0.45);
-    c.lerp(TONE.earth, bankBlend(x, z, bay) * 0.8);                             // raw earth on the banks, blended in from the floor
-    const grass = y > 1.8 ? Math.min(1, (y - 1.8) / 0.4) * Math.min(1, Math.max(0, grassPatch(x * 0.25, z * 0.25) + 0.45) * 1.6) : 0;
-    c.lerp(TONE.grass, grass * 0.85);
-    colors.set([c.r, c.g, c.b], i * 3);
+    floorTone.set([c.r, c.g, c.b], i * 3);
+    earthW[i] = bankBlend(x, z, bay) * 0.8;                                      // raw earth on the banks, blended in from the floor
+    grassW[i] = (y > 1.8 ? Math.min(1, (y - 1.8) / 0.4) * Math.min(1, Math.max(0, grassPatch(x * 0.25, z * 0.25) + 0.45) * 1.6) : 0) * 0.85;
   }
-  geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+  const colorAttr = new THREE.BufferAttribute(colors, 3);
+  geo.setAttribute("color", colorAttr);
+  const paintBanks = (earth) => {
+    const e = new THREE.Color(earth);
+    for (let i = 0; i < pos.count; i++) {
+      c.setRGB(floorTone[i * 3], floorTone[i * 3 + 1], floorTone[i * 3 + 2]).lerp(e, earthW[i]).lerp(TONE.grass, grassW[i]);
+      colors.set([c.r, c.g, c.b], i * 3);
+    }
+    colorAttr.needsUpdate = true;
+  };
+  paintBanks(GROUND_PALETTE.sand.earth);
   geo.computeVertexNormals();
   const maps = bakeGroundMaps();
   for (const t of Object.values(maps)) t.repeat.set(W / TILE, D / TILE);
@@ -186,6 +208,9 @@ export function buildGround(bay, { onUpdate } = {}) {
     if (name === control.ground) return;
     control.ground = name;
     control.regrade?.(name);
+    const pal = GROUND_PALETTE[name] || GROUND_PALETTE.sand;
+    paintBanks(pal.earth);                         // the banks' earth and the stones follow the ground
+    stones.material.color.set(pal.stone);
   };
   loadPhotoMaps(mat, W, D, onUpdate, control);
   return group;

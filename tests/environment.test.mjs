@@ -158,3 +158,29 @@ test("changing the foliage swaps the plants and never touches the stage", () => 
   env.dispose();
   assert.deepEqual(stage, before);
 });
+
+test("changing the Outdoor ground recolours the stones and the earth banks to match", async () => {
+  const { GROUND_PALETTE } = await import("../js/render/environments/ground.js");
+  const { GROUNDS } = await import("../js/model/look.js");
+  assert.deepEqual(Object.keys(GROUND_PALETTE).sort(), GROUNDS.map((g) => g.id).sort(), "a palette for every ground");
+  const stage = everyPropStage();
+  const env = createEnvironment("outdoor", stage.bay);
+  const groundMesh = env.group.children[0].children.find((c) => c.userData.ground);
+  const stones = env.group.children[0].children.find((c) => c.isInstancedMesh);
+  // A point high on the back bank.
+  const pos = groundMesh.geometry.attributes.position, col = groundMesh.geometry.attributes.color;
+  let i = 0, best = -1;
+  for (let k = 0; k < pos.count; k++) if (pos.getY(k) > best) { best = pos.getY(k); i = k; }
+  const bank = () => [col.getX(i), col.getY(i), col.getZ(i)].map((v) => +v.toFixed(3));
+  applyLook(env, { ...LOOK_DEFAULTS, ground: "sand" }, stage.bay);
+  const sandBank = bank(), sandStone = stones.material.color.getHexString();
+  applyLook(env, { ...LOOK_DEFAULTS, ground: "red-dirt" }, stage.bay);
+  const red = bank();
+  assert.notDeepEqual(red, sandBank, "the bank changed colour");
+  assert.ok(red[0] - red[2] > sandBank[0] - sandBank[2], "redder on red dirt");
+  assert.notEqual(stones.material.color.getHexString(), sandStone, "the stones changed colour");
+  applyLook(env, { ...LOOK_DEFAULTS, ground: "gravel" }, stage.bay);
+  const g = stones.material.color;
+  assert.ok(Math.abs(g.r - g.b) < 0.08, "grey stones on gravel");
+  env.dispose();
+});

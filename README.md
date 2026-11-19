@@ -331,7 +331,7 @@ procedure carries on to the next page instead of being cut. In the print dialog 
 *Save as PDF*; on an iPad, tap Share → Print, then pinch out on the preview and Share → Save to Files.
 
 **Projects, export and import.** Every change is saved in this browser automatically (the chip in
-the toolbar says *Saved*). *Projects* opens in the left-hand panel and lists your stages: open, duplicate or delete them, start a
+the toolbar says *Saved*). The *Projects* tab in the left-hand panel lists your stages: open, duplicate or delete them, start a
 *New stage*, *Export this stage* as a `.json` file, or *Import file…* to add a stage from a file.
 An import always becomes a new project, so it never overwrites one. Below your projects is the
 *Stage library*: 58 ready-made stages (drills and standards, short, medium and long IPSC courses,
