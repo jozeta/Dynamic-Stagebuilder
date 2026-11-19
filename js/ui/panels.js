@@ -40,7 +40,8 @@ export function makeResizable(aside, { app, name, label }) {
   sizes ??= loadSizes();
   const stacked = () => name === "inspector" && matchMedia("(max-width: 1099px)").matches;   // inspector under the view
   const key = () => (stacked() ? "inspectorHeight" : name);
-  const cssVar = (k) => (k === "inspectorHeight" ? "--inspector-h" : `--${k}-w`);
+  // The chosen size goes in its own variable, so a folded panel's rail always wins over it.
+  const cssVar = (k) => (k === "inspectorHeight" ? "--inspector-hsize" : `--${k}-size`);
   const handle = h("div", { class: `panel-resize panel-resize-${name}`, role: "separator", tabindex: "0", "aria-label": `Resize the ${label} panel`,
     "aria-orientation": "vertical", title: "Drag to resize · double-click to reset" });
   function apply(k, px, persist = true) {

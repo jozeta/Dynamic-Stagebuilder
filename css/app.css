@@ -5,7 +5,8 @@ body { background: var(--lg-bg); overflow: hidden; }
 
 .app {
   display: grid; height: 100vh; height: 100dvh;
-  --library-w: 232px; --inspector-w: 280px; --inspector-h: clamp(240px, 34dvh, 340px);
+  /* The size you dragged a panel to (--*-size, set by panels.js) or the default; folding overrides it. */
+  --library-w: var(--library-size, 232px); --inspector-w: var(--inspector-size, 280px); --inspector-h: var(--inspector-hsize, clamp(240px, 34dvh, 340px));
   grid-template-columns: var(--library-w) minmax(0, 1fr) var(--inspector-w);
   grid-template-rows: auto minmax(0, 1fr);
   grid-template-areas: "toolbar toolbar toolbar" "library viewport inspector";
@@ -26,7 +27,7 @@ body { background: var(--lg-bg); overflow: hidden; }
 
 /* iPad portrait and small laptops: the inspector becomes a panel under the viewport. */
 @media (max-width: 1099px) {
-  .app { --library-w: 200px; grid-template-columns: var(--library-w) minmax(0, 1fr);
+  .app { --library-w: var(--library-size, 200px); grid-template-columns: var(--library-w) minmax(0, 1fr);
     grid-template-rows: auto minmax(0, 1fr) var(--inspector-h);
     grid-template-areas: "toolbar toolbar" "library viewport" "library inspector"; }
   .inspector .panel-toggle svg { transform: rotate(90deg); }

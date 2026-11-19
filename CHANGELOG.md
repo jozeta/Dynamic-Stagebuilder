@@ -4,6 +4,8 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Fixed: a side panel you had resized didn't fold (it kept its width with the handle in the middle).
+
 - A folded side panel is now only a slim grab handle at the edge of the 3D view (a horizontal one
   under the view on iPad portrait), so the view gets nearly the whole window.
 
