@@ -1,4 +1,5 @@
 // Grid and angle snapping and bay clamping. Bay coordinates: x ∈ [−width/2, width/2], z ∈ [0, depth].
+import { isRect, nearestInBay } from "./bay.js";
 const clean = (v) => {
   const r = Math.round(v * 1e9) / 1e9;
   return Object.is(r, -0) ? 0 : r;
@@ -24,5 +25,7 @@ export function snapAngle(deg, step) {
 
 export function clampToBay([x, z], bay, margin = 0) {
   const half = bay.width / 2 - margin;
-  return [clean(Math.min(half, Math.max(-half, x))), clean(Math.min(bay.depth - margin, Math.max(margin, z)))];
+  const p = [clean(Math.min(half, Math.max(-half, x))), clean(Math.min(bay.depth - margin, Math.max(margin, z)))];
+  // A tapered or notched bay: onto the nearest edge of its floor.
+  return isRect(bay) ? p : nearestInBay(p, bay).map(clean);
 }

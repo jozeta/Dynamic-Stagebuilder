@@ -312,9 +312,13 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
       edit(setBriefing(present(), clean));
     },
     rename({ name }) { edit({ ...present(), name: String(name ?? "").trim().slice(0, 120) || "Untitled stage" }); },
-    setBay({ width, depth }) {
-      const bay = { width: clampNum(Number(width) || 1, 1, 200), depth: clampNum(Number(depth) || 1, 1, 200) };
-      let s = setBay(present(), bay.width, bay.depth);
+    // The bay's size and (optional) shape; a size change alone keeps the shape. Props, lines and
+    // the start move onto the floor if they would be off it.
+    setBay({ width, depth, ...rest }) {
+      const shape = Object.fromEntries(Object.entries(rest).filter(([k]) => k !== "type"));      // the action's own type isn't a bay field
+      const keep = Object.keys(shape).length ? shape : present().bay;
+      let s = setBay(present(), clampNum(Number(width) || 1, 1, 200), clampNum(Number(depth) || 1, 1, 200), { ...keep, ...shape });
+      const bay = s.bay;
       s = { ...s,
         objects: s.objects.map((o) => ({ ...o, position: clampToBay(o.position, bay) })),
         lines: s.lines.map((l) => ({ ...l, points: l.points.map((p) => clampToBay(p, bay)) })),

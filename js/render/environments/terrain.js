@@ -25,6 +25,8 @@ export function fbm(seed, octaves = 4) {
 /** Berms: a flat apron round the bay, then an earth bank 2–3 m high with an irregular face. */
 export const BERM = Object.freeze({ setback: 2.5, run: 3.2, height: 2.5, uprangeFade: 10 });
 
+import { isRect, outsideDistance } from "../../model/bay.js";
+
 const setbackNoise = fbm(101), topNoise = fbm(102), faceNoise = fbm(103), blendNoise = fbm(104);
 const clamp01 = (v) => Math.min(1, Math.max(0, v));
 
@@ -32,8 +34,10 @@ const clamp01 = (v) => Math.min(1, Math.max(0, v));
 function bankDistance(x, z, bay) {
   const wobble = setbackNoise(x * 0.08, z * 0.08) * 0.8;                  // the bank line wanders
   const sb = BERM.setback + wobble;
-  const side = Math.abs(x) - (bay.width / 2 + sb);
   const behind = z - (bay.depth + sb);
+  // A tapered or notched bay: the banks follow its outline (sides and back).
+  if (!isRect(bay)) return { d: outsideDistance([x, z], bay) - sb, behind };
+  const side = Math.abs(x) - (bay.width / 2 + sb);
   return { d: Math.max(side, behind), behind };
 }
 

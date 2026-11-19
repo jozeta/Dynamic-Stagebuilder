@@ -7,6 +7,7 @@
 import * as THREE from "three";
 import { canvasTexture, ground, sun, hasDom } from "./common.js";
 import { GROUND_TONE_DEFAULTS } from "../../model/look.js";
+import { bayOutline } from "../../model/bay.js";
 
 const PAPER = "#1f63cc";
 const BG = 0x3a78d0;
@@ -142,7 +143,7 @@ export function blueprint(bay) {
   }
 
   // Registration crosses at the bay corners (the bay itself is not drawn as a floor).
-  for (const [x, z] of [[-W / 2, 0], [W / 2, 0], [-W / 2, D], [W / 2, D]]) {
+  for (const [x, z] of bayOutline(bay)) {
     group.add(decal(1.2, 1.2, (g, px, w, h) => {
       g.lineWidth = 3; g.beginPath(); g.moveTo(w / 2, 6); g.lineTo(w / 2, h - 6); g.moveTo(6, h / 2); g.lineTo(w - 6, h / 2); g.stroke();
       g.beginPath(); g.arc(w / 2, h / 2, w * 0.22, 0, 7); g.stroke();

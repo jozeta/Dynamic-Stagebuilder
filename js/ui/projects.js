@@ -9,7 +9,7 @@ import { createMatches } from "./matches.js";
 const when = (t) => new Date(t).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
 
 export function createProjects({ panel, docked = false, hide = [], onToggle = () => {}, onOpenLibrary = async () => {}, store, currentId, onOpen, onNew, onDuplicate, onDelete, onImport, onExport,
-  onNewStage = async () => null, onApplyBriefing = async () => {}, onPrintMatch = () => {}, onExportMatch = () => {}, onImportMatch = async () => [] }) {
+  onNewStage = async () => null, onApplyBriefing = async () => {}, onPrintMatch = () => {}, onExportMatch = () => {}, onImportMatch = async () => [], onShareLink = async () => ({ ok: false, error: "Not available." }) }) {
   // Matches: their list above the stages, and a match's own page in place of the lists.
   const stagesBox = h("div", { class: "lg-stack" });
   const matches = createMatches({
@@ -62,6 +62,7 @@ export function createProjects({ panel, docked = false, hide = [], onToggle = ()
         h("button", { type: "button", class: "lg-btn", onclick: () => matches.create() }, [icon("layers"), "New match"]),
         h("button", { type: "button", class: "lg-btn", onclick: () => file.click() }, [icon("folder"), "Import file…"]),
         h("button", { type: "button", class: "lg-btn", onclick: async () => { await onExport(); await fill(); } }, [icon("doc"), "Export this stage"]),
+        h("button", { type: "button", class: "lg-btn", onclick: () => shareLink() }, [icon("link"), "Copy share link"]),
         file,
       ]),
       message,
@@ -81,6 +82,21 @@ export function createProjects({ panel, docked = false, hide = [], onToggle = ()
   panel.addEventListener("keydown", (e) => { if (e.key === "Escape") { e.stopPropagation(); close(); } });
 
   const say = (text, tone) => message.replaceChildren(text ? h("p", { class: `lg-alert lg-alert-${tone}`, text }) : "");
+
+  // Copy a link that holds the open stage. Where the clipboard isn't allowed, show the link to copy.
+  async function shareLink() {
+    const r = await onShareLink();
+    if (!r.ok) return say(r.error, "bad");
+    try {
+      // A clipboard that doesn't answer (a permission prompt left open) falls back to the field below.
+      await Promise.race([navigator.clipboard.writeText(r.url), new Promise((_, no) => setTimeout(() => no(new Error("clipboard timeout")), 3000))]);
+      say("Share link copied. Anyone with the link can open a copy of this stage; nothing is uploaded.", "ok");
+    } catch {
+      const field = h("input", { class: "lg-input", readonly: true, value: r.url, "aria-label": "Share link", onfocus: (e) => e.target.select() });
+      message.replaceChildren(h("div", { class: "lg-alert lg-alert-info" }, [h("p", { text: "Copy this link. Anyone with it can open a copy of this stage." }), field]));
+      field.focus();
+    }
+  }
 
   async function importFile() {
     const f = file.files?.[0];

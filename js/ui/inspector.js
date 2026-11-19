@@ -126,12 +126,31 @@ export function createInspector(root, { editor }) {
     ]);
   }
 
+  // The bay's shape: a rectangle, tapered (narrower at one end) or with a back corner cut away.
+  // Width and depth stay the outer rectangle.
+  function bayShapeFields(bay) {
+    const set = (patch) => d({ type: "setBay", width: bay.width, depth: bay.depth, ...bay, ...patch });
+    const shape = bay.shape || "rect";
+    const out = [field("Bay shape", select("bayShape", shape, [["rect", "Rectangle"], ["taper", "Tapered"], ["notch", "Corner cut away"]],
+      (v) => d({ type: "setBay", width: bay.width, depth: bay.depth, shape: v })))];
+    if (shape === "taper") out.push(
+      field("Narrow end", select("narrowEnd", bay.narrowEnd, [["back", "Back (down range)"], ["front", "Front (up range)"]], (v) => set({ narrowEnd: v }))),
+      field("Width at the narrow end (m)", numberInput("narrowWidth", bay.narrowWidth, { min: 1, max: bay.width - 1, step: 0.5 }, (v) => set({ narrowWidth: v }))));
+    if (shape === "notch") out.push(
+      field("Cut corner", select("notchSide", bay.notchSide, [["left", "Back left"], ["right", "Back right"]], (v) => set({ notchSide: v }))),
+      h("div", { class: "pos-fields" }, [
+        field("Cut width (m)", numberInput("notchWidth", bay.notchWidth, { min: 1, max: bay.width - 1, step: 0.5 }, (v) => set({ notchWidth: v }))),
+        field("Cut depth (m)", numberInput("notchDepth", bay.notchDepth, { min: 1, max: bay.depth - 1, step: 0.5 }, (v) => set({ notchDepth: v })))]));
+    return out;
+  }
+
   function stagePanel(stage) {
     return [
       h("h2", { class: "lg-subtitle panel-title", text: "Stage" }),
       h("p", { class: "lg-muted hint-text", text: "Nothing selected. Tap a prop on the stage to edit it." }),
       field("Bay width (m)", numberInput("bayWidth", stage.bay.width, { min: 1, max: 200, step: 0.5 }, (v) => d({ type: "setBay", width: v, depth: stage.bay.depth }))),
       field("Bay depth (m)", numberInput("bayDepth", stage.bay.depth, { min: 1, max: 200, step: 0.5 }, (v) => d({ type: "setBay", width: stage.bay.width, depth: v }))),
+      ...bayShapeFields(stage.bay),
       field("Grid snap", select("grid", stage.settings.grid, GRID_OPTIONS, (v) => d({ type: "setSetting", key: "grid", value: Number(v) }))),
       field("Angle snap", select("angle", stage.settings.angleSnap, ANGLE_OPTIONS, (v) => d({ type: "setSetting", key: "angleSnap", value: Number(v) }))),
       h("button", { type: "button", class: "lg-btn", title: "Flip every prop, line and the start left to right about the centre line", onclick: () => d({ type: "mirror", ids: [] }) }, [icon("mirror"), "Mirror the stage"]),

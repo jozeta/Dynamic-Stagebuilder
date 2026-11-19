@@ -4,6 +4,7 @@
 import * as THREE from "three";
 import { canvasTexture, ground, sun } from "./common.js";
 import { hsvToRgb } from "../../model/look.js";
+import { bayOutline, isRect } from "../../model/bay.js";
 
 const FLOOR = 900;                 // metres a side: well past the fog, so it reads as endless
 const BG = 0xb7bcc2;
@@ -33,10 +34,8 @@ export function technical(bay) {
   group.add(gridMesh);
 
   // Bay outline (thin dark line) so the edge reads in top view.
-  const edge = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints([
-    new THREE.Vector3(-bay.width / 2, 0.004, 0), new THREE.Vector3(bay.width / 2, 0.004, 0),
-    new THREE.Vector3(bay.width / 2, 0.004, bay.depth), new THREE.Vector3(-bay.width / 2, 0.004, bay.depth)]),
-  new THREE.LineBasicMaterial({ color: 0x3d4044 }));
+  const edge = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(bayOutline(bay).map(([x, z]) => new THREE.Vector3(x, 0.004, z))),
+    new THREE.LineBasicMaterial({ color: 0x3d4044 }));
   group.add(edge);
 
   const walls = new THREE.Group();
@@ -50,9 +49,27 @@ export function technical(bay) {
     m.castShadow = false;           // only props cast sun shadows
     walls.add(m);
   };
-  wall(bay.width + 1, 4, 0.5, 0, bay.depth + 1.25);                    // backstop
-  wall(0.5, 2.5, bay.depth + 2, -bay.width / 2 - 1.25, bay.depth / 2);  // sides
-  wall(0.5, 2.5, bay.depth + 2, bay.width / 2 + 1.25, bay.depth / 2);
+  if (isRect(bay)) {
+    wall(bay.width + 1, 4, 0.5, 0, bay.depth + 1.25);                    // backstop
+    wall(0.5, 2.5, bay.depth + 2, -bay.width / 2 - 1.25, bay.depth / 2);  // sides
+    wall(0.5, 2.5, bay.depth + 2, bay.width / 2 + 1.25, bay.depth / 2);
+  } else {
+    // A tapered or notched bay: a wall 1.25 m outside each edge but the open front; the ones
+    // across the back (facing up range) are backstop height.
+    const o = bayOutline(bay);
+    for (let i = 1; i < o.length; i++) {           // edge 0 (o[0] → o[1]) is the open front
+      const a = o[i], b = o[(i + 1) % o.length];
+      const dx = b[0] - a[0], dz = b[1] - a[1], len = Math.hypot(dx, dz);
+      if (len < 0.01) continue;
+      const nx = dz / len, nz = -dx / len;                              // outward (the outline runs anticlockwise seen from above)
+      const across = Math.abs(dx) > Math.abs(dz);
+      const m = new THREE.Mesh(new THREE.BoxGeometry(len + 1.5, across ? 4 : 2.5, 0.5), wallMat);
+      m.position.set((a[0] + b[0]) / 2 + nx * 1.25, (across ? 4 : 2.5) / 2, (a[1] + b[1]) / 2 + nz * 1.25);
+      m.rotation.y = -Math.atan2(dz, dx);
+      m.receiveShadow = true;
+      walls.add(m);
+    }
+  }
 
   const hemiLight = new THREE.HemisphereLight(0xffffff, 0x5c6066, 1.6);
   const sunLight = sun(bay, 0xffffff, 1.6, [-12, 30, -10]);

@@ -32,7 +32,9 @@ export function mapSvg(stage) {
   const layers = { grid: s("g"), area: s("g"), obj: s("g"), line: s("g"), text: s("g") };
   for (const it of items) {
     switch (it.kind) {
-      case "bay": svg.append(s("rect", { x: it.x, y: it.y, width: it.w, height: it.h, fill: "#ffffff", stroke: "#444", "stroke-width": 0.35 })); break;
+      case "bay": svg.append(it.points
+        ? s("polygon", { points: it.points.map((p) => p.join(",")).join(" "), fill: "#ffffff", stroke: "#444", "stroke-width": 0.35 })
+        : s("rect", { x: it.x, y: it.y, width: it.w, height: it.h, fill: "#ffffff", stroke: "#444", "stroke-width": 0.35 })); break;
       case "frame": layers.text.append(s("rect", { x: it.x, y: it.y, width: it.w, height: it.h, fill: "none", stroke: "#bbb", "stroke-width": 0.25 })); break;
       case "grid": layers.grid.append(s("polyline", { points: pts(it.points), fill: "none", stroke: "#e2e2e2", "stroke-width": 0.15 })); break;
       case "poly": {

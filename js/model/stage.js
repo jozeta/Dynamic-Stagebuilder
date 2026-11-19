@@ -3,6 +3,7 @@
 // z down range (0 at the uprange edge). Rotation in degrees about the vertical axis.
 import { defaultParams, getProp } from "./props.js";
 import { LOOK_DEFAULTS } from "./look.js";
+import { cleanBay } from "./bay.js";
 
 export const newId = () => crypto.randomUUID();
 const SETTINGS = ["grid", "angleSnap", "environment", "objectSnap", "look", "targetStyle"];
@@ -83,8 +84,8 @@ export function setSetting(stage, key, value) {
   return { ...stage, settings: { ...stage.settings, [key]: value } };
 }
 
-export function setBay(stage, width, depth) {
-  return { ...stage, bay: { width, depth } };
+export function setBay(stage, width, depth, shape = {}) {
+  return { ...stage, bay: cleanBay({ ...shape, width, depth }) };
 }
 
 export function setBriefing(stage, patch) {

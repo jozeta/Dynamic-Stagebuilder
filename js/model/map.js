@@ -3,6 +3,7 @@
 // is on the left, as in the 3D view.
 import { dimensionsOf, getProp, STICK } from "./props.js";
 import { arrayCounts } from "./arrays.js";
+import { bayOutline, isRect } from "./bay.js";
 
 const ROUND = new Set(["shooting-position", "barrel", "tyre", "tyre-stack", "plate-round", "plant-palm", "cone"]);
 const CARD_DEPTH = 0.03;   // paper targets are drawn as their thin face, not their stand
@@ -71,7 +72,7 @@ export function mapModel(stage, { width, height, margin = 4, region = "bay" }) {
   const items = [];
 
   const [bx0, by0] = pt([bw / 2, bd]);
-  items.push({ kind: "bay", x: bx0, y: by0, w: bw * scale, h: bd * scale });
+  items.push({ kind: "bay", x: bx0, y: by0, w: bw * scale, h: bd * scale, ...(isRect(stage.bay) ? {} : { points: bayOutline(stage.bay).map(pt) }) });
   items.push({ kind: "frame", x: cx - (rw / 2) * scale, y: cy - (rd / 2) * scale, w: rw * scale, h: rd * scale });
   for (let x = Math.ceil(r.minX); x <= Math.floor(r.maxX); x++) items.push({ kind: "grid", points: [pt([x, r.minZ]), pt([x, r.maxZ])] });
   for (let z = Math.ceil(r.minZ); z <= Math.floor(r.maxZ); z++) items.push({ kind: "grid", points: [pt([r.minX, z]), pt([r.maxX, z])] });

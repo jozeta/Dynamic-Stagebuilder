@@ -1,6 +1,7 @@
 // Validation for stage JSON from untrusted places (imported files, browser storage). It builds a
 // fresh stage from known keys only, so unknown and "__proto__" keys never get through, and it
 // rejects the whole stage on any error: nothing is ever applied halfway.
+import { cleanBay } from "./bay.js";
 import { PROPS, TARGET_STYLES } from "./props.js";
 import { MAX_GROUPS } from "./layers.js";
 import { canBeActivated, isActivator } from "./activation.js";
@@ -174,7 +175,7 @@ export function validateStage(json) {
     schema: SCHEMA_VERSION,
     id: str(json.id, "id", LIMITS.id, { allowEmpty: false }),
     name: str(json.name, "name", LIMITS.name),
-    bay: { width, depth },
+    bay: cleanBay({ ...bay, width, depth }),
     settings: { grid: num(settings.grid, "settings.grid", 0, 5), angleSnap: num(settings.angleSnap, "settings.angleSnap", 0, 90),
       environment: settings.environment, objectSnap: settings.objectSnap !== false, look: cleanLook(settings.look), targetStyle },
     objects, lines, start, briefing, camera,

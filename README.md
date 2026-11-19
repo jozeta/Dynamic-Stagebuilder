@@ -15,7 +15,12 @@ training, and want a clear briefing sheet without drawing the map by hand.
 
 ## What it does
 
-- **Shooting bay** at real scale: width × depth in metres (default 20 × 30 m), 1 m grid.
+- **Shooting bay** at real scale: width × depth in metres (default 20 × 30 m), 1 m grid; a
+  rectangle, tapered, or with a back corner cut away.
+- **Safety checks** from the IPSC rules (January 2024): steel within 7 m, fault lines within 8 m of
+  steel, targets past the 90° muzzle angle, and targets nobody can see.
+- **Sight lines** from a shooting position, a **run-time estimate**, a printed **setup sheet**, and
+  **share links** that carry the stage itself.
 - **Prop library**, every prop drawn in 3D at real dimensions:
   - stage markings (first in the panel): fault lines, shooting areas, the start position and
     numbered shooting positions with a facing, look angle and stance
@@ -167,6 +172,7 @@ Stage settings are in the inspector when nothing is selected. They are saved wit
 |---|---|---|
 | Bay width | Width of the shooting bay across the range, 1–200 m | 20 m |
 | Bay depth | Depth of the bay down range, 1–200 m | 30 m |
+| Bay shape | Rectangle; *Tapered* (narrow end back or front, its width); *Corner cut away* (back left or right, cut width and depth). Width and depth stay the outer rectangle | Rectangle |
 | Grid snap | Positions snap to this grid: off, 0.1, 0.25, 0.5 or 1 m (toolbar *Grid* turns it on/off) | 0.25 m |
 | Object snap | Toolbar *Objects*: a wall's end jumps onto another wall's end within 35 cm | On |
 | Angle snap | Rotations snap to this step: off, 5°, 15°, 45° or 90° | 15° |
@@ -293,6 +299,32 @@ dashed line shows the distance in metres. Near a prop or the start, a point snap
 shooting position to a target is exact; hold Shift to place it exactly where you tap. Take as many as
 you like; *Clear* removes them and *Done* or Escape ends measuring. Measurements aren't saved.
 
+**Place props exactly.** Select a prop: the inspector shows its position, *Across* (metres from the
+centre line, + to the shooter's left) and *Down range* (metres from the up-range edge). Type a value
+to put it exactly there, without grid snap. With two or more selected, *Arrange* lines them up (left,
+centre, right, front or back) or spreads three or more evenly across or down range. *Mirror left to
+right* flips the selection about its centre; with nothing selected, *Mirror the stage* flips every
+prop, line and the start about the centre line (doors swap hinge sides). Locked props stay put.
+
+**Check the stage's safety.** Under the stage statistics, *Safety checks* lists what breaks IPSC
+rules 2.1.2 and 2.1.3 (Combined Competition Rules, January 2024, Handgun): steel closer than 7 m to
+anywhere a shooter may stand (the shooting areas, positions and the start), a fault line closer than
+8 m to steel, a target that can only be shot with the muzzle past 90° from down range (red), or that
+can also be seen from places down range of it (amber), and a target nobody can see from where they
+may stand. *Show* selects the props concerned. It's a designer's aid, not a range approval: it
+doesn't know your berms, ricochet angles or stage-specific muzzle angles.
+
+**See what a position sees.** Select a shooting position: green sight lines run from its eye (at its
+stance's height) to each target it can see, and the inspector lists the targets seen and hidden.
+
+**Estimate the run time.** The stage statistics give a time for a fast and a steady run (draw, the
+minimum rounds, the walk along the route through the shooting positions, and a reload every 15
+rounds) and the hit factors they give with all A hits. A rule of thumb for designers.
+
+**Shape the bay.** With nothing selected, *Bay shape* makes the bay tapered (narrower at the back
+or front) or cuts a back corner away, for ranges that aren't rectangles. Props move onto the floor if
+they would be off it; the Outdoor banks, Technical walls and the printed map follow the shape.
+
 **Number targets.** Targets are numbered as you place them: T1… for paper, P1… for steel, NS1… for
 a lone no-shoot (an array with a target is one T label; its targets and no-shoots all count in the
 statistics). Deleting a target leaves a gap until you press *Renumber*. To set a label by hand, type
@@ -321,7 +353,9 @@ is suggested from the round count; pick Short, Medium or Long to set it yourself
 **Print the brief or save it as a PDF.** *Print* makes a two-page A4 brief. Page 1: a header with
 the stage number, name, minimum rounds and maximum points, the briefing in a grid, the procedure,
 and a top-down map of the stage (down range at the top) with a legend and scale bar. Page 2: a 3D
-view. A long
+view. Page 3: the setup sheet, for building it: every prop measured from the shooter's-left side line
+and the up-range edge and to both up-range corners (two tapes), with its rotation, and the corner
+points of the fault lines and shooting areas. A long
 procedure carries on to the next page instead of being cut. In the print dialog choose
 *Save as PDF*; on an iPad, tap Share → Print, then pinch out on the preview and Share → Save to Files.
 
@@ -332,7 +366,8 @@ stage with its arrows, *Remove* it from the match, or *Open* it to edit. Every s
 the match name and its stage number in its briefing, renumbered when you change the order. *Print the
 match* prints a cover page (the stages with their rounds and points) and then each stage's brief page;
 the 3D view page is left out, since only the open stage can be drawn. A stage taken out of a match, or
-the stages of a deleted match, stay as ordinary projects.
+the stages of a deleted match, stay as ordinary projects. *Export the match* saves the match and all
+its stages in one file; *Import file…* takes it back as new projects in a new match.
 
 **Projects, export and import.** Every change is saved in this browser automatically (the chip in
 the toolbar says *Saved*). The *Projects* tab in the left-hand panel lists your stages: open, duplicate or delete them, start a
@@ -340,7 +375,9 @@ the toolbar says *Saved*). The *Projects* tab in the left-hand panel lists your 
 An import always becomes a new project, so it never overwrites one. Below your projects is the
 *Stage library*: 58 ready-made stages (drills and standards, short, medium and long IPSC courses,
 USPSA and club stages with moving targets). Search or pick a category, then *Open as new project*
-to get your own copy to change. A project with changes that
+to get your own copy to change. *Copy share link* copies a link that holds the open stage itself
+(after the #, which browsers never send to a server): whoever opens it gets a copy as a new project.
+A project with changes that
 aren't in an exported file shows a hint, so you know when to export a backup.
 
 ### Keyboard shortcuts

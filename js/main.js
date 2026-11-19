@@ -21,6 +21,7 @@ import { h, icon } from "./ui/dom.js";
 import { createStage } from "./model/stage.js";
 import { validateStage } from "./model/schema.js";
 import { openStore, memoryStore } from "./storage/db.js";
+import { decodeShare, encodeShare, shareHash, MAX_LINK } from "./storage/share.js";
 import { projectRecord, sortProjects, nextProjectAfterDelete } from "./storage/projects.js";
 import { exportFileName, stageToJson, matchToJson, matchFileName } from "./storage/files.js";
 
@@ -135,7 +136,7 @@ function render(state) {
   playButton?.update();
   if (animator.active()) engine.requestRender();
   if (editor) applyVisibility();            // rebuilt nodes: keep the viewed markers (and a hidden run) hidden
-  const key = `${stage.settings.environment}|${stage.bay.width}|${stage.bay.depth}|${surroundingsVersion}`;
+  const key = `${stage.settings.environment}|${JSON.stringify(stage.bay)}|${surroundingsVersion}`;      // size and shape
   if (key !== envKey) { envKey = key; lookShown = stage.settings.look; engine.setEnvironment(stage.settings.environment, stage.bay, stage.settings.look); }
   else if (stage.settings.look !== lookShown) { lookShown = stage.settings.look; engine.setLook(stage.settings.look, stage.bay); }
 
@@ -417,6 +418,12 @@ const projects = createProjects({
     if (!(next && await openProject(next))) await addProject(freshStage());
   },
   onImport: (stage) => addProject(stage),
+  // A share link for the open stage: the stage itself is in the link (after the #).
+  onShareLink: async () => {
+    const code = await encodeShare(editor.stage());
+    if (code.length > MAX_LINK) return { ok: false, error: "This stage is too large for a link. Export a file instead." };
+    return { ok: true, url: `${location.origin}${location.pathname}#${shareHash}${code}` };
+  },
   // A match file's stages: saved as new projects (not opened), in order; their ids go in the match.
   onImportMatch: async (stages) => {
     const now = Date.now();
@@ -565,7 +572,16 @@ rig.preset("iso", editor.stage());
   const all = sortProjects(await store.list());
   const last = recall();
   const pick = all.find((r) => r.id === last) ?? all[0];
-  if (!(pick && await openProject(pick.id))) await addProject(demoStage());
+  // A share link (#stage=…) opens its stage as a new project; the link leaves the address bar.
+  const shared = await decodeShare(location.hash);
+  if (shared) history.replaceState(null, "", location.pathname + location.search);
+  if (shared?.ok) {
+    await addProject(shared.stage);
+    globalThis.LadaGlass?.toast?.(`Opened the shared stage "${shared.stage.name}" as a new project.`, { type: "ok" });
+  } else {
+    if (shared) globalThis.LadaGlass?.toast?.(shared.error, { type: "bad", duration: 8000 });
+    if (!(pick && await openProject(pick.id))) await addProject(demoStage());
+  }
   viewReady = true;                        // from now on the camera belongs to an opened project
   syncDockTabs();                          // a Settings or Projects tab still shown after a reload is filled in
 })();

@@ -4,6 +4,15 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Share links: *Copy share link* (Projects) copies a link that holds the stage itself after the #,
+  so nothing is uploaded. Opening it adds the stage as a new project, checked like an imported file.
+- Run-time estimate: the stage statistics give a time for a fast and a steady run (draw, shots,
+  movement along the route, reloads) and the hit factors they give with all A hits. A rule of
+  thumb, not a rule.
+- Bay shapes: under the Stage panel, a bay can be a rectangle, tapered (narrower at the back or the
+  front) or have a back corner cut away. Props stay on the floor; the Outdoor banks, the Technical
+  walls, the Blueprint corner marks and the printed map follow the shape.
+
 - Setup sheet: the printed brief ends with a page listing where each prop goes, measured from the
   left side line and the up-range edge and to both up-range corners (two tapes), with its rotation,
   and the corner points of the fault lines and shooting areas.
