@@ -4,6 +4,8 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+## 0.5.0 (2026-11-19)
+
 - Safety distances: select a paper or steel target and switch on *Show safety distances* to draw the
   rulebook's rings on the ground round it (saved with the stage): steel 7 m in red (rules 2.1.3 and
   10.4.7) and 8 m in yellow (fault lines, rule 2.1.3); paper 3 m in yellow (rule 10.4.2, IPSC sets no

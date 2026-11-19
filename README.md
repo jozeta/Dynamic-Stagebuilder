@@ -4,7 +4,7 @@ A browser-based 3D stage builder for IPSC practical shooting. Lay out a stage at
 it from any angle, and print a Written Stage Briefing with a stage map for range officers and
 competitors.
 
-**Version:** 0.4.0 · **Try it:** [jozeta.github.io/Dynamic-Stagebuilder](https://jozeta.github.io/Dynamic-Stagebuilder/)
+**Version:** 0.5.0 · **Try it:** [jozeta.github.io/Dynamic-Stagebuilder](https://jozeta.github.io/Dynamic-Stagebuilder/)
 (runs in the browser; nothing to install, nothing leaves your device) · Started 2026-11-18 (see the
 [v1 design](docs/superpowers/specs/2026-11-18-stage-builder-v1-design.md)).
 
@@ -96,17 +96,11 @@ not supported: below 768 px wide the app asks you to use a larger screen. Englis
 
 ## What's new
 
-### 0.4.0 (2026-11-19)
+### 0.5.0 (2026-11-19)
 
-- **Build day:** a setup sheet page in the print (every prop measured from the bay's edges and
-  corners), exact position fields, and mirror, align and spread tools.
-- **Safety checks** from the IPSC rules (January 2024, 2.1.2 and 2.1.3): steel within 7 m, fault
-  lines within 8 m of steel, targets past the 90° muzzle angle, targets nobody can see. Library
-  stages fixed to keep steel at 7 m.
-- **Sight lines** from a shooting position and a **run-time estimate** with hit factors.
-- **Bay shapes:** tapered, or with a back corner cut away.
-- **Sharing:** share links that carry the stage itself, and match files with all their stages.
-- Paper target stands have dark brown feet.
+- **Safety distances:** select a paper or steel target and switch on *Show safety distances* for
+  rings at the IPSC rulebook's distances: steel 7 m (red) and 8 m (yellow), paper 3 m (yellow).
+- The safety checks list from 0.4.0 is removed; the library's steel stays at 7 m.
 
 Older versions are listed in [CHANGELOG.md](CHANGELOG.md).
 
