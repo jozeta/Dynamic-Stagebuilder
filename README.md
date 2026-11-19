@@ -17,8 +17,8 @@ training, and want a clear briefing sheet without drawing the map by hand.
 
 - **Shooting bay** at real scale: width × depth in metres (default 20 × 30 m), 1 m grid; a
   rectangle, tapered, or with a back corner cut away.
-- **Safety checks** from the IPSC rules (January 2024): steel within 7 m, fault lines within 8 m of
-  steel, targets past the 90° muzzle angle, and targets nobody can see.
+- **Safety distances** from the IPSC rules (January 2024): rings round a target at 7 and 8 m for
+  steel, 3 m for paper.
 - **Sight lines** from a shooting position, a **run-time estimate**, a printed **setup sheet**, and
   **share links** that carry the stage itself.
 - **Prop library**, every prop drawn in 3D at real dimensions:
@@ -307,19 +307,12 @@ centre, right, front or back) or spreads three or more evenly across or down ran
 right* flips the selection about its centre; with nothing selected, *Mirror the stage* flips every
 prop, line and the start about the centre line (doors swap hinge sides). Locked props stay put.
 
-**Check the stage's safety.** Under the stage statistics, *Safety checks* lists what breaks IPSC
-rules 2.1.2 and 2.1.3 (Combined Competition Rules, January 2024, Handgun): steel closer than 7 m to
-anywhere a shooter may stand (the shooting areas, positions and the start), a fault line closer than
-8 m to steel, a target that can only be shot with the muzzle past 90° from down range (red), or that
-can also be seen from places down range of it (amber), and a target nobody can see from where they
-may stand. *Show* selects the props concerned. Select a target, or hover over a warning (tap it on an iPad to pin
-it), and a line in the warning's colour runs on the ground from the target to the spot the check is
-about, with the distance: the nearest place to stand, the nearest point of the fault line, or the
-nearest place it would be shot from past 90°. With a target selected, the list shows only its own
-problems (and how many the whole stage has); select nothing to see them all. To see the distances themselves, select a paper or steel
-target and switch on *Show safety distances*: rings on the ground at 7 m (red) and 8 m (yellow) round
-steel, and 3 m (yellow) round paper, each explained in the inspector. It's a designer's aid, not a range approval: it
-doesn't know your berms, ricochet angles or stage-specific muzzle angles.
+**Show safety distances.** Select a paper or steel target and switch on *Show safety distances*:
+rings on the ground round it at the IPSC rulebook's distances (Combined Competition Rules, January
+2024, Handgun), each explained in the inspector and saved with the stage. Steel: 7 m in red (nobody
+closer while it is shot, rule 2.1.3; a shot from closer is a disqualification, rule 10.4.7) and 8 m in
+yellow (the nearest a fault line limiting the approach may be, rule 2.1.3). Paper: 3 m in yellow (rule
+10.4.2; IPSC sets no minimum distance for paper). A designer's aid, not a range approval.
 
 **See what a position sees.** Select a shooting position: green sight lines run from its eye (at its
 stance's height) to each target it can see, and the inspector lists the targets seen and hidden.

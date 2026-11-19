@@ -49,7 +49,7 @@ import { revealOnSelect } from "./model/layout.js";
 import { activationLinks } from "./model/activation.js";
 import { isHidden } from "./model/layers.js";
 import { measureText } from "./model/measure.js";
-import { sightFrom, safetyRings, stageChecks } from "./model/safety.js";
+import { sightFrom, safetyRings } from "./model/safety.js";
 import { eyeHeight } from "./model/positions.js";
 import { createContextMenu } from "./ui/context-menu.js";
 import { createLayers } from "./ui/layers.js";
@@ -92,38 +92,6 @@ engine.groups.helper.add(highlight, preview, measuring, rings);
 const RING_COLOR = { bad: 0xd9483b, warn: 0xf0b93a };
 let ringsFor = null;
 
-// Safety-check lines on the ground, from a target to the spot each of its checks is about, in the
-// check's colour: for the selected targets, and for the warning pointed at in the stats panel.
-let pointed = null;                                   // { key } of the warning hovered or pinned
-const pointer = { set(p) { pointed = p; render(editor.state); engine.requestRender(); } };
-let checksStage = null, checksCache = [];
-const checksOf = (stage) => { if (stage !== checksStage) { checksStage = stage; checksCache = stageChecks(stage); } return checksCache; };
-function drawCheckLines(stage, state, group) {
-  if (state.drag) return;
-  for (const c of checksOf(stage)) {
-    if (!c.to || !(state.selection.includes(c.ids[0]) || pointed?.key === c.text)) continue;
-    const colour = RING_COLOR[c.level];
-    const [ax, az] = c.from, [bx, bz] = c.to, len = Math.hypot(bx - ax, bz - az);
-    const mat = () => new THREE.MeshBasicMaterial({ color: colour, transparent: true, opacity: 0.95, depthTest: false, depthWrite: false });
-    if (len > 0.05) {
-      const strip = new THREE.Mesh(new THREE.PlaneGeometry(len, 0.07), mat());
-      strip.rotation.set(-Math.PI / 2, 0, Math.atan2(-(bz - az), bx - ax));
-      strip.position.set((ax + bx) / 2, 0.06, (az + bz) / 2);
-      strip.renderOrder = 7;
-      const label = createLabel(`${len.toFixed(1)} m`);
-      label.scale.multiplyScalar(2);
-      label.position.set((ax + bx) / 2, 0.5, (az + bz) / 2);
-      group.add(strip, label);
-    }
-    for (const [x, z, r] of [[bx, bz, 0.3], [ax, az, 0.45]]) {
-      const ring = new THREE.Mesh(new THREE.RingGeometry(r - 0.06, r, 48), mat());
-      ring.rotation.x = -Math.PI / 2;
-      ring.position.set(x, 0.06, z);
-      ring.renderOrder = 7;
-      group.add(ring);
-    }
-  }
-}
 // Rebuilt when the stage changes: a flat ring and a distance label (on the shooter's side) for each
 // rulebook distance of every target with Show safety distances on (and not hidden).
 function drawRings(stage) {
@@ -214,7 +182,6 @@ function render(state) {
   }
 
   drawRings(stage);
-  drawCheckLines(stage, state, highlight);
 
   // Sight lines from a selected shooting position: thin green lines from its eye to each target seen.
   const pos = state.selection.length === 1 && !state.drag ? stage.objects.find((o) => o.id === state.selection[0] && o.type === "shooting-position") : null;
@@ -521,7 +488,7 @@ updaters.push(
   library,
   layers.update,
   createInspector(document.getElementById("inspector-body"), { editor }),
-  createStats(document.getElementById("stats"), { onShow: (ids) => editor.dispatch({ type: "select", ids }), onPoint: (p) => pointer.set(p) }),
+  createStats(document.getElementById("stats")),
 );
 attachShortcuts({ editor, rig });
 // Play / pause for animated props, in the bar over the 3D view (shown when any prop is animated).

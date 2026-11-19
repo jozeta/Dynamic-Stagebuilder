@@ -359,12 +359,6 @@ body { background: var(--lg-bg); overflow: hidden; }
 .arrange { margin-top: var(--lg-space-s); }
 .arrange-row { flex-wrap: wrap; gap: 4px; }
 
-/* Safety checks under the statistics: each problem with a Show button that selects its props. */
-.safety { margin-top: var(--lg-space-m); display: flex; flex-direction: column; gap: var(--lg-space-s); }
-.safety-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
-.safety-item { display: flex; align-items: flex-start; gap: var(--lg-space-s); font-size: var(--lg-fs-small); }
-.safety-item > span { flex: 1; }
-.safety-show { flex: none; }
 .sight p { margin: 0; font-size: var(--lg-fs-small); }
 .sight-seen::before { content: ""; display: inline-block; width: 10px; height: 2px; margin: 0 6px 3px 0; background: #4fd18b; }
 
@@ -375,6 +369,3 @@ body { background: var(--lg-bg); overflow: hidden; }
 .ring-legend .ring-bad::before { border-color: #d9483b; }
 .ring-legend .ring-warn::before { border-color: #f0b93a; }
 
-/* A safety warning that is pointed at (its line is drawn on the ground). */
-.safety-item { cursor: pointer; }
-.safety-item.is-pinned { outline: 2px solid currentColor; outline-offset: 1px; }
