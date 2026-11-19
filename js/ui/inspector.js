@@ -5,6 +5,7 @@ import { getProp } from "../model/props.js";
 import { labelPrefix } from "../model/numbering.js";
 import { PRESENTATIONS, HARD_COVERS, arrayIssues } from "../model/arrays.js";
 import { canBeActivated, isActivator, activatorsFor, activatorOf, activationLinks, describe } from "../model/activation.js";
+import { isLocked } from "../model/layers.js";
 
 const PARAM_LABELS = {
   presentation: "Presentation", hardCover: "Hard cover", mountHeight: "Stand height (m)", style: "Target style", baseHeight: "Base height (m)", size: "Size (m)", length: "Length (m)",
@@ -75,6 +76,17 @@ export function createInspector(root, { editor }) {
       const starts = activationLinks(stage).filter((l) => l.activator.id === o.id).map((l) => describe(l.target));
       if (starts.length) nodes.push(h("p", { class: "lg-muted hint-text", text: `Activates ${starts.join(", ")}.` }));
     }
+    // Lock in place (not clickable or draggable in the 3D view) and hide (not drawn; still counts).
+    for (const [k, label, hint] of [["locked", "Locked in place", "Can't be clicked or moved in the 3D view; pick it in the On stage list."], ["hidden", "Hidden", "Not drawn in the 3D view; it still counts in the statistics."]]) {
+      const id = `f${++uid}`;
+      const sw = h("input", { type: "checkbox", class: "lg-toggle", id, dataset: { field: k },
+        onchange: (e) => d(k === "locked" ? { type: "setLocked", ids: [o.id], locked: e.target.checked } : { type: "setHidden", ids: [o.id], hidden: e.target.checked }) });
+      sw.checked = o[k] === true;
+      nodes.push(h("div", { class: "lg-field inspector-switch", title: hint }, [h("label", { for: id, text: label }), sw]));
+    }
+    if (o.group && stage.groups?.some((g) => g.id === o.group && (g.locked || g.hidden))) {
+      nodes.push(h("p", { class: "lg-muted hint-text", text: "Its group is locked or hidden (On stage panel)." }));
+    }
     // Rule problems with a paper target array (cited from the Target Array Handbook).
     if (def.note) nodes.splice(1, 0, h("p", { class: "lg-muted hint-text", text: def.note }));
     if (o.type.startsWith("paper-")) for (const text of arrayIssues(o)) nodes.push(h("p", { class: "lg-alert lg-alert-warn inspector-warning", role: "status", text }));
@@ -92,9 +104,9 @@ export function createInspector(root, { editor }) {
     ];
   }
 
-  const actions = () => h("div", { class: "lg-row panel-actions" }, [
+  const actions = (locked = false) => h("div", { class: "lg-row panel-actions" }, [
     h("button", { type: "button", class: "lg-btn", onclick: () => d({ type: "duplicate" }) }, [icon("copy"), "Duplicate"]),
-    h("button", { type: "button", class: "lg-btn lg-btn-danger", onclick: () => d({ type: "delete" }) }, [icon("trash"), "Delete"]),
+    h("button", { type: "button", class: "lg-btn lg-btn-danger", disabled: locked, title: locked ? "Unlock it to delete it" : null, onclick: () => d({ type: "delete" }) }, [icon("trash"), "Delete"]),
   ]);
 
   return function update(state) {
@@ -103,6 +115,7 @@ export function createInspector(root, { editor }) {
     const objs = stage.objects.filter((o) => sel.includes(o.id));
     const lines = stage.lines.filter((l) => sel.includes(l.id));
     const links = stage.objects.filter((o) => isActivator(o.type) || o.activatedBy).map((o) => [o.id, o.label, o.activatedBy]);
+    links.push(stage.groups ?? null);
     const key = JSON.stringify([sel, objs, lines, links, sel.length ? null : [stage.bay, stage.settings.grid, stage.settings.angleSnap]]);
     if (key === lastKey) return;
     lastKey = key;
@@ -110,7 +123,7 @@ export function createInspector(root, { editor }) {
 
     let nodes;
     if (!sel.length) nodes = stagePanel(stage);
-    else if (objs.length === 1 && sel.length === 1) nodes = [...objectPanel(objs[0], stage.settings.angleSnap, stage), actions()];
+    else if (objs.length === 1 && sel.length === 1) nodes = [...objectPanel(objs[0], stage.settings.angleSnap, stage), actions(isLocked(stage, objs[0]))];
     else if (lines.length === 1 && sel.length === 1) {
       const l = lines[0];
       nodes = [h("h2", { class: "lg-subtitle panel-title", text: l.type === "fault-line" ? "Fault line" : "Shooting area" }),

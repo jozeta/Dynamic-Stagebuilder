@@ -13,6 +13,7 @@ import { snapToObjects, SNAP_RADIUS } from "./model/objsnap.js";
 import { cleanLook, lookDefaults, lookAfterSwitch } from "./model/look.js";
 import { stepFrom } from "./model/positions.js";
 import { canBeActivated, isActivator } from "./model/activation.js";
+import { isLocked, isHidden, setFlag, pruneGroups, groupObjects, ungroup, moveToGroup, updateGroup, copyObjects, pasteObjects } from "./model/layers.js";
 
 const STAGE_TYPES = ["", "Short", "Medium", "Long"];
 const BRIEFING_TEXT = ["matchName", "designer", "startSignal", "startPosition", "gunCondition", "procedure", "stopTime", "notes", "scoring"];
@@ -26,7 +27,7 @@ function withVia(stage, id, fn) {
 }
 
 export function createEditor({ stage = createStage(), onChange = () => {} } = {}) {
-  const state = { history: createHistory(assignLabels(stage)), selection: [], mode: "select", drag: null };
+  const state = { history: createHistory(assignLabels(stage)), selection: [], mode: "select", drag: null, clipboard: [] };
   const present = () => state.history.present;
   const fit = (p, s = present()) => clampToBay(snapPoint(p, s.settings.grid), s.bay);
   let lastGrid = stage.settings.grid || 0.25;
@@ -43,9 +44,13 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
   }
 
   function edit(next) {
-    state.history = commit(state.history, assignLabels(next));
+    state.history = commit(state.history, assignLabels(pruneGroups(next)));
     state.selection = pruneSelection(state.selection, present());
   }
+
+  const objIds = (ids) => ids.filter((id) => present().objects.some((o) => o.id === id));
+  // Lines aren't lockable, so they always pass.
+  const unlocked = (ids) => ids.filter((id) => { const o = present().objects.find((x) => x.id === id); return !o || !isLocked(present(), o); });
 
   function cleanParams(type, params) {
     const out = {};
@@ -128,7 +133,7 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
       const o = present().objects.find((x) => x.id === id);
       if (o) edit(updateObject(present(), id, { position: landing(present(), o, position) }));
     },
-    dragStart({ ids }) { state.drag = { base: state.history, ids: [...ids] }; },
+    dragStart({ ids }) { state.drag = { base: state.history, ids: unlocked(ids) }; },      // locked props stay put
     dragMove({ delta, fine = false }) {
       if (!state.drag) return;
       state.history = replacePresent(state.drag.base, moved(state.drag.base.present, state.drag.ids, delta, fine));
@@ -142,7 +147,7 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
     },
     rotate({ by, ids = state.selection }) {
       let s = present();
-      for (const id of ids) {
+      for (const id of unlocked(ids)) {
         const o = s.objects.find((x) => x.id === id);
         if (o) s = updateObject(s, id, { rotation: snapAngle(o.rotation + by, s.settings.angleSnap) });
       }
@@ -196,7 +201,50 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
       const r = ((Math.round(rotation) % 360) + 360) % 360;
       edit(updateObject(present(), id, { rotation: r, params: cleanParams(o.type, { pitch: Math.round(pitch) }) }));
     },
-    delete({ ids = state.selection }) { edit(removeObjects(present(), ids)); state.selection = []; },
+    delete({ ids = state.selection }) {
+      const go = unlocked(ids);                    // a locked prop is kept: unlock it first
+      if (!go.length) return;
+      edit(removeObjects(present(), go));
+      state.selection = state.selection.filter((id) => !go.includes(id));
+    },
+    // The props-on-stage list and the right-click menu.
+    setLocked({ ids = state.selection, locked }) { if (objIds(ids).length) edit(setFlag(present(), objIds(ids), "locked", locked)); },
+    setHidden({ ids = state.selection, hidden }) { if (objIds(ids).length) edit(setFlag(present(), objIds(ids), "hidden", hidden)); },
+    group({ ids = state.selection, name }) {
+      const go = objIds(ids);
+      if (!go.length) return;
+      const r = groupObjects(present(), go, name);
+      edit(r.stage);
+      state.selection = go;
+    },
+    // Ungroup a group (id), or every group the given props are in.
+    ungroup({ id, ids = state.selection }) {
+      const gids = id ? [id] : [...new Set(present().objects.filter((o) => ids.includes(o.id) && o.group).map((o) => o.group))];
+      if (!gids.length) return;
+      edit(gids.reduce((s, g) => ungroup(s, g), present()));
+    },
+    moveToGroup({ ids = state.selection, group }) { if (objIds(ids).length) edit(moveToGroup(present(), objIds(ids), group)); },
+    updateGroup({ id, patch }) { edit(updateGroup(present(), id, patch)); },
+    copy({ ids = state.selection }) { const c = copyObjects(present(), objIds(ids)); if (c.length) state.clipboard = c; },
+    cut({ ids = state.selection }) {
+      const go = unlocked(objIds(ids));
+      if (!go.length) return;
+      state.clipboard = copyObjects(present(), go);
+      edit(removeObjects(present(), go));
+      state.selection = [];
+    },
+    paste({ offset = [0.5, 0.5] } = {}) {
+      if (!state.clipboard.length) return;
+      const r = pasteObjects(present(), state.clipboard, offset, (p) => clampToBay(p, present().bay));
+      edit(r.stage);
+      state.selection = r.ids;
+      // The next paste lands a step further on.
+      state.clipboard = state.clipboard.map((o) => ({ ...o, position: [o.position[0] + offset[0], o.position[1] + offset[1]] }));
+    },
+    selectAll({ propType = null } = {}) {
+      const s = present();
+      state.selection = s.objects.filter((o) => (!propType || o.type === propType) && !isHidden(s, o) && !isLocked(s, o)).map((o) => o.id);
+    },
     duplicate({ ids = state.selection }) {
       const r = duplicateObjects(present(), ids);
       if (!r.ids.length) return;

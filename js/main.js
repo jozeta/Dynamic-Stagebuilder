@@ -37,6 +37,9 @@ import { setRunLook } from "./render/materials.js";
 import { walkSpeed } from "./model/route.js";
 import { revealOnSelect } from "./model/layout.js";
 import { activationLinks } from "./model/activation.js";
+import { isHidden } from "./model/layers.js";
+import { createContextMenu } from "./ui/context-menu.js";
+import { createLayers } from "./ui/layers.js";
 import { createAutosave } from "./storage/autosave.js";
 
 const canvas = document.getElementById("viewport");
@@ -224,9 +227,12 @@ window.addEventListener("beforeprint", () => {
 let viewing = "";
 let viewingList = [];
 function applyVisibility() {
+  const stage = editor.stage();
+  const byId = new Map(stage.objects.map((o) => [o.id, o]));
   for (const node of engine.groups.stage.children) {
     const id = node.userData.id;
-    node.visible = !viewingList.includes(id) && (id !== "route" || runLook.route.show);
+    const o = byId.get(id);
+    node.visible = !viewingList.includes(id) && (id !== "route" || runLook.route.show) && !(o && isHidden(stage, o));
     node.traverse((c) => { const part = c.userData.runPart; if (part) c.visible = runLook[part].show; });
   }
   engine.groups.helper.visible = !viewingList.length;
@@ -296,7 +302,7 @@ const freshStage = () => {
 const projects = createProjects({
   onOpenLibrary: (spec) => addProject(withView(libraryStage(spec))),
   panel: document.getElementById("projects"),
-  hide: [document.getElementById("library-body")],
+  hide: [document.getElementById("left-main")],
   onToggle: (open) => {
     document.querySelector('[aria-label="Projects"].tool')?.setAttribute("aria-pressed", String(open));
     if (open && folds.library?.collapsed) folds.library.set(false);      // never open a view inside a folded panel
@@ -338,12 +344,38 @@ const projects = createProjects({
 const help = createHelp();
 let hiddenProps = loadHidden();
 const library = createLibrary(document.getElementById("library-body"), { editor, hidden: hiddenProps });
+// The right-click menu (long press on an iPad) on the 3D view and the On stage list.
+const menu = createContextMenu({ editor, rig, onShooterEye: () => document.getElementById("toolbar")?.eyeSteps?.reset() });
+menu.attach(canvas, { target: (e) => picking.objectAt(e, { locked: true }), ground: (e) => picking.groundAt(e) });
+const layers = createLayers(document.getElementById("layers"), { editor, menu });
+// The left panel's tabs: Props (the library) and On stage (the props on the stage), remembered.
+(() => {
+  const panes = { props: document.getElementById("library-body"), layers: document.getElementById("layers") };
+  const tabs = [["props", "Props"], ["layers", "On stage"]].map(([id, label]) => h("button", { type: "button", class: "lg-tab", role: "tab", id: `left-tab-${id}`,
+    "aria-controls": panes[id].id, onclick: () => show(id), text: label }));
+  const bar = h("div", { class: "lg-tabs left-tabs", role: "tablist", "aria-label": "Left panel" }, tabs);
+  bar.addEventListener("keydown", (e) => {
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    const next = tabs[(tabs.indexOf(document.activeElement) + 1) % tabs.length];
+    next.focus(); next.click();
+  });
+  function show(id) {
+    for (const b of tabs) b.setAttribute("aria-selected", String(b.id === `left-tab-${id}`));
+    for (const [k, el] of Object.entries(panes)) el.hidden = k !== id;
+    try { localStorage.setItem("dsb:left-tab", id); } catch { /* private mode */ }
+  }
+  document.getElementById("left-tabs").append(bar);
+  let first = "props";
+  try { if (localStorage.getItem("dsb:left-tab") === "layers") first = "layers"; } catch { /* private mode */ }
+  show(first);
+})();
 updaters.push(
   createToolbar(document.getElementById("toolbar"), {
     editor, rig, status, onAbout: () => about.open(), onHelp: () => help.open(), onBriefing: () => briefing.open(), onPrint: () => printBrief(),
     onProjects: () => projects.open(), onSettings: () => settings.open(), onViewing: viewingFrom, walking: () => animator.playing(),
   }),
   library,
+  layers.update,
   createInspector(document.getElementById("inspector-body"), { editor }),
   createStats(document.getElementById("stats")),
 );

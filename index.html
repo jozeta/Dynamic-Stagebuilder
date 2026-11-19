@@ -23,7 +23,11 @@
   <div class="app">
     <header class="toolbar lg-glass" id="toolbar" aria-label="Tools"></header>
     <aside class="library lg-glass" id="library" aria-label="Prop library">
-      <div id="library-body"></div>
+      <div id="left-main">
+        <div id="left-tabs"></div>
+        <div id="library-body" role="tabpanel" aria-labelledby="left-tab-props"></div>
+        <section id="layers" class="layers-panel" role="tabpanel" aria-labelledby="left-tab-layers" hidden></section>
+      </div>
       <section id="projects" class="side-panel projects-panel" aria-label="Projects" hidden></section>
     </aside>
     <main class="viewport-wrap">

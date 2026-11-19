@@ -340,3 +340,41 @@ body { background: var(--lg-bg); overflow: hidden; }
 .run-swatch:focus-visible, .run-color:focus-visible { outline: 2px solid var(--lg-accent); outline-offset: 2px; }
 .run-color { width: 40px; height: 28px; padding: 0; border: 1px solid var(--lg-border); border-radius: 8px; background: none; cursor: pointer; }
 @media (pointer: coarse) { .run-swatch { width: var(--lg-touch); height: var(--lg-touch); } .run-color { width: 56px; height: var(--lg-touch); } }
+
+/* Left panel tabs: Props and On stage. */
+#left-main { display: flex; flex-direction: column; min-height: 0; height: 100%; }
+#left-main[hidden] { display: none; }
+.left-tabs { display: flex; width: calc(100% - 36px); margin: 0 0 var(--lg-space-s); flex: none; }
+.left-tabs .lg-tab { flex: 1; }
+#library-body[hidden], .layers-panel[hidden] { display: none; }
+
+/* The On stage panel: a list of the props on the stage, with groups. */
+.layers-panel { display: flex; flex-direction: column; gap: var(--lg-space-s); min-height: 0; flex: 1; }
+.layers-head { display: flex; align-items: center; justify-content: space-between; }
+.layers-bar { display: flex; flex-wrap: wrap; gap: 2px; align-items: center; }
+.layers-tool { width: 32px; height: 32px; min-width: 32px; padding: 0; }
+.layers-tool svg { width: 16px; height: 16px; }
+.layers-tool[aria-pressed="false"] { opacity: 0.55; }
+.layers-bar .layers-tool[aria-pressed="true"] { background: color-mix(in srgb, var(--lg-accent) 18%, transparent); opacity: 1; }
+.layers-move { flex: 1; min-width: 7em; height: 32px; }
+.layers-list { overflow: auto; min-height: 0; flex: 1; display: flex; flex-direction: column; gap: 1px; }
+.layer-row { display: flex; align-items: center; gap: 2px; border-radius: var(--lg-radius-control); padding-left: 2px; }
+.layer-row[data-depth="1"] { padding-left: 22px; }
+.layer-row.is-selected { background: color-mix(in srgb, var(--lg-accent) 20%, transparent); }
+.layer-row.is-hidden .layer-name, .layer-row.is-locked .layer-name { color: var(--lg-muted); }
+.layer-row.is-drop, .layers-top.is-drop { outline: 2px dashed var(--lg-accent); outline-offset: -2px; }
+.layer-name { flex: 1; min-width: 0; text-align: left; background: none; border: 0; color: var(--lg-text); font: inherit; font-size: var(--lg-fs-small);
+  padding: 6px 4px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-radius: var(--lg-radius-control); }
+.layer-name:focus-visible { outline: 2px solid var(--lg-accent); outline-offset: -2px; }
+.layer-group { margin-top: 4px; }
+.layer-rename { flex: 1; min-width: 0; height: 30px; }
+.layers-top { font-size: var(--lg-fs-small); color: var(--lg-muted); text-align: center; padding: 2px; border-radius: var(--lg-radius-control); display: none; }
+.layers-list.is-dragging .layers-top { display: block; }
+.layers-hint { flex: none; }
+@media (pointer: coarse) {
+  .layers-tool { width: var(--lg-touch); height: var(--lg-touch); min-width: var(--lg-touch); }
+  .layer-name { min-height: var(--lg-touch); }
+  .layers-move { height: var(--lg-touch); }
+}
+/* The right-click menu sits over everything. */
+.stage-menu .lg-icon, .stage-menu svg { width: 16px; height: 16px; }

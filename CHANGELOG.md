@@ -4,6 +4,16 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- On stage panel (a tab beside Props in the left panel): every prop on the stage in a list; click a
+  row to select it and see its settings, Shift / ⌘-click or *Select several* to pick more. Group
+  props, rename, fold, hide and lock groups, drag rows into groups or use *Move to…*, and copy,
+  paste and delete from its bar.
+- Right-click menu on the 3D view and the list (long-press on an iPad): cut, copy, paste (here),
+  duplicate, delete, lock in place, hide, group / ungroup, rotate 90°, select all of a kind,
+  frame the selection and Shooter's eye from a shooting position.
+- Lock in place (not clickable or draggable in the 3D view; also a switch in the inspector) and
+  Hide (not drawn; still counted). Shortcuts: ⌘C, ⌘X, ⌘V, ⌘A, ⌘G / ⇧⌘G, L and H.
+
 - New View defaults: walking speed Sprint; figures, position marks and the route line shown in
   light grey at 30 % opacity.
 

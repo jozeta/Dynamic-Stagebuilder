@@ -6,6 +6,7 @@
 // - start mode: tap to set the start position;
 // - a rotate ring (TransformControls, vertical axis only) on a single selected object.
 import * as THREE from "three";
+import { isLocked } from "../model/layers.js";
 import { TransformControls } from "three/addons/controls/TransformControls.js";
 import { groundPoint, createDragTracker } from "./ground.js";
 import { yawDegrees } from "./rotation.js";
@@ -44,12 +45,20 @@ export function attachPicking({ engine, stageView, editor, cameraRig, canvas, on
     const { origin, direction } = raycaster.ray;
     return groundPoint(origin.toArray(), direction.toArray());
   }
-  function objectAt(e) {
+  // Only what's drawn can be picked (a hidden prop, or a part hidden in Settings → View, can't).
+  const shown = (o) => { for (let n = o; n; n = n.parent) if (!n.visible) return false; return true; };
+  // The prop under the pointer: hidden props are skipped; a locked prop counts as empty ground
+  // (so you orbit past it) unless `locked` is asked for (the right-click menu, to unlock it).
+  function objectAt(e, { locked = false } = {}) {
     setPointer(e);
     const hits = raycaster.intersectObject(engine.groups.stage, true);
     for (const h of hits) {
+      if (!shown(h.object)) continue;
       const id = stageView.idFor(h.object);
-      if (id && id !== "start" && id !== "route") return id;
+      if (!id || id === "start" || id === "route") continue;
+      const o = editor.stage().objects.find((x) => x.id === id);
+      if (o && isLocked(editor.stage(), o) && !locked) return null;
+      return id;
     }
     return null;
   }
@@ -157,10 +166,11 @@ export function attachPicking({ engine, stageView, editor, cameraRig, canvas, on
   function updateGizmo() {
     const sel = editor.state.selection;
     const node = sel.length === 1 ? stageView.objectFor(sel[0]) : null;
-    const isObject = node && editor.stage().objects.some((o) => o.id === sel[0]);
+    const o = node && editor.stage().objects.find((x) => x.id === sel[0]);
+    const isObject = o && !isLocked(editor.stage(), o);         // no rotate ring on a locked prop
     if (isObject && editor.state.mode === "select") { if (gizmo.object !== node) gizmo.attach(node); }
     else if (gizmo.object) gizmo.detach();
   }
 
-  return { gizmo, updateGizmo };
+  return { gizmo, updateGizmo, objectAt, groundAt };
 }

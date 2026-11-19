@@ -279,6 +279,17 @@ position, look around and let go: that view is saved. The grey arrows in the low
 position you stand on 25 cm forward, back, left or right (one undo step each). Figures fade out as
 the camera comes close, so you never look out from inside one.
 
+**Organise what's on the stage.** The *On stage* tab in the left panel lists every prop on the
+stage. Click a row to select it (its settings show on the right); Shift- or ⌘-click, or switch on
+*Select several* on an iPad, to pick more. *Group* (⌘G) puts the selection in a group: double-click
+its name to rename it, fold it with its arrow, and hide or lock the whole group with its eye and
+lock. Drag rows onto a group, or use *Move to…*; copy, paste and delete from the bar. A locked prop
+can't be clicked or dragged in the 3D view (change it from the list or the inspector); a hidden
+prop isn't drawn but still counts in the statistics and the brief. Right-click a prop in the view
+or the list (long-press on an iPad) for cut, copy, paste, duplicate, delete, lock, hide, group,
+rotate 90°, select all of that kind, frame the selection and Shooter's eye from a shooting
+position; right-click the ground to paste there.
+
 **Number targets.** Targets are numbered as you place them: T1… for paper, P1… for steel, NS1… for
 a lone no-shoot (an array with a target is one T label; its targets and no-shoots all count in the
 statistics). Deleting a target leaves a gap until you press *Renumber*. To set a label by hand, type
@@ -333,6 +344,11 @@ aren't in an exported file shows a hint, so you know when to export a backup.
 | F | Frame all |
 | 1 2 3 4 | Isometric, Top, Front, Shooter's eye |
 | [ / ] | In Shooter's eye: previous / next shooting position |
+| ⌘/Ctrl C, X, V | Copy, cut, paste the selection |
+| ⌘/Ctrl A | Select everything that isn't hidden or locked |
+| ⌘/Ctrl G, ⇧⌘/Ctrl G | Group the selection, ungroup |
+| L / H | Lock or unlock, hide or show the selection |
+| Right-click (long-press) | The prop menu |
 
 ## Tests
 

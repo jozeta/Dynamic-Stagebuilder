@@ -2,6 +2,7 @@
 // fresh stage from known keys only, so unknown and "__proto__" keys never get through, and it
 // rejects the whole stage on any error: nothing is ever applied halfway.
 import { PROPS, TARGET_STYLES } from "./props.js";
+import { MAX_GROUPS } from "./layers.js";
 import { canBeActivated, isActivator } from "./activation.js";
 import { cleanLook } from "./look.js";
 
@@ -92,13 +93,40 @@ export function validateStage(json) {
     // A moving target's activator (checked against the other objects below).
     let activatedBy;
     if (o.activatedBy !== undefined) activatedBy = str(o.activatedBy, `${path}.activatedBy`, 64);
+    // The props-on-stage list: locked, hidden and a group (checked against stage.groups below).
+    const flags = {};
+    for (const k of ["locked", "hidden"]) {
+      if (o[k] === undefined) continue;
+      if (typeof o[k] !== "boolean") err(`${path}.${k}`, "must be true or false");
+      else if (o[k]) flags[k] = true;
+    }
+    if (o.group !== undefined) flags.group = str(o.group, `${path}.group`, 64);
     return {
+      ...flags,
       ...(activatedBy ? { activatedBy } : {}),
       id: id(o.id, `${path}.id`), type: o.type, label, labelManual: o.labelManual === true,
       position: inBay(o.position, `${path}.position`), rotation: num(o.rotation, `${path}.rotation`, -1e6, 1e6), params,
       ...(via ? { via } : {}),
     };
   });
+
+  // Groups: [{ id, name, hidden?, locked? }]; a prop's group must be one of them.
+  let groups;
+  if (json.groups !== undefined) {
+    if (!Array.isArray(json.groups) || json.groups.length > MAX_GROUPS) err("groups", `must be a list of at most ${MAX_GROUPS} groups`);
+    else groups = json.groups.map((g, i) => {
+      if (!isObj(g)) { err(`groups[${i}]`, "must be an object"); return null; }
+      const out = { id: str(g.id, `groups[${i}].id`, 64, { allowEmpty: false }), name: str(g.name, `groups[${i}].name`, 60) };
+      for (const k of ["hidden", "locked"]) {
+        if (g[k] === undefined) continue;
+        if (typeof g[k] !== "boolean") err(`groups[${i}].${k}`, "must be true or false");
+        else if (g[k]) out[k] = true;
+      }
+      return out;
+    }).filter(Boolean);
+  }
+  const groupIds = new Set((groups ?? []).map((g) => g.id));
+  for (const o of objects) if (o.group !== undefined && !groupIds.has(o.group)) delete o.group;
 
   // Activation links must point at an activator on this stage, from a target that can be started.
   for (const o of objects) {
@@ -150,6 +178,7 @@ export function validateStage(json) {
     settings: { grid: num(settings.grid, "settings.grid", 0, 5), angleSnap: num(settings.angleSnap, "settings.angleSnap", 0, 90),
       environment: settings.environment, objectSnap: settings.objectSnap !== false, look: cleanLook(settings.look), targetStyle },
     objects, lines, start, briefing, camera,
+    ...(groups && groups.length ? { groups } : {}),
   };
   return errors.length ? { ok: false, errors } : { ok: true, stage };
 }
