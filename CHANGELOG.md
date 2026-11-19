@@ -4,6 +4,11 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- **Blueprint** now looks like a real architect's sheet: a bright blue drafting paper with a fine grid
+  and floor plans all round the stage (hatched walls, rooms with names and areas, door swings,
+  windows, stairs, furniture, dimension chains and callouts), over faint older drawings. The bay
+  stays clear.
+
 - Fixed: dueling-tree paddles now swing round the post, behind it, to the other side at the same
   height, instead of flipping up over the top.
 

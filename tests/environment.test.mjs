@@ -104,3 +104,26 @@ test("the Outdoor ground can be switched without touching the stage", async () =
   env.dispose();
   assert.deepEqual(stage, before);
 });
+
+test("Blueprint: a drafting sheet of floor plans round the stage, keeping the bay itself clear", async () => {
+  const { Box3, Vector3 } = await import("three");
+  const { sheetPlans } = await import("../js/render/environments/blueprint.js");
+  const bay = { width: 20, depth: 30 };
+  const env = createEnvironment("blueprint", bay);
+  const sheet = env.group.children.find((c) => c.userData.sheet);
+  assert.ok(sheet, "a drawing sheet lies on the paper");
+  const s = new Box3().setFromObject(sheet).getSize(new Vector3());
+  assert.ok(s.x >= 80 && s.z >= 80, `sheet ${s.x} × ${s.z} m`);
+  env.dispose();
+  const plans = sheetPlans(bay, 7);
+  assert.ok(plans.length >= 6, `${plans.length} floor plans`);
+  for (const p of plans) {
+    assert.ok(p.rooms.length >= 2, "plans are split into rooms");
+    const clear = p.x1 < -bay.width / 2 - 3 || p.x0 > bay.width / 2 + 3 || p.z1 < -3 || p.z0 > bay.depth + 3;
+    assert.ok(clear, `plan at ${p.x0},${p.z0} stays out of the bay`);
+  }
+  for (let i = 0; i < plans.length; i++) for (let j = i + 1; j < plans.length; j++) {
+    const a = plans[i], b = plans[j];
+    assert.ok(a.x1 <= b.x0 || b.x1 <= a.x0 || a.z1 <= b.z0 || b.z1 <= a.z0, "plans don't overlap");
+  }
+});

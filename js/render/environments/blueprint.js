@@ -7,8 +7,8 @@
 import * as THREE from "three";
 import { canvasTexture, ground, sun, hasDom } from "./common.js";
 
-const PAPER = "#1b4d8c";
-const BG = 0x16396a;
+const PAPER = "#1f63cc";
+const BG = 0x3a78d0;
 const INK = (a) => `rgba(226,238,255,${a})`;
 const HAND = "'Bradley Hand', 'Segoe Print', 'Comic Sans MS', cursive";
 const MONO = "'Courier New', ui-monospace, monospace";
@@ -54,6 +54,8 @@ export function blueprint(bay) {
     g.fillStyle = PAPER; g.fillRect(0, 0, s, s);
     for (let i = 0; i < 1600; i++) { g.fillStyle = `rgba(${r() > 0.5 ? "255,255,255" : "0,20,60"},${0.015 + r() * 0.03})`; g.fillRect(r() * s, r() * s, 2 + r() * 6, 2 + r() * 6); }
     const step = s / TILE;
+    g.strokeStyle = INK(0.16); g.lineWidth = 1.2;                    // a fine quarter-metre grid
+    for (let i = 1; i < TILE * 4; i++) { if (i % 4 === 0) continue; const q = (i * step) / 4; g.beginPath(); g.moveTo(q, 0); g.lineTo(q, s); g.moveTo(0, q); g.lineTo(s, q); g.stroke(); }
     g.strokeStyle = INK(0.34); g.lineWidth = 2.2;
     for (let i = 1; i < TILE; i++) { g.beginPath(); g.moveTo(i * step, 0); g.lineTo(i * step, s); g.moveTo(0, i * step); g.lineTo(s, i * step); g.stroke(); }
     g.strokeStyle = INK(0.78); g.lineWidth = 4.2;
@@ -63,11 +65,32 @@ export function blueprint(bay) {
   }, [SIZE / TILE, SIZE / TILE], { seed: 7 });
   if (grid) grid.anisotropy = 16;
   // Toned down so the lit paper reads as deep Prussian blue, not bright royal blue.
-  const paper = new THREE.MeshStandardMaterial({ color: grid ? 0x8f9cb4 : 0x173f72, map: grid, roughness: 0.95 });
+  const paper = new THREE.MeshStandardMaterial({ color: grid ? 0xdce6f6 : 0x2a6fd6, map: grid, roughness: 0.95 });
   const g0 = ground(SIZE, SIZE, paper, D / 2);
   // Line the grid up with the world: whole metres on whole metres, a bold line on the bay's centre.
   if (grid) grid.offset.set(((SIZE / 2) % TILE) / TILE, ((SIZE / 2 - D / 2) % TILE) / TILE);
   group.add(g0);
+
+  // The drafting sheet of floor plans round the stage.
+  {
+    const { S, cz } = sheetExtent(bay);
+    let map = null;
+    if (hasDom) {
+      const touch = typeof matchMedia !== "undefined" && matchMedia("(pointer: coarse)").matches;
+      const c = document.createElement("canvas");
+      c.width = c.height = touch ? 2048 : 4096;
+      drawSheet(c, bay);
+      map = new THREE.CanvasTexture(c);
+      map.colorSpace = THREE.SRGBColorSpace;
+      map.anisotropy = 16;
+    }
+    const sheet = new THREE.Mesh(new THREE.PlaneGeometry(S, S),
+      new THREE.MeshBasicMaterial({ map, transparent: true, opacity: map ? 1 : 0, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1 }));
+    sheet.rotation.set(-Math.PI / 2, 0, Math.PI);
+    sheet.position.set(0, 0.003, cz);
+    sheet.userData.sheet = true;
+    group.add(sheet);
+  }
 
   // Registration crosses at the bay corners (the bay itself is not drawn as a floor).
   for (const [x, z] of [[-W / 2, 0], [W / 2, 0], [-W / 2, D], [W / 2, D]]) {
@@ -175,4 +198,178 @@ export function blueprint(bay) {
   const fog = new THREE.Fog(BG, 70, 320);           // the endless paper fades into the background
   return { group, lights: [hemiLight, sunLight], hemiLight, sunLight, sunStrength: 1.5, hemiStrength: 1.8, warmth: 0,
     hazeColor: null, background, fog, baseFog: fog, exposure: 1 };
+}
+
+// ---------------------------------------------------------------------------------------------
+// The drafting sheet round the stage: floor plans drawn like an architect's blueprint (hatched
+// double-line walls, rooms, door swings, windows, stairs, furniture, room names and areas,
+// dimension chains with ticks, callouts), over a faint ghosted layer of older drawings. The bay
+// itself (and 3 m round it) stays clear so the stage reads cleanly.
+
+const ROOM_NAMES = { bed: "BEDROOM", living: "LIVING", kitchen: "KITCHEN", bath: "BATH", dining: "DINING", stair: "STAIR", store: "STORAGE", office: "OFFICE", hall: "HALL", garage: "GARAGE" };
+const KINDS = ["bed", "living", "kitchen", "bath", "dining", "stair", "store", "office", "hall", "bed", "living"];
+
+/** World extent of the sheet: centred on the bay, at least 90 m a side. */
+export function sheetExtent(bay) {
+  const S = Math.max(90, Math.max(bay.width, bay.depth) + 64);
+  return { S, cx: 0, cz: bay.depth / 2 };
+}
+
+/**
+ * The floor plans on the sheet (world metres): each { x0, x1, z0, z1, rooms: [{ x0, x1, z0, z1, kind }] },
+ * placed round the bay without touching it (3 m clear) or each other. Seeded, so it's the same on
+ * every load.
+ */
+export function sheetPlans(bay, seed = 7) {
+  const r = mulberry(seed);
+  const { S, cz } = sheetExtent(bay);
+  const clear = { x0: -bay.width / 2 - 3, x1: bay.width / 2 + 3, z0: -3, z1: bay.depth + 3 };
+  const hits = (a, b, pad = 2) => !(a.x1 + pad <= b.x0 || b.x1 + pad <= a.x0 || a.z1 + pad <= b.z0 || b.z1 + pad <= a.z0);
+  const plans = [];
+  for (let i = 0; i < 400 && plans.length < 12; i++) {
+    const w = 9 + r() * 12, d = 7 + r() * 9;
+    const x0 = -S / 2 + 2 + r() * (S - w - 4), z0 = cz - S / 2 + 2 + r() * (S - d - 4);
+    const p = { x0, x1: x0 + w, z0, z1: z0 + d };
+    if (hits(p, clear, 0.5) || plans.some((q) => hits(p, q))) continue;
+    p.rooms = split(p, 0, r);
+    plans.push(p);
+  }
+  return plans;
+}
+
+function mulberry(seed) {
+  let a = seed >>> 0;
+  return () => { a = (a + 0x6d2b79f5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+}
+
+// Split a plan into rooms (a few cuts along the longer side).
+function split(rect, depth, r) {
+  const w = rect.x1 - rect.x0, d = rect.z1 - rect.z0;
+  if (depth >= 3 || (w < 5.5 && d < 5.5) || (depth >= 1 && r() < 0.25)) return [{ ...rect, kind: KINDS[Math.floor(r() * KINDS.length)] }];
+  const t = 0.35 + r() * 0.3;
+  if (w >= d) {
+    const x = rect.x0 + w * t;
+    return [...split({ ...rect, x1: x }, depth + 1, r), ...split({ ...rect, x0: x }, depth + 1, r)];
+  }
+  const z = rect.z0 + d * t;
+  return [...split({ ...rect, z1: z }, depth + 1, r), ...split({ ...rect, z0: z }, depth + 1, r)];
+}
+
+function drawSheet(c, bay) {
+  const g = c.getContext("2d");
+  const { S, cz } = sheetExtent(bay);
+  const k = c.width / S;                                       // px per metre
+  const P = (x, z) => [(S / 2 - x) * k, (S / 2 - (z - cz)) * k];
+  const r = mulberry(11);
+  g.lineCap = "round"; g.lineJoin = "round";
+  const ink = (a, w) => { g.strokeStyle = INK(a); g.fillStyle = INK(a); g.lineWidth = Math.max(1, w * k); };
+  const line = (x0, z0, x1, z1) => { g.beginPath(); g.moveTo(...P(x0, z0)); g.lineTo(...P(x1, z1)); g.stroke(); };
+  const rect = (x0, z0, x1, z1) => { const [a, b] = P(x1, z1), [cx2, dd] = P(x0, z0); g.strokeRect(a, b, cx2 - a, dd - b); };
+  const text = (t, x, z, size, a = 0.9, font = MONO) => { g.font = `600 ${Math.max(6, size * k)}px ${font}`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillStyle = INK(a); g.fillText(t, ...P(x, z)); };
+
+  // Ghosted older drawings underneath: big faint plans, turned a little.
+  g.save();
+  for (let i = 0; i < 4; i++) {
+    const [px, py] = [r() * c.width, r() * c.height];
+    g.translate(px, py); g.rotate((r() - 0.5) * 0.5); g.translate(-px, -py);
+    g.strokeStyle = INK(0.12); g.lineWidth = Math.max(1, 0.06 * k);
+    const w = (14 + r() * 20) * k, h = (10 + r() * 14) * k;
+    g.strokeRect(px - w / 2, py - h / 2, w, h);
+    for (let j = 0; j < 7; j++) { const yy = py - h / 2 + r() * h; g.beginPath(); g.moveTo(px - w / 2, yy); g.lineTo(px - w / 2 + r() * w, yy); g.stroke(); }
+    for (let j = 0; j < 4; j++) { g.beginPath(); g.arc(px + (r() - 0.5) * w, py + (r() - 0.5) * h, (0.8 + r()) * k, 0, Math.PI / 2); g.stroke(); }
+    g.setTransform(1, 0, 0, 1, 0, 0);
+  }
+  g.restore();
+
+  for (const p of sheetPlans(bay)) {
+    const T = 0.3;                                               // outer wall thickness
+    // Outer walls: two lines with diagonal hatching between.
+    ink(0.95, 0.05);
+    rect(p.x0, p.z0, p.x1, p.z1); rect(p.x0 + T, p.z0 + T, p.x1 - T, p.z1 - T);
+    g.save();
+    g.beginPath();
+    { const [a, b] = P(p.x1, p.z1), [e, f] = P(p.x0, p.z0); g.rect(a, b, e - a, f - b); }
+    { const [a, b] = P(p.x1 - T, p.z1 - T), [e, f] = P(p.x0 + T, p.z0 + T); g.rect(a, b, e - a, f - b); }
+    g.clip("evenodd");
+    ink(0.55, 0.025);
+    for (let s = p.x0 - (p.z1 - p.z0); s < p.x1; s += 0.22) line(s, p.z0, s + (p.z1 - p.z0), p.z1);
+    g.restore();
+    // Rooms: inner walls as double lines, a door with its swing, furniture, name and area.
+    for (const rm of p.rooms) {
+      ink(0.85, 0.035);
+      const ix0 = Math.max(rm.x0, p.x0 + T) + 0.07, ix1 = Math.min(rm.x1, p.x1 - T) - 0.07;
+      const iz0 = Math.max(rm.z0, p.z0 + T) + 0.07, iz1 = Math.min(rm.z1, p.z1 - T) - 0.07;
+      rect(ix0, iz0, ix1, iz1);
+      // Door: a gap in the room's lower wall with a quarter-circle swing.
+      const dw = 0.9, dx = ix0 + 0.4 + r() * Math.max(0.1, ix1 - ix0 - dw - 0.8);
+      g.save(); g.globalCompositeOperation = "destination-out"; ink(1, 0.2); line(dx, iz0, dx + dw, iz0); g.restore();
+      ink(0.85, 0.03);
+      line(dx, iz0, dx, iz0 + dw);
+      g.beginPath(); g.arc(...P(dx, iz0), dw * k, Math.PI * 1.0, Math.PI * 1.5, false); g.stroke();
+      furniture(rm, { ix0, ix1, iz0, iz1 });
+      const cxr = (ix0 + ix1) / 2, czr = (iz0 + iz1) / 2;
+      text(ROOM_NAMES[rm.kind], cxr, czr + 0.45, 0.42, 0.95);
+      text(`${((ix1 - ix0) * (iz1 - iz0)).toFixed(1)} m²`, cxr, czr - 0.1, 0.28, 0.75);
+    }
+    // Windows on the outer walls: a gap with three thin lines.
+    for (let i = 0; i < 3; i++) {
+      const along = 0.25 + r() * 0.5, wl = 1.2;
+      const onX = r() < 0.5, side = r() < 0.5 ? p.z0 : p.z1 - T;
+      if (onX) {
+        const x = p.x0 + (p.x1 - p.x0) * along;
+        g.save(); g.globalCompositeOperation = "destination-out"; g.fillRect(...P(x + wl, side + T), wl * k, T * k); g.restore();
+        ink(0.9, 0.025);
+        for (const f of [0, 0.5, 1]) line(x, side + T * f, x + wl, side + T * f);
+      }
+    }
+    // Dimension chains under and beside the plan: ticks at the plan edges and room cuts, sizes in cm.
+    ink(0.8, 0.025);
+    const cutsX = [...new Set([p.x0, ...p.rooms.flatMap((q) => [q.x0, q.x1]), p.x1].map((v) => Math.round(v * 100) / 100))].sort((a, b) => a - b);
+    const cutsZ = [...new Set([p.z0, ...p.rooms.flatMap((q) => [q.z0, q.z1]), p.z1].map((v) => Math.round(v * 100) / 100))].sort((a, b) => a - b);
+    for (const [zz, all] of [[p.z0 - 1.1, cutsX], [p.z0 - 2.1, [p.x0, p.x1]]]) {
+      line(p.x0, zz, p.x1, zz);
+      all.forEach((x, i) => { line(x - 0.18, zz - 0.18, x + 0.18, zz + 0.18); line(x, zz - 0.35, x, zz + 0.35); if (i) text(String(Math.round((x - all[i - 1]) * 100)), (x + all[i - 1]) / 2, zz + 0.35, 0.3, 0.85); });
+    }
+    const xx = p.x1 + 1.1;
+    line(xx, p.z0, xx, p.z1);
+    cutsZ.forEach((z, i) => {
+      line(xx - 0.18, z - 0.18, xx + 0.18, z + 0.18); line(xx - 0.35, z, xx + 0.35, z);
+      if (i) { g.save(); const [tx, ty] = P(xx - 0.4, (z + cutsZ[i - 1]) / 2); g.translate(tx, ty); g.rotate(-Math.PI / 2); g.font = `600 ${Math.max(6, 0.3 * k)}px ${MONO}`; g.textAlign = "center"; g.fillStyle = INK(0.85); g.fillText(String(Math.round((z - cutsZ[i - 1]) * 100)), 0, 0); g.restore(); }
+    });
+    // A callout circle with a leader.
+    const cxp = p.x0 + (p.x1 - p.x0) * r(), czp = p.z1 + 1.5;
+    ink(0.85, 0.03);
+    g.beginPath(); g.arc(...P(cxp, czp), 0.5 * k, 0, 7); g.stroke();
+    text(String(1 + Math.floor(r() * 9)), cxp, czp, 0.4, 0.95);
+    line(cxp, czp - 0.5, cxp + 0.8, p.z1 - 0.3);
+  }
+
+  function furniture(rm, b) {
+    const cx = (b.ix0 + b.ix1) / 2, cz = (b.iz0 + b.iz1) / 2, w = b.ix1 - b.ix0, d = b.iz1 - b.iz0;
+    ink(0.8, 0.03);
+    if (rm.kind === "bed" && w > 2.2 && d > 2.4) { rect(cx - 0.8, b.iz1 - 2.2, cx + 0.8, b.iz1 - 0.1); rect(cx - 0.7, b.iz1 - 0.65, cx - 0.1, b.iz1 - 0.2); rect(cx + 0.1, b.iz1 - 0.65, cx + 0.7, b.iz1 - 0.2); }
+    else if (rm.kind === "dining" && w > 2 && d > 2) {
+      rect(cx - 0.8, cz - 0.45, cx + 0.8, cz + 0.45);
+      for (const sx of [-0.5, 0, 0.5]) for (const sz of [-0.75, 0.75]) rect(cx + sx - 0.2, cz + sz - 0.2, cx + sx + 0.2, cz + sz + 0.2);
+    } else if (rm.kind === "living" && w > 3 && d > 2.5) {
+      rect(b.ix0 + 0.3, b.iz0 + 0.3, b.ix0 + 2.4, b.iz0 + 1.2); rect(b.ix0 + 0.3, b.iz0 + 1.2, b.ix0 + 1.2, b.iz0 + 2.2);
+      g.beginPath(); g.arc(...P(cx + 0.6, cz + 0.3), 0.45 * k, 0, 7); g.stroke();
+    } else if (rm.kind === "kitchen") {
+      rect(b.ix0 + 0.05, b.iz1 - 0.65, b.ix1 - 0.05, b.iz1 - 0.05);
+      for (const o of [0.5, 1.0]) { g.beginPath(); g.arc(...P(b.ix0 + o, b.iz1 - 0.35), 0.15 * k, 0, 7); g.stroke(); }
+    } else if (rm.kind === "bath") {
+      g.beginPath(); g.ellipse(...P(b.ix0 + 0.45, b.iz1 - 0.55), 0.22 * k, 0.3 * k, 0, 0, 7); g.stroke();
+      rect(b.ix0 + 0.25, b.iz1 - 0.2, b.ix0 + 0.65, b.iz1 - 0.05);
+      rect(b.ix1 - 0.95, b.iz1 - 0.95, b.ix1 - 0.05, b.iz1 - 0.05); line(b.ix1 - 0.95, b.iz1 - 0.95, b.ix1 - 0.05, b.iz1 - 0.05); line(b.ix1 - 0.05, b.iz1 - 0.95, b.ix1 - 0.95, b.iz1 - 0.05);
+    } else if (rm.kind === "stair" && w > 1.2 && d > 2) {
+      const sw = Math.min(1.2, w - 0.2), x0 = cx - sw / 2;
+      for (let z = b.iz0 + 0.3; z < b.iz1 - 0.3; z += 0.28) line(x0, z, x0 + sw, z);
+      line(cx, b.iz0 + 0.3, cx, b.iz1 - 0.4); line(cx, b.iz1 - 0.4, cx - 0.15, b.iz1 - 0.65); line(cx, b.iz1 - 0.4, cx + 0.15, b.iz1 - 0.65);
+    } else if (rm.kind === "office" && w > 2) { rect(b.ix0 + 0.1, b.iz1 - 0.8, b.ix0 + 1.7, b.iz1 - 0.1); g.beginPath(); g.arc(...P(b.ix0 + 0.9, b.iz1 - 1.15), 0.25 * k, 0, 7); g.stroke(); }
+    else if (rm.kind === "garage" || rm.kind === "store") { for (let i = 0; i < 3; i++) rect(b.ix0 + 0.1 + i * 0.7, b.iz0 + 0.1, b.ix0 + 0.7 + i * 0.7, b.iz0 + 0.6); }
+  }
+
+  // Keep the bay and 3 m round it clear.
+  const [ax, ay] = P(bay.width / 2 + 3, bay.depth + 3), [bx, by] = P(-bay.width / 2 - 3, -3);
+  g.clearRect(ax, ay, bx - ax, by - ay);
 }
