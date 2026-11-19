@@ -30,7 +30,7 @@ const SLIDERS = [
 const OUTDOOR_ONLY = new Set(["haze", "clouds", "cloudSpeed", "wind"]);
 
 export function createSettings({ editor, panel, hide = [], onToggle = () => {}, getHidden = () => ({ categories: [], props: [] }), onHidden = () => {}, mine = null,
-  getSpeed = () => "quick", onSpeed = () => {}, getRunLook = () => null, onRunLook = () => {} }) {
+  getSpeed = () => "sprint", onSpeed = () => {}, getRunLook = () => null, onRunLook = () => {} }) {
   const d = (a) => editor.dispatch(a);
   const body = h("div", { class: "settings-body" });
   const lookPane = h("div", { id: "settings-look", role: "tabpanel", "aria-labelledby": "settings-tab-look" }, [

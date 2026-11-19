@@ -19,9 +19,9 @@ export const RUN_PARTS = Object.freeze([
 ]);
 
 export const RUN_LOOK_DEFAULTS = Object.freeze({
-  figure: Object.freeze({ show: true, opacity: 0.5, color: "#d4d8de" }),
-  mark: Object.freeze({ show: true, opacity: 0.6, color: "#d4d8de" }),
-  route: Object.freeze({ show: true, opacity: 0.7, color: "#d4d8de" }),
+  figure: Object.freeze({ show: true, opacity: 0.3, color: "#d4d8de" }),
+  mark: Object.freeze({ show: true, opacity: 0.3, color: "#d4d8de" }),
+  route: Object.freeze({ show: true, opacity: 0.3, color: "#d4d8de" }),
 });
 
 function cleanPart(v, d) {

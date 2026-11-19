@@ -57,11 +57,11 @@ test("a figure fades out as the camera comes close, and is gone inside it", asyn
   assert.ok(FADE_LEVELS >= 8, "enough steps that the fade looks smooth");
 });
 
-test("the walking speed is one of a few named paces, the quick move by default", async () => {
+test("the walking speed is one of a few named paces, sprint by default", async () => {
   const { WALK_SPEEDS, walkSpeed } = await import("../js/model/route.js");
   assert.deepEqual(WALK_SPEEDS.map((s) => s.id), ["slow", "walk", "quick", "sprint"]);
   assert.equal(walkSpeed("quick").pace, 3.4);
-  assert.equal(walkSpeed(undefined).id, "quick");
-  assert.equal(walkSpeed("warp").id, "quick", "unknown: the default");
+  assert.equal(walkSpeed(undefined).id, "sprint");
+  assert.equal(walkSpeed("warp").id, "sprint", "unknown: the default");
   for (let i = 1; i < WALK_SPEEDS.length; i++) assert.ok(WALK_SPEEDS[i].pace > WALK_SPEEDS[i - 1].pace);
 });

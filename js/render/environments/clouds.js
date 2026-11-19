@@ -136,7 +136,7 @@ export function createClouds(bay = { width: 20, depth: 30 }) {
     setCoverage,
     shadow,
     /** How dark the cloud shadows are: the look's shadow strength (0 with shadows off). */
-    setShadow(strength) { shadowMat.opacity = 0.32 * strength; shadow.visible = mesh.visible && strength > 0.01; },
+    setShadow(strength) { shadowMat.opacity = 0.6 * strength; shadow.visible = mesh.visible && strength > 0.01; },
     setWarmth(w) { material.color.copy(WHITE).lerp(WARM, Math.pow(w, 1.5) * 0.7); ringMat.color.copy(material.color); },
     setDrift([u, v]) {
       map.offset.set(-u, -v);                          // the pattern moves +x / +z with the wind

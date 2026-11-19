@@ -86,7 +86,7 @@ export function createCameraRig(engine, domElement) {
     look(v.eye, v.eye.map((p, i) => p + dir[i] * 0.1));
   }
   let walking = null;
-  let pace = 3.4;                                    // metres a second (Settings → walking speed)
+  let pace = 4.6;                                    // metres a second (Settings → View → walking speed; Sprint)
   function stopWalk() { if (walking) { cancelAnimationFrame(walking.frame); walking.done(false); walking = null; } }
   // With a route (`path`, [[x, z], …] from here to there, and the stage), the camera walks along it,
   // standing on the ground, ramps and platforms under it.

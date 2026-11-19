@@ -4,6 +4,9 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- New View defaults: walking speed Sprint; figures, position marks and the route line shown in
+  light grey at 30 % opacity.
+
 - Clouds show from every camera: a distant ring of clouds just above the horizon (behind the banks
   and trees), and their soft shadows drift across the range floor, as dark as the shadow strength.
 
@@ -25,7 +28,7 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
   the printed brief list them ("T5 (swinger) by P1 (IPSC popper)").
 - The route line on the ground is light grey, like the figures.
 
-- Walks between shooting positions are faster (3.4 m/s, a quick IPSC move, by default) and
+- Walks between shooting positions are faster (the pace is set in Settings → View) and
   smoother: stepping onto a platform or a ramp rises over a stride instead of jumping.
 - Settings → Light and view: Shooter's eye walking speed (slow walk, walk, quick move, sprint),
   kept in this browser.

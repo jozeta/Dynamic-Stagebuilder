@@ -187,4 +187,4 @@ export const WALK_SPEEDS = Object.freeze([
   { id: "quick", name: "Quick move", pace: 3.4 },
   { id: "sprint", name: "Sprint", pace: 4.6 },
 ].map((s) => Object.freeze(s)));
-export const walkSpeed = (id) => WALK_SPEEDS.find((s) => s.id === id) || WALK_SPEEDS[2];
+export const walkSpeed = (id) => WALK_SPEEDS.find((s) => s.id === id) || WALK_SPEEDS[3];      // Sprint by default

@@ -8,14 +8,14 @@ test("figures, position marks and the route are shown in light grey by default",
   assert.deepEqual(RUN_PARTS.map((p) => p.id), ["figure", "mark", "route"]);
   for (const { id } of RUN_PARTS) assert.deepEqual(d[id], { ...RUN_LOOK_DEFAULTS[id] });
   assert.equal(RUN_COLORS[0].hex, d.figure.color);
-  assert.ok(d.figure.opacity < d.mark.opacity && d.mark.opacity < d.route.opacity, "figures the most see-through");
+  for (const { id } of RUN_PARTS) assert.equal(d[id].opacity, 0.3, `${id}: 30 % by default`);
 });
 
 test("each part has its own colour, see-through and show/hide", () => {
   let look = cleanRunLook(null);
   look = withRunPart(look, "route", { color: "#FF9A2E", show: false });
   look = withRunPart(look, "figure", { opacity: 0.8 });
-  assert.deepEqual(look.route, { show: false, opacity: 0.7, color: "#ff9a2e" });
+  assert.deepEqual(look.route, { show: false, opacity: 0.3, color: "#ff9a2e" });
   assert.deepEqual(look.figure, { show: true, opacity: 0.8, color: "#d4d8de" });
   assert.deepEqual(look.mark, { ...RUN_LOOK_DEFAULTS.mark }, "the others are untouched");
 });
@@ -26,5 +26,5 @@ test("a stored run look is checked before use", () => {
   assert.equal(bad.mark.opacity, 0.1, "never fully invisible: use Show for that");
   assert.deepEqual(bad.route, { ...RUN_LOOK_DEFAULTS.route });
   assert.equal(bad.extra, undefined);
-  assert.equal(cleanRunLook({ figure: { opacity: NaN } }).figure.opacity, 0.5);
+  assert.equal(cleanRunLook({ figure: { opacity: NaN } }).figure.opacity, 0.3);
 });
