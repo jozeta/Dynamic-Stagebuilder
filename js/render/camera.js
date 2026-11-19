@@ -2,7 +2,7 @@
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { obliqueView, stageArea, VIEW } from "./view-math.js";
 import { viewFromPosition, anglesFromView, walkBetween, walkDuration } from "../model/positions.js";
-import { surfaceHeight, pointAlong, legLength } from "../model/route.js";
+import { surfaceHeight, pointAlong, legLength, walkLook } from "../model/route.js";
 
 export const PRESETS = ["iso", "top", "front", "shooter"];
 export const PRESET_LABELS = { iso: "Isometric", top: "Top", front: "Front", shooter: "Shooter's eye" };
@@ -100,8 +100,9 @@ export function createCameraRig(engine, domElement) {
     const reduce = typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
     const ground = (x, z) => (stage ? surfaceHeight(stage, x, z) : 0);
     const eyeFrom = from.eye[1] - ground(from.eye[0], from.eye[2]), eyeTo = to.eye[1] - ground(to.eye[0], to.eye[2]);
-    const route = path && path.length >= 2 ? path : null;
-    const dist = route ? legLength(route) : Math.hypot(to.eye[0] - from.eye[0], to.eye[2] - from.eye[2]);
+    // Always a route on the ground: the drawn one, else straight from here to there.
+    const route = path && path.length >= 2 ? path : [[from.eye[0], from.eye[2]], [to.eye[0], to.eye[2]]];
+    const dist = legLength(route);
     const ms = reduce ? 0 : walkDuration([0, 0, 0], [dist, 0, 0]) * 1000;
     return new Promise((done) => {
       const t0 = performance.now();
@@ -109,12 +110,13 @@ export function createCameraRig(engine, domElement) {
       walking = w;
       const step = () => {
         const t = ms ? (performance.now() - t0) / ms : 1;
+        // The shooter looks the way they walk (as on the course), turning to the view on arrival.
         const v = walkBetween(from, to, t);
-        if (route) {
-          const k = v.eased;
-          const [x, z] = pointAlong(route, k);
-          v.eye = [x, ground(x, z) + eyeFrom + (eyeTo - eyeFrom) * k, z];
-        }
+        const k = v.eased;
+        const [x, z] = pointAlong(route, k);
+        v.eye = [x, ground(x, z) + eyeFrom + (eyeTo - eyeFrom) * k, z];
+        Object.assign(v, walkLook(route, k, from, to));
+        if (t >= 1) Object.assign(v, { yaw: to.yaw, pitch: to.pitch ?? 0 });
         lookFrom(v);
         if (t < 1) w.frame = requestAnimationFrame(step);
         else { if (walking === w) walking = null; done(true); }
@@ -134,5 +136,9 @@ export function createCameraRig(engine, domElement) {
   };
   controls.addEventListener("start", stopWalk);      // grabbing the view stops a walk
 
-  return { controls, preset, frameAll, viewFrom, currentAngles, walkTo, stopWalk, jumpTo: (v) => { stopWalk(); lens(VIEW.eyeFov); lookFrom(v); }, startView, positionView, dispose: () => controls.dispose() };
+  /** The camera as plain data ({ position, target, fov }), to remember it across reloads. */
+  const getView = () => ({ position: camera.position.toArray(), target: controls.target.toArray(), fov: camera.fov });
+  const setView = (v) => { stopWalk(); lens(v.fov); look(v.position, v.target); };
+
+  return { controls, preset, frameAll, viewFrom, currentAngles, walkTo, stopWalk, jumpTo: (v) => { stopWalk(); lens(VIEW.eyeFov); lookFrom(v); }, startView, positionView, getView, setView, dispose: () => controls.dispose() };
 }

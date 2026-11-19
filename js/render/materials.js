@@ -573,8 +573,8 @@ const specs = {
   "route-handle": () => std({ color: 0xffffff, emissive: 0x2f7bff, emissiveIntensity: 0.5, roughness: 0.4 }),
   "route-pick": () => new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false, side: THREE.DoubleSide }),
   "position-ring": () => new THREE.MeshBasicMaterial({ color: 0xd2d6dc, side: THREE.DoubleSide, transparent: true, opacity: 0.6, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4 }),
-  "position-ghost": () => new THREE.MeshStandardMaterial({ color: 0xd8dbe0, transparent: true, opacity: 0.45, roughness: 0.55, depthWrite: false }),
-  "position-gun": () => new THREE.MeshStandardMaterial({ color: 0x2a2c30, roughness: 0.5, metalness: 0.4 }),
+  "position-ghost": () => new THREE.MeshStandardMaterial({ color: 0xd8dbe0, transparent: true, opacity: 0.5, roughness: 0.6, depthWrite: false, side: THREE.DoubleSide }),
+  "position-ghost-depth": () => new THREE.MeshBasicMaterial({ colorWrite: false, transparent: true, depthWrite: true, side: THREE.DoubleSide }),
   // Building pieces.
   "bld-concrete": () => mapped(concreteTex, 0xb4b2ac, { roughness: 0.95 }),
   "bld-brick": () => mapped(brickTex, 0x9a4b34, { roughness: 0.9 }),

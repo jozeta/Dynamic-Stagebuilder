@@ -1,10 +1,72 @@
-// A shooting position on the ground: a light grey ring with an arrow for the facing, and a light
-// grey mannequin (head, body, arms holding a pistol, legs, feet) in the stance (standing, crouching, kneeling, sitting or prone) at real size. The figure
-// casts no shadow and doesn't hide the stage behind it.
+// A shooting position on the ground: a light grey ring with a chevron for the facing, and a light
+// grey, see-through man in the stance (standing, crouching, kneeling, sitting or prone) at real
+// size, holding a pistol in both hands (all from figureParts in model/positions.js). The figure is
+// one merged mesh drawn after a depth-only pass, so only its outer surface shows, as one even
+// translucent grey. It casts no shadow.
 import * as THREE from "three";
 import { STANCES, MARKER_RADIUS, positionSize } from "../../model/positions.js";
 import { getMaterial } from "../materials.js";
 import { group } from "./parts.js";
+
+const up = new THREE.Vector3(0, 1, 0);
+
+function limbGeometry({ a, b, prof }) {
+  const A = new THREE.Vector3(...a), dir = new THREE.Vector3(...b).sub(A), len = Math.max(0.001, dir.length());
+  const g = new THREE.LatheGeometry(prof.map(([t, r]) => new THREE.Vector2(r, t * len)), 16);
+  const m = new THREE.Matrix4().compose(A, new THREE.Quaternion().setFromUnitVectors(up, dir.normalize()), new THREE.Vector3(1, 1, 1));
+  return g.applyMatrix4(m);
+}
+function loftGeometry({ sections }) {
+  const N = 24, pos = [], idx = [];
+  for (const { c, rx, rz, X, V } of sections) {
+    for (let k = 0; k < N; k++) {
+      const t = (k / N) * Math.PI * 2, cx = Math.cos(t) * rx, sz = Math.sin(t) * rz;
+      pos.push(...c.map((v, i) => v + X[i] * cx + V[i] * sz));
+    }
+  }
+  const S = sections.length;
+  for (let s = 0; s < S - 1; s++) for (let k = 0; k < N; k++) {
+    const a = s * N + k, b = s * N + ((k + 1) % N), c = a + N, d = b + N;
+    idx.push(a, c, b, b, c, d);
+  }
+  for (const [s, flip] of [[0, true], [S - 1, false]]) {       // close both ends
+    const centre = pos.length / 3;
+    pos.push(...sections[s].c);
+    for (let k = 0; k < N; k++) {
+      const a = s * N + k, b = s * N + ((k + 1) % N);
+      idx.push(...(flip ? [centre, b, a] : [centre, a, b]));
+    }
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+  g.setIndex(idx);
+  g.computeVertexNormals();
+  return g;
+}
+function partGeometry(part) {
+  switch (part.kind) {
+    case "limb": return limbGeometry(part);
+    case "loft": return loftGeometry(part);
+    case "ellipsoid": return new THREE.SphereGeometry(1, 20, 14).scale(...part.r).translate(...part.c);
+    case "box": return new THREE.BoxGeometry(...part.s).rotateX(part.tilt).translate(...part.c);
+    default: return null;
+  }
+}
+// One geometry from many (non-indexed), keeping each part's smooth normals.
+function merge(geoms) {
+  const flat = geoms.map((g) => (g.index ? g.toNonIndexed() : g));
+  const join = (name) => {
+    const arrays = flat.map((g) => g.getAttribute(name).array);
+    const out = new Float32Array(arrays.reduce((n, a) => n + a.length, 0));
+    let o = 0;
+    for (const a of arrays) { out.set(a, o); o += a.length; }
+    return new THREE.BufferAttribute(out, 3);
+  };
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", join("position"));
+  g.setAttribute("normal", join("normal"));
+  return g;
+}
 
 export function buildShootingPosition(obj) {
   const st = STANCES.find((s) => s.id === obj.params.stance) || STANCES[0];
@@ -19,28 +81,12 @@ export function buildShootingPosition(obj) {
   a.rotation.x = -Math.PI / 2;                     // shape −y → world +z: points the way the shooter faces
   a.position.y = 0.002;
   g.add(a);
-  const figure = new THREE.Group();
-  const up = new THREE.Vector3(0, 1, 0);
-  for (const { a: p0, b: p1, r } of st.segments) {
-    const A = new THREE.Vector3(...p0), B = new THREE.Vector3(...p1), dir = B.clone().sub(A);
-    const m = new THREE.Mesh(new THREE.CapsuleGeometry(r, Math.max(0.001, dir.length()), 6, 14), getMaterial("position-ghost"));
-    m.position.copy(A).addScaledVector(dir, 0.5);
-    if (dir.lengthSq() > 1e-9) m.quaternion.setFromUnitVectors(up, dir.normalize());
-    figure.add(m);
-  }
-  for (const [x, y, z, r] of st.spheres) {
-    const m = new THREE.Mesh(new THREE.SphereGeometry(r, 18, 14), getMaterial("position-ghost"));
-    m.position.set(x, y, z);
-    figure.add(m);
-  }
-  st.boxes.forEach(([x, y, z, w, bh, d], i) => {
-    const pistol = i === st.boxes.length - 1;
-    const m = new THREE.Mesh(new THREE.BoxGeometry(w, bh, d), getMaterial(pistol ? "position-gun" : "position-ghost"));
-    m.position.set(x, y, z);
-    figure.add(m);
-  });
-  figure.traverse((m) => { m.castShadow = false; m.receiveShadow = false; m.renderOrder = 2; });
-  g.add(figure);
+  const body = merge(st.parts.map(partGeometry).filter(Boolean));
+  const depth = new THREE.Mesh(body, getMaterial("position-ghost-depth"));
+  const skin = new THREE.Mesh(body, getMaterial("position-ghost"));
+  depth.renderOrder = 1;
+  skin.renderOrder = 2;
+  for (const m of [depth, skin]) { m.castShadow = false; m.receiveShadow = false; g.add(m); }
   g.userData.size = positionSize(st.id);
   return g;
 }

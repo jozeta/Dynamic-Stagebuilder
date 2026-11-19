@@ -316,3 +316,15 @@ body { background: var(--lg-bg); overflow: hidden; }
 .help-art .hi-cell { fill: none; stroke: #9a9892; }
 .help-art .hi-proc { fill: #eceae4; stroke: #d8322a; stroke-width: 0; }
 .help-art .hi-map { fill: #fff; stroke: #9a9892; }
+
+/* Shooter's eye move pad: semi-transparent grey arrows in the lower left of the 3D view. */
+.eye-pad { position: absolute; left: var(--lg-space-s); bottom: calc(var(--lg-space-s) + env(safe-area-inset-bottom, 0px));
+  display: grid; grid-template: "a f b" var(--lg-touch) "l c r" var(--lg-touch) "g d e" var(--lg-touch) / var(--lg-touch) var(--lg-touch) var(--lg-touch); gap: 2px; z-index: 3; }
+.eye-pad[hidden] { display: none; }
+.eye-pad-btn { display: grid; place-items: center; border: 1px solid rgb(255 255 255 / 0.25); border-radius: 10px; cursor: pointer;
+  background: rgb(150 155 162 / 0.45); color: rgb(255 255 255 / 0.92); backdrop-filter: blur(4px); padding: 0; }
+.eye-pad-btn:hover { background: rgb(150 155 162 / 0.65); }
+.eye-pad-btn:active { background: rgb(120 125 132 / 0.75); }
+.eye-pad-btn:focus-visible { outline: 2px solid var(--lg-accent); outline-offset: 1px; }
+.eye-pad-btn svg { width: 22px; height: 22px; }
+.eye-pad-forward { grid-area: f; } .eye-pad-left { grid-area: l; } .eye-pad-right { grid-area: r; } .eye-pad-back { grid-area: d; }

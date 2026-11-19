@@ -82,3 +82,19 @@ test("the drawn line stops short of the rings at each end", async () => {
   assert.ok(t.some((p) => p[0] === 0 && p[1] === 4), "keeps the bend");
   assert.equal(trimPolyline([[0, 0], [0, 0.6]], 0.5, 0.5).length, 0, "too short to draw");
 });
+
+test("walking a route, the shooter looks the way they walk, then turns to the position's view", async () => {
+  const { walkLook } = await import("../js/model/route.js");
+  const route = [[0, 0], [0, 10], [-10, 10]];        // down range, then to the shooter's right (−x)
+  const yawAt = (k) => walkLook(route, k, { yaw: 0, pitch: 0 }, { yaw: 180, pitch: -10 });
+  assert.ok(Math.abs(yawAt(0.25).yaw - 0) < 1e-6, "first leg: looking down range (0°)");
+  assert.ok(Math.abs(yawAt(0.7).yaw - 90) < 1e-6, "second leg: looking along −x (90°)");
+  assert.equal(yawAt(0.7).pitch, 0, "level while walking");
+  assert.ok(Math.abs(((yawAt(1).yaw % 360) + 360) % 360 - 180) < 1e-6, "arrives facing the position's view");
+  assert.equal(yawAt(1).pitch, -10);
+  assert.equal(yawAt(0).yaw, 0, "starts from where it looked");
+  const back = walkLook([[0, 0], [0, 10]], 0, { yaw: 180, pitch: 0 }, { yaw: 0, pitch: 0 });
+  assert.equal(back.yaw, 180);
+  const mid = walkLook([[0, 0], [0, 10]], 0.5, { yaw: 180, pitch: 0 }, { yaw: 0, pitch: 0 });
+  assert.ok(Math.abs(((mid.yaw % 360) + 360) % 360) < 1e-6, "turned into the walk by mid-route");
+});

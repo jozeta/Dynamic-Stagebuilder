@@ -4,6 +4,16 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Shooting positions show a detailed, see-through grey man in the stance: a shaped torso and
+  tapered limbs, a cap, shooting glasses and ear muffs, shoes, and both hands round a pistol with
+  slide, frame, angled grip, trigger guard, trigger and sights. Only its outer surface is drawn,
+  so it is one even grey without dark overlaps.
+- Shooter's eye: standing on a shooting position, grey arrows in the lower left move it forward,
+  back, left or right (25 cm, relative to the way it faces; one undo step each).
+- Walking between positions, the camera looks the way the shooter walks, turning to the
+  position's view as it arrives.
+- The camera view is remembered per project in this browser: a reload opens where you left off.
+
 - Every stage in the library comes with suggested shooting positions and the walk between
   them, worked out from its layout: each target is seen from a position inside the shooting
   areas (walls block, ports and doorways don't; low ports mean kneeling), each position faces

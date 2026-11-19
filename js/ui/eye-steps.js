@@ -2,7 +2,9 @@
 // 3… (and back) along the route drawn on the ground (bending at its grab points, standing on ramps
 // and platforms), at each one's eye height, facing and look angle; Play run walks the whole course,
 // pausing at every position. At a position, looking around saves the view to it (an undo step) when
-// you let go. Keys: [ and ]. With no positions yet, the bar says how to add them.
+// you let go. Keys: [ and ]. With no positions yet, the bar says how to add them. Standing on a
+// position, a pad of arrows in the lower left steps it forward, back, left or right (relative to
+// the way it faces), one undo step each.
 import { h, icon } from "./dom.js";
 import { shootingPositions } from "../model/positions.js";
 import { routeLegs } from "../model/route.js";
@@ -21,6 +23,19 @@ export function createEyeSteps({ editor, rig, bar, onViewing = () => {}, walking
   const saved = h("span", { class: "eye-step-hint", text: "Look around: the view is saved" });
   const box = h("div", { class: "eye-steps", role: "group", "aria-label": "Shooting positions", hidden: true }, [prev, label, next, run, saved, hint]);
   bar.append(box);
+  const arrow = (dir, name, label) => h("button", { type: "button", class: `eye-pad-btn eye-pad-${dir}`, "aria-label": `Move the position ${label}`, title: `Move ${label}`,
+    onclick: () => nudge(dir) }, [icon(name)]);
+  const pad = h("div", { class: "eye-pad", role: "group", "aria-label": "Move the shooting position", hidden: true },
+    [arrow("forward", "chevu", "forward"), arrow("left", "chevl", "left"), arrow("right", "chevr", "right"), arrow("back", "chevd", "back")]);
+  bar.parentElement.append(pad);
+  function nudge(dir) {
+    const o = list()[index];
+    if (!o || running) return;
+    const a = rig.currentAngles();                 // keep looking where you look now
+    editor.dispatch({ type: "stepPosition", id: o.id, dir });
+    const moved = list().find((p) => p.id === o.id);
+    if (moved) rig.jumpTo({ ...rig.positionView(moved, editor.stage()), yaw: a.rotation, pitch: a.pitch });
+  }
 
   const list = () => shootingPositions(editor.stage());
   const viewOf = (i, ps) => (i < 0 ? rig.startView(editor.stage()) : rig.positionView(ps[i], editor.stage()));
@@ -39,6 +54,7 @@ export function createEyeSteps({ editor, rig, bar, onViewing = () => {}, walking
     hint.hidden = has;
     label.hidden = !has;
     saved.hidden = index < 0 || !has;
+    pad.hidden = box.hidden || index < 0 || !has || running;
     if (index < 0) label.textContent = "Start";
     else {
       const o = ps[index];
@@ -70,6 +86,7 @@ export function createEyeSteps({ editor, rig, bar, onViewing = () => {}, walking
     running = true;
     run.setAttribute("aria-pressed", "true");
     run.replaceChildren(icon("pause"), "Stop run");
+    pad.hidden = true;
     index = -1;
     await go({ walk: true });
     while (running && index < list().length - 1) {
@@ -85,6 +102,7 @@ export function createEyeSteps({ editor, rig, bar, onViewing = () => {}, walking
     running = false;
     run.setAttribute("aria-pressed", "false");
     run.replaceChildren(icon("play"), "Play run");
+    describe(list());
   }
   function saveView() {
     const o = list()[index];
@@ -100,6 +118,6 @@ export function createEyeSteps({ editor, rig, bar, onViewing = () => {}, walking
     /** The Shooter's eye button: back to the start and show the bar (with a hint if there are no positions). */
     reset() { stopRun(); rig.stopWalk(); index = -1; at = -1; box.hidden = false; go({ walk: false }); },
     update() { if (!box.hidden) describe(list()); },
-    hide() { stopRun(); rig.stopWalk(); box.hidden = true; onViewing(null); },
+    hide() { stopRun(); rig.stopWalk(); box.hidden = true; pad.hidden = true; onViewing(null); },
   };
 }

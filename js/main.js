@@ -30,7 +30,7 @@ import { createAnimator } from "./render/animate.js";
 import { createSurroundings } from "./ui/surroundings.js";
 import { takeBuildingPieces } from "./model/surroundings.js";
 import { libraryStage } from "./model/stage-library.js";
-import { loadHidden, saveHidden } from "./ui/prefs.js";
+import { loadHidden, saveHidden, loadView, saveView } from "./ui/prefs.js";
 import { createAutosave } from "./storage/autosave.js";
 
 const canvas = document.getElementById("viewport");
@@ -221,7 +221,8 @@ async function openProject(id) {
   autosave.markSaved(editor.stage(), rec.exportedAt ?? null);
   remember(id);
   setStatus("Saved", "lg-ok");
-  rig.preset("iso", editor.stage());        // the high oblique overview of the whole bay
+  const view = loadView(id);                // where you left the camera, else the overview
+  if (view) rig.setView(view); else rig.preset("iso", editor.stage());        // the high oblique overview of the whole bay
   return true;
 }
 async function addProject(stage) {
@@ -360,6 +361,11 @@ settings = createSettings({
 
 render(editor.state);
 document.getElementById("boot-state")?.remove();
+// Remember the camera (per project, in this browser) a moment after it stops moving, and on leaving.
+let viewTimer = 0, viewReady = false;
+const keepView = () => { if (viewReady) saveView(editor.stage().id, rig.getView()); };
+rig.controls.addEventListener("change", () => { clearTimeout(viewTimer); viewTimer = setTimeout(keepView, 400); });
+addEventListener("pagehide", keepView);
 rig.preset("iso", editor.stage());
 
 // Open the last project, else the newest, else save the example stage as the first project.
@@ -373,6 +379,7 @@ rig.preset("iso", editor.stage());
   const last = recall();
   const pick = all.find((r) => r.id === last) ?? all[0];
   if (!(pick && await openProject(pick.id))) await addProject(demoStage());
+  viewReady = true;                        // from now on the camera belongs to an opened project
 })();
 
 // Offline support (PWA). Not on file:// pages or browsers without service workers.

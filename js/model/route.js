@@ -90,3 +90,28 @@ export function trimPolyline(pts, a, b) {
   out.push(pointAlong(pts, (total - b) / total));
   return out;
 }
+
+const turnTo = (a, b, w) => a + ((((b - a) % 360) + 540) % 360 - 180) * w;
+const smooth = (x) => { const t = Math.min(1, Math.max(0, x)); return t * t * (3 - 2 * t); };
+
+/**
+ * Where the shooter looks at fraction k (0–1) of a walk along route `pts`, from view `from` to view
+ * `to` ({ yaw, pitch } in degrees, the shooting-position convention): turning into the way they walk
+ * over the first metre or so, looking level along the route (a metre ahead, so bends turn smoothly),
+ * then turning to the position's own view over the last stretch. Returns { yaw, pitch }.
+ */
+export function walkLook(pts, k, from, to) {
+  const total = legLength(pts);
+  if (total < 0.05) return { yaw: turnTo(from.yaw, to.yaw, smooth(k)), pitch: from.pitch + (to.pitch - from.pitch) * smooth(k) };
+  const s = k * total;
+  const here = pointAlong(pts, k);
+  let ahead = pointAlong(pts, Math.min(1, (s + 1) / total));
+  let dir = [ahead[0] - here[0], ahead[1] - here[1]];
+  if (Math.hypot(...dir) < 1e-6) { const a = pts.at(-2), b = pts.at(-1); dir = [b[0] - a[0], b[1] - a[1]]; }
+  const heading = (Math.atan2(-dir[0], dir[1]) * 180) / Math.PI;
+  const tIn = Math.min(1.2, total * 0.25), tOut = Math.min(1.5, total * 0.3);
+  const wIn = smooth(s / tIn), wOut = smooth((s - (total - tOut)) / tOut);
+  const yaw = turnTo(turnTo(from.yaw, heading, wIn), to.yaw, wOut);
+  const pitch = (from.pitch + (0 - from.pitch) * wIn) * (1 - wOut) + to.pitch * wOut;
+  return { yaw, pitch };
+}

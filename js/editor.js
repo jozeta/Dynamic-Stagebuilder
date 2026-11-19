@@ -11,6 +11,7 @@ import { snapPoint, snapAngle, clampToBay } from "./model/snap.js";
 import { getProp } from "./model/props.js";
 import { snapToObjects, SNAP_RADIUS } from "./model/objsnap.js";
 import { cleanLook, lookDefaults, lookAfterSwitch } from "./model/look.js";
+import { stepFrom } from "./model/positions.js";
 
 const STAGE_TYPES = ["", "Short", "Medium", "Long"];
 const BRIEFING_TEXT = ["matchName", "designer", "startSignal", "startPosition", "gunCondition", "procedure", "stopTime", "notes", "scoring"];
@@ -115,6 +116,12 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
       edit(updateObject(r.stage, r.id, { position: landing(r.stage, obj, position) }));
       state.selection = [r.id];
       state.mode = "select";
+    },
+    // Shooter's eye move arrows: one step relative to the position's facing, unsnapped, in the bay.
+    stepPosition({ id, dir, step }) {
+      const o = present().objects.find((x) => x.id === id && x.type === "shooting-position");
+      const to = o && stepFrom(o.position, o.rotation, dir, Number.isFinite(step) ? step : undefined);
+      if (to) edit(updateObject(present(), id, { position: clampToBay(to, present().bay) }));
     },
     move({ id, position }) {
       const o = present().objects.find((x) => x.id === id);
