@@ -4,6 +4,22 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- **Your own surroundings:** Settings → Surroundings → *New from a plan…* takes a blueprint or site
+  plan (PNG, JPEG or WebP). Click both ends of something you know the length of and type it (for
+  example a 5.2 m wall), and the plan is laid on the ground at true scale. Sliders move, turn and
+  fade it.
+- **Building pieces:** a new props group (building walls in concrete, brick, wood or metal, square
+  pillars, round columns, earth berms, 20/40 ft containers, chain-link fences, concrete barriers)
+  to rebuild your range on the plan. *Save pieces to these surroundings* keeps them as a template
+  that every stage can choose; *Edit the pieces on the stage* brings them back. Templates are saved
+  in this browser.
+- **Animation:** swingers, drop turners, clamshells, movers, Texas stars, plate racks, dueling trees
+  and poppers have an *Animate* switch. The *Play / Pause* button over the 3D view starts or stops
+  all switched-on props together.
+- **Resizable side panels:** drag a panel's inner edge (or use the arrow keys on it) to make it
+  wider or narrower; double-click to reset. On iPad portrait, drag the top of the bottom panel.
+- Fixed: a change with nothing valid in it no longer adds an empty undo step.
+
 - **Stage library:** 34 ready-made stages in the Projects panel, searchable and grouped:
   - drills and standards (El Presidente, Vice Presidente, Bill Drill, Mozambique, Hostage
     Presidente and more)

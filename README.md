@@ -47,7 +47,11 @@ training, and want a clear briefing sheet without drawing the map by hand.
 - **Printable brief** (A4): a header with the stage number and key figures, the briefing grid, the
   procedure and a top-down map with a legend and scale bar on page 1, a 3D view on page 2. Save it
   as a PDF from the print dialog.
-- **Help** guide with a drawing for every main task, and folding side panels.
+- **Help** guide with a drawing for every main task, and side panels that fold away and resize.
+- **Your own surroundings** from a blueprint or site plan, measured with one known length, plus
+  building pieces (walls, pillars, columns, berms, containers, fences, barriers), saved as templates.
+- **Animated moving targets** (swingers, drop turners, clamshells, movers, Texas stars, plate racks,
+  dueling trees, poppers) with a per-prop switch and one Play / Pause button.
 - **Three surroundings,** Outdoor (a dirt range with earth banks, bushes and trees, stones, and a
   choice of sand, light sand, dark sand, red dirt or gravel), Technical (grey floor, grid) and
   Blueprint (an endless blue drafting sheet with grid, title block and notes). Switching never moves
@@ -165,6 +169,8 @@ Stage settings are in the inspector when nothing is selected. They are saved wit
 | Exposure | *Settings*: 0.5–1.6 | 1.00 |
 | Hidden props | *Settings → Props*: groups and single props the props panel leaves out (per browser) | None |
 | Folded panels | The arrow at the top of each side panel (per browser) | Both open |
+| Panel sizes | Drag a side panel's inner edge, or arrow keys on it; double-click resets (per browser) | 232 / 280 px |
+| My surroundings | *Settings*: your own plan-based surroundings, with plan position, turn and strength | None |
 | Default target style | *Settings*: Classic (octagon) or With head, for new paper targets | Classic |
 
 Prop settings (inspector, one prop selected): label (targets), rotation, and per prop: stand height
@@ -206,6 +212,19 @@ plate rack, dueling tree) are in their own group.
 **Draw fault lines and shooting areas.** Choose *Fault line* or *Shooting area* at the top of the props panel, tap
 the points on the ground, then double-click, press Enter or tap *Finish*. Escape or *Cancel* stops.
 *Start position* then a tap sets where the shooter starts (the shooter's-eye camera stands there).
+
+**Use your own range.** In *Settings → Surroundings*, choose *New from a plan…* and pick an image of
+your range's blueprint or site plan. Click both ends of something whose real length you know (a
+wall, a bay line) and type that length; the plan is scaled to match and laid on the ground. Use the
+sliders to move, turn and fade it until it lines up. Then rebuild what's really there with the
+*Buildings and surroundings* props (walls, pillars, columns, berms, containers, fences, barriers) and
+press *Save pieces to these surroundings*. The template then shows up under *My surroundings* for
+every stage. *Edit the pieces on the stage* brings them back to change. Templates live in this
+browser only; a stage opened on another device shows a plain floor until you make the template there.
+
+**Animate moving targets.** Select a swinger, drop turner, clamshell, mover, Texas star, plate rack,
+dueling tree or popper and switch on *Animate*. The *Play / Pause* button over the 3D view (it
+appears once something is animated) starts and stops all of them together.
 
 **Plan the shooter's run.** Pick *Shooting position* in Stage markings and tap each place the
 shooter shoots from; they are numbered 1, 2, 3…. In the inspector set the stance (standing,
