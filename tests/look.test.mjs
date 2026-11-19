@@ -53,3 +53,19 @@ test("old files read with the default look; a saved look round-trips", () => {
   const custom = { ...s, settings: { ...s.settings, look: { ...LOOK_DEFAULTS, hour: 9 } } };
   assert.equal(validateStage(JSON.parse(JSON.stringify(custom))).stage.settings.look.hour, 9);
 });
+
+test("Technical surroundings have their own light defaults; reset and switching use them", async () => {
+  const { lookDefaults, TECHNICAL_LOOK } = await import("../js/model/look.js");
+  assert.deepEqual({ ...TECHNICAL_LOOK }, { hour: 16, sun: 1.15, ambient: 1.1, shadows: true, softness: 3, shadowStrength: 0.55, haze: 0.2, exposure: 1 });
+  assert.deepEqual(lookDefaults("technical"), TECHNICAL_LOOK);
+  assert.deepEqual(lookDefaults("outdoor"), LOOK_DEFAULTS);
+  const ed = createEditor();
+  ed.dispatch({ type: "setEnvironment", name: "technical" });
+  assert.deepEqual(ed.stage().settings.look, { ...TECHNICAL_LOOK }, "an untouched look follows the surroundings");
+  ed.dispatch({ type: "setLook", patch: { hour: 9 } });
+  ed.dispatch({ type: "setEnvironment", name: "outdoor" });
+  assert.equal(ed.stage().settings.look.hour, 9, "a look you changed is kept");
+  ed.dispatch({ type: "setEnvironment", name: "technical" });
+  ed.dispatch({ type: "setLook", reset: true });
+  assert.deepEqual(ed.stage().settings.look, { ...TECHNICAL_LOOK });
+});

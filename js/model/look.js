@@ -5,6 +5,16 @@ const SPEC = {
 };
 
 export const LOOK_DEFAULTS = Object.freeze({ hour: 18.25, sun: 1, ambient: 1, shadows: true, softness: 1, shadowStrength: 0.85, haze: 0.2, exposure: 1 });
+// The Technical surroundings: brighter afternoon light with softer, lighter shadows.
+export const TECHNICAL_LOOK = Object.freeze({ hour: 16, sun: 1.15, ambient: 1.1, shadows: true, softness: 3, shadowStrength: 0.55, haze: 0.2, exposure: 1 });
+
+/** The light defaults for a surroundings name ("outdoor" or "technical"). */
+export const lookDefaults = (environment) => (environment === "technical" ? TECHNICAL_LOOK : LOOK_DEFAULTS);
+const sameLook = (a, b) => Object.keys(b).every((k) => a?.[k] === b[k]);
+/** The look to use after switching surroundings: an untouched look follows to the new defaults. */
+export function lookAfterSwitch(look, from, to) {
+  return sameLook(look, lookDefaults(from)) ? { ...lookDefaults(to) } : look;
+}
 
 export function cleanLook(look) {
   const src = look && typeof look === "object" ? look : {};

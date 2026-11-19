@@ -8,7 +8,7 @@ import { assignLabels, renumber, setLabel } from "./model/numbering.js";
 import { snapPoint, snapAngle, clampToBay } from "./model/snap.js";
 import { getProp } from "./model/props.js";
 import { snapToObjects, SNAP_RADIUS } from "./model/objsnap.js";
-import { cleanLook, LOOK_DEFAULTS } from "./model/look.js";
+import { cleanLook, lookDefaults, lookAfterSwitch } from "./model/look.js";
 
 const STAGE_TYPES = ["", "Short", "Medium", "Long"];
 const BRIEFING_TEXT = ["matchName", "designer", "startSignal", "startPosition", "gunCondition", "procedure", "stopTime", "notes", "scoring"];
@@ -150,10 +150,14 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
     setLabel({ id, text }) { edit(setLabel(present(), id, text)); },
     // The look (light, time of day, haze) is a view choice like the surroundings: no undo step.
     setLook({ patch = {}, reset = false }) {
-      const look = reset ? { ...LOOK_DEFAULTS } : cleanLook({ ...present().settings.look, ...patch });
+      const look = reset ? { ...lookDefaults(present().settings.environment) } : cleanLook({ ...present().settings.look, ...patch });
       state.history = replacePresent(state.history, setSetting(present(), "look", look));
     },
-    setEnvironment({ name }) { state.history = replacePresent(state.history, setSetting(present(), "environment", name)); },
+    setEnvironment({ name }) {
+      const { environment: from, look } = present().settings;
+      const next = setSetting(present(), "environment", name);
+      state.history = replacePresent(state.history, setSetting(next, "look", lookAfterSwitch(look, from, name)));
+    },
     setSetting({ key, value }) {
       if (key === "targetStyle" && value !== "classic" && value !== "head") return;
       if (key === "grid" && value) lastGrid = value;
