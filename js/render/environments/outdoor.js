@@ -151,8 +151,8 @@ export function outdoor(bay, { onUpdate } = {}) {
   const hemiLight = new THREE.HemisphereLight(0x9db4d0, 0xb8946a, 0.85);
   const sunLight = sun(bay, 0xffe0b8, 3.1, [-16, 15, 16]);
   const skyTex = canvasTexture(256, (g, s) => paintSky(g, s, 0.5), [1, 1]);
-  const clouds = createClouds();
-  if (clouds) group.add(clouds.mesh);
+  const clouds = createClouds(bay);
+  if (clouds) group.add(clouds.mesh, clouds.shadow);
   return {
     clouds,
     group, lights: [hemiLight, sunLight], hemiLight, sunLight, sunStrength: 5.4, hemiStrength: 0.95, warmth: 1,

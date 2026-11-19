@@ -94,6 +94,7 @@ export function applyLook(env, look, bay) {
   env.paintSky?.(s.warmth);
   env.clouds?.setCoverage(look.clouds ?? 0);
   env.clouds?.setWarmth(s.warmth);
+  env.clouds?.setShadow(look.shadows ? (look.shadowStrength ?? 1) * s.strength : 0);
   if (env.setGround && look.ground && look.ground !== env.ground) env.setGround(look.ground);
   return env;
 }

@@ -4,6 +4,9 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Clouds show from every camera: a distant ring of clouds just above the horizon (behind the banks
+  and trees), and their soft shadows drift across the range floor, as dark as the shadow strength.
+
 - Selecting a prop brings its settings into view: a folded inspector unfolds, and Settings (which
   shares that panel) closes. Folding it again while the prop stays selected keeps it folded.
 

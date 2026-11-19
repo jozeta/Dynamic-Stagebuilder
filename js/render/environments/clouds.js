@@ -1,11 +1,16 @@
-// Clouds over the Outdoor range: a high layer (160 m up) painted in code from seeded, tileable
-// value noise, fading out toward the horizon. Look settings set how much of the sky they cover;
-// with Play on they drift with the wind (look.js cloudDrift). The evening sun warms them.
+// Clouds over the Outdoor range, painted in code from seeded, tileable value noise: a high layer
+// (160 m up) overhead, and a distant ring of clouds just above the horizon (800 m out, behind the
+// banks and trees), so they show from the overview cameras too, not only from the ground. Look
+// settings set how much of the sky they cover; with Play on they drift with the wind (look.js
+// cloudDrift). The evening sun warms them, and their soft shadows drift across the range floor
+// (seen from above, where no sky is in view), as strong as the look's shadow strength.
 import * as THREE from "three";
 import { rng, hasDom } from "./common.js";
 import { CLOUD_TILE } from "../../model/look.js";
 
 const SIZE = 512, HEIGHT = 160, SPAN = 1700;
+const RING = { radius: 800, bottom: -60, top: 190, w: 1024, h: 256, repeat: 3 };
+const smoothstep = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 
 // Tileable fractal value noise on a SIZE × SIZE grid, 0…1 (made once per layer).
 function noiseField(seed) {
@@ -30,7 +35,7 @@ function noiseField(seed) {
   return field;
 }
 
-export function createClouds() {
+export function createClouds(bay = { width: 20, depth: 30 }) {
   if (!hasDom) return null;
   const field = noiseField(29);
   const canvas = document.createElement("canvas");
@@ -57,6 +62,38 @@ export function createClouds() {
   mesh.castShadow = mesh.receiveShadow = false;
   mesh.name = "clouds";
 
+  // The horizon ring: a band of clouds, densest a little above the horizon, thinning upward.
+  const ringCanvas = document.createElement("canvas");
+  ringCanvas.width = RING.w; ringCanvas.height = RING.h;
+  const rg = ringCanvas.getContext("2d");
+  const ringImage = rg.createImageData(RING.w, RING.h);
+  const ringMap = new THREE.CanvasTexture(ringCanvas);
+  ringMap.colorSpace = THREE.SRGBColorSpace;
+  ringMap.wrapS = THREE.RepeatWrapping;
+  ringMap.repeat.set(RING.repeat, 1);
+  const ringMat = new THREE.MeshBasicMaterial({ map: ringMap, transparent: true, depthWrite: false, fog: false, side: THREE.BackSide });
+  const ring = new THREE.Mesh(new THREE.CylinderGeometry(RING.radius, RING.radius, RING.top - RING.bottom, 96, 1, true), ringMat);
+  ring.renderOrder = -2;
+  ring.name = "horizon-clouds";
+  mesh.add(ring);
+  // The ring hangs from the overhead layer's group position but must stay level and centred.
+  ring.rotation.x = -Math.PI / 2;
+  ring.position.set(0, 0, HEIGHT - (RING.top + RING.bottom) / 2);   // the parent's +90° turn maps local +z to world −y
+  // Where the horizon (eye height) falls in the band: rows above it hold the clouds.
+  const horizonRow = RING.h * (RING.top / (RING.top - RING.bottom));
+
+  // Cloud shadows on the floor: the same pattern in black, at a fraction of its opacity.
+  const shadowMap = map.clone();
+  const floorW = bay.width + 16, floorD = bay.depth + 16;
+  shadowMap.repeat.set(floorW / CLOUD_TILE, floorD / CLOUD_TILE);
+  const shadowMat = new THREE.MeshBasicMaterial({ color: 0x000000, map: shadowMap, transparent: true, opacity: 0.3, depthWrite: false,
+    polygonOffset: true, polygonOffsetFactor: -2 });
+  const shadow = new THREE.Mesh(new THREE.PlaneGeometry(floorW, floorD), shadowMat);
+  shadow.rotation.x = -Math.PI / 2;
+  shadow.position.set(0, 0.02, bay.depth / 2);
+  shadow.renderOrder = 1;
+  shadow.name = "cloud-shadows";
+
   let coverage = -1;
   // Paint the clouds for an amount 0 (clear) … 1 (overcast): soft-edged, white tops, grey bellies.
   function setCoverage(c) {
@@ -74,13 +111,38 @@ export function createClouds() {
     }
     g.putImageData(image, 0, 0);
     map.needsUpdate = true;
+    shadowMap.needsUpdate = true;
+    shadow.visible = mesh.visible;
+    // The ring: the same noise stretched sideways (wide, flat cumulus), above the horizon only.
+    const rp = ringImage.data;
+    for (let y = 0; y < RING.h; y++) {
+      const above = (horizonRow - y) / horizonRow;                       // 0 at the horizon … 1 at the top
+      const band = smoothstep(-0.02, 0.12, above) * (1 - smoothstep(0.45, 1, above));
+      for (let x = 0; x < RING.w; x++) {
+        const n = field[((y * 2) % SIZE) * SIZE + ((x >> 1) % SIZE)];
+        const dens = n + band * 0.3 - 0.15;
+        const k = Math.min(1, Math.max(0, (dens - t0) / soft)), a = k * k * (3 - 2 * k) * band;
+        const v = 248 - Math.min(1, Math.max(0, (dens - t0) / 0.35)) * 60 - (1 - above) * 20;
+        const i = (y * RING.w + x) * 4;
+        rp[i] = v; rp[i + 1] = v + 3; rp[i + 2] = v + 10; rp[i + 3] = a * 240;
+      }
+    }
+    rg.putImageData(ringImage, 0, 0);
+    ringMap.needsUpdate = true;
   }
   const WHITE = new THREE.Color(0xffffff), WARM = new THREE.Color(0xffc896);
   return {
     mesh,
     setCoverage,
-    setWarmth(w) { material.color.copy(WHITE).lerp(WARM, Math.pow(w, 1.5) * 0.7); },
-    setDrift([u, v]) { map.offset.set(-u, -v); },     // the pattern moves +x / +z with the wind
-    dispose() { map.dispose(); alphaMap.dispose(); material.dispose(); mesh.geometry.dispose(); },
+    shadow,
+    /** How dark the cloud shadows are: the look's shadow strength (0 with shadows off). */
+    setShadow(strength) { shadowMat.opacity = 0.32 * strength; shadow.visible = mesh.visible && strength > 0.01; },
+    setWarmth(w) { material.color.copy(WHITE).lerp(WARM, Math.pow(w, 1.5) * 0.7); ringMat.color.copy(material.color); },
+    setDrift([u, v]) {
+      map.offset.set(-u, -v);                          // the pattern moves +x / +z with the wind
+      ringMap.offset.x = (u + v) * 0.06;               // far away, the ring creeps slowly sideways
+      shadowMap.offset.set(-u, v);                     // on the floor (turned the other way up), the same drift
+    },
+    dispose() { map.dispose(); alphaMap.dispose(); material.dispose(); mesh.geometry.dispose(); ringMap.dispose(); ringMat.dispose(); ring.geometry.dispose(); shadowMap.dispose(); shadowMat.dispose(); shadow.geometry.dispose(); },
   };
 }
