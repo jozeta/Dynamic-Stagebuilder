@@ -7,8 +7,8 @@ import { createStage } from "../js/model/stage.js";
 import { validateStage } from "../js/model/schema.js";
 
 test("defaults", () => {
-  assert.deepEqual({ ...LOOK_DEFAULTS }, { hour: 15.75, sun: 0.6, ambient: 0.65, shadows: true, softness: 3, shadowStrength: 0.55, haze: 0.1, exposure: 1.1, ground: "gravel", foliage: "mixed",
-    clouds: 0.75, cloudSpeed: 1.3, wind: 70, cloudShadow: 0.5, sunAuto: false, sunElevation: 36, sunAzimuth: 30, sunColor: 0.78,
+  assert.deepEqual({ ...LOOK_DEFAULTS }, { hour: 15.75, sun: 0.85, ambient: 1.05, shadows: true, softness: 4, shadowStrength: 0.55, haze: 0.15, exposure: 1, ground: "gravel", foliage: "mixed",
+    clouds: 0.45, cloudSpeed: 0.5, wind: 70, cloudShadow: 0.5, sunAuto: false, sunElevation: 31, sunAzimuth: 35, sunColor: 0.78,
     groundHue: null, groundIntensity: null, groundBrightness: null, walls: true });
   assert.ok(Object.isFrozen(LOOK_DEFAULTS));
 });
@@ -90,12 +90,12 @@ test("Outdoor grounds: sand, light sand, dark sand, red dirt and gravel; unknown
 
 test("the Outdoor sky has clouds by default; their amount, speed and wind are checked", async () => {
   const { cloudDrift, CLOUD_TILE } = await import("../js/model/look.js");
-  assert.equal(LOOK_DEFAULTS.clouds, 0.75);
-  assert.equal(LOOK_DEFAULTS.cloudSpeed, 1.3);
+  assert.equal(LOOK_DEFAULTS.clouds, 0.45);
+  assert.equal(LOOK_DEFAULTS.cloudSpeed, 0.5);
   assert.equal(LOOK_DEFAULTS.wind, 70);
   const c = cleanLook({ clouds: 3, cloudSpeed: -1, wind: 400 });
   assert.equal(c.clouds, 1); assert.equal(c.cloudSpeed, 0); assert.equal(c.wind, 359);
-  assert.equal(cleanLook({ clouds: "lots" }).clouds, 0.75);
+  assert.equal(cleanLook({ clouds: "lots" }).clouds, 0.45);
   // Drift: the cloud pattern moves with the wind, by speed × time, in tiles of the texture.
   assert.deepEqual(cloudDrift({ cloudSpeed: 1, wind: 0 }, 0), [0, 0]);
   const [u, v] = cloudDrift({ cloudSpeed: 1, wind: 0 }, 10);

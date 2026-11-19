@@ -50,8 +50,8 @@ export const FOLIAGE = Object.freeze([
 const FOLIAGE_IDS = FOLIAGE.map((f) => f.id);
 
 // Outdoor (the user's chosen look): the sun set by hand, high and warm white, 75 % cloud.
-export const LOOK_DEFAULTS = Object.freeze({ hour: 15.75, sun: 0.6, ambient: 0.65, shadows: true, softness: 3, shadowStrength: 0.55, haze: 0.1, exposure: 1.1, ground: "gravel", foliage: "mixed",
-  clouds: 0.75, cloudSpeed: 1.3, wind: 70, cloudShadow: 0.5, sunAuto: false, sunElevation: 36, sunAzimuth: 30, sunColor: 0.78, ...TONE });
+export const LOOK_DEFAULTS = Object.freeze({ hour: 15.75, sun: 0.85, ambient: 1.05, shadows: true, softness: 4, shadowStrength: 0.55, haze: 0.15, exposure: 1, ground: "gravel", foliage: "mixed",
+  clouds: 0.45, cloudSpeed: 0.5, wind: 70, cloudShadow: 0.5, sunAuto: false, sunElevation: 31, sunAzimuth: 35, sunColor: 0.78, ...TONE });
 // The Technical surroundings: brighter afternoon light with softer, lighter shadows.
 export const TECHNICAL_LOOK = Object.freeze({ hour: 16, sun: 1.15, ambient: 1.1, shadows: true, softness: 3, shadowStrength: 0.55, haze: 0.2, exposure: 1, ground: "sand", foliage: "mixed", ...CLOUDS, ...SUN, ...TONE });
 

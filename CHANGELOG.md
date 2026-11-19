@@ -4,6 +4,9 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- New Outdoor defaults: sun 31° high at 35°, warm white; sunlight 85 %, ambient 105 %, shadow
+  softness 4, haze 15 %, exposure 1.00, clouds 45 % at 50 % speed.
+
 - Changing the Outdoor ground recolours the stones and the earth banks to match (sandstone on
   sand, grey stones and banks on gravel, red-brown on red dirt).
 - The Projects button left the top toolbar; Projects is a tab in the left panel.
