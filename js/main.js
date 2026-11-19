@@ -171,7 +171,8 @@ async function addProject(stage) {
 }
 const freshStage = () => {
   const s = createStage({ name: "New stage" });
-  return { ...s, settings: { ...s.settings, environment: editor.stage().settings.environment } };
+  const cur = editor.stage().settings;
+  return { ...s, settings: { ...s.settings, environment: cur.environment, look: cur.look } };
 };
 
 const projects = createProjects({

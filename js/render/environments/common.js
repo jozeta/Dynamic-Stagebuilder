@@ -67,7 +67,12 @@ export function applyLook(env, look, bay) {
   const s = sunFromHour(look.hour);
   const sunLight = env.sunLight, hemi = env.hemiLight;
   const centre = new THREE.Vector3(0, 0, bay.depth / 2);
-  sunLight.position.copy(centre).addScaledVector(new THREE.Vector3(...s.direction), 70);
+  // Below about 8° the shadow map smears across the ground, so the light that casts shadows stays
+  // at least that high; the colour and strength still follow the real sun.
+  const dir = new THREE.Vector3(...s.direction);
+  const minY = Math.sin((8 * Math.PI) / 180);
+  if (dir.y < minY) { const h = Math.hypot(dir.x, dir.z) || 1; dir.set((dir.x / h) * Math.cos(Math.asin(minY)), minY, (dir.z / h) * Math.cos(Math.asin(minY))); }
+  sunLight.position.copy(centre).addScaledVector(dir, 70);
   sunLight.target.position.copy(centre);
   sunLight.color.copy(WHITE).lerp(SUNSET, Math.pow(s.warmth, 1.6) * env.warmth);
   sunLight.intensity = env.sunStrength * look.sun * s.strength;

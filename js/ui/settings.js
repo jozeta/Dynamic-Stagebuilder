@@ -32,14 +32,16 @@ export function createSettings({ editor }) {
     const env = h("div", { class: "lg-segmented", role: "radiogroup", "aria-label": "Surroundings" });
     for (const name of ENVIRONMENT_NAMES) {
       const id = `set-env-${name}`;
-      const input = h("input", { type: "radio", name: "set-env", id, value: name, onchange: () => d({ type: "setEnvironment", name }) });
+      const input = h("input", { type: "radio", name: "set-env", id, value: name, onchange: () => { d({ type: "setEnvironment", name }); fill(); } });
       input.checked = st.environment === name;
       env.append(input, h("label", { for: id, text: ENVIRONMENT_LABELS[name] }));
     }
     const rows = SLIDERS.map(([key, label, min, max, step, show]) => {
       const id = `set-${key}`;
+      const off = key === "haze" && st.environment === "technical";   // the indoor-style bay has no haze
       const out = h("output", { for: id, class: "lg-mono settings-value", text: show(look[key]) });
-      const input = h("input", { type: "range", class: "lg-slider", id, min, max, step, value: String(look[key]),
+      const input = h("input", { type: "range", class: "lg-slider", id, min, max, step, value: String(look[key]), disabled: off,
+        title: off ? "Haze applies to the Outdoor surroundings" : null,
         oninput: (e) => { const v = Number(e.target.value); out.textContent = show(v); d({ type: "setLook", patch: { [key]: v } }); } });
       return h("div", { class: "settings-row" }, [h("label", { for: id, text: label }), input, out]);
     });

@@ -39,6 +39,6 @@ export function technical(bay) {
 
   const hemiLight = new THREE.HemisphereLight(0xffffff, 0x5c6066, 1.6);
   const sunLight = sun(bay, 0xffffff, 1.6, [-12, 30, -10]);
-  return { group, lights: [hemiLight, sunLight], hemiLight, sunLight, sunStrength: 1.8, hemiStrength: 1.6, warmth: 0.35,
+  return { group, lights: [hemiLight, sunLight], hemiLight, sunLight, sunStrength: 1.8, hemiStrength: 1.6, warmth: 0.1,
     hazeColor: null, background: new THREE.Color(0xb7bcc2), fog: null };
 }

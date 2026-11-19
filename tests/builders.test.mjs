@@ -143,3 +143,14 @@ test("target sticks reach only half way up the card", () => {
   const mount = o.params.mountHeight;
   near(stickTop, mount + 0.58 / 2, 0.03, "stick top");
 });
+
+test("short sandbag walls keep whole bags in every row", () => {
+  for (const length of [0.6, 0.8, 1.2]) {
+    const g = buildProp(obj("sandbags", { length, rows: 3 }));
+    const bags = [];
+    g.traverse((c) => { if (c.isMesh) bags.push(new Box3().setFromObject(c)); });
+    const rows = [0, 1, 2].map((r) => bags.filter((b) => { const cy = (b.min.y + b.max.y) / 2; return cy > r * 0.13 && cy < (r + 1) * 0.13; }).length);
+    assert.ok(rows.every((n) => n >= 1), `length ${length}: bags per row ${rows}`);
+    for (const b of bags) assert.ok(b.max.y - b.min.y < 0.15, `length ${length}: a bag ${(b.max.y - b.min.y).toFixed(2)} m tall`);
+  }
+});

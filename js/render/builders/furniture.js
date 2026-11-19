@@ -153,7 +153,9 @@ export function buildSandbags(obj) {
   const { length: L, rows } = obj.params;
   const n = Math.max(1, Math.round(L / 0.55)), w = L / n;
   for (let r = 0; r < rows; r++) {
-    const shift = r % 2 ? w / 2 : 0, count = r % 2 ? n - 1 : n;
+    // Offset rows sit half a bag over (brickwork); a one-bag-wide wall stacks straight.
+    const offset = r % 2 && n > 1;
+    const shift = offset ? w / 2 : 0, count = offset ? n - 1 : n;
     for (let i = 0; i < count; i++) {
       const b = bag(w * 0.98);
       b.position.set(-L / 2 + w / 2 + shift + i * w, SANDBAG.height * (r + 0.5), 0);
