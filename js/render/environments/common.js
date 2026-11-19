@@ -97,5 +97,6 @@ export function applyLook(env, look, bay) {
   env.clouds?.setWarmth(s.warmth);
   env.clouds?.setShadow(look.shadows ? s.strength : 0);       // shadow strength is for the props' shadows only
   if (env.setGround && look.ground && look.ground !== env.ground) env.setGround(look.ground);
+  if (env.setFoliage && look.foliage && look.foliage !== env.foliage) env.setFoliage(look.foliage);
   return env;
 }

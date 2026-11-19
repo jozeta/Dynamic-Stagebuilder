@@ -179,7 +179,7 @@ export function buildGround(bay, { onUpdate } = {}) {
   group.add(ground);
 
   const stones = scatterStones(bay);
-  group.add(...stones.meshes, grassCards(bay));
+  group.add(...stones.meshes);            // grass comes with the foliage (foliage.js)
   // The ground choice: regrade the photo when it has loaded, else remember it for when it does.
   const control = { ground: "sand", regrade: null };
   group.userData.setGround = (name) => {
@@ -287,13 +287,13 @@ function crossedQuads() {
   return g;
 }
 
-function grassCards(bay) {
+/** Grass tufts on the banks: `count` cards in `tones`, `scale` times their usual size. */
+export function grassCards(bay, { count = 7000, tones: toneList = ["#c9c08a", "#a9ab68", "#8f9a58", "#bcae72", "#7f8a4a"], scale = 1 } = {}) {
   const r = rng(97), patch = fbm(301);
-  const count = 7000;
   const map = bladeTexture();
   const mat = new THREE.MeshStandardMaterial({ color: map ? 0xffffff : 0x8e9a56, map, alphaTest: 0.5, side: THREE.DoubleSide, roughness: 0.95 });
   const mesh = new THREE.InstancedMesh(crossedQuads(), mat, count);
-  const tones = ["#c9c08a", "#a9ab68", "#8f9a58", "#bcae72", "#7f8a4a"].map((h) => new THREE.Color(h));
+  const tones = toneList.map((h) => new THREE.Color(h));
   const m = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3(), p = new THREE.Vector3(), e = new THREE.Euler();
   let placed = 0, tries = 0;
   while (placed < count && tries++ < count * 20) {
@@ -304,7 +304,7 @@ function grassCards(bay) {
     const foot = y > 0.02 && y < 0.5 && patchy > 0.35;
     const face = y >= 0.5 && y <= 1.8 && patchy > 0.55;
     if (!(top || foot || face)) continue;
-    const k = 0.6 + r() * 0.9;
+    const k = (0.6 + r() * 0.9) * scale;
     e.set((r() - 0.5) * 0.25, r() * 6.28, (r() - 0.5) * 0.25);
     m.compose(p.set(x, y - 0.02, z), q.setFromEuler(e), sc.set(k, k * (0.7 + r() * 0.6), k));
     mesh.setMatrixAt(placed, m);

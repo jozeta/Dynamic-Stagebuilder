@@ -7,7 +7,7 @@ import { createStage } from "../js/model/stage.js";
 import { validateStage } from "../js/model/schema.js";
 
 test("defaults", () => {
-  assert.deepEqual({ ...LOOK_DEFAULTS }, { hour: 15.75, sun: 0.6, ambient: 0.65, shadows: true, softness: 3, shadowStrength: 0.55, haze: 0.1, exposure: 1.1, ground: "sand",
+  assert.deepEqual({ ...LOOK_DEFAULTS }, { hour: 15.75, sun: 0.6, ambient: 0.65, shadows: true, softness: 3, shadowStrength: 0.55, haze: 0.1, exposure: 1.1, ground: "gravel", foliage: "mixed",
     clouds: 0.75, cloudSpeed: 1.3, wind: 70, sunAuto: false, sunElevation: 36, sunAzimuth: 30, sunColor: 0.78 });
   assert.ok(Object.isFrozen(LOOK_DEFAULTS));
 });
@@ -57,7 +57,7 @@ test("old files read with the default look; a saved look round-trips", () => {
 
 test("Technical surroundings have their own light defaults; reset and switching use them", async () => {
   const { lookDefaults, TECHNICAL_LOOK } = await import("../js/model/look.js");
-  assert.deepEqual({ ...TECHNICAL_LOOK }, { hour: 16, sun: 1.15, ambient: 1.1, shadows: true, softness: 3, shadowStrength: 0.55, haze: 0.2, exposure: 1, ground: "sand", clouds: 0.35, cloudSpeed: 1, wind: 60, sunAuto: true, sunElevation: 35, sunAzimuth: 20, sunColor: 0.8 });
+  assert.deepEqual({ ...TECHNICAL_LOOK }, { hour: 16, sun: 1.15, ambient: 1.1, shadows: true, softness: 3, shadowStrength: 0.55, haze: 0.2, exposure: 1, ground: "sand", foliage: "mixed", clouds: 0.35, cloudSpeed: 1, wind: 60, sunAuto: true, sunElevation: 35, sunAzimuth: 20, sunColor: 0.8 });
   assert.deepEqual(lookDefaults("technical"), TECHNICAL_LOOK);
   assert.deepEqual(lookDefaults("outdoor"), LOOK_DEFAULTS);
   const ed = createEditor();
@@ -74,7 +74,7 @@ test("Technical surroundings have their own light defaults; reset and switching 
 test("Blueprint has its own light defaults: 11:00, ambient 115 %, softness 4, shadows 70 %, no haze, exposure 1.05", async () => {
   const { lookDefaults, BLUEPRINT_LOOK } = await import("../js/model/look.js");
   assert.deepEqual(lookDefaults("blueprint"), BLUEPRINT_LOOK);
-  assert.deepEqual({ ...BLUEPRINT_LOOK }, { hour: 11, sun: 1, ambient: 1.15, shadows: true, softness: 4, shadowStrength: 0.7, haze: 0, exposure: 1.05, ground: "sand", clouds: 0.35, cloudSpeed: 1, wind: 60, sunAuto: true, sunElevation: 35, sunAzimuth: 20, sunColor: 0.8 });
+  assert.deepEqual({ ...BLUEPRINT_LOOK }, { hour: 11, sun: 1, ambient: 1.15, shadows: true, softness: 4, shadowStrength: 0.7, haze: 0, exposure: 1.05, ground: "sand", foliage: "mixed", clouds: 0.35, cloudSpeed: 1, wind: 60, sunAuto: true, sunElevation: 35, sunAzimuth: 20, sunColor: 0.8 });
   const { ENVIRONMENTS } = await import("../js/model/schema.js");
   assert.ok(ENVIRONMENTS.includes("blueprint"));
 });
@@ -83,8 +83,8 @@ test("Outdoor grounds: sand, light sand, dark sand, red dirt and gravel; unknown
   const { GROUNDS } = await import("../js/model/look.js");
   assert.deepEqual(GROUNDS.map((g) => g.id), ["sand", "light-sand", "dark-sand", "red-dirt", "gravel"]);
   assert.equal(cleanLook({ ground: "gravel" }).ground, "gravel");
-  assert.equal(cleanLook({ ground: "lava" }).ground, "sand");
-  assert.equal(cleanLook({ ground: 3 }).ground, "sand");
+  assert.equal(cleanLook({ ground: "lava" }).ground, "gravel", "unknown: the Outdoor default");
+  assert.equal(cleanLook({ ground: 3 }).ground, "gravel");
 });
 
 test("the Outdoor sky has clouds by default; their amount, speed and wind are checked", async () => {

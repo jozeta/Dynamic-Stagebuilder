@@ -10,7 +10,7 @@ import { WALK_SPEEDS } from "../model/route.js";
 import { RUN_PARTS, RUN_COLORS } from "../model/run-look.js";
 import { LIBRARY_GROUPS, MARKINGS, isShown, setShown } from "../model/visibility.js";
 import { PROPS } from "../model/props.js";
-import { GROUNDS } from "../model/look.js";
+import { GROUNDS, FOLIAGE } from "../model/look.js";
 import { customId, customEnv, BUILDING_TYPES } from "../model/surroundings.js";
 import { ENVIRONMENT_NAMES, ENVIRONMENT_LABELS } from "../render/environments/index.js";
 
@@ -247,9 +247,14 @@ export function createSettings({ editor, panel, docked = false, hide = [], onTog
     const groundSel = h("select", { class: "lg-select", id: "set-ground", onchange: (e) => d({ type: "setLook", patch: { ground: e.target.value } }) },
       GROUNDS.map((g) => h("option", { value: g.id, text: g.name })));
     groundSel.value = look.ground || "sand";
+    // The Outdoor range's plants: trees, bushes and grass of one kind.
+    const foliageSel = h("select", { class: "lg-select", id: "set-foliage", onchange: (e) => d({ type: "setLook", patch: { foliage: e.target.value } }) },
+      FOLIAGE.map((f) => h("option", { value: f.id, text: f.name })));
+    foliageSel.value = look.foliage || "mixed";
     body.replaceChildren(...[
       h("div", { class: "settings-row" }, [h("span", { class: "settings-label", text: "Surroundings" }), env]),
       st.environment === "outdoor" ? h("div", { class: "settings-row" }, [h("label", { for: "set-ground", text: "Ground" }), groundSel]) : null,
+      st.environment === "outdoor" ? h("div", { class: "settings-row" }, [h("label", { for: "set-foliage", text: "Foliage" }), foliageSel]) : null,
       ...myRows,
       h("div", { class: "settings-row" }, [h("label", { for: "set-sun-auto", text: "Time of day" }), clock]),
       ...(auto ? [row.hour] : SUN_KEYS.map((k) => row[k])),
