@@ -4,6 +4,9 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- A folded side panel is now only a slim grab handle at the edge of the 3D view (a horizontal one
+  under the view on iPad portrait), so the view gets nearly the whole window.
+
 - **From the 2012 US IPSC Nationals stage diagrams:**
   - 24 match stages in the library (original layouts and wording after the Nationals' stages)
   - new props:
