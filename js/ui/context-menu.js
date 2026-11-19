@@ -111,7 +111,28 @@ export function createContextMenu({ editor, rig, onShooterEye = () => {} }) {
       if (!id && el.tagName === "CANVAS") d({ type: "select", ids: [] });
       open(e.clientX, e.clientY, ground(e));
     };
-    el.addEventListener("contextmenu", (e) => { e.preventDefault(); prepare(e); });
+    // A right-button (or two-finger) press opens the menu only when it's let go without moving: a
+    // drag pans the view. On a Mac the contextmenu event comes on the press, so the menu waits for
+    // the release; where it comes on the release, it opens straight away unless the pointer moved.
+    let right = null;          // { x, y, moved, pending, released }
+    el.addEventListener("pointerdown", (e) => { if (e.button === 2) right = { x: e.clientX, y: e.clientY, moved: false, pending: null }; });
+    addEventListener("pointermove", (e) => {
+      if (right && Math.hypot(e.clientX - right.x, e.clientY - right.y) > 6) right.moved = true;
+    }, true);
+    addEventListener("pointerup", (e) => {
+      if (e.button !== 2 || !right) return;
+      const r = right;
+      right = null;
+      if (r.pending) { if (!r.moved) prepare(r.pending); }
+      else right = { ...r, released: true };                         // the contextmenu event may still come
+    }, true);
+    el.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+      if (right && !right.released) { right.pending = { clientX: e.clientX, clientY: e.clientY, target: e.target }; return; }
+      const moved = right?.moved;
+      right = null;
+      if (!moved) prepare(e);
+    });
     let timer = 0, start = null;
     el.addEventListener("pointerdown", (e) => {
       if (e.pointerType !== "touch") return;

@@ -4,6 +4,9 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Fix: panning with a right-button or two-finger drag (a Mac trackpad) no longer opens the
+  right-click menu; it opens only for a click without a drag.
+
 - Settings → Environment: *Time of day* can be switched off; then the sun is set by hand: its
   height (2–90°), direction (0° = behind the shooter) and colour, from dark orange through yellow
   to bright white. Saved with the stage.
