@@ -4,6 +4,38 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- **Cars rebuilt:** each car is one smooth body lofted along its length, with real glass, pillars,
+  bumpers, door seams and wheel arches, in four models: saloon, hatchback, pickup (with a bed
+  cover) and van. Every model keeps the wear, lights, mirrors, handles, wipers, aerial and exhaust.
+- **Target presentations:** the separate no-shoot props are gone. The IPSC target and the mini
+  target each have a *Presentation* choice: target, no-shoot, no-shoot over the lower half, over
+  the left or right side, target between two no-shoots, target in front of a no-shoot, two
+  overlapping targets, two targets with a no-shoot between, two stacked targets, or a target above
+  a no-shoot. *Hard cover* paints the lower ¼, ⅓ or ½, the left or right half, or a lower diagonal
+  black. Arrays follow the IPSC Target Array Handbook (January 2019). The inspector warns when a
+  target's top is above 1.8 m (1.6 m for mini targets). Stages with old no-shoot props open with
+  them as targets presented as no-shoots. Stats and labels count every target in an array.
+- **Moving and reactive targets:** a new group with a swinger, drop turner, clamshell and mover on
+  a track (paper), and a Texas star (5 or 10 plates), plate rack (4–8 plates) and dueling tree
+  (steel; each plate counts). Stars, racks and trees are marked as not allowed in IPSC (Target
+  Array Handbook 4.1).
+- **Panels:** fault line, shooting area and start position are now at the top of the props panel.
+  Both side panels fold away with an arrow. Projects opens in the left-hand panel instead of a
+  pop-up.
+- **Settings:** tabs for *Light and view* and *Props*. The Props tab hides whole groups or single
+  props from the props panel (remembered per browser). Outdoor and Technical each have their own
+  light defaults (Outdoor 15:45, sunlight 50 %, softness 4, shadow strength 50 %, haze 35 %;
+  Technical 16:00, sunlight 115 %, ambient 110 %, softness 3, shadow strength 55 %). An untouched
+  look follows the surroundings when you switch.
+- **Help:** a new *Help* button opens a guide with a drawing, text and tips for every main task,
+  plus the keyboard shortcuts.
+- **Briefing:** scoring, start signal, start position, gun condition and stop time offer common
+  choices, with *Custom text…* for your own. Procedure has common sentences to add.
+- **Print:** a redesigned brief. Page 1 has a header with the stage number, name and key figures,
+  the briefing in a grid, a highlighted procedure, and a map cropped to the stage with a legend.
+  Labels no longer overlap, and the stray "nullnull" text is gone.
+- Fixed: hidden props and search results really hide in the props panel.
+
 - Cars more detailed and worn: dark wheel wells, wipers, door mirrors with glass, 3D door
   handles, an aerial, an exhaust, orange indicators, fog lamps, framed lights, a mesh grille and
   number plates; paint with dust, swirl scratches, faded clear coat, a few dents, mud thrown up

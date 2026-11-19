@@ -30,10 +30,17 @@ npm run lint        # ESLint, including the unsafe-DOM rule
 - `index.html`: entry page (strict CSP with the import map's sha256, app grid, small-screen message)
 - `css/app.css`: the app's own styles on Låda Glass tokens
 - `js/main.js`: boot and wiring; `js/editor.js`: user actions → undoable stage edits (no DOM)
-- `js/model/`: pure stage data (props, scoring-rules, stage, history, snap, objsnap, numbering,
-  stats, schema, briefing, map, look)
+- `js/model/`: pure stage data (props incl. CAR_MODELS and MOVING, arrays = paper target
+  presentations and hard cover, scoring-rules incl. TARGET_ARRAY_RULES, stage, history, snap,
+  objsnap, numbering, stats, schema, briefing, briefing-options, map, look, visibility = hidden
+  props, help-content)
 - `js/render/`: Three.js (engine, stage-view, builders/, environments/, camera, labels, picking, ground)
-- `js/ui/`: Låda Glass panels (toolbar, library, inspector, stats, shortcuts, about, dom helpers)
+- `js/ui/`: Låda Glass panels (toolbar, library, inspector, stats, settings with Light/Props tabs,
+  projects in the left panel, panels = folding side panels, prefs = per-browser preferences, help,
+  briefing, print, shortcuts, about, dom helpers)
+- `js/render/builders/car.js`: cars lofted from the CAR_MODELS profile curves (glass is a material
+  group of the body); `moving.js`: swinger, drop turner, clamshell, mover, Texas star, plate rack,
+  dueling tree
 - `js/demo.js`: the example stage shown on open (until saved projects exist)
 - `vendor/three/0.187.0/`, `vendor/lada-glass/2.3.0/`: self-hosted libraries (don't edit)
 - `vendor/textures/polyhaven/gravelly_sand/`: CC0 photo-scanned ground texture (see its SOURCE.md)

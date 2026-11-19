@@ -16,8 +16,14 @@ training, and want a clear briefing sheet without drawing the map by hand.
 
 - **Shooting bay** at real scale: width × depth in metres (default 20 × 30 m), 1 m grid.
 - **Prop library**, every prop drawn in 3D at real dimensions:
-  - paper: IPSC target, mini target, no-shoot, mini no-shoot, each in two versions, Classic
-    (octagon, 45 × 57 cm) or With head (46 × 76 cm), on sticks with an adjustable stand height
+  - stage markings (first in the panel): fault lines, shooting areas and the start position
+  - paper: IPSC target and mini target, each in two versions, Classic (octagon, 45 × 57 cm) or
+    With head (46 × 76 cm), on sticks with an adjustable stand height. Each one can be a target, a
+    no-shoot or a common competition array (no-shoots over a side or the lower half, between two
+    no-shoots, overlapping targets, two targets with a no-shoot between, stacked), with painted
+    hard cover (lower ¼, ⅓ or ½, left or right half, lower diagonal)
+  - moving and reactive: swinger, drop turner, clamshell, mover on a track, Texas star (5 or 10
+    plates), plate rack, dueling tree (the last three are marked as not allowed in IPSC)
   - steel: IPSC popper, mini popper, round plate, square plate
   - walls: mesh wall and mesh wall with port (orange safety netting, or black or blue wire mesh,
     in a light pine or black frame on feet),
@@ -26,8 +32,8 @@ training, and want a clear briefing sheet without drawing the map by hand.
     both snap like the other walls
   - structures: ramp, platform
   - obstacles and range furniture: 200 l steel drum (black, blue, red, green), tyre, tyre stack,
-    shipping crate, potted plant, car, table, chair, pallets, sandbag wall, traffic cone
-  - fault lines, shooting areas and the start position
+    shipping crate, potted plant, car (saloon, hatchback, pickup or van, in five colours), table,
+    chair, pallets, sandbag wall, traffic cone
 - **Editing by eye:** tap or drag props in, drag them on the ground, rotate them, all with grid and
   angle snapping; multi-select, duplicate, delete, undo and redo.
 - **Snapping:** walls snap end to end onto nearby walls, so a run of walls joins up cleanly; other
@@ -35,10 +41,12 @@ training, and want a clear briefing sheet without drawing the map by hand.
 - **Automatic target numbers** (T1…, P1… for steel, NS1… for no-shoots), with hand-set labels kept.
 - **Live statistics:** targets, no-shoots, minimum rounds, maximum points, suggested stage type.
 - **Written Stage Briefing** editor: match, stage name and number, designer, stage type, scoring,
-  start signal, start position, gun condition, procedure, stop time and notes. Targets, rounds and
-  points are counted from the stage.
-- **Printable brief** (A4): briefing and a top-down map with a scale bar on page 1, a 3D view on
-  page 2. Save it as a PDF from the print dialog.
+  start signal, start position, gun condition, procedure, stop time and notes, with common choices
+  or your own text. Targets, rounds and points are counted from the stage.
+- **Printable brief** (A4): a header with the stage number and key figures, the briefing grid, the
+  procedure and a top-down map with a legend and scale bar on page 1, a 3D view on page 2. Save it
+  as a PDF from the print dialog.
+- **Help** guide with a drawing for every main task, and folding side panels.
 - **Two surroundings,** Outdoor (a dirt range with earth banks, bushes and trees, gravel and stones)
   and Technical (grey floor, grid). Switching never moves anything on the stage.
 - **Environment settings:** time of day (the sun moves and warms toward evening), sunlight,
@@ -48,7 +56,7 @@ training, and want a clear briefing sheet without drawing the map by hand.
 - **Works offline** and can be installed as an app (PWA).
 
 Not in v1 (ideas for later): matches with several stages, a build sheet with coordinates, sight-line
-analysis, measuring tools, moving targets, more surroundings and props, model import, version history.
+analysis, measuring tools, animated moving targets, more surroundings and props, model import, version history.
 
 ## Devices
 
@@ -143,19 +151,24 @@ Stage settings are in the inspector when nothing is selected. They are saved wit
 | Object snap | Toolbar *Objects*: a wall's end jumps onto another wall's end within 35 cm | On |
 | Angle snap | Rotations snap to this step: off, 5°, 15°, 45° or 90° | 15° |
 | Surroundings | *Settings*: Outdoor (dirt range) or Technical (grey floor, grid); never moves the stage | Outdoor |
-| Time of day | *Settings*: 06:00–20:00; the sun's height, direction and colour follow it | 18:15 |
-| Sunlight, Ambient light | *Settings*: 0–200 % | 100 % |
-| Shadows, Shadow softness | *Settings*: on/off, 0 (sharp) – 8 | On, 1 |
-| Shadow strength | *Settings*: 0–100 %; lower makes shadows lighter | 85 % |
-| Haze | *Settings*: 0 (clear) – 100 % (Outdoor only) | 20 % |
+| Time of day | *Settings*: 06:00–20:00; the sun's height, direction and colour follow it | Outdoor 15:45, Technical 16:00 |
+| Sunlight | *Settings*: 0–200 % | Outdoor 50 %, Technical 115 % |
+| Ambient light | *Settings*: 0–200 % | Outdoor 100 %, Technical 110 % |
+| Shadows, Shadow softness | *Settings*: on/off, 0 (sharp) – 8 | On; Outdoor 4, Technical 3 |
+| Shadow strength | *Settings*: 0–100 %; lower makes shadows lighter | Outdoor 50 %, Technical 55 % |
+| Haze | *Settings*: 0 (clear) – 100 % (Outdoor only) | Outdoor 35 % |
 | Exposure | *Settings*: 0.5–1.6 | 1.00 |
+| Hidden props | *Settings → Props*: groups and single props the props panel leaves out (per browser) | None |
+| Folded panels | The arrow at the top of each side panel (per browser) | Both open |
 | Default target style | *Settings*: Classic (octagon) or With head, for new paper targets | Classic |
 
 Prop settings (inspector, one prop selected): label (targets), rotation, and per prop: stand height
-for paper targets (0.1–2 m, default 0.7 m to the card's bottom), target style (Classic or With head), base height for steel, plate size
+for paper targets (0.1–2 m, default 0.7 m to the lowest card's bottom), presentation (target,
+no-shoot or an array; default target), hard cover (default none), target style (Classic or With head), base height for steel, plate size
 (15–30 cm), wall length (0.5–4 m) and height (0.5–2.5 m), mesh colour (black/blue), frame
 (wood/black), port width, height and bottom edge, door width and height, paint for poppers and
-plates (white/yellow), barrel and car colour, ramp and platform length, width and height, table
+plates (white/yellow), plates on a Texas star (5 or 10) or plate rack (4–8), mover track length
+(1.5–6 m), car model (saloon, hatchback, pickup, van) and colour, barrel colour, ramp and platform length, width and height, table
 length, pallets in a stack (1–6), sandbag wall length and rows, tyres in a stack (1–6), crate size.
 
 Scoring follows the IPSC Combined Competition Rules, January 2024 edition (Handgun): 2 hits per
@@ -165,8 +178,10 @@ is a suggestion from the round count.
 
 ## How to
 
-**Build a stage.** The library on the left is grouped (Paper, Steel, Walls, Structures, Obstacles
-and range furniture); click a group's heading to fold it away. Pick a prop in the library, then tap (or click) the ground to place it.
+**Build a stage.** The props panel on the left is grouped (Stage markings, Paper, Steel, Moving
+and reactive, Walls, Structures, Obstacles and range furniture); click a group's heading to fold it
+away, or hide groups and props you never use in *Settings → Props*. The arrow at the top of each
+side panel folds the whole panel to give the 3D view more room. Pick a prop in the library, then tap (or click) the ground to place it.
 With a mouse you can also drag a prop from the library onto the stage. Drag a placed prop to move it;
 it snaps to the grid and stays inside the bay. Rotate the selected prop with the green ring, the
 ↺/↻ buttons in the inspector, or Q and E. Shift-click selects several props.
@@ -176,12 +191,20 @@ it jumps into place, end to end (in a straight line or at a corner). Turn *Objec
 toolbar to place walls freely, and *Grid* off to stop grid snapping. For fine adjustments, hold
 **Shift** while you drag: the prop moves at a fifth of the speed and doesn't snap.
 
-**Draw fault lines and shooting areas.** Choose *Fault line* or *Shooting area* in the toolbar, tap
+**Set up targets and arrays.** Select an IPSC or mini target and pick a *Presentation*: target,
+no-shoot, or a common array (no-shoots over a side or the lower half, between two no-shoots,
+overlapping, two targets with a no-shoot between, stacked). *Hard cover* paints part of the first
+card black. The inspector warns when the top of the array is above 1.8 m (1.6 m for mini targets),
+the IPSC limit. Moving and reactive targets (swinger, drop turner, clamshell, mover, Texas star,
+plate rack, dueling tree) are in their own group.
+
+**Draw fault lines and shooting areas.** Choose *Fault line* or *Shooting area* at the top of the props panel, tap
 the points on the ground, then double-click, press Enter or tap *Finish*. Escape or *Cancel* stops.
 *Start position* then a tap sets where the shooter starts (the shooter's-eye camera stands there).
 
 **Number targets.** Targets are numbered as you place them: T1… for paper, P1… for steel, NS1… for
-no-shoots. Deleting a target leaves a gap until you press *Renumber*. To set a label by hand, type
+a lone no-shoot (an array with a target is one T label; its targets and no-shoots all count in the
+statistics). Deleting a target leaves a gap until you press *Renumber*. To set a label by hand, type
 it in the inspector; Renumber keeps hand-set labels and warns about duplicates.
 
 **Look at the stage.** Drag the empty ground to orbit, right-drag (two fingers on an iPad) to pan,
@@ -192,23 +215,27 @@ long 32° lens) that fits the whole bay; *Shooter's eye* and *Front* use a natur
 **Change the light and surroundings.** *Settings* opens in the right-hand panel (the 3D view stays
 live; *Done* or Escape returns to the inspector). It switches between Outdoor and Technical and sets
 the time of day, sunlight, ambient light, shadows (on/off, softness, strength), haze and exposure. Changes show as you drag the
-sliders; *Reset to defaults* goes back to a late-afternoon sun. Nothing on the stage moves, and
+sliders; *Reset light to defaults* goes back to the defaults of the surroundings you're in. Nothing on the stage moves, and
 the printed 3D view uses the same light.
 
 **Undo anything** with Undo/Redo or ⌘Z / ⇧⌘Z (Ctrl on Windows).
 
 **Write the briefing.** *Briefing* opens the Written Stage Briefing. Fill in the match, stage
-number, designer, start signal, start position, gun condition, procedure and notes. Targets,
+number, designer, start signal, start position, gun condition, procedure and notes. Scoring, start
+signal, start position, gun condition and stop time have a list of common wordings; *Custom text…*
+lets you type your own. *Add a common sentence…* adds a usual procedure line. Targets,
 minimum rounds and maximum points are counted from the stage and can't be typed over. Stage type
 is suggested from the round count; pick Short, Medium or Long to set it yourself.
 
-**Print the brief or save it as a PDF.** *Print* makes a two-page A4 brief: the briefing and a
-top-down map with a scale bar on page 1 (down range at the top), a 3D view on page 2. A long
+**Print the brief or save it as a PDF.** *Print* makes a two-page A4 brief. Page 1: a header with
+the stage number, name, minimum rounds and maximum points, the briefing in a grid, the procedure,
+and a top-down map of the stage (down range at the top) with a legend and scale bar. Page 2: a 3D
+view. A long
 procedure carries on to the next page instead of being cut. In the print dialog choose
 *Save as PDF*; on an iPad, tap Share → Print, then pinch out on the preview and Share → Save to Files.
 
 **Projects, export and import.** Every change is saved in this browser automatically (the chip in
-the toolbar says *Saved*). *Projects* lists your stages: open, duplicate or delete them, start a
+the toolbar says *Saved*). *Projects* opens in the left-hand panel and lists your stages: open, duplicate or delete them, start a
 *New stage*, *Export this stage* as a `.json` file, or *Import file…* to add a stage from a file.
 An import always becomes a new project, so it never overwrites one. A project with changes that
 aren't in an exported file shows a hint, so you know when to export a backup.
