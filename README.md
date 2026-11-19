@@ -184,17 +184,17 @@ Stage settings are in the inspector when nothing is selected. They are saved wit
 | Angle snap | Rotations snap to this step: off, 5°, 15°, 45° or 90° | 15° |
 | Surroundings | *Settings*: Outdoor (dirt range), Technical (grey floor, grid) or Blueprint (drafting sheet); never moves the stage | Outdoor |
 | Ground | *Settings* (Outdoor): sand, light sand, dark sand, red dirt or gravel | Sand |
-| Time of day | *Settings*: on/off; on, 06:00–20:00 moves the sun (its height, direction and colour follow it) | On; Outdoor 15:45, Technical 16:00 |
-| Sun height, direction, colour | *Settings*, with Time of day off: 2–90°; 0–359° (0° = behind the shooter, 90° = to the shooter's left); dark orange → yellow → white | 35°, 20°, warm white |
+| Time of day | *Settings*: on/off; on, 06:00–20:00 moves the sun (its height, direction and colour follow it) | Outdoor off (sun set by hand), Technical on at 16:00 |
+| Sun height, direction, colour | *Settings*, with Time of day off: 2–90°; 0–359° (0° = behind the shooter, 90° = to the shooter's left); dark orange → yellow → white | Outdoor 36°, 30°, warm white |
 | Sunlight | *Settings*: 0–200 % | Outdoor 60 %, Technical 115 % |
-| Ambient light | *Settings*: 0–200 % | Outdoor 100 %, Technical 110 % |
-| Shadows, Shadow softness | *Settings*: on/off, 0 (sharp) – 8 | On; Outdoor 4, Technical 3 |
-| Shadow strength | *Settings*: 0–100 %; lower makes shadows lighter | Outdoor 50 %, Technical 55 % |
-| Haze | *Settings*: 0 (clear) – 100 % (Outdoor only) | Outdoor 35 % |
-| Exposure | *Settings*: 0.5–1.6 | 1.00 |
-| Clouds | *Settings → Environment* (Outdoor): 0 % (clear) – 100 % | 35 % |
-| Cloud speed | *Settings → Environment* (Outdoor): 0 (still) – 300 %; 100 % ≈ 8 m/s; they move only with Play on | 100 % |
-| Wind direction | *Settings → Environment* (Outdoor): which way the clouds drift, 0° = toward down range, 90° = toward +x | 60° |
+| Ambient light | *Settings*: 0–200 % | Outdoor 65 %, Technical 110 % |
+| Shadows, Shadow softness | *Settings*: on/off, 0 (sharp) – 8 | On; Outdoor 3, Technical 3 |
+| Shadow strength | *Settings*: 0–100 %; lower makes shadows lighter | Outdoor 55 %, Technical 55 % (only the props' shadows) |
+| Haze | *Settings*: 0 (clear) – 100 % (Outdoor only) | Outdoor 10 % |
+| Exposure | *Settings*: 0.5–1.6 | Outdoor 1.10, Technical 1.00 |
+| Clouds | *Settings → Environment* (Outdoor): 0 % (clear) – 100 % | 75 % |
+| Cloud speed | *Settings → Environment* (Outdoor): 0 (still) – 300 %; 100 % ≈ 8 m/s; they move only with Play on | 130 % |
+| Wind direction | *Settings → Environment* (Outdoor): which way the clouds drift, 0° = toward down range, 90° = toward +x | 70° |
 | Hidden props | *Settings → Props*: groups and single props the props panel leaves out (per browser) | None |
 | Panel places | Drag a panel's tab (or a lone panel's grip ⋮⋮) onto a side for a frame of its own, or onto another frame to add it as a tab; or click the grip for *Move to…* (per browser) | Props, On stage and Projects as tabs on the left; Inspector and Settings on the right (under the view on a narrow screen) |
 | Folded panels | The arrow beside the grip (per browser) | Both open |
