@@ -39,6 +39,24 @@ body { background: var(--lg-bg); overflow: hidden; }
 .panel-toggle { position: absolute; top: 6px; right: 6px; z-index: 1; }
 .side-head, .settings-head { min-height: 36px; }
 .panel-collapsed > :not(.panel-toggle) { display: none !important; }
+/* Resize handles: grid items laid over the panels' inner edges (12 px to grab, 24 px on touch); a
+   line shows on hover, focus or while dragging. Hidden while a panel is folded. */
+.panel-resize { position: relative; z-index: 3; width: 12px; cursor: col-resize; touch-action: none; align-self: stretch; margin: 12px 0; }
+.panel-resize-library { grid-area: library; justify-self: end; margin-right: -10px; }
+.panel-resize-inspector { grid-area: inspector; justify-self: start; margin-left: -10px; }
+.panel-resize::after { content: ""; position: absolute; top: 0; bottom: 0; left: 5px; width: 2px; border-radius: 2px; background: transparent; }
+.panel-resize:hover::after, .panel-resize:focus-visible::after, .panel-resize.is-dragging::after { background: var(--lg-accent); }
+.panel-resize:focus-visible { outline: none; }
+.app.library-collapsed .panel-resize-library, .app.inspector-collapsed .panel-resize-inspector { display: none; }
+@media (pointer: coarse) {
+  .panel-resize { width: 24px; } .panel-resize-library { margin-right: -16px; } .panel-resize-inspector { margin-left: -16px; }
+  .panel-resize::after { left: 11px; background: var(--lg-border); }
+}
+@media (max-width: 1099px) {
+  .panel-resize-inspector { justify-self: stretch; align-self: start; width: auto; height: 12px; margin: -10px 12px 0; cursor: row-resize; }
+  .panel-resize-inspector::after { top: 5px; bottom: auto; left: 0; right: 0; width: auto; height: 2px; }
+}
+
 .panel-collapsed { overflow: hidden; }
 .panel-collapsed .panel-toggle { right: 50%; transform: translateX(50%); }
 .library .panel-title, .inspector .panel-title, .side-head { padding-right: 44px; }

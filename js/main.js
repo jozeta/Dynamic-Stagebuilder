@@ -24,7 +24,7 @@ import { openStore, memoryStore } from "./storage/db.js";
 import { projectRecord, sortProjects, nextProjectAfterDelete } from "./storage/projects.js";
 import { exportFileName, stageToJson } from "./storage/files.js";
 import { createProjects } from "./ui/projects.js";
-import { makeCollapsible } from "./ui/panels.js";
+import { makeCollapsible, makeResizable } from "./ui/panels.js";
 import { createHelp } from "./ui/help.js";
 import { createAnimator } from "./render/animate.js";
 import { createSurroundings } from "./ui/surroundings.js";
@@ -312,6 +312,8 @@ playButton = (() => {
 })();
 makeCollapsible(document.getElementById("library"), { app: appEl, name: "library", label: "props" });
 makeCollapsible(document.getElementById("inspector"), { app: appEl, name: "inspector", label: "inspector" });
+makeResizable(document.getElementById("library"), { app: appEl, name: "library", label: "props" });
+makeResizable(document.getElementById("inspector"), { app: appEl, name: "inspector", label: "inspector" });
 briefing = createBriefing({ editor });
 // Your own surroundings (templates in this browser); the store is ready once projects have opened.
 let mine = null;
