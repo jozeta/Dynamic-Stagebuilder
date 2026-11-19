@@ -342,3 +342,14 @@ body { background: var(--lg-bg); overflow: hidden; }
 /* Three tabs in a 260 px side panel: tighter tab padding so "Props", "On stage" and "Projects" fit. */
 .lg-dock-tab { padding: 4px 7px; }
 .lg-dock-tablist { gap: 1px; }
+
+/* Matches in the Projects panel: a match's stages in order, each with its number. */
+.matches { display: flex; flex-direction: column; gap: var(--lg-space-s); }
+.match-head { display: flex; align-items: center; }
+.projects-panel .match-stage { display: grid; grid-template-columns: 26px minmax(0, 1fr); align-items: center; gap: 6px var(--lg-space-s); }
+.projects-panel .match-stage .proj-buttons { grid-column: 1 / -1; flex-wrap: wrap; }
+.match-num { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 7px; font-weight: 700; font-size: var(--lg-fs-small);
+  background: color-mix(in srgb, var(--lg-accent) 22%, transparent); color: var(--lg-text); }
+.match-stage .proj-buttons .lg-btn-icon { width: 32px; min-width: 32px; padding: 0; }
+@media (pointer: coarse) { .match-stage .proj-buttons .lg-btn-icon { width: var(--lg-touch); min-width: var(--lg-touch); } }
+.match-picker .vis-items { max-height: 240px; overflow: auto; }

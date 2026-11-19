@@ -4,6 +4,14 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Matches: under Projects, *New match* starts a match of one or more stages in order. On its page,
+  add a new stage to it or add stages you already made, move them up and down, take one out, open
+  one, rename the match and *Print the match* (a cover page with every stage's rounds and points,
+  then each stage's brief page). Each stage in a match gets the match name and its stage number in
+  its briefing; taking it out, or deleting the match, keeps the stage as a project.
+- Fix: a Projects tab still shown after a reload no longer tries to fill before the project store
+  has opened.
+
 - Measuring tool (toolbar *Measure* or M): tap two points on the ground to see the distance
   between them; near a prop or the start a point snaps to its centre (Shift: exactly where you tap).
   Take as many as you like; *Clear* or Escape removes them. Not saved with the stage.

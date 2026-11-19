@@ -4,10 +4,21 @@ import { h, icon } from "./dom.js";
 import { sortProjects, exportAge } from "../storage/projects.js";
 import { parseStageFile } from "../storage/files.js";
 import { STAGE_LIBRARY, LIBRARY_CATEGORIES, librarySummary } from "../model/stage-library.js";
+import { createMatches } from "./matches.js";
 
 const when = (t) => new Date(t).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
 
-export function createProjects({ panel, docked = false, hide = [], onToggle = () => {}, onOpenLibrary = async () => {}, store, currentId, onOpen, onNew, onDuplicate, onDelete, onImport, onExport }) {
+export function createProjects({ panel, docked = false, hide = [], onToggle = () => {}, onOpenLibrary = async () => {}, store, currentId, onOpen, onNew, onDuplicate, onDelete, onImport, onExport,
+  onNewStage = async () => null, onApplyBriefing = async () => {}, onPrintMatch = () => {} }) {
+  // Matches: their list above the stages, and a match's own page in place of the lists.
+  const stagesBox = h("div", { class: "lg-stack" });
+  const matches = createMatches({
+    store, currentId,
+    onOpen: async (id) => { await onOpen(id); await fill(); },
+    onNewStage, onApplyBriefing, onPrint: onPrintMatch,
+    onViewChange: (inMatch) => { stagesBox.hidden = inMatch; },
+    onChanged: async () => {},
+  });
   const list = h("div", { class: "proj-list", role: "list" });
   const message = h("div", { class: "proj-message", role: "status", "aria-live": "polite" });
   const file = h("input", { type: "file", accept: ".json,application/json", hidden: true, onchange: () => importFile() });
@@ -48,14 +59,14 @@ export function createProjects({ panel, docked = false, hide = [], onToggle = ()
     h("div", { class: "lg-stack proj-body" }, [
       h("div", { class: "proj-actions" }, [
         h("button", { type: "button", class: "lg-btn", onclick: async () => { await onNew(); close(); } }, [icon("new"), "New stage"]),
+        h("button", { type: "button", class: "lg-btn", onclick: () => matches.create() }, [icon("layers"), "New match"]),
         h("button", { type: "button", class: "lg-btn", onclick: () => file.click() }, [icon("folder"), "Import file…"]),
         h("button", { type: "button", class: "lg-btn", onclick: async () => { await onExport(); await fill(); } }, [icon("doc"), "Export this stage"]),
         file,
       ]),
       message,
-      h("p", { class: "lg-muted hint-text", text: "Stages are saved in this browser only. Export a file to keep a copy or move a stage to another device." }),
-      list,
-      libraryBox,
+      matches.box,
+      stagesBox,
     ]),
   );
   panel.setAttribute("aria-labelledby", "projects-title");
@@ -83,7 +94,15 @@ export function createProjects({ panel, docked = false, hide = [], onToggle = ()
     await fill();
   }
 
+  stagesBox.append(
+    h("h3", { class: "lg-label stage-library-title", text: "Stages" }),
+    h("p", { class: "lg-muted hint-text", text: "Stages are saved in this browser only. Export a file to keep a copy or move a stage to another device." }),
+    list,
+    libraryBox,
+  );
+
   async function fill() {
+    await matches.fill();
     const now = Date.now();
     const records = sortProjects(await store.list());
     const id = currentId();

@@ -89,7 +89,7 @@ function legend() {
   return h("ul", { class: "print-legend" }, entries.map(([label, draw]) => h("li", {}, [sw(draw), h("span", { text: label })])));
 }
 
-export function renderPrint(root, stage, snapshot) {
+export function renderPrint(root, stage, snapshot, { threeD = true } = {}) {
   const b = stage.briefing;
   const { procedure, notes } = briefingText(stage);
   const row = Object.fromEntries(briefingRows(stage).map((r) => [r.label, r.value]));
@@ -115,10 +115,35 @@ export function renderPrint(root, stage, snapshot) {
     notes.trim() ? h("section", { class: "print-text" }, [h("h2", { text: "Notes" }), h("p", { text: notes })]) : null,
     h("figure", { class: "print-map" }, [mapSvg(stage), h("figcaption", {}, [legend()])]),
     h("p", { class: "print-foot", text: "Made with Dynamic-Stagebuilder. Counts follow the IPSC rules; check the stage before the match." }),
-    h("section", { class: "print-3d" }, [
+    threeD ? h("section", { class: "print-3d" }, [
       h("h2", { text: `Stage ${b.stageNumber} – ${stage.name}: 3D view` }),
       snapshot ? h("img", { src: snapshot, alt: "3D view of the stage" }) : h("p", { text: "3D view not available." }),
-    ]),
+    ]) : null,
   ];
   root.replaceChildren(...nodes.filter(Boolean));
+}
+
+/**
+ * A whole match: a cover page (the match name, its stages in order with rounds and points, and the
+ * totals), then each stage's brief page (header, briefing, map). The 3D view needs the stage on
+ * screen, so it isn't part of a match print.
+ */
+export function renderMatchPrint(root, match, stages) {
+  const rows = stages.map((st, i) => {
+    const r = Object.fromEntries(briefingRows(st).map((x) => [x.label, x.value]));
+    return h("tr", {}, [h("td", { text: String(i + 1) }), h("td", { text: st.name || "Untitled stage" }), h("td", { text: r["Stage type"] }),
+      h("td", { class: "num", text: r["Minimum rounds"] }), h("td", { class: "num", text: r["Maximum points"] })]);
+  });
+  const total = (label) => stages.reduce((n, st) => n + Number(briefingRows(st).find((x) => x.label === label)?.value || 0), 0);
+  const cover = h("section", { class: "print-cover" }, [
+    h("p", { class: "print-match", text: "Match" }),
+    h("h1", { text: match.name }),
+    h("p", { class: "print-meta", text: `${stages.length} stage${stages.length === 1 ? "" : "s"} · ${total("Minimum rounds")} rounds minimum · ${total("Maximum points")} points` }),
+    h("table", { class: "print-stages" }, [
+      h("thead", {}, [h("tr", {}, ["Stage", "Name", "Type", "Rounds", "Points"].map((t) => h("th", { text: t })))]),
+      h("tbody", {}, rows),
+    ]),
+  ]);
+  const pages = stages.map((st) => { const el = h("div", { class: "print-stage" }); renderPrint(el, st, null, { threeD: false }); return el; });
+  root.replaceChildren(cover, ...pages);
 }

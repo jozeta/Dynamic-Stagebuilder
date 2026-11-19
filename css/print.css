@@ -42,3 +42,13 @@
   .print-3d { break-before: page; }
   .print-3d img { width: 100%; height: auto; border: 0.3mm solid #999; border-radius: 1.5mm; }
 }
+
+/* A match: a cover page, then each stage's brief on its own page. */
+@media print {
+  .print-cover h1 { font-size: 22pt; margin: 2mm 0; }
+  .print-stages { width: 100%; border-collapse: collapse; margin-top: 6mm; font-size: 10pt; }
+  .print-stages th, .print-stages td { border-bottom: 0.3mm solid #bbb; padding: 1.6mm 2mm; text-align: left; }
+  .print-stages th { font-size: 8pt; text-transform: uppercase; letter-spacing: 0.06em; color: #444; }
+  .print-stages .num { text-align: right; }
+  .print-stage { break-before: page; }
+}

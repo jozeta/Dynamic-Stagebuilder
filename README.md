@@ -74,6 +74,8 @@ training, and want a clear briefing sheet without drawing the map by hand.
   eye walks it at a chosen speed, looking the way the shooter moves, or jumps between positions.
 - **Cameras:** orbit, pan, zoom, Top, Isometric, Front and Shooter's eye; the view is remembered
   per project, so a reload opens where you left off. Figures fade out as the camera comes close.
+- **Matches** of one or more stages, numbered in order, with the match name in every briefing and
+  one print for the whole match.
 - **Projects** saved in the browser automatically, with JSON export and import, and a **stage
   library** of 58 ready-made drills and IPSC/USPSA stages (including 24 after the 2012 US IPSC
   Nationals) to open and edit, each with suggested shooting positions worked out from its sight lines.
@@ -330,6 +332,15 @@ and a top-down map of the stage (down range at the top) with a legend and scale 
 view. A long
 procedure carries on to the next page instead of being cut. In the print dialog choose
 *Save as PDF*; on an iPad, tap Share → Print, then pinch out on the preview and Share → Save to Files.
+
+**Run a match.** In the *Projects* tab, *New match* starts a match: name it, then *Add stages you
+made…* to tick stages you already have, or *New stage in this match* for a fresh one. The match lists
+its stages in order as Stage 1, 2, 3… with each one's rounds and points and the match's totals; move a
+stage with its arrows, *Remove* it from the match, or *Open* it to edit. Every stage in the match gets
+the match name and its stage number in its briefing, renumbered when you change the order. *Print the
+match* prints a cover page (the stages with their rounds and points) and then each stage's brief page;
+the 3D view page is left out, since only the open stage can be drawn. A stage taken out of a match, or
+the stages of a deleted match, stay as ordinary projects.
 
 **Projects, export and import.** Every change is saved in this browser automatically (the chip in
 the toolbar says *Saved*). The *Projects* tab in the left-hand panel lists your stages: open, duplicate or delete them, start a

@@ -16,7 +16,7 @@ import { attachShortcuts } from "./ui/shortcuts.js";
 import { createAbout } from "./ui/about.js";
 import { createBriefing } from "./ui/briefing.js";
 import { createSettings } from "./ui/settings.js";
-import { renderPrint } from "./ui/print.js";
+import { renderPrint, renderMatchPrint } from "./ui/print.js";
 import { h, icon } from "./ui/dom.js";
 import { createStage } from "./model/stage.js";
 import { validateStage } from "./model/schema.js";
@@ -341,7 +341,40 @@ const projects = createProjects({
     document.querySelector('[aria-label="Projects"].tool')?.setAttribute("aria-pressed", String(open));
     dock?.activate(open ? "projects" : "props");            // its tab comes forward (and unfolds); closing goes back to Props
   },
-  store: { list: () => store.list() },
+  store: {
+    list: () => store.list(),
+    matches: { list: () => store.matches.list(), put: (r) => store.matches.put(r), remove: (id) => store.matches.remove(id) },
+  },
+  // A new stage made from a match's page: saved and opened like New stage; its id goes in the match.
+  onNewStage: async () => { const st = freshStage(); await addProject(st); return st.id; },
+  // A match writes its name and the stage's number into the stage's briefing. The open stage gets it
+  // through the editor (so autosave keeps it); others in their saved record. With onlyIf, only when
+  // the stage still carries that match name (taking it out of a match).
+  onApplyBriefing: async (id, patch, { onlyIf = null } = {}) => {
+    if (!patch) return;
+    if (id === editor.stage().id) {
+      const b = editor.stage().briefing;
+      if (onlyIf !== null && b.matchName !== onlyIf) return;
+      if (Object.entries(patch).every(([k, v]) => b[k] === v)) return;
+      editor.dispatch({ type: "setBriefing", patch });
+      return;
+    }
+    const rec = await store.get(id);
+    if (!rec) return;
+    const b = rec.stage.briefing || {};
+    if (onlyIf !== null && b.matchName !== onlyIf) return;
+    if (Object.entries(patch).every(([k, v]) => b[k] === v)) return;
+    await store.put({ ...rec, modified: Date.now(), stage: { ...rec.stage, briefing: { ...b, ...patch } } });
+  },
+  // Print a match: a cover page, then each stage's brief page (the open stage as it is now).
+  onPrintMatch: (match, stages) => {
+    const now = stages.map((st) => (st.id === editor.stage().id ? editor.stage() : st));
+    renderMatchPrint(document.getElementById("print"), match, now);
+    printedStage = null;
+    printReady = true;
+    window.print();
+    printReady = false;
+  },
   currentId: () => editor.stage().id,
   onOpen: openProject,
   onNew: () => addProject(freshStage()),
@@ -431,7 +464,8 @@ dock = window.LadaGlass.dock.init(dockEl, { key: "dsb", onChange: () => { engine
 function syncDockTabs() {
   if (!dock) return;                         // still being set up
   if (dock.active("settings") && !dock.folded("settings") && settings && !settings.isOpen) settings.ensureOpen();
-  if (dock.active("projects") && !dock.folded("projects") && projects && !projects.isOpen) projects.ensureOpen();
+  // Projects needs the store, which opens a moment after start-up (that end of start-up calls this again).
+  if (store && dock.active("projects") && !dock.folded("projects") && projects && !projects.isOpen) projects.ensureOpen();
 }
 const fold = (id) => ({ set: (f) => dock.fold(id, f), get collapsed() { return dock.folded(id); } });
 folds.library = fold("props");
