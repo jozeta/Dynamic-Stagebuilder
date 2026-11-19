@@ -40,3 +40,15 @@ test("a mesh wall with port and wooden walls snap too", () => {
   const s = addObject(createStage(), "wall-wood", [0, 5], 0).stage;
   assert.equal(snapToObjects(s, wall([2.1, 5], 0, 2, "wall-mesh-port"), [2.1, 5]).snapped, true);
 });
+
+test("a parallel wall close behind another does not jump onto it", () => {
+  const s = addObject(createStage(), "wall-mesh", [0, 5], 0).stage;
+  assert.equal(snapToObjects(s, wall([0.1, 5.3]), [0.1, 5.3]).snapped, false);
+  assert.equal(snapToObjects(s, wall([0, 5.2], 0, 1.8), [0, 5.2]).snapped, false);
+});
+
+test("a smaller reach leaves a gap open", () => {
+  const s = addObject(createStage(), "wall-mesh", [0, 5], 0).stage;   // right end x = 1
+  assert.equal(snapToObjects(s, wall([2.25, 5]), [2.25, 5], 0.25 * 0.8).snapped, false);   // 25 cm gap
+  assert.equal(snapToObjects(s, wall([2.1, 5]), [2.1, 5], 0.25 * 0.8).snapped, true);
+});

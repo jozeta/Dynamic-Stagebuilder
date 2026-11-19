@@ -70,3 +70,4 @@ test("Shift slows the drag to a fifth from where it was pressed, with no jump", 
   const [x3] = t.update([3, 0], false);
   assert.ok(Math.abs(x3 - 2.2) < 1e-9);
 });
+

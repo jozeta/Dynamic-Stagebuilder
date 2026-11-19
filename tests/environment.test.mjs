@@ -35,3 +35,11 @@ test("creating and disposing environments leaves the stage and its view untouche
 test("unknown environment names are refused", () => {
   assert.throws(() => createEnvironment("moon", { width: 20, depth: 30 }), /Unknown environment/);
 });
+
+test("instanced vegetation is disposed with the environment", () => {
+  const env = createEnvironment("outdoor", { width: 20, depth: 30 });
+  let disposed = 0;
+  env.group.traverse((c) => { if (c.isInstancedMesh) c.addEventListener("dispose", () => disposed++); });
+  env.dispose();
+  assert.ok(disposed >= 2, `instanced meshes disposed: ${disposed}`);
+});

@@ -16,6 +16,8 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
   low warm sun with soft shadows, a gradient sky and haze; ACES tone mapping. Outdoor is now the
   default for new stages, and mesh walls default to a pine frame.
 - Fixed: the service worker no longer stores stale files from the browser's HTTP cache.
+- Steel saved before the paint setting keeps its white paint; a wall dropped close behind a
+  parallel wall no longer jumps on top of it; lighter shadows on iPads.
 
 - 3D stage editor (Three.js 0.187.0, self-hosted): shooting bay, prop library with IPSC and mini
   targets, no-shoots, poppers, plates, mesh/wooden walls, a wall with a real port, barrels, tyres and

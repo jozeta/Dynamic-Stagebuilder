@@ -7,7 +7,7 @@ import { createHistory, commit, replacePresent, undo, redo } from "./model/histo
 import { assignLabels, renumber, setLabel } from "./model/numbering.js";
 import { snapPoint, snapAngle, clampToBay } from "./model/snap.js";
 import { getProp } from "./model/props.js";
-import { snapToObjects } from "./model/objsnap.js";
+import { snapToObjects, SNAP_RADIUS } from "./model/objsnap.js";
 
 const STAGE_TYPES = ["", "Short", "Medium", "Long"];
 const BRIEFING_TEXT = ["matchName", "designer", "startSignal", "startPosition", "gunCondition", "procedure", "stopTime", "notes", "scoring"];
@@ -25,7 +25,7 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
   function landing(s, obj, raw, fine = false) {
     if (fine) return clampToBay(raw, s.bay);
     if (s.settings.objectSnap !== false) {
-      const r = snapToObjects(s, obj, raw);
+      const r = snapToObjects(s, obj, raw, SNAP_RADIUS);
       if (r.snapped) return clampToBay(r.position, s.bay);
     }
     return fit(raw, s);

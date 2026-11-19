@@ -77,3 +77,12 @@ test("files from before object snapping read with object snap on", () => {
   assert.equal(r.stage.settings.objectSnap, true);
   assert.equal(validateStage({ ...s, settings: { ...s.settings, objectSnap: false } }).stage.settings.objectSnap, false);
 });
+
+test("steel saved before the paint setting stays white", () => {
+  let s = createStage();
+  const { addObject: add } = { addObject };
+  s = add(s, "popper", [0, 5]).stage;
+  const old = JSON.parse(JSON.stringify(s));
+  delete old.objects[0].params.paint;
+  assert.equal(validateStage(old).stage.objects[0].params.paint, "white");
+});

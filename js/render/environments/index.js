@@ -16,6 +16,7 @@ export function createEnvironment(name, bay) {
     ...env,
     dispose() {
       disposeGroup(env.group);
+      if (env.background?.isTexture) env.background.dispose();
       for (const l of env.lights) l.shadow?.map?.dispose();
     },
   };

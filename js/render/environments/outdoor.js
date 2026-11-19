@@ -120,7 +120,7 @@ export function outdoor(bay) {
     bushes.setMatrixAt(i, m);
     bushes.setColorAt(i, greens[(r() * greens.length) | 0]);
   });
-  bushes.castShadow = true;
+  bushes.castShadow = false;     // outside the bay: no need to pay for them in the shadow pass
   bushes.receiveShadow = true;
   group.add(bushes);
 

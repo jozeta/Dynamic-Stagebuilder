@@ -39,7 +39,10 @@ export function sun(bay, color, intensity, from) {
   light.castShadow = true;
   const r = Math.max(bay.width, bay.depth) * 0.75 + 5;
   Object.assign(light.shadow.camera, { left: -r, right: r, top: r, bottom: -r, near: 1, far: 200 });
-  light.shadow.mapSize.set(4096, 4096);
+  // 4096 on computers; 2048 on touch devices (iPads), where GPU memory is tighter.
+  const touch = typeof matchMedia !== "undefined" && matchMedia("(pointer: coarse)").matches;
+  const size = touch ? 2048 : 4096;
+  light.shadow.mapSize.set(size, size);
   light.shadow.bias = -0.0004;
   light.shadow.normalBias = 0.02;
   light.shadow.radius = 3;      // soft shadow edges
@@ -48,6 +51,7 @@ export function sun(bay, color, intensity, from) {
 
 export function disposeGroup(group) {
   group.traverse((c) => {
+    if (c.isInstancedMesh) c.dispose();      // frees the instance matrix and colour buffers
     c.geometry?.dispose();
     const mats = Array.isArray(c.material) ? c.material : c.material ? [c.material] : [];
     for (const m of mats) { m.map?.dispose(); m.dispose(); }
