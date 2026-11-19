@@ -4,6 +4,16 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Library: each prop group (Paper, Steel, Walls, Structures, Obstacles and range furniture) is
+  a collapsible section; the folded state is remembered per browser and a search opens groups
+  with matches.
+- Reference range look: 6 cm pine frames with a post at every panel, bold black wire mesh and a
+  denser royal-blue mesh, a new Solid panel wall (grey sheet, snaps like other walls), targets
+  with printed scoring-zone outlines, bevelled yellow/white poppers, 10 × 8 cm red fault-line
+  timber, dense areca palms, steep cut dirt banks with shrubs on top, crisper light (default
+  16:30, sharper shadows, exposure 0.92); the sun now passes on the shooter's side so target
+  faces are lit.
+
 - Environment settings dialog (toolbar *Settings*): surroundings (moved from the toolbar), time
   of day 06:00–20:00 driving the sun's position and colour, sunlight, ambient light, shadows,
   shadow softness, haze and exposure; `settings.look` in stage files (older files get defaults).

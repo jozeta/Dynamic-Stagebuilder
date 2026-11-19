@@ -20,7 +20,8 @@ training, and want a clear briefing sheet without drawing the map by hand.
   - steel: IPSC popper, mini popper, round plate, square plate
   - walls: mesh wall and mesh wall with port (black or blue 10 cm wire mesh, pine or black frame),
     wooden wall, wooden wall with port; ports are real openings
-  - mesh doorway (a wall with a door opening; it snaps like the other walls)
+  - mesh doorway (a wall with a door opening) and solid panel (a grey sheet in a pine frame);
+    both snap like the other walls
   - structures: ramp, platform
   - obstacles and range furniture: worn steel barrel (black, blue, red, green), tyre, tyre stack,
     board crate, potted plant, car, table, chair, pallets, sandbag wall, traffic cone
@@ -55,6 +56,11 @@ not supported: below 768 px wide the app asks you to use a larger screen. Englis
 ## What's new
 
 ### Unreleased
+
+- Prop groups in the library fold open and closed (remembered; a search opens matching groups).
+- The look of a real club range: chunky pine frames, bold black and royal-blue mesh, a new
+  solid panel wall, targets with printed scoring zones, chunky yellow and white poppers, heavy
+  red fault-line timber, dense potted palms, steep dirt banks with shrubs and crisper light.
 
 - Environment settings (toolbar *Settings*): surroundings, time of day, sunlight, ambient light,
   shadows, shadow softness, haze and exposure.
@@ -135,11 +141,11 @@ Stage settings are in the inspector when nothing is selected. They are saved wit
 | Object snap | Toolbar *Objects*: a wall's end jumps onto another wall's end within 35 cm | On |
 | Angle snap | Rotations snap to this step: off, 5°, 15°, 45° or 90° | 15° |
 | Surroundings | *Settings*: Outdoor (dirt range) or Technical (grey floor, grid); never moves the stage | Outdoor |
-| Time of day | *Settings*: 06:00–20:00; the sun's height, direction and colour follow it | 17:30 |
+| Time of day | *Settings*: 06:00–20:00; the sun's height, direction and colour follow it | 16:30 |
 | Sunlight, Ambient light | *Settings*: 0–200 % | 100 % |
-| Shadows, Shadow softness | *Settings*: on/off, 0 (sharp) – 8 | On, 3 |
-| Haze | *Settings*: 0 (clear) – 100 % | 35 % |
-| Exposure | *Settings*: 0.5–1.6 | 1.05 |
+| Shadows, Shadow softness | *Settings*: on/off, 0 (sharp) – 8 | On, 1.5 |
+| Haze | *Settings*: 0 (clear) – 100 % (Outdoor only) | 25 % |
+| Exposure | *Settings*: 0.5–1.6 | 0.92 |
 
 Prop settings (inspector, one prop selected): label (targets), rotation, and per prop: mount height
 for paper targets (0.1–2 m, default 0.7 m to the target's bottom), base height for steel, plate size
@@ -155,7 +161,8 @@ is a suggestion from the round count.
 
 ## How to
 
-**Build a stage.** Pick a prop in the library on the left, then tap (or click) the ground to place it.
+**Build a stage.** The library on the left is grouped (Paper, Steel, Walls, Structures, Obstacles
+and range furniture); click a group's heading to fold it away. Pick a prop in the library, then tap (or click) the ground to place it.
 With a mouse you can also drag a prop from the library onto the stage. Drag a placed prop to move it;
 it snaps to the grid and stays inside the bay. Rotate the selected prop with the green ring, the
 ↺/↻ buttons in the inspector, or Q and E. Shift-click selects several props.
