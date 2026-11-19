@@ -4,6 +4,10 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Settings → Environment: *Time of day* can be switched off; then the sun is set by hand: its
+  height (2–90°), direction (0° = behind the shooter) and colour, from dark orange through yellow
+  to bright white. Saved with the stage.
+
 - Dockable side panels (Låda Glass 2.4.0): drag a panel's grip (⋮⋮) to the left, the right or
   under the view, or click it for *Move to…*; panels sharing a side stack. Fold with the arrow,
   resize from the inner edge. Where they are, their sizes and folds are remembered. The Inspector

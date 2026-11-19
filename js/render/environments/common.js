@@ -1,7 +1,7 @@
 // Shared pieces for environments: a ground plane, canvas textures and a shadow-casting sun sized to
 // the bay. Environments only ever build into their own group.
 import * as THREE from "three";
-import { sunFromHour } from "../../model/look.js";
+import { sunFromLook } from "../../model/look.js";
 
 export const hasDom = typeof document !== "undefined";
 
@@ -66,7 +66,7 @@ export function disposeGroup(group) {
 const WHITE = new THREE.Color(0xfff1df), SUNSET = new THREE.Color(0xffb15e);
 
 export function applyLook(env, look, bay) {
-  const s = sunFromHour(look.hour);
+  const s = sunFromLook(look);           // from the time of day, or set by hand
   const sunLight = env.sunLight, hemi = env.hemiLight;
   const centre = new THREE.Vector3(0, 0, bay.depth / 2);
   // Below about 8° the shadow map smears across the ground, so the light that casts shadows stays
@@ -76,7 +76,8 @@ export function applyLook(env, look, bay) {
   if (dir.y < minY) { const h = Math.hypot(dir.x, dir.z) || 1; dir.set((dir.x / h) * Math.cos(Math.asin(minY)), minY, (dir.z / h) * Math.cos(Math.asin(minY))); }
   sunLight.position.copy(centre).addScaledVector(dir, 70);
   sunLight.target.position.copy(centre);
-  sunLight.color.copy(WHITE).lerp(SUNSET, Math.pow(s.warmth, 1.6) * env.warmth);
+  if (s.color) sunLight.color.setRGB(...s.color, THREE.SRGBColorSpace);      // chosen by hand
+  else sunLight.color.copy(WHITE).lerp(SUNSET, Math.pow(s.warmth, 1.6) * env.warmth);
   sunLight.intensity = env.sunStrength * look.sun * s.strength;
   sunLight.castShadow = look.shadows;
   sunLight.shadow.radius = look.softness;

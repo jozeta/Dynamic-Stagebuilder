@@ -3,10 +3,14 @@
 const SPEC = {
   hour: [6, 20], sun: [0, 2], ambient: [0, 2], softness: [0, 8], shadowStrength: [0, 1], haze: [0, 1], exposure: [0.5, 1.6],
   clouds: [0, 1], cloudSpeed: [0, 3], wind: [0, 359],
+  sunElevation: [2, 90], sunAzimuth: [0, 359], sunColor: [0, 1],
 };
 // Clouds (Outdoor only): how much of the sky they cover, how fast they drift (1 = about 8 m/s) and
 // the wind they drift with (degrees, 0 = down range, 90 = toward +x). They move only with Play on.
 const CLOUDS = { clouds: 0.35, cloudSpeed: 1, wind: 60 };
+// The sun by hand (time of day off): height above the horizon, direction (0 = behind the shooter,
+// up range; 90 = toward +x, the shooter's left) and colour (0 dark orange … 0.5 yellow … 1 white).
+const SUN = { sunAuto: true, sunElevation: 35, sunAzimuth: 20, sunColor: 0.8 };
 export const CLOUD_TILE = 340;            // metres across one tile of the cloud texture
 const CLOUD_MPS = 8;
 
@@ -18,12 +22,12 @@ export const GROUNDS = Object.freeze([
 ]);
 const GROUND_IDS = GROUNDS.map((g) => g.id);
 
-export const LOOK_DEFAULTS = Object.freeze({ hour: 15.75, sun: 0.5, ambient: 1, shadows: true, softness: 4, shadowStrength: 0.5, haze: 0.35, exposure: 1, ground: "sand", ...CLOUDS });
+export const LOOK_DEFAULTS = Object.freeze({ hour: 15.75, sun: 0.5, ambient: 1, shadows: true, softness: 4, shadowStrength: 0.5, haze: 0.35, exposure: 1, ground: "sand", ...CLOUDS, ...SUN });
 // The Technical surroundings: brighter afternoon light with softer, lighter shadows.
-export const TECHNICAL_LOOK = Object.freeze({ hour: 16, sun: 1.15, ambient: 1.1, shadows: true, softness: 3, shadowStrength: 0.55, haze: 0.2, exposure: 1, ground: "sand", ...CLOUDS });
+export const TECHNICAL_LOOK = Object.freeze({ hour: 16, sun: 1.15, ambient: 1.1, shadows: true, softness: 3, shadowStrength: 0.55, haze: 0.2, exposure: 1, ground: "sand", ...CLOUDS, ...SUN });
 
 // Blueprint: late-morning light with soft shadows; no haze.
-export const BLUEPRINT_LOOK = Object.freeze({ hour: 11, sun: 1, ambient: 1.15, shadows: true, softness: 4, shadowStrength: 0.7, haze: 0, exposure: 1.05, ground: "sand", ...CLOUDS });
+export const BLUEPRINT_LOOK = Object.freeze({ hour: 11, sun: 1, ambient: 1.15, shadows: true, softness: 4, shadowStrength: 0.7, haze: 0, exposure: 1.05, ground: "sand", ...CLOUDS, ...SUN });
 
 /** The light defaults for a surroundings name ("outdoor", "technical" or "blueprint"). */
 export const lookDefaults = (environment) => (environment === "technical" || String(environment).startsWith("custom:") ? TECHNICAL_LOOK
@@ -72,4 +76,27 @@ export function cloudDrift(look, seconds) {
   const metres = (look.cloudSpeed ?? CLOUDS.cloudSpeed) * CLOUD_MPS * seconds;
   const a = ((look.wind ?? CLOUDS.wind) * Math.PI) / 180;
   return [(Math.sin(a) * metres) / CLOUD_TILE, (Math.cos(a) * metres) / CLOUD_TILE];
+}
+
+/** The sun's colour by hand: 0 dark orange, 0.5 yellow, 1 bright white ([r, g, b], 0–1). */
+export function sunColorAt(t) {
+  const stops = [[0, [0.78, 0.3, 0.08]], [0.5, [1, 0.82, 0.38]], [1, [1, 1, 1]]];
+  const x = Math.min(1, Math.max(0, t));
+  const i = x <= 0.5 ? 0 : 1;
+  const [t0, a] = stops[i], [t1, b] = stops[i + 1];
+  const k = (x - t0) / (t1 - t0);
+  return a.map((v, j) => Math.round((v + (b[j] - v) * k) * 1e6) / 1e6);
+}
+
+/**
+ * The sun for a look: from the time of day, or (time of day off) from its height, direction and
+ * colour. Same shape as sunFromHour, plus `color` when set by hand.
+ */
+export function sunFromLook(look) {
+  if (look.sunAuto !== false) return sunFromHour(look.hour);
+  const e = (Math.min(90, Math.max(2, look.sunElevation ?? SUN.sunElevation)) * Math.PI) / 180;
+  const a = ((look.sunAzimuth ?? SUN.sunAzimuth) * Math.PI) / 180;
+  const direction = [Math.sin(a) * Math.cos(e), Math.sin(e), -Math.cos(a) * Math.cos(e)].map((v) => (Math.abs(v) < 1e-12 ? 0 : v));
+  const t = Math.min(1, Math.max(0, look.sunColor ?? SUN.sunColor));
+  return { elevation: (e * 180) / Math.PI, direction, warmth: 1 - t, strength: 0.3 + 0.7 * Math.sqrt(Math.sin(e)), color: sunColorAt(t) };
 }

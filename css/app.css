@@ -331,3 +331,8 @@ body { background: var(--lg-bg); overflow: hidden; }
 }
 /* The right-click menu sits over everything. */
 .stage-menu .lg-icon, .stage-menu svg { width: 16px; height: 16px; }
+
+/* Settings → Environment, the sun by hand: the colour slider's track runs dark orange → yellow → white. */
+.sun-color-slider::-webkit-slider-runnable-track { background: linear-gradient(90deg, #c74d14, #ffd160 50%, #ffffff); }
+.sun-color-slider::-moz-range-track { background: linear-gradient(90deg, #c74d14, #ffd160 50%, #ffffff); }
+.sun-color-slider::-moz-range-progress { background: transparent; }

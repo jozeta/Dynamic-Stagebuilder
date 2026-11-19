@@ -184,7 +184,8 @@ Stage settings are in the inspector when nothing is selected. They are saved wit
 | Angle snap | Rotations snap to this step: off, 5°, 15°, 45° or 90° | 15° |
 | Surroundings | *Settings*: Outdoor (dirt range), Technical (grey floor, grid) or Blueprint (drafting sheet); never moves the stage | Outdoor |
 | Ground | *Settings* (Outdoor): sand, light sand, dark sand, red dirt or gravel | Sand |
-| Time of day | *Settings*: 06:00–20:00; the sun's height, direction and colour follow it | Outdoor 15:45, Technical 16:00 |
+| Time of day | *Settings*: on/off; on, 06:00–20:00 moves the sun (its height, direction and colour follow it) | On; Outdoor 15:45, Technical 16:00 |
+| Sun height, direction, colour | *Settings*, with Time of day off: 2–90°; 0–359° (0° = behind the shooter, 90° = to the shooter's left); dark orange → yellow → white | 35°, 20°, warm white |
 | Sunlight | *Settings*: 0–200 % | Outdoor 50 %, Technical 115 % |
 | Ambient light | *Settings*: 0–200 % | Outdoor 100 %, Technical 110 % |
 | Shadows, Shadow softness | *Settings*: on/off, 0 (sharp) – 8 | On; Outdoor 4, Technical 3 |

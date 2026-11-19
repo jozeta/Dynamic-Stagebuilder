@@ -7,7 +7,7 @@ import { createStage } from "../js/model/stage.js";
 import { validateStage } from "../js/model/schema.js";
 
 test("defaults", () => {
-  assert.deepEqual({ ...LOOK_DEFAULTS }, { hour: 15.75, sun: 0.5, ambient: 1, shadows: true, softness: 4, shadowStrength: 0.5, haze: 0.35, exposure: 1, ground: "sand", clouds: 0.35, cloudSpeed: 1, wind: 60 });
+  assert.deepEqual({ ...LOOK_DEFAULTS }, { hour: 15.75, sun: 0.5, ambient: 1, shadows: true, softness: 4, shadowStrength: 0.5, haze: 0.35, exposure: 1, ground: "sand", clouds: 0.35, cloudSpeed: 1, wind: 60, sunAuto: true, sunElevation: 35, sunAzimuth: 20, sunColor: 0.8 });
   assert.ok(Object.isFrozen(LOOK_DEFAULTS));
 });
 
@@ -56,7 +56,7 @@ test("old files read with the default look; a saved look round-trips", () => {
 
 test("Technical surroundings have their own light defaults; reset and switching use them", async () => {
   const { lookDefaults, TECHNICAL_LOOK } = await import("../js/model/look.js");
-  assert.deepEqual({ ...TECHNICAL_LOOK }, { hour: 16, sun: 1.15, ambient: 1.1, shadows: true, softness: 3, shadowStrength: 0.55, haze: 0.2, exposure: 1, ground: "sand", clouds: 0.35, cloudSpeed: 1, wind: 60 });
+  assert.deepEqual({ ...TECHNICAL_LOOK }, { hour: 16, sun: 1.15, ambient: 1.1, shadows: true, softness: 3, shadowStrength: 0.55, haze: 0.2, exposure: 1, ground: "sand", clouds: 0.35, cloudSpeed: 1, wind: 60, sunAuto: true, sunElevation: 35, sunAzimuth: 20, sunColor: 0.8 });
   assert.deepEqual(lookDefaults("technical"), TECHNICAL_LOOK);
   assert.deepEqual(lookDefaults("outdoor"), LOOK_DEFAULTS);
   const ed = createEditor();
@@ -73,7 +73,7 @@ test("Technical surroundings have their own light defaults; reset and switching 
 test("Blueprint has its own light defaults: 11:00, ambient 115 %, softness 4, shadows 70 %, no haze, exposure 1.05", async () => {
   const { lookDefaults, BLUEPRINT_LOOK } = await import("../js/model/look.js");
   assert.deepEqual(lookDefaults("blueprint"), BLUEPRINT_LOOK);
-  assert.deepEqual({ ...BLUEPRINT_LOOK }, { hour: 11, sun: 1, ambient: 1.15, shadows: true, softness: 4, shadowStrength: 0.7, haze: 0, exposure: 1.05, ground: "sand", clouds: 0.35, cloudSpeed: 1, wind: 60 });
+  assert.deepEqual({ ...BLUEPRINT_LOOK }, { hour: 11, sun: 1, ambient: 1.15, shadows: true, softness: 4, shadowStrength: 0.7, haze: 0, exposure: 1.05, ground: "sand", clouds: 0.35, cloudSpeed: 1, wind: 60, sunAuto: true, sunElevation: 35, sunAzimuth: 20, sunColor: 0.8 });
   const { ENVIRONMENTS } = await import("../js/model/schema.js");
   assert.ok(ENVIRONMENTS.includes("blueprint"));
 });
@@ -104,4 +104,26 @@ test("the Outdoor sky has clouds by default; their amount, speed and wind are ch
   assert.ok(Math.abs(fast - 2 * v) < 1e-9, "twice the speed, twice as far");
   assert.equal(cloudDrift({ cloudSpeed: 0, wind: 0 }, 99)[1], 0, "speed 0: still");
   assert.ok(v * CLOUD_TILE > 50 && v * CLOUD_TILE < 150, "about 8 m/s at speed 100 %");
+});
+
+test("time of day can be turned off: then the sun's height, direction and colour are set by hand", async () => {
+  const { sunFromLook, sunColorAt } = await import("../js/model/look.js");
+  assert.equal(LOOK_DEFAULTS.sunAuto, true, "time of day is on by default");
+  const byClock = sunFromLook({ ...LOOK_DEFAULTS, hour: 12 });
+  assert.deepEqual(byClock, sunFromHour(12), "with time of day on, the clock decides");
+  const manual = sunFromLook({ ...LOOK_DEFAULTS, sunAuto: false, sunElevation: 30, sunAzimuth: 0, sunColor: 1 });
+  assert.ok(Math.abs(manual.elevation - 30) < 1e-9);
+  assert.ok(Math.abs(manual.direction[1] - Math.sin(Math.PI / 6)) < 1e-9, "30° up");
+  assert.ok(manual.direction[2] < 0 && Math.abs(manual.direction[0]) < 1e-9, "0°: behind the shooter, up range");
+  const left = sunFromLook({ ...LOOK_DEFAULTS, sunAuto: false, sunElevation: 30, sunAzimuth: 90, sunColor: 1 });
+  assert.ok(left.direction[0] > 0.8, "90°: toward +x, the shooter's left");
+  assert.equal(manual.warmth, 0, "bright white: no evening warmth");
+  assert.ok(sunFromLook({ ...LOOK_DEFAULTS, sunAuto: false, sunColor: 0 }).warmth > 0.9, "dark orange: full warmth");
+  // The colour runs dark orange → yellow → bright white.
+  const [r0, g0, b0] = sunColorAt(0), [r1, g1, b1] = sunColorAt(0.5), [r2, g2, b2] = sunColorAt(1);
+  assert.ok(r0 > g0 * 1.6 && b0 < 0.2, "dark orange");
+  assert.ok(r1 > 0.95 && g1 > 0.75 && b1 < 0.5, "yellow");
+  assert.deepEqual([r2, g2, b2], [1, 1, 1], "bright white");
+  const c = cleanLook({ sunAuto: "no", sunElevation: 500, sunAzimuth: -5, sunColor: 2 });
+  assert.equal(c.sunAuto, true); assert.equal(c.sunElevation, 90); assert.equal(c.sunAzimuth, 0); assert.equal(c.sunColor, 1);
 });

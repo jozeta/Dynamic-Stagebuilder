@@ -26,7 +26,12 @@ const SLIDERS = [
   ["clouds", "Clouds", 0, 1, 0.05, (v) => (v > 0.01 ? `${Math.round(v * 100)} %` : "Clear")],
   ["cloudSpeed", "Cloud speed", 0, 3, 0.1, (v) => (v ? `${Math.round(v * 100)} %` : "Still")],
   ["wind", "Wind (0° = toward down range)", 0, 359, 5, (v) => `${Math.round(v)}°`],
+  // The sun by hand, when Time of day is off.
+  ["sunElevation", "Sun height", 2, 90, 1, (v) => `${Math.round(v)}°`],
+  ["sunAzimuth", "Sun direction (0° = behind the shooter)", 0, 359, 5, (v) => `${Math.round(v)}°`],
+  ["sunColor", "Sun colour", 0, 1, 0.02, (v) => (v < 0.25 ? "Dark orange" : v < 0.4 ? "Orange" : v < 0.62 ? "Yellow" : v < 0.85 ? "Warm white" : "White")],
 ];
+const SUN_KEYS = ["sunElevation", "sunAzimuth", "sunColor"];
 const OUTDOOR_ONLY = new Set(["haze", "clouds", "cloudSpeed", "wind"]);
 
 export function createSettings({ editor, panel, hide = [], onToggle = () => {}, getHidden = () => ({ categories: [], props: [] }), onHidden = () => {}, mine = null,
@@ -212,8 +217,14 @@ export function createSettings({ editor, panel, hide = [], onToggle = () => {}, 
       const input = h("input", { type: "range", class: "lg-slider", id, min, max, step, value: String(look[key]), disabled: off,
         title: off ? `${label} applies to the Outdoor surroundings` : null,
         oninput: (e) => { const v = Number(e.target.value); out.textContent = show(v); d({ type: "setLook", patch: { [key]: v } }); } });
-      return h("div", { class: "settings-row" }, [h("label", { for: id, text: label }), input, out]);
+      if (key === "sunColor") input.classList.add("sun-color-slider");          // the track shows the colours
+      return [key, h("div", { class: "settings-row" }, [h("label", { for: id, text: label }), input, out])];
     });
+    const row = Object.fromEntries(rows);
+    // Time of day: on, the clock moves the sun; off, its height, direction and colour are set by hand.
+    const auto = look.sunAuto !== false;
+    const clock = h("input", { type: "checkbox", class: "lg-toggle", id: "set-sun-auto", onchange: (e) => { d({ type: "setLook", patch: { sunAuto: e.target.checked } }); fill(); } });
+    clock.checked = auto;
     const shadows = h("input", { type: "checkbox", class: "lg-toggle", id: "set-shadows", onchange: (e) => d({ type: "setLook", patch: { shadows: e.target.checked } }) });
     shadows.checked = look.shadows;
     // Default style for new IPSC paper targets (each target can still be switched in its properties).
@@ -233,9 +244,11 @@ export function createSettings({ editor, panel, hide = [], onToggle = () => {}, 
       st.environment === "outdoor" ? h("div", { class: "settings-row" }, [h("label", { for: "set-ground", text: "Ground" }), groundSel]) : null,
       ...myRows,
       h("div", { class: "settings-row" }, [h("span", { class: "settings-label", text: "Default target style" }), ts]),
-      ...rows.slice(0, 3),
+      h("div", { class: "settings-row" }, [h("label", { for: "set-sun-auto", text: "Time of day" }), clock]),
+      ...(auto ? [row.hour] : SUN_KEYS.map((k) => row[k])),
+      row.sun, row.ambient,
       h("div", { class: "settings-row" }, [h("label", { for: "set-shadows", text: "Shadows" }), shadows]),
-      ...rows.slice(3),
+      ...["softness", "shadowStrength", "haze", "exposure", "clouds", "cloudSpeed", "wind"].map((k) => row[k]),
       h("p", { class: "lg-muted", text: "Saved with this stage and used for the printed 3D view. Changing these is not an undo step." }),
     ].filter(Boolean));
   }
