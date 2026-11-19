@@ -4,6 +4,8 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+## 0.7.0 (2026-11-19)
+
 - Draw your own bay shape: *Bay shape → Draw a new shape…* opens a white sheet with a 1 m grid (down
   range at the top, 35 × 35 m to start). Set the width and depth, pick black (raised ground) or
   white (floor), and draw with the pencil (1–5 m) or fill with the paint bucket, which fills the

@@ -4,7 +4,7 @@ A browser-based 3D stage builder for IPSC practical shooting. Lay out a stage at
 it from any angle, and print a Written Stage Briefing with a stage map for range officers and
 competitors.
 
-**Version:** 0.6.0 · **Try it:** [jozeta.github.io/Dynamic-Stagebuilder](https://jozeta.github.io/Dynamic-Stagebuilder/)
+**Version:** 0.7.0 · **Try it:** [jozeta.github.io/Dynamic-Stagebuilder](https://jozeta.github.io/Dynamic-Stagebuilder/)
 (runs in the browser; nothing to install, nothing leaves your device) · Started 2026-11-18 (see the
 [v1 design](docs/superpowers/specs/2026-11-18-stage-builder-v1-design.md)).
 
@@ -96,14 +96,12 @@ not supported: below 768 px wide the app asks you to use a larger screen. Englis
 
 ## What's new
 
-### 0.6.0 (2026-11-19)
+### 0.7.0 (2026-11-19)
 
-- **More bay shapes:** L and reverse L, T, U and reverse U, and dogleg (Z) and reverse dogleg (S),
-  each with its own sizes; the banks, walls and printed map follow the shape.
-- **Fixes:** no hang at start-up when an older copy is open elsewhere; *Line up on the shooter's
-  left / right* goes the right way; mirroring swaps one-sided no-shoots and hard cover; share links
-  pasted into an open tab work; a stage is in one match only; match name and number aren't undo
-  steps; deleting a project takes it out of its match; group drags in shaped bays keep their shape.
+- **Draw your own bay shape:** *Bay shape → Draw a new shape…* opens a 1 m grid (35 × 35 m to
+  start). Black is raised ground, white is floor; draw with the pencil or fill with the paint bucket.
+  Beside and behind the drawing is raised too. Raised ground slopes down to a flat floor and gets
+  grass, bushes and stones in Outdoor. Name it and save it to *My shapes*; the stage keeps a copy.
 
 Older versions are listed in [CHANGELOG.md](CHANGELOG.md).
 
