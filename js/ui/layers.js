@@ -12,7 +12,10 @@ const LINE_NAMES = { "fault-line": "Fault line", "shooting-area": "Shooting area
 export function createLayers(root, { editor, menu }) {
   const d = (a) => editor.dispatch(a);
   let several = false, filter = "", lastKey = "";
-  const folded = new Set();               // group ids folded in the list (this session)
+  // Group ids folded in the list, remembered in this browser.
+  const FOLDS = "dsb:layer-folds";
+  const folded = new Set((() => { try { const v = JSON.parse(localStorage.getItem(FOLDS) || "[]"); return Array.isArray(v) ? v.filter((x) => typeof x === "string").slice(0, 500) : []; } catch { return []; } })());
+  const keepFolds = () => { try { localStorage.setItem(FOLDS, JSON.stringify([...folded])); } catch { /* private mode */ } };
   let renaming = null;
 
   const list = h("div", { class: "layers-list", role: "list", "aria-label": "Props on the stage" });
@@ -108,7 +111,7 @@ export function createLayers(root, { editor, menu }) {
         ondblclick: () => { renaming = g.id; lastKey = ""; update(); } }, [h("strong", { text: g.name }), h("span", { class: "lg-muted", text: ` ${ids.length}` })]);
     const row = h("div", { class: `layer-row layer-group${g.hidden ? " is-hidden" : ""}`, role: "listitem", dataset: { group: g.id } }, [
       h("button", { type: "button", class: "lg-btn lg-btn-ghost lg-btn-icon layers-tool", "aria-expanded": String(open), "aria-label": `${open ? "Fold" : "Open"} ${g.name}`,
-        onclick: () => { if (open) folded.add(g.id); else folded.delete(g.id); lastKey = ""; update(); } }, [icon(open ? "chevd" : "chevr")]),
+        onclick: () => { if (open) folded.add(g.id); else folded.delete(g.id); keepFolds(); lastKey = ""; update(); } }, [icon(open ? "chevd" : "chevr")]),
       name,
       btn("doc", `Rename ${g.name}`, () => { renaming = g.id; lastKey = ""; update(); }),
       btn(g.hidden ? "eyeoff" : "eye", `${g.hidden ? "Show" : "Hide"} ${g.name}`, () => d({ type: "updateGroup", id: g.id, patch: { hidden: !g.hidden } }), { pressed: !g.hidden }),

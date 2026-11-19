@@ -4,7 +4,7 @@ import { canUndo, canRedo } from "../model/history.js";
 import { PRESETS, PRESET_LABELS } from "../render/camera.js";
 import { createEyeSteps } from "./eye-steps.js";
 
-export function createToolbar(root, { editor, rig, status, onViewing = () => {}, walking = () => true, onAbout, onHelp, onBriefing, onPrint, onProjects, onSettings }) {
+export function createToolbar(root, { editor, rig, status, onViewing = () => {}, walking = () => true, onEyeState = () => {}, onAbout, onHelp, onBriefing, onPrint, onProjects, onSettings }) {
   // Camera presets live in a bar over the 3D view (#camera-slot); the rest in the toolbar.
   const btn = (name, label, onclick, extra = {}) =>
     h("button", { type: "button", class: "lg-btn lg-btn-ghost tool", "aria-label": label, onclick, ...extra }, [icon(name), h("span", { text: label.split(" (")[0] })]);
@@ -26,7 +26,7 @@ export function createToolbar(root, { editor, rig, status, onViewing = () => {},
     h("button", { type: "button", class: "lg-btn lg-btn-ghost tool-text", title: "Frame all (F)", onclick: () => rig.frameAll(editor.stage()) }, [icon("frame"), "Frame all"]),
   ]);
   document.getElementById("camera-slot").append(cams);
-  const eyeSteps = createEyeSteps({ editor, rig, bar: cams, onViewing, walking });
+  const eyeSteps = createEyeSteps({ editor, rig, bar: cams, onViewing, walking, onState: onEyeState });
   root.eyeSteps = eyeSteps;
 
   root.append(

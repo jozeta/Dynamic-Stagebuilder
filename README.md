@@ -196,11 +196,11 @@ Stage settings are in the inspector when nothing is selected. They are saved wit
 | Cloud speed | *Settings → Environment* (Outdoor): 0 (still) – 300 %; 100 % ≈ 8 m/s; they move only with Play on | 100 % |
 | Wind direction | *Settings → Environment* (Outdoor): which way the clouds drift, 0° = toward down range, 90° = toward +x | 60° |
 | Hidden props | *Settings → Props*: groups and single props the props panel leaves out (per browser) | None |
-| Panel places | Each side panel's grip (⋮⋮): drag it to the left, the right or the bottom, or click it for *Move to…* (per browser) | Props left, Inspector right (under the view on a narrow screen) |
+| Panel places | Drag a panel's tab (or a lone panel's grip ⋮⋮) onto a side for a frame of its own, or onto another frame to add it as a tab; or click the grip for *Move to…* (per browser) | Props, On stage and Projects as tabs on the left; Inspector and Settings on the right (under the view on a narrow screen) |
 | Folded panels | The arrow beside the grip (per browser) | Both open |
 | Panel sizes | Drag a dock's inner edge, or arrow keys on it (Shift: bigger steps); double-click resets (per browser) | 260 / 300 px, bottom 260 px |
 | My surroundings | *Settings*: your own plan-based surroundings, with plan position, turn and strength | None |
-| Default target style | *Settings*: Classic (octagon) or With head, for new paper targets | Classic |
+| Default target style | *Settings → Props*: Classic (octagon) or With head, for new paper targets | Classic |
 | Shooter's eye walking speed | *Settings → View*: slow walk 1.6, walk 2.4, quick move 3.4 or sprint 4.6 m/s, when Play is on (per browser) | Sprint |
 | Figures, position marks, route line | *Settings → View*, each: show or hide, colour (seven swatches or your own), opacity 10–100 % (per browser) | Shown, light grey, 30 % |
 | Camera view | Remembered per project as you move the camera (per browser) | The Isometric overview |

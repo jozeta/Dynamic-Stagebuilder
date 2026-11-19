@@ -7,7 +7,7 @@ import { STAGE_LIBRARY, LIBRARY_CATEGORIES, librarySummary } from "../model/stag
 
 const when = (t) => new Date(t).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
 
-export function createProjects({ panel, hide = [], onToggle = () => {}, onOpenLibrary = async () => {}, store, currentId, onOpen, onNew, onDuplicate, onDelete, onImport, onExport }) {
+export function createProjects({ panel, docked = false, hide = [], onToggle = () => {}, onOpenLibrary = async () => {}, store, currentId, onOpen, onNew, onDuplicate, onDelete, onImport, onExport }) {
   const list = h("div", { class: "proj-list", role: "list" });
   const message = h("div", { class: "proj-message", role: "status", "aria-live": "polite" });
   const file = h("input", { type: "file", accept: ".json,application/json", hidden: true, onchange: () => importFile() });
@@ -62,7 +62,7 @@ export function createProjects({ panel, hide = [], onToggle = () => {}, onOpenLi
   let isOpen = false;
   function show(open) {
     isOpen = open;
-    panel.hidden = !open;
+    if (!docked) panel.hidden = !open;            // docked, the dock shows or hides its tab
     for (const el of hide) el.hidden = open;
     onToggle(open);
   }
@@ -111,8 +111,10 @@ export function createProjects({ panel, hide = [], onToggle = () => {}, onOpenLi
 
   return {
     // Open, or close when it's open and in view; when it's open but its panel is folded, unfold it.
-    async open() { if (isOpen && !panel.closest(".lg-dock-folded")) return close(); if (isOpen) return show(true); say(""); await fill(); fillLibrary(); show(true); panel.querySelector("button")?.focus(); },
+    async open() { if (isOpen && !panel.closest(".lg-dock-folded") && !panel.classList.contains("lg-dock-inactive")) return close(); if (isOpen) return show(true); say(""); await fill(); fillLibrary(); show(true); panel.querySelector("button")?.focus(); },
     close,
+    /** Shown by the dock (its tab clicked): fill it and count as open, without toggling. */
+    async ensureOpen() { if (isOpen) return; say(""); await fill(); fillLibrary(); show(true); },
     get isOpen() { return isOpen; },
   };
 }

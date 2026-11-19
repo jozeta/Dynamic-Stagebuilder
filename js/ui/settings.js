@@ -15,7 +15,7 @@ import { customId, customEnv, BUILDING_TYPES } from "../model/surroundings.js";
 import { ENVIRONMENT_NAMES, ENVIRONMENT_LABELS } from "../render/environments/index.js";
 
 const SLIDERS = [
-  ["hour", "Time of day", 6, 20, 0.25, (v) => `${String(Math.floor(v)).padStart(2, "0")}:${String(Math.round((v % 1) * 60)).padStart(2, "0")}`],
+  ["hour", "Time", 6, 20, 0.25, (v) => `${String(Math.floor(v)).padStart(2, "0")}:${String(Math.round((v % 1) * 60)).padStart(2, "0")}`],
   ["sun", "Sunlight", 0, 2, 0.05, (v) => `${Math.round(v * 100)} %`],
   ["ambient", "Ambient light", 0, 2, 0.05, (v) => `${Math.round(v * 100)} %`],
   ["softness", "Shadow softness", 0, 8, 0.5, (v) => (v ? `${v}` : "Sharp")],
@@ -34,7 +34,7 @@ const SLIDERS = [
 const SUN_KEYS = ["sunElevation", "sunAzimuth", "sunColor"];
 const OUTDOOR_ONLY = new Set(["haze", "clouds", "cloudSpeed", "wind"]);
 
-export function createSettings({ editor, panel, hide = [], onToggle = () => {}, getHidden = () => ({ categories: [], props: [] }), onHidden = () => {}, mine = null,
+export function createSettings({ editor, panel, docked = false, hide = [], onToggle = () => {}, getHidden = () => ({ categories: [], props: [] }), onHidden = () => {}, mine = null,
   getSpeed = () => "sprint", onSpeed = () => {}, getRunLook = () => null, onRunLook = () => {} }) {
   const d = (a) => editor.dispatch(a);
   const body = h("div", { class: "settings-body" });
@@ -57,6 +57,7 @@ export function createSettings({ editor, panel, hide = [], onToggle = () => {}, 
     next.focus(); next.click();
   });
   function selectTab(id) {
+    try { localStorage.setItem("dsb:settings-tab", id); } catch { /* private mode */ }     // remembered for the next visit
     for (const b of tabButtons) b.setAttribute("aria-selected", String(b.id === `settings-tab-${id}`));
     lookPane.hidden = id !== "look";
     viewPane.hidden = id !== "view";
@@ -107,7 +108,18 @@ export function createSettings({ editor, panel, hide = [], onToggle = () => {}, 
   function fillProps() {
     const hidden = getHidden();
     const set = (kind, id, shown) => { onHidden(setShown(getHidden(), kind, id, shown)); fillProps(); };
+    // Default style for new IPSC paper targets (each target can still be switched in its properties).
+    const ts = h("div", { class: "lg-segmented", role: "radiogroup", "aria-label": "Default target style" });
+    for (const [value, label] of [["classic", "Classic (octagon)"], ["head", "With head"]]) {
+      const id = `set-ts-${value}`;
+      const input = h("input", { type: "radio", name: "set-ts", id, value, onchange: () => { d({ type: "setSetting", key: "targetStyle", value }); fillProps(); } });
+      input.checked = (editor.stage().settings.targetStyle || "classic") === value;
+      ts.append(input, h("label", { for: id, text: label }));
+    }
     propsPane.replaceChildren(
+      h("div", { class: "settings-row" }, [h("span", { class: "settings-label", text: "Default target style" }), ts]),
+      h("p", { class: "lg-muted hint-text", text: "For new IPSC targets; each target can still be switched in its properties. Saved with the stage." }),
+      h("h3", { class: "settings-sub", text: "Shown in the props panel" }),
       h("p", { class: "lg-muted hint-text", text: "Choose what the props panel lists. Hiding a prop doesn't remove it from stages." }),
       ...LIBRARY_GROUPS.map((g) => {
         const groupOn = isShown(hidden, g.id);
@@ -138,11 +150,15 @@ export function createSettings({ editor, panel, hide = [], onToggle = () => {}, 
     h("div", { class: "settings-foot" }, [h("button", { type: "button", class: "lg-btn lg-btn-primary", onclick: () => close(), text: "Done" })]),
   );
   panel.setAttribute("aria-labelledby", "settings-title");
-  panel.hidden = true;
+  // The tab you had open last time.
+  let savedTab = null;
+  try { savedTab = localStorage.getItem("dsb:settings-tab"); } catch { /* private mode */ }
+  if (["view", "props"].includes(savedTab)) selectTab(savedTab);
+  if (!docked) panel.hidden = true;
   let isOpen = false;
   function show(open) {
     isOpen = open;
-    panel.hidden = !open;
+    if (!docked) panel.hidden = !open;            // docked, the dock shows or hides its tab
     for (const el of hide) el.hidden = open;
     onToggle(open);
   }
@@ -227,14 +243,6 @@ export function createSettings({ editor, panel, hide = [], onToggle = () => {}, 
     clock.checked = auto;
     const shadows = h("input", { type: "checkbox", class: "lg-toggle", id: "set-shadows", onchange: (e) => d({ type: "setLook", patch: { shadows: e.target.checked } }) });
     shadows.checked = look.shadows;
-    // Default style for new IPSC paper targets (each target can still be switched in its properties).
-    const ts = h("div", { class: "lg-segmented", role: "radiogroup", "aria-label": "Default target style" });
-    for (const [value, label] of [["classic", "Classic (octagon)"], ["head", "With head"]]) {
-      const id = `set-ts-${value}`;
-      const input = h("input", { type: "radio", name: "set-ts", id, value, onchange: () => d({ type: "setSetting", key: "targetStyle", value }) });
-      input.checked = (st.targetStyle || "classic") === value;
-      ts.append(input, h("label", { for: id, text: label }));
-    }
     // The Outdoor range floor (the other surroundings have their own fixed floor).
     const groundSel = h("select", { class: "lg-select", id: "set-ground", onchange: (e) => d({ type: "setLook", patch: { ground: e.target.value } }) },
       GROUNDS.map((g) => h("option", { value: g.id, text: g.name })));
@@ -243,7 +251,6 @@ export function createSettings({ editor, panel, hide = [], onToggle = () => {}, 
       h("div", { class: "settings-row" }, [h("span", { class: "settings-label", text: "Surroundings" }), env]),
       st.environment === "outdoor" ? h("div", { class: "settings-row" }, [h("label", { for: "set-ground", text: "Ground" }), groundSel]) : null,
       ...myRows,
-      h("div", { class: "settings-row" }, [h("span", { class: "settings-label", text: "Default target style" }), ts]),
       h("div", { class: "settings-row" }, [h("label", { for: "set-sun-auto", text: "Time of day" }), clock]),
       ...(auto ? [row.hour] : SUN_KEYS.map((k) => row[k])),
       row.sun, row.ambient,
@@ -255,8 +262,10 @@ export function createSettings({ editor, panel, hide = [], onToggle = () => {}, 
 
   return {
     // Open, or close when it's open and in view; when it's open but its panel is folded, unfold it.
-    open() { if (isOpen && !panel.closest(".lg-dock-folded")) return close(); if (isOpen) return show(true); fill(); show(true); panel.querySelector("input, button")?.focus(); },
+    open() { if (isOpen && !panel.closest(".lg-dock-folded") && !panel.classList.contains("lg-dock-inactive")) return close(); if (isOpen) return show(true); fill(); show(true); panel.querySelector("input, button")?.focus(); },
     close,
+    /** Shown by the dock (its tab clicked): fill it and count as open, without toggling. */
+    ensureOpen() { if (isOpen) return; fill(); show(true); },
     get isOpen() { return isOpen; },
   };
 }

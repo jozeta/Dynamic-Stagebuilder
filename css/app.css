@@ -108,9 +108,9 @@ body { background: var(--lg-bg); overflow: hidden; }
 .hint[hidden] { display: none; }
 
 /* The Inspector under the view: its settings and the statistics side by side. */
-.inspector[data-lg-dock-at="bottom"] { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--lg-space-l); align-content: start; }
-.inspector[data-lg-dock-at="bottom"] .stats { margin-top: 0; padding-top: 0; border-top: 0; }
-.inspector[data-lg-dock-at="bottom"] > .lg-dock-tools { position: absolute; }
+#inspector[data-lg-dock-at="bottom"] { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--lg-space-l); align-content: start; }
+#inspector[data-lg-dock-at="bottom"] .stats { margin-top: 0; padding-top: 0; border-top: 0; }
+#inspector[data-lg-dock-at="bottom"] > .lg-dock-tools { position: absolute; }
 
 .camera-bar { position: absolute; top: var(--lg-space-s); left: var(--lg-space-s); display: flex; flex-wrap: wrap; gap: 2px;
   padding: 2px; border-radius: var(--lg-radius-control); max-width: calc(100% - 2 * var(--lg-space-s)); box-sizing: border-box; }
@@ -295,11 +295,9 @@ body { background: var(--lg-bg); overflow: hidden; }
 @media (pointer: coarse) { .run-swatch { width: var(--lg-touch); height: var(--lg-touch); } .run-color { width: 56px; height: var(--lg-touch); } }
 
 /* Left panel tabs: Props and On stage. */
-#left-main { display: flex; flex-direction: column; min-height: 0; height: 100%; }
-#left-main[hidden] { display: none; }
-.left-tabs { display: flex; width: calc(100% - 66px); margin: 0 0 var(--lg-space-s); flex: none; }
-.left-tabs .lg-tab { flex: 1; }
-#library-body[hidden], .layers-panel[hidden] { display: none; }
+/* In a frame with tabs, the dock's tab bar carries the move and fold buttons. */
+.layers-head { padding-right: 68px; }        /* clear of the dock's buttons when the panel is alone */
+.lg-dock-frame[data-tabs] :is(.panel-title, .side-head, .settings-head, .layers-head) { padding-right: 0; }
 
 /* The On stage panel: a list of the props on the stage, with groups. */
 .layers-panel { display: flex; flex-direction: column; gap: var(--lg-space-s); min-height: 0; flex: 1; }

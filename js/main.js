@@ -109,8 +109,8 @@ function revealInspector(selection) {
   const reveal = revealOnSelect(shownSelection, selection);
   shownSelection = [...selection];
   if (!reveal) return;
-  if (settings?.isOpen) settings.close();
-  if (folds.inspector?.collapsed) folds.inspector.set(false);
+  if (settings?.isOpen && dock.side("settings") === dock.side("inspector")) settings.close();
+  dock.activate("inspector");                // its tab comes forward, unfolded
 }
 
 function render(state) {
@@ -283,6 +283,11 @@ async function openProject(id) {
   setStatus("Saved", "lg-ok");
   const view = loadView(id);                // where you left the camera, else the overview
   if (view) rig.setView(view); else rig.preset("iso", editor.stage());        // the high oblique overview of the whole bay
+  // Shooter's eye, if it was on in this project (and where you stood).
+  let eye = null;
+  try { eye = JSON.parse(localStorage.getItem(`dsb:eye:${id}`) || "null"); } catch { /* private mode */ }
+  const steps = document.getElementById("toolbar")?.eyeSteps;
+  if (eye?.on && typeof eye.at === "string" && view) steps?.restore(eye.at); else steps?.hide();
   return true;
 }
 async function addProject(stage) {
@@ -298,13 +303,14 @@ const freshStage = () => {
   return { ...s, settings: { ...s.settings, environment: cur.environment, look: cur.look } };
 };
 
+let dock = null;                   // the side panels' dock (Låda Glass), set up below
 const projects = createProjects({
   onOpenLibrary: (spec) => addProject(withView(libraryStage(spec))),
   panel: document.getElementById("projects"),
-  hide: [document.getElementById("left-main")],
+  docked: true,
   onToggle: (open) => {
     document.querySelector('[aria-label="Projects"].tool')?.setAttribute("aria-pressed", String(open));
-    if (open && folds.library?.collapsed) folds.library.set(false);      // never open a view inside a folded panel
+    dock?.activate(open ? "projects" : "props");            // its tab comes forward (and unfolds); closing goes back to Props
   },
   store: { list: () => store.list() },
   currentId: () => editor.stage().id,
@@ -347,31 +353,11 @@ const library = createLibrary(document.getElementById("library-body"), { editor,
 const menu = createContextMenu({ editor, rig, onShooterEye: () => document.getElementById("toolbar")?.eyeSteps?.reset() });
 menu.attach(canvas, { target: (e) => picking.objectAt(e, { locked: true }), ground: (e) => picking.groundAt(e) });
 const layers = createLayers(document.getElementById("layers"), { editor, menu });
-// The left panel's tabs: Props (the library) and On stage (the props on the stage), remembered.
-(() => {
-  const panes = { props: document.getElementById("library-body"), layers: document.getElementById("layers") };
-  const tabs = [["props", "Props"], ["layers", "On stage"]].map(([id, label]) => h("button", { type: "button", class: "lg-tab", role: "tab", id: `left-tab-${id}`,
-    "aria-controls": panes[id].id, onclick: () => show(id), text: label }));
-  const bar = h("div", { class: "lg-tabs left-tabs", role: "tablist", "aria-label": "Left panel" }, tabs);
-  bar.addEventListener("keydown", (e) => {
-    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
-    const next = tabs[(tabs.indexOf(document.activeElement) + 1) % tabs.length];
-    next.focus(); next.click();
-  });
-  function show(id) {
-    for (const b of tabs) b.setAttribute("aria-selected", String(b.id === `left-tab-${id}`));
-    for (const [k, el] of Object.entries(panes)) el.hidden = k !== id;
-    try { localStorage.setItem("dsb:left-tab", id); } catch { /* private mode */ }
-  }
-  document.getElementById("left-tabs").append(bar);
-  let first = "props";
-  try { if (localStorage.getItem("dsb:left-tab") === "layers") first = "layers"; } catch { /* private mode */ }
-  show(first);
-})();
 updaters.push(
   createToolbar(document.getElementById("toolbar"), {
     editor, rig, status, onAbout: () => about.open(), onHelp: () => help.open(), onBriefing: () => briefing.open(), onPrint: () => printBrief(),
     onProjects: () => projects.open(), onSettings: () => settings.open(), onViewing: viewingFrom, walking: () => animator.playing(),
+    onEyeState: (st) => { try { localStorage.setItem(`dsb:eye:${editor.stage().id}`, JSON.stringify(st)); } catch { /* private mode */ } },
   }),
   library,
   layers.update,
@@ -386,10 +372,12 @@ playButton = (() => {
       animator.setPlaying(!animator.playing());
       if (animator.playing()) animStart = performance.now() - pausedAt * 1000;
       else pausedAt = (performance.now() - animStart) / 1000;
+      try { localStorage.setItem("dsb:playing", String(animator.playing())); } catch { /* private mode */ }   // remembered
       b.update();
       engine.requestRender();
     } });
   let pausedAt = 0;
+  try { if (localStorage.getItem("dsb:playing") === "false") animator.setPlaying(false); } catch { /* private mode */ }
   b.update = () => {
     // Shown when props are animated, or when there are shooting positions to walk between.
     const st = editor.stage();
@@ -408,10 +396,16 @@ playButton = (() => {
 // right or under the view (drag the grip, or click it), fold to a rail and resize; remembered per
 // browser. On a narrow screen (an iPad upright) the Inspector starts under the view.
 const dockEl = document.getElementById("dock");
-if (matchMedia("(max-width: 1099px)").matches) document.getElementById("inspector").setAttribute("data-lg-dock-side", "bottom");
-const dock = window.LadaGlass.dock.init(dockEl, { key: "dsb", onChange: () => engine.resize?.() });
+if (matchMedia("(max-width: 1099px)").matches) for (const id of ["inspector", "settings-panel"]) document.getElementById(id).setAttribute("data-lg-dock-side", "bottom");
+dock = window.LadaGlass.dock.init(dockEl, { key: "dsb", onChange: () => { engine.resize?.(); syncDockTabs(); } });
+// A tab shown by the dock (clicked, or still shown after a reload) is filled in.
+function syncDockTabs() {
+  if (!dock) return;                         // still being set up
+  if (dock.active("settings") && !dock.folded("settings") && settings && !settings.isOpen) settings.ensureOpen();
+  if (dock.active("projects") && !dock.folded("projects") && projects && !projects.isOpen) projects.ensureOpen();
+}
 const fold = (id) => ({ set: (f) => dock.fold(id, f), get collapsed() { return dock.folded(id); } });
-folds.library = fold("library");
+folds.library = fold("props");
 folds.inspector = fold("inspector");
 briefing = createBriefing({ editor });
 // Your own surroundings (templates in this browser); the store is ready once projects have opened.
@@ -442,10 +436,10 @@ settings = createSettings({
   mine: mineApi,
   editor,
   panel: document.getElementById("settings-panel"),
-  hide: [document.getElementById("inspector-body"), document.getElementById("stats")],
+  docked: true,
   onToggle: (open) => {
     document.querySelector('[aria-label="Settings"].tool')?.setAttribute("aria-pressed", String(open));
-    if (open && folds.inspector?.collapsed) folds.inspector.set(false);
+    dock?.activate(open ? "settings" : "inspector");        // its tab comes forward; Done goes back to the Inspector
   },
   getHidden: () => hiddenProps,
   onHidden: (next) => { hiddenProps = next; saveHidden(next); library.setHidden(next); },
@@ -480,6 +474,7 @@ rig.preset("iso", editor.stage());
   const pick = all.find((r) => r.id === last) ?? all[0];
   if (!(pick && await openProject(pick.id))) await addProject(demoStage());
   viewReady = true;                        // from now on the camera belongs to an opened project
+  syncDockTabs();                          // a Settings or Projects tab still shown after a reload is filled in
 })();
 
 // Offline support (PWA). Not on file:// pages or browsers without service workers.

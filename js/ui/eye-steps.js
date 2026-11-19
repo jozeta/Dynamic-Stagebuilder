@@ -11,7 +11,7 @@ import { routeLegs } from "../model/route.js";
 
 const PAUSE_MS = 1400;     // time at each position during Play run
 
-export function createEyeSteps({ editor, rig, bar, onViewing = () => {}, walking = () => true }) {
+export function createEyeSteps({ editor, rig, bar, onViewing = () => {}, walking = () => true, onState = () => {} }) {
   let index = -1;                                    // −1 = the start position, else a shooting position
   let running = false;
   const label = h("span", { class: "eye-step-label", "aria-live": "polite", text: "Start" });
@@ -66,6 +66,7 @@ export function createEyeSteps({ editor, rig, bar, onViewing = () => {}, walking
   async function go({ walk = true } = {}) {
     const ps = list();
     if (index >= ps.length) index = ps.length - 1;
+    onState({ on: true, at: index < 0 ? "start" : ps[index].id });       // remembered for a reload
     const idOf = (i) => (i < 0 ? "start" : ps[i]?.id);
     describe(ps);
     const from = at;
@@ -130,6 +131,14 @@ export function createEyeSteps({ editor, rig, bar, onViewing = () => {}, walking
       index = i; at = i; box.hidden = false; go({ walk: false });
     },
     update() { if (!box.hidden) describe(list()); },
-    hide() { stopRun(); rig.stopWalk(); box.hidden = true; pad.hidden = true; onViewing(null); },
+    hide() { stopRun(); rig.stopWalk(); box.hidden = true; pad.hidden = true; onViewing(null); onState({ on: false }); },
+    /** After a reload: Shooter's eye back on at `at` (a position id or "start"); the camera is already there. */
+    restore(atId) {
+      const i = atId === "start" ? -1 : list().findIndex((p) => p.id === atId);
+      if (atId !== "start" && i < 0) return;
+      index = i; at = i; box.hidden = false;
+      describe(list());
+      onViewing(i < 0 ? "start" : list()[i].id);
+    },
   };
 }

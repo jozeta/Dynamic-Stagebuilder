@@ -3,6 +3,19 @@
 Newest first. Apps vendor a version under `vendor/lada-glass/<version>/`; `claude-check` reports an
 older copy as advice (DES-FAMILY-2).
 
+## 2.5.0 (2026-11-19)
+
+Dockable panels move one at a time: a dock holds frames, a frame holds panels as tabs, and any
+panel can be split out on its own or added to another frame. Apps on 2.4 keep working (their saved
+layouts carry over); grouping panels into tabs is opt-in with `data-lg-dock-group`.
+
+### Changed (web)
+
+- **Frames and tabs** in `LadaGlass.dock`: panels with the same `data-lg-dock-group` (and side) start as tabs of one frame (`.lg-dock-frame` with a `.lg-dock-head` tab bar: `role="tablist"`, ←/→/Home/End, the shown tab's grip and fold button at its end); frames on one side stack. Dragging a tab, or a lone panel's grip, moves only that panel: drop it on a side for a frame of its own there, or on the middle of another frame (`.lg-dock-target-tab`) to join it as the shown tab. The grip's menu offers the same moves ("Move to the left, on its own", "Add to … as a tab") for the keyboard. Folding folds a frame; `activate(id)` shows a tab and unfolds it.
+- Controller: new `join(id, otherId)`, `activate(id)` and `active(id)`; `move(id, side)` now gives the panel a frame of its own. Pure helpers `dock.moved` and `dock.joined`; `dock.sizes(state)` works on frames. `data-lg-dock-title` sets a tab's text.
+- The saved state is `{frames, sizes, folded}`; a 2.4 state (`{sides}`) carries over, with grouped panels kept together.
+- Preview: the demo's Library and Outline share a frame.
+
 ## 2.4.0 (2026-11-19)
 
 Dockable panels: side panels that move between a left, a right and a bottom dock around the main

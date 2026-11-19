@@ -4,6 +4,15 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Panels move one at a time (Låda Glass 2.5.0): Props, On stage and Projects are tabs of one
+  frame on the left, Inspector and Settings of one on the right. Drag a tab onto a side to give
+  it a frame of its own there, or onto another frame to add it there as a tab; the grip's menu
+  does the same. Projects and Settings in the toolbar bring their tab forward.
+- A reload brings back the view as you left it: the panels and their tabs, the Settings tab you
+  had open, folded groups in On stage, Play or Pause, and Shooter's eye at the position you stood on
+  (with the camera, View settings and walking speed, already remembered).
+- Default target style moved to the top of Settings → Props.
+
 - Fix: panning with a right-button or two-finger drag (a Mac trackpad) no longer opens the
   right-click menu; it opens only for a click without a drag.
 

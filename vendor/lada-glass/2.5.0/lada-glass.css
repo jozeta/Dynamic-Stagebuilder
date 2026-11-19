@@ -1,4 +1,4 @@
-/* Låda Glass 2.4.0: the shared look of Johan's apps (tools/design).
+/* Låda Glass 2.5.0: the shared look of Johan's apps (tools/design).
    Dark charcoal frosted glass is the main theme, light the alternative; compact density; custom
    accents. Values come from Låda (tokens.json); no build step, no dependencies, works from file://.
 
@@ -1062,10 +1062,11 @@ hr.lg-divider { height: 1px; margin: var(--lg-space-m) 0; border: 0; background:
 .lg-state-error   { --lg-tone: var(--lg-bad); }
 .lg-state-success { --lg-tone: var(--lg-ok); }
 
-/* ---- 2.4 dockable panels: .lg-dock-layout (LadaGlass.dock) -------------------------------------------- */
-/* A main view with docks on the left, right and bottom; panels move between them, stack when they
-   share one, resize from the dock's inner edge (.lg-dock-resize) and fold to a rail. The JS sets
-   --lg-dock-left / -right / -bottom (0 for an empty dock). */
+/* ---- 2.4–2.5 dockable panels: .lg-dock-layout (LadaGlass.dock) ---------------------------------------- */
+/* A main view with docks on the left, right and bottom. A dock holds frames (stacked); a frame
+   holds panels, shown as tabs when there are several (.lg-dock-head). Docks resize from their
+   inner edge (.lg-dock-resize); frames fold to a rail. The JS sets --lg-dock-left / -right /
+   -bottom (0 for an empty dock). */
 .lg-dock-layout { --lg-dock-left: 0px; --lg-dock-right: 0px; --lg-dock-bottom: 0px;
   position: relative; display: grid; min-width: 0; min-height: 0;
   grid-template-columns: var(--lg-dock-left) minmax(0, 1fr) var(--lg-dock-right);
@@ -1077,19 +1078,37 @@ hr.lg-divider { height: 1px; margin: var(--lg-space-m) 0; border: 0; background:
 .lg-dock[data-side="right"] { grid-area: right; flex-direction: column; padding-left: var(--lg-space-s); }
 .lg-dock[data-side="bottom"] { grid-area: bottom; flex-direction: row; padding-top: var(--lg-space-s); }
 .lg-dock[data-empty] { display: none; }
+.lg-dock-frame { flex: 1 1 0; display: flex; flex-direction: column; min-width: 0; min-height: 0; gap: var(--lg-space-xxs); }
 .lg-dock-panel { position: relative; flex: 1 1 0; min-width: 0; min-height: 0; overflow: auto; box-sizing: border-box; }
+.lg-dock-panel.lg-dock-inactive { display: none !important; }
 .lg-dock-tools { position: absolute; top: var(--lg-space-xs); right: var(--lg-space-xs); z-index: 2; display: flex; gap: var(--lg-space-xxs); }
-.lg-dock-tools .lg-btn { width: 28px; height: 28px; min-width: 0; min-height: 0; padding: 0; }
-.lg-dock-tools .lg-icon { width: 16px; height: 16px; }
-.lg-dock-grip { cursor: grab; touch-action: none; }
-.lg-dock-dragging .lg-dock-grip { cursor: grabbing; }
-/* Folded: only the panel's tools show; in a dock where every panel is folded, the dock is a rail. */
+.lg-dock-tools[hidden] { display: none; }
+.lg-dock-tools .lg-btn, .lg-dock-head-tools .lg-btn { width: 28px; height: 28px; min-width: 0; min-height: 0; padding: 0; }
+.lg-dock-tools .lg-icon, .lg-dock-head-tools .lg-icon { width: 16px; height: 16px; }
+.lg-dock-grip, .lg-dock-tab { cursor: grab; touch-action: none; }
+.lg-dock-dragging .lg-dock-grip, .lg-dock-dragging .lg-dock-tab { cursor: grabbing; }
+/* The tab bar of a frame with several panels. */
+.lg-dock-head { display: flex; align-items: center; gap: var(--lg-space-xs); flex: none; min-width: 0; padding: var(--lg-space-xxs);
+  border: 1px solid var(--lg-line); border-radius: var(--lg-radius-control); background-color: var(--lg-glass-strong); }
+.lg-dock-tablist { display: flex; flex: 1; min-width: 0; gap: var(--lg-space-xxs); overflow-x: auto; scrollbar-width: none; }
+.lg-dock-tab { flex: 0 1 auto; min-width: 0; padding: 4px 10px; border: 0; border-radius: var(--lg-radius-small); background: transparent;
+  color: var(--lg-muted); font: inherit; font-size: var(--lg-fs-small); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lg-dock-tab:hover { color: var(--lg-text); }
+.lg-dock-tab[aria-selected="true"] { color: var(--lg-text); background: color-mix(in srgb, var(--lg-accent) 18%, transparent); }
+.lg-dock-tab:focus-visible { outline: 2px solid var(--lg-accent); outline-offset: -2px; }
+.lg-dock-head-tools { display: flex; gap: var(--lg-space-xxs); flex: none; }
+/* Folded: only the tools show; in a dock where every frame is folded, the dock is a rail. */
+.lg-dock-frame[data-folded] { flex: 0 0 auto; }
+.lg-dock-frame[data-folded] .lg-dock-tablist { display: none; }
 .lg-dock-panel.lg-dock-folded { flex: 0 0 auto; min-height: 36px; overflow: visible; }
 .lg-dock-panel.lg-dock-folded > :not(.lg-dock-tools) { display: none !important; }
+.lg-dock-frame[data-tabs][data-folded] .lg-dock-panel { display: none !important; }
 .lg-dock[data-folded] { padding: 0; }
-.lg-dock[data-folded] .lg-dock-panel { flex: 1 1 0; padding: 0; background: none; border-color: transparent; box-shadow: none; }
-.lg-dock[data-folded]:not([data-side="bottom"]) .lg-dock-tools { position: static; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
-.lg-dock[data-side="bottom"][data-folded] .lg-dock-tools { position: static; justify-content: center; width: 100%; height: 100%; align-items: center; }
+.lg-dock[data-folded] .lg-dock-frame { flex: 1 1 0; }
+.lg-dock[data-folded] .lg-dock-panel, .lg-dock[data-folded] .lg-dock-head { flex: 1 1 0; padding: 0; background: none; border-color: transparent; box-shadow: none; }
+.lg-dock[data-folded]:not([data-side="bottom"]) :is(.lg-dock-tools, .lg-dock-head-tools) { position: static; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
+.lg-dock[data-folded]:not([data-side="bottom"]) .lg-dock-head { flex-direction: column; justify-content: center; }
+.lg-dock[data-side="bottom"][data-folded] :is(.lg-dock-tools, .lg-dock-head-tools) { position: static; justify-content: center; width: 100%; height: 100%; align-items: center; }
 /* The resize separator straddles the dock's inner edge. */
 .lg-dock-resize { z-index: 3; touch-action: none; background: transparent; border-radius: 4px; }
 .lg-dock-resize[data-side="left"] { grid-area: left; justify-self: end; width: 8px; margin-right: -4px; cursor: col-resize; }
@@ -1097,18 +1116,21 @@ hr.lg-divider { height: 1px; margin: var(--lg-space-m) 0; border: 0; background:
 .lg-dock-resize[data-side="bottom"] { grid-area: bottom; align-self: start; height: 8px; margin-top: -4px; cursor: row-resize; }
 .lg-dock-resize[hidden] { display: none; }
 .lg-dock-resize:is(:hover, :focus-visible, .is-dragging) { background: color-mix(in srgb, var(--lg-accent) 45%, transparent); outline: none; }
-/* While a grip is dragged: where it would land. */
+/* While a tab or grip is dragged: where it would land (a side, or another frame as a tab). */
 .lg-dock-targets { position: absolute; inset: 0; z-index: 20; pointer-events: none; display: none; }
 .lg-dock-dragging .lg-dock-targets { display: block; }
 .lg-dock-target { position: absolute; display: grid; place-items: center; border: 2px dashed color-mix(in srgb, var(--lg-accent) 55%, transparent);
-  border-radius: var(--lg-radius-card); color: var(--lg-text); font-size: var(--lg-fs-small); text-transform: capitalize;
-  background: color-mix(in srgb, var(--lg-accent) 8%, transparent); }
+  border-radius: var(--lg-radius-card); color: var(--lg-text); font-size: var(--lg-fs-small); text-transform: capitalize; text-align: center;
+  background: color-mix(in srgb, var(--lg-accent) 8%, transparent); box-sizing: border-box; }
+.lg-dock-target[data-side] { place-items: start center; padding-top: var(--lg-space-m); }      /* labels clear of the frame targets */
 .lg-dock-target[data-side="left"] { left: 0; top: 0; bottom: 0; width: 22%; }
 .lg-dock-target[data-side="right"] { right: 0; top: 0; bottom: 0; width: 22%; }
 .lg-dock-target[data-side="bottom"] { left: 22%; right: 22%; bottom: 0; height: 30%; }
+.lg-dock-target-tab { text-transform: none; border-style: dotted; z-index: 1; background: color-mix(in srgb, var(--lg-bg) 55%, transparent); }
 .lg-dock-target.is-active { background: color-mix(in srgb, var(--lg-accent) 26%, transparent); border-style: solid; }
 @media (pointer: coarse) {
-  .lg-dock-tools .lg-btn { width: var(--lg-touch); height: var(--lg-touch); }
+  .lg-dock-tools .lg-btn, .lg-dock-head-tools .lg-btn { width: var(--lg-touch); height: var(--lg-touch); }
+  .lg-dock-tab { min-height: var(--lg-touch); }
   .lg-dock-resize[data-side="left"], .lg-dock-resize[data-side="right"] { width: 16px; }
   .lg-dock-resize[data-side="left"] { margin-right: -8px; } .lg-dock-resize[data-side="right"] { margin-left: -8px; }
   .lg-dock-resize[data-side="bottom"] { height: 16px; margin-top: -8px; }
@@ -1139,7 +1161,7 @@ hr.lg-divider { height: 1px; margin: var(--lg-space-m) 0; border: 0; background:
   .lg-backdrop { background: var(--lg-bg); }
 }
 @media (forced-colors: active) {
-  .lg-dock-target { border-color: Highlight; } .lg-dock-target.is-active { background: Highlight; color: HighlightText; } .lg-dock-resize:is(:hover, :focus-visible, .is-dragging) { background: Highlight; }
+  .lg-dock-target { border-color: Highlight; } .lg-dock-tab[aria-selected="true"] { outline: 2px solid Highlight; } .lg-dock-target.is-active { background: Highlight; color: HighlightText; } .lg-dock-resize:is(:hover, :focus-visible, .is-dragging) { background: Highlight; }
   .lg-glass, .lg-card, .lg-sidebar, .lg-toast, .lg-popup, .lg-empty, .lg-modal, .lg-drawer, .lg-palette, .lg-popover, .lg-menu, .lg-combobox, .lg-notifications { border: 1px solid CanvasText; }
   .lg-toggle, .lg-check, .lg-select, .lg-stepper { border: 1px solid CanvasText; }
   .lg-shimmer { background: none; color: CanvasText; }
