@@ -2,12 +2,13 @@
 // own group and never read or change stage objects.
 import { technical } from "./technical.js";
 import { outdoor } from "./outdoor.js";
+import { blueprint } from "./blueprint.js";
 import { disposeGroup } from "./common.js";
 export { applyLook } from "./common.js";
 
-const FACTORIES = { technical, outdoor };
+const FACTORIES = { technical, outdoor, blueprint };
 export const ENVIRONMENT_NAMES = Object.keys(FACTORIES);
-export const ENVIRONMENT_LABELS = { technical: "Technical", outdoor: "Outdoor" };
+export const ENVIRONMENT_LABELS = { technical: "Technical", outdoor: "Outdoor", blueprint: "Blueprint" };
 
 export function createEnvironment(name, bay, options = {}) {
   const make = FACTORIES[name];

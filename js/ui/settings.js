@@ -101,7 +101,7 @@ export function createSettings({ editor, panel, hide = [], onToggle = () => {}, 
     }
     const rows = SLIDERS.map(([key, label, min, max, step, show]) => {
       const id = `set-${key}`;
-      const off = key === "haze" && st.environment === "technical";   // the indoor-style bay has no haze
+      const off = key === "haze" && st.environment !== "outdoor";     // haze is for the Outdoor range only
       const out = h("output", { for: id, class: "lg-mono settings-value", text: show(look[key]) });
       const input = h("input", { type: "range", class: "lg-slider", id, min, max, step, value: String(look[key]), disabled: off,
         title: off ? "Haze applies to the Outdoor surroundings" : null,

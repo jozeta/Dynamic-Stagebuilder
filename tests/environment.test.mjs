@@ -8,8 +8,25 @@ import { everyPropStage } from "./fixtures.mjs";
 
 const snapshot = (group) => group.children.map((c) => ({ id: c.userData.id, p: c.position.toArray(), r: c.rotation.toArray(), n: c.children.length }));
 
-test("both environments exist", () => {
-  assert.deepEqual(ENVIRONMENT_NAMES, ["technical", "outdoor"]);
+test("three surroundings exist", () => {
+  assert.deepEqual(ENVIRONMENT_NAMES, ["technical", "outdoor", "blueprint"]);
+});
+
+test("Blueprint: an endless blue drafting ground with no bay floor or walls, fading into the distance", async () => {
+  const { Box3, Vector3 } = await import("three");
+  const env = createEnvironment("blueprint", { width: 20, depth: 30 });
+  const ground = env.group.children.find((c) => c.userData.ground);
+  assert.ok(ground, "a ground to place props on");
+  const size = new Box3().setFromObject(ground).getSize(new Vector3());
+  assert.ok(size.x >= 2000 && size.z >= 2000, `ground ${size.x} × ${size.z} m`);
+  let tallest = 0;
+  env.group.traverse((c) => { if (c.isMesh && !c.userData.ground) tallest = Math.max(tallest, new Box3().setFromObject(c).getSize(new Vector3()).y); });
+  assert.ok(tallest < 0.05, `nothing stands up out of the drawing (tallest ${tallest} m)`);
+  let notes = 0;
+  env.group.traverse((c) => { if (c.userData.blueprint) notes++; });
+  assert.ok(notes >= 6, `drafting details: ${notes}`);
+  assert.ok(env.fog && env.fog.color.getHex() === env.background.getHex(), "the ground fades into the background colour");
+  env.dispose();
 });
 
 test("creating and disposing environments leaves the stage and its view untouched", () => {
@@ -57,7 +74,7 @@ test("the look moves the sun with the hour and switches shadows, never touching 
     applyLook(env, { ...LOOK_DEFAULTS, hour: 19, shadows: false, haze: 0 }, stage.bay);
     assert.ok(env.sunLight.position.y < noonY, name);
     assert.equal(env.sunLight.castShadow, false);
-    assert.equal(env.fog, null);
+    assert.equal(env.fog, name === "blueprint" ? env.baseFog : null, "no haze: only Blueprint's distance fade");
     env.dispose();
   }
   assert.deepEqual(stage, before);

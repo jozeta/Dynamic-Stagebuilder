@@ -89,7 +89,7 @@ export function applyLook(env, look, bay) {
     env.hazeFog ??= new THREE.FogExp2(env.hazeColor, 0.01);
     env.hazeFog.density = 0.002 + look.haze * 0.0135;
     env.fog = env.hazeFog;
-  } else env.fog = null;
+  } else env.fog = env.baseFog ?? null;      // Blueprint keeps its distance fade
   env.exposure = look.exposure;
   env.paintSky?.(s.warmth);
   return env;

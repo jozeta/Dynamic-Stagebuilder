@@ -40,7 +40,7 @@ const FILES = [
   "js/render/environments/common.js",
   "js/render/environments/ground.js",
   "js/render/environments/index.js",
-  "js/render/environments/outdoor.js",
+  "js/render/environments/outdoor.js", "js/render/environments/blueprint.js",
   "js/render/environments/technical.js",
   "js/render/environments/terrain.js",
   "js/render/ground.js",
