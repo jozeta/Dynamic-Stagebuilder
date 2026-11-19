@@ -14,6 +14,7 @@ export const LIBRARY_CATEGORIES = Object.freeze([
   { id: "medium", name: "Medium courses" },
   { id: "long", name: "Long courses" },
   { id: "club", name: "USPSA and club (moving and reactive)" },
+  { id: "nationals", name: "Match stages (after the 2012 US IPSC Nationals)" },
 ]);
 
 export const STAGE_LIBRARY = LIBRARY_STAGES;

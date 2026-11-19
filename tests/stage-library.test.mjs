@@ -28,7 +28,7 @@ for (const spec of STAGE_LIBRARY) {
     const s = stageStats(stage);
     assert.ok(s.minRounds > 0);
     if (spec.discipline === "IPSC") {
-      const limit = { short: SCORING.courseLimits.Short, medium: SCORING.courseLimits.Medium, long: SCORING.courseLimits.Long }[spec.category];
+      const limit = { short: SCORING.courseLimits.Short, medium: SCORING.courseLimits.Medium, long: SCORING.courseLimits.Long }[spec.size ?? spec.category];
       if (limit) assert.ok(s.minRounds <= limit, `${s.minRounds} rounds for a ${spec.category} course`);
       for (const o of stage.objects) assert.ok(!["texas-star", "plate-rack", "dueling-tree"].includes(o.type), "no carnival props in IPSC stages");
     }

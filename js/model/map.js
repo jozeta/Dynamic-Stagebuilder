@@ -10,6 +10,7 @@ const CARD_DEPTH = 0.03;   // paper targets are drawn as their thin face, not th
 function style(o) {
   const p = getProp(o.type);
   if (p.scoring === "position") return "position";
+  if (o.type === "hardcover-panel") return "hardcover";
   if (p.scoring === "paper") return arrayCounts(o).paper ? "paper" : "noshoot";
   if (p.scoring === "steel") return "steel";
   if (p.category === "wall") return "wall";
@@ -92,7 +93,7 @@ export function mapModel(stage, { width, height, margin = 4, region = "bay" }) {
       const paper = st === "paper" || st === "noshoot";
       // Walls are drawn as their frame (not the feet); paper targets as their thin face.
       const width = d.w * scale;
-      const depth = paper ? Math.max(CARD_DEPTH * scale, 0.8) : st === "wall" ? Math.max(STICK * scale, 0.6) : Math.max(d.d * scale, 0.5);
+      const depth = paper ? Math.max(CARD_DEPTH * scale, 0.8) : st === "wall" || st === "hardcover" ? Math.max(STICK * scale, 0.6) : Math.max(d.d * scale, 0.5);
       items.push({ kind: "rect", x, y, w: width, h: depth, rotation: o.rotation, style: st });
     }
     if (o.label && getProp(o.type).scoring) labels.push({ kind: "label", x, y: y - 1.6, text: o.label, style: st, ...labelSize(o.label) });

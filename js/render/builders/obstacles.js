@@ -40,6 +40,13 @@ export function buildBarrel(obj) {
   const small = mesh(new THREE.CylinderGeometry(0.017, 0.017, 0.012, 16), "bare-steel");
   small.position.set(-R * 0.66, lidY + 0.006, R * 0.08);
   g.add(big, small);
+  // Two high: a second drum stood on the first.
+  if (obj.params.stack > 1) {
+    const top = buildBarrel({ ...obj, params: { ...obj.params, stack: 1 } });
+    top.position.y = H;
+    top.rotation.y = Math.PI;          // bungs on the other side
+    g.add(top);
+  }
   return g;
 }
 

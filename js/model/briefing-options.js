@@ -16,6 +16,10 @@ export const BRIEFING_OPTIONS = Object.freeze({
     "Seated on the chair, hands flat on the thighs",
     "Kneeling in the start box, hands on the knees",
     "Standing anywhere in the shooting area, wrists above the shoulders",
+    "Standing with toes touching the X marks, hands on the head",
+    "Standing with heels touching the X marks, facing up range, arms hanging naturally",
+    "Standing with palms touching the X marks on the wall",
+    "Seated on the chair, pistol in the closed gun case on the table, hands flat on the thighs",
   ]),
   gunCondition: Object.freeze([
     "Loaded and holstered, ready condition",
@@ -23,6 +27,8 @@ export const BRIEFING_OPTIONS = Object.freeze({
     "Loaded, on the table, muzzle toward the berm, hammer down",
     "Unloaded on the table, slide forward, magazines in the pouches",
     "Unloaded in the box, slide locked back, magazines in the pouches",
+    "Unloaded in the closed gun case on the table, magazines in the pouches",
+    "Unloaded on the table, slide forward, all ammunition on the table",
   ]),
   stopTime: Object.freeze(["Last shot", "Last shot as recorded by the timer"]),
   procedure: Object.freeze([

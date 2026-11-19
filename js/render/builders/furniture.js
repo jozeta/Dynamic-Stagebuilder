@@ -52,6 +52,13 @@ export function buildTable(obj) {
   g.add(box(L - 0.06, 0.06, 0.03, "bare-steel", 0, H - 0.06, D / 2 - 0.05));
   for (const [x, z] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) g.add(box(0.035, H - 0.03, 0.035, "bare-steel", x * (L / 2 - 0.08), (H - 0.03) / 2, z * (D / 2 - 0.06)));
   g.add(box(L - 0.16, 0.025, 0.025, "bare-steel", 0, 0.2, 0));
+  // Start gear on the table: a pistol, a pistol with magazines, or a closed gun case.
+  const it = obj.params.items;
+  if (it === "pistol" || it === "pistol-mags") {
+    g.add(box(0.2, 0.03, 0.035, "plastic-dark", 0, H + 0.015, 0));
+    g.add(box(0.035, 0.03, 0.12, "plastic-dark", -0.07, H + 0.015, 0.06));
+    if (it === "pistol-mags") for (const i of [0, 1, 2]) g.add(box(0.035, 0.025, 0.13, "steel-dark", 0.2 + i * 0.06, H + 0.0125, 0));
+  } else if (it === "case") g.add(box(0.45, 0.12, 0.3, "plastic-dark", 0, H + 0.06, 0));
   return g;
 }
 

@@ -88,6 +88,12 @@ export function starPlates(plates) {
   return out;
 }
 
+// From the 2012 US IPSC Nationals stage diagrams: activators, start marks, a port with a shutter,
+// hard-cover panels, raised barricades, bobbers, twisters, a wobble platform, a balance rope, a step box.
+export const ACTIVATORS = deepFreeze({ pad: 0.5, lever: { base: 0.3, pivot: 1.0, top: 1.52 } });
+const TABLE_ITEMS = { none: 0, pistol: 0.03, "pistol-mags": 0.03, case: 0.12 };
+const X_MARK = (0.26 + 0.03) / Math.SQRT2;
+
 // Building pieces, to rebuild your own range on a plan (Settings → Surroundings → New from a plan).
 const MATERIAL = { material: { default: "concrete", options: ["concrete", "brick", "wood", "metal"] } };
 export const CONTAINERS = deepFreeze({ "20ft": { length: 6.06, width: 2.44, height: 2.59 }, "40ft": { length: 12.19, width: 2.44, height: 2.59 } });
@@ -136,7 +142,7 @@ const defs = [
   { type: "clamshell", name: "Clamshell", category: "moving", scoring: "paper", params: { ...ANIMATE_PARAM, style: mount.style },
     note: "A paper target behind a steel cover that drops away once activated." },
   { type: "mover", name: "Mover on a track", category: "moving", scoring: "paper",
-    params: { ...ANIMATE_PARAM, style: mount.style, length: { default: 3, min: 1.5, max: 6, step: 0.5 } },
+    params: { ...ANIMATE_PARAM, style: mount.style, length: { default: 3, min: 1.5, max: 8, step: 0.5 }, targets: { default: 1, min: 1, max: 4, step: 1 } },
     note: "A paper target that runs across on a track once activated." },
   { type: "texas-star", name: "Texas star", category: "moving", scoring: "steel", plates: (p) => p.plates,
     params: { ...ANIMATE_PARAM, plates: { default: 5, min: 5, max: 10, step: 5 }, ...paint("white") }, note: `A spinning star of steel plates. ${CARNIVAL}` },
@@ -144,6 +150,30 @@ const defs = [
     params: { ...ANIMATE_PARAM, plates: { default: 6, min: 4, max: 8, step: 1 }, ...paint("white") }, note: `Falling plates in a row. ${CARNIVAL}` },
   { type: "dueling-tree", name: "Dueling tree", category: "moving", scoring: "steel", plates: () => 6,
     params: { ...ANIMATE_PARAM, ...paint("white") }, note: `Six paddles that swing over from one side of the post to the other. ${CARNIVAL}` },
+  { type: "step-pad", name: "Step pad", category: "activator", scoring: null, params: { pads: { default: 1, min: 1, max: 3, step: 2 } },
+    note: "A pressure pad the shooter steps on to start a moving target (one pad, or a cluster of three)." },
+  { type: "pull-lever", name: "Pull lever", category: "activator", scoring: null, params: {},
+    note: "A lever on a post the shooter pulls to open a shutter or release a target." },
+  { type: "start-marks", name: "Start marks (X)", category: "marking", scoring: null, params: {},
+    note: "Two X marks for toes, heels or palms at the start." },
+  { type: "wall-port-shutter", name: "Wall with shuttered port", category: "wall", scoring: null,
+    params: { ...ANIMATE_PARAM, ...wallSize, ...port, shutter: { default: "closed", options: ["closed", "open"] } },
+    note: "A wooden wall whose port has a shutter that drops open (by a lever, rope or popper)." },
+  { type: "hardcover-panel", name: "Hard cover panel", category: "wall", scoring: null,
+    params: { length: { default: 1, min: 0.5, max: 1.5, step: 0.1 }, height: { default: 1.8, min: 0.9, max: 2.2, step: 0.1 } },
+    note: "A black panel that hits don't go through; moving targets swing or turn behind it." },
+  { type: "raised-barricade", name: "Raised barricade", category: "wall", scoring: null,
+    params: { length: { default: 3, min: 2, max: 4, step: 0.1 }, panelHeight: { default: 0.9, min: 0.5, max: 1.2, step: 0.05 }, gap: { default: 0.5, min: 0.2, max: 1, step: 0.05 } },
+    note: "A panel on posts with an open gap underneath, to shoot under or over." },
+  { type: "bobber", name: "Bobber", category: "moving", scoring: "paper", params: { ...ANIMATE_PARAM, style: mount.style },
+    note: "A paper target that rises into view behind hard cover and drops out of sight again." },
+  { type: "twister", name: "Twister", category: "moving", scoring: "paper", params: { ...ANIMATE_PARAM, style: mount.style },
+    note: "A paper target that spins on a vertical post, showing its face and its edge in turn." },
+  { type: "wobble-platform", name: "Wobble platform", category: "structure", scoring: null, params: { ...ANIMATE_PARAM },
+    note: "A deck on a pivot that moves under the shooter." },
+  { type: "balance-rope", name: "Balance rope", category: "structure", scoring: null, params: {},
+    note: "A rope hanging from a frame, to steady yourself on a wobble platform." },
+  { type: "step-box", name: "Step box", category: "structure", scoring: null, params: {} },
   { type: "building-wall", name: "Building wall", category: "building", scoring: null,
     params: { length: { default: 5, min: 0.5, max: 30, step: 0.1 }, height: { default: 3, min: 0.5, max: 8, step: 0.1 },
       thickness: { default: 0.25, min: 0.1, max: 0.8, step: 0.05 }, ...MATERIAL } },
@@ -179,7 +209,7 @@ const defs = [
   { type: "platform", name: "Platform", category: "structure", scoring: null,
     params: { length: { default: 2, min: 1, max: 4, step: 0.1 }, width: { default: 1.2, min: 0.8, max: 3, step: 0.1 }, height: { default: 0.6, min: 0.2, max: 1.5, step: 0.05 } } },
   { type: "barrel", name: "Barrel (200 l)", category: "obstacle", scoring: null,
-    params: { color: { default: "black", options: ["black", "blue", "red", "green"] } } },
+    params: { color: { default: "black", options: ["black", "blue", "red", "green"] }, stack: { default: 1, min: 1, max: 2, step: 1 } } },
   { type: "tyre", name: "Tyre", category: "obstacle", scoring: null, params: {} },
   { type: "tyre-stack", name: "Tyre stack", category: "obstacle", scoring: null,
     params: { count: { default: 3, min: 1, max: 6, step: 1 } } },
@@ -188,7 +218,7 @@ const defs = [
   { type: "plant-palm", name: "Potted plant", category: "obstacle", scoring: null, params: {} },
   { type: "car", name: "Car", category: "obstacle", scoring: null,
     params: { model: { default: "sedan", options: ["sedan", "hatchback", "pickup", "van"] }, color: { default: "white", options: ["white", "red", "blue", "grey", "rust"] } } },
-  { type: "table", name: "Table", category: "obstacle", scoring: null, params: { length: { default: 1.8, min: 1, max: 2.4, step: 0.1 } } },
+  { type: "table", name: "Table", category: "obstacle", scoring: null, params: { items: { default: "none", options: ["none", "pistol", "pistol-mags", "case"] }, length: { default: 1.8, min: 1, max: 2.4, step: 0.1 } } },
   { type: "chair", name: "Chair", category: "obstacle", scoring: null, params: {} },
   { type: "pallet", name: "Pallets", category: "obstacle", scoring: null, params: { count: { default: 1, min: 1, max: 6, step: 1 } } },
   { type: "sandbags", name: "Sandbag wall", category: "obstacle", scoring: null,
@@ -236,14 +266,14 @@ export function dimensionsOf(obj) {
       [w, h, d] = [Math.max(p.size, PLATE_FOOT), p.baseHeight + p.size, PLATE_FOOT]; break;
     case "wall-mesh": case "wall-mesh-port": case "wall-wood": case "wall-port": case "wall-door": case "wall-solid":
       [w, h, d] = [p.length, p.height, WALL_FOOT]; break;
-    case "barrel": [w, h, d] = [BARREL.diameter, BARREL.height, BARREL.diameter]; break;
+    case "barrel": [w, h, d] = [BARREL.diameter, BARREL.height * (p.stack || 1), BARREL.diameter]; break;
     case "tyre": [w, h, d] = [TYRE.diameter, TYRE.height, TYRE.diameter]; break;
     case "tyre-stack": [w, h, d] = [TYRE.diameter, TYRE.height * p.count, TYRE.diameter]; break;
     case "crate": [w, h, d] = [p.size, p.size, p.size]; break;
     case "plant-palm": [w, h, d] = [PLANT.diameter, PLANT.height, PLANT.diameter]; break;
     case "ramp": case "platform": [w, h, d] = [p.length, p.height, p.width]; break;
     case "car": { const m = CAR_MODELS[p.model] || CAR_MODELS.sedan; [w, h, d] = [m.length, m.height, m.width]; break; }
-    case "table": [w, h, d] = [p.length, TABLE.height, TABLE.depth]; break;
+    case "table": [w, h, d] = [p.length, TABLE.height + (TABLE_ITEMS[p.items] ?? 0), TABLE.depth]; break;
     case "chair": [w, h, d] = [CHAIR.w, CHAIR.h, CHAIR.d]; break;
     case "pallet": [w, h, d] = [PALLET.length, PALLET.height * p.count, PALLET.width]; break;
     case "sandbags": [w, h, d] = [p.length, SANDBAG.height * p.rows, SANDBAG.depth]; break;
@@ -254,6 +284,20 @@ export function dimensionsOf(obj) {
       [w, h, d] = [p.doorWidth + 2 * STICK + 0.02, p.height, WALL_FOOT / 2 + Math.max(WALL_FOOT / 2, leaf)]; break;
     }
     case "building-wall": [w, h, d] = [p.length, p.height, p.thickness]; break;
+    case "step-pad": [w, h, d] = p.pads > 1 ? [1.2, 0.05, 1.2] : [0.5, 0.05, 0.5]; break;
+    case "pull-lever": [w, h, d] = [ACTIVATORS.lever.base, ACTIVATORS.lever.top, ACTIVATORS.lever.base]; break;
+    case "start-marks": [w, h, d] = [0.3 + X_MARK, 0.004, X_MARK]; break;
+    case "wall-port-shutter": {
+      const ph = Math.min(p.portHeight, p.height - 0.1);           // the port as fitted into the wall
+      [w, h, d] = [p.length, p.height, WALL_FOOT / 2 + (p.shutter === "open" ? Math.max(WALL_FOOT / 2, ph + 0.023) : WALL_FOOT / 2)]; break;
+    }
+    case "hardcover-panel": [w, h, d] = [p.length, p.height, WALL_FOOT]; break;
+    case "raised-barricade": [w, h, d] = [p.length, p.gap + p.panelHeight, WALL_FOOT]; break;
+    case "bobber": { const c = paperSize({ type: obj.type, params: p }); [w, h, d] = [Math.max(0.6, c.w), 1.0 + c.h, 0.5]; break; }
+    case "twister": { const c = paperSize({ type: obj.type, params: p }); [w, h, d] = [Math.max(0.5, c.w), 0.9 + c.h, 0.5]; break; }
+    case "wobble-platform": [w, h, d] = [1.6, 0.25, 1.2]; break;
+    case "balance-rope": [w, h, d] = [0.8, 2.4, 0.5]; break;
+    case "step-box": [w, h, d] = [0.6, 0.2, 0.3]; break;
     case "pillar": [w, h, d] = [p.size, p.height, p.size]; break;
     case "column": [w, h, d] = [p.diameter, p.height, p.diameter]; break;
     case "berm": [w, h, d] = [p.length, p.height, p.depth]; break;
@@ -271,7 +315,7 @@ export function dimensionsOf(obj) {
     case "swinger": { const m = MOVING.swinger, c = paperSize({ type: obj.type, params: p }); [w, h, d] = [Math.max(m.frame, c.w), m.cardBottom + c.h, m.depth]; break; }
     case "drop-turner": { const m = MOVING.turner, c = paperSize({ type: obj.type, params: p }); [w, h, d] = [Math.max(m.frame, c.w), Math.max(m.post, m.cardBottom + c.h), m.depth]; break; }
     case "clamshell": { const m = MOVING.clam, c = paperSize({ type: obj.type, params: p }); [w, h, d] = [c.w + 0.1, m.cardBottom + c.h + 0.05, m.depth]; break; }
-    case "mover": { const m = MOVING.mover, c = paperSize({ type: obj.type, params: p }); [w, h, d] = [p.length, m.cardBottom + c.h, m.depth]; break; }
+    case "mover": { const m = MOVING.mover, c = paperSize({ type: obj.type, params: p }); [w, h, d] = [Math.max(p.length, ((p.targets || 1) - 1) * 0.7 + c.w), m.cardBottom + c.h, m.depth]; break; }
     default: throw new Error(`Unknown prop type: ${obj.type}`);
   }
   return { w: round(w), h: round(h), d: round(d) };

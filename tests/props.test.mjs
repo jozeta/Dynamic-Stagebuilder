@@ -8,6 +8,7 @@ const TYPES = ["paper-ipsc", "paper-mini", "popper", "mini-popper",
   "plate-round", "plate-square", "wall-mesh", "wall-mesh-port", "wall-wood", "wall-port", "barrel", "tyre", "tyre-stack", "crate", "plant-palm",
   "wall-door", "wall-solid", "ramp", "platform", "car", "table", "chair", "pallet", "sandbags", "cone",
   "swinger", "drop-turner", "clamshell", "mover", "texas-star", "plate-rack", "dueling-tree", "shooting-position", "door",
+  "step-pad", "pull-lever", "start-marks", "wall-port-shutter", "hardcover-panel", "raised-barricade", "bobber", "twister", "wobble-platform", "balance-rope", "step-box",
   "building-wall", "pillar", "column", "berm", "container", "fence", "barrier"];
 
 const near = (a, b, tol = 0.005) => assert.ok(Math.abs(a - b) <= tol, `${a} ≈ ${b}`);
@@ -16,7 +17,7 @@ const obj = (type, params = {}) => ({ type, params: { ...defaultParams(type), ..
 test("every v1 prop type exists with a category", () => {
   for (const t of TYPES) {
     assert.ok(PROPS[t], t);
-    assert.ok(["marking", "paper", "steel", "moving", "wall", "structure", "obstacle", "building"].includes(PROPS[t].category), t);
+    assert.ok(["marking", "paper", "steel", "moving", "activator", "wall", "structure", "obstacle", "building"].includes(PROPS[t].category), t);
   }
   assert.equal(Object.keys(PROPS).length, TYPES.length);
 });

@@ -35,6 +35,16 @@ function sizeText(type) {
     case "texas-star": return `${p.plates} plates, not IPSC`;
     case "plate-rack": return `${p.plates} plates, not IPSC`;
     case "dueling-tree": return "6 paddles, not IPSC";
+    case "step-pad": return p.pads > 1 ? "Three pads, activates a target" : "Pad, activates a target";
+    case "pull-lever": return "Opens a shutter or releases a target";
+    case "wall-port-shutter": return `${p.length} × ${p.height} m, port with a shutter`;
+    case "hardcover-panel": return `${p.length} × ${p.height} m, black`;
+    case "raised-barricade": return `${p.length} m, gap ${cm(p.gap)} cm`;
+    case "bobber": return "Paper, rises and drops";
+    case "twister": return "Paper, spins on its post";
+    case "wobble-platform": return "1.6 × 1.2 m, moves under you";
+    case "balance-rope": return "Rope on a 2.4 m frame";
+    case "step-box": return "60 × 30 × 20 cm";
     case "door": return `${cm(p.doorWidth)} × ${cm(p.height)} cm, opens`;
     case "building-wall": return `${p.length} × ${p.height} m, concrete, brick, wood or metal`;
     case "pillar": return `${cm(p.size)} cm square, ${p.height} m`;
@@ -66,6 +76,7 @@ export function createLibrary(root, { editor, hidden: initialHidden = { categori
     ["line", "Fault line", "Tap points; Finish or Enter to end", { type: "beginDraw", lineType: "fault-line" }, (s) => s.mode?.draw === "fault-line"],
     ["area", "Shooting area", "Tap the corners; Finish to close", { type: "beginDraw", lineType: "shooting-area" }, (s) => s.mode?.draw === "shooting-area"],
     ["flag", "Start position", "Tap where the shooter starts", { type: "beginStart" }, (s) => s.mode === "start"],
+    ["flag", "Start marks (X)", "Tap to place X marks for toes, heels or palms", { type: "setMode", mode: { place: "start-marks" } }, (s) => s.mode?.place === "start-marks", "start-marks"],
     ["eye", "Shooting position", "Tap each place the shooter shoots from: 1, 2, 3…", { type: "setMode", mode: { place: "shooting-position" } }, (s) => s.mode?.place === "shooting-position", "shooting-position"],
   ].map(([ic, name, hint, action, active, id = action.lineType || "start"]) => {
     const el = h("button", { type: "button", class: "lib-item lib-marking", role: "listitem", "aria-pressed": "false", dataset: { marking: name, type: id },

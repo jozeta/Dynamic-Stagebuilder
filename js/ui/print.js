@@ -12,7 +12,8 @@ function mapBox(stage) {
   const r = mapRegion(stage, "content");
   return { width: MAP_WIDTH, height: Math.round(Math.min(165, Math.max(90, (MAP_WIDTH * (r.maxZ - r.minZ)) / (r.maxX - r.minX)))) };
 }
-const FILL = { paper: "#c9a273", noshoot: "#ffffff", steel: "#8d9096", wall: "#1d1f22", obstacle: "#6f5638", position: "#2f7bff" };
+// Map colours as on IPSC stage diagrams: tan = shoot, white = no-shoot, blue = steel, black = hard cover.
+const FILL = { paper: "#c9a273", noshoot: "#ffffff", steel: "#3d6fd6", wall: "#1d1f22", hardcover: "#000000", obstacle: "#6f5638", position: "#2f7bff" };
 
 function s(tag, attrs = {}, text) {
   const el = document.createElementNS(SVG, tag);
@@ -77,6 +78,7 @@ function legend() {
     ["Paper target", () => [s("rect", { x: 2, y: 1.3, width: 4, height: 1.4, fill: FILL.paper })]],
     ["No-shoot", () => [s("rect", { x: 2, y: 1.3, width: 4, height: 1.4, fill: FILL.noshoot, stroke: "#222", "stroke-width": 0.25 })]],
     ["Steel", () => [s("rect", { x: 3, y: 1, width: 2, height: 2, fill: FILL.steel })]],
+    ["Hard cover", () => [s("rect", { x: 1, y: 1.4, width: 6, height: 1.2, fill: FILL.hardcover })]],
     ["Wall", () => [s("rect", { x: 0.5, y: 1.6, width: 7, height: 0.8, fill: FILL.wall })]],
     ["Obstacle", () => [s("rect", { x: 1.5, y: 0.6, width: 5, height: 2.8, fill: FILL.obstacle })]],
     ["Fault line", () => [s("line", { x1: 0.5, y1: 2, x2: 7.5, y2: 2, stroke: "#d8322a", "stroke-width": 0.8 })]],

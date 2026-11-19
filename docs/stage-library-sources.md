@@ -23,3 +23,9 @@ The stage library's layouts and briefing text are original, written for this app
 | [GECO: Action adventure in 4 letters](https://geco-ammunition.com/en/geco-world/news/news-detail/action-adventure-in-4-letters) | search result only | Search result only: medium courses up to 24 rounds. |
 | [RWS 2024 match booklet (Rifle World Shoot)](https://2024rws.worldshoot.org/wp-content/uploads/sites/10/2024/07/RWS2024_match-booklet_digi.pdf) | search result only | Search result only: example of a World Shoot stage booklet. |
 | [NROI: Stage design articles index](https://nroi.org/stage-design/stage-design-movement/) | search result only | Search result only: articles on movement in stage design. |
+
+## Match stages (after the 2012 US IPSC Nationals)
+
+| Source | Opened | What it gave |
+|---|---|---|
+| [US IPSC Stage Diagrams (2012 US IPSC Nationals, 24 stages), Universal Shooting Academy](http://www.universalshootingacademy.com/wp-content/uploads/2013/01/US-IPSC-Stage-Diagrams-final.pdf) | yes (all 24 pages) | Stage layouts, target counts and props; each library stage is an original concept with new names and wording. Positions are estimated (the diagrams have no scale). |

@@ -81,19 +81,24 @@ export function buildClamshell(obj) {
 }
 
 export function buildMover(obj) {
-  const m = MOVING.mover, c = paperSize(obj), g = group(obj.id), L = obj.params.length;
+  const m = MOVING.mover, c = paperSize(obj), g = group(obj.id);
+  const n = Math.max(1, Math.min(4, Math.round(obj.params.targets || 1))), spread = (n - 1) * 0.7;
+  const L = Math.max(obj.params.length, spread + c.w);
   for (const z of [-0.1, 0.1]) g.add(box(L, 0.04, 0.04, "steel-dark", 0, 0.02, z));                  // rails
   for (let x = -L / 2 + 0.025; x <= L / 2 - 0.025 + 1e-9; x += Math.max(0.4, (L - 0.05) / Math.round((L - 0.05) / 0.5))) {
     g.add(box(0.05, 0.02, m.depth, "stick-wood", x, 0.01, 0));                                       // sleepers
   }
   const cart = new THREE.Group();                 // the trolley and its target run along the track
-  cart.userData.anim = { kind: "slide", range: Math.max(0, L / 2 - 0.3) };
-  cart.add(box(0.4, 0.12, 0.3, "steel-dark", 0, 0.1, 0));                                            // trolley
+  cart.userData.anim = { kind: "slide", range: Math.max(0, (L - spread - c.w) / 2) };
+  cart.add(box(Math.max(0.4, spread + 0.4), 0.12, 0.3, "steel-dark", 0, 0.1, 0));                   // trolley (one carrier for every card)
   const top = m.cardBottom + c.h * 0.5;
-  for (const x of [-0.11, 0.11]) cart.add(box(TARGET_STICK, top - 0.16, TARGET_STICK, "stick-wood", x, 0.16 + (top - 0.16) / 2, 0));
-  const card = paperCard(obj);
-  card.position.set(0, m.cardBottom, -TARGET_STICK / 2 - 0.006);
-  cart.add(card);
+  for (let i = 0; i < n; i++) {
+    const cx = (i - (n - 1) / 2) * 0.7;
+    for (const x of [-0.11, 0.11]) cart.add(box(TARGET_STICK, top - 0.16, TARGET_STICK, "stick-wood", cx + x, 0.16 + (top - 0.16) / 2, 0));
+    const card = paperCard(obj);
+    card.position.set(cx, m.cardBottom, -TARGET_STICK / 2 - 0.006);
+    cart.add(card);
+  }
   g.add(cart);
   return g;
 }

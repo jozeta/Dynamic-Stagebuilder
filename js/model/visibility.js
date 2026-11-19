@@ -2,7 +2,7 @@
 // data: hiding a prop never touches stages that use it. Pure: no DOM.
 import { PROPS } from "./props.js";
 
-const CATEGORY_NAMES = [["paper", "Paper"], ["steel", "Steel"], ["moving", "Moving and reactive"], ["wall", "Walls"],
+const CATEGORY_NAMES = [["paper", "Paper"], ["steel", "Steel"], ["moving", "Moving and reactive"], ["activator", "Activators"], ["wall", "Walls"],
   ["structure", "Structures"], ["obstacle", "Obstacles and range furniture"], ["building", "Buildings and surroundings"]];
 
 // The stage markings (drawn on the ground) come first; then the prop categories.
@@ -11,6 +11,7 @@ export const MARKINGS = Object.freeze([
   Object.freeze({ id: "shooting-area", name: "Shooting area" }),
   Object.freeze({ id: "start", name: "Start position" }),
   Object.freeze({ id: "shooting-position", name: "Shooting position" }),
+  Object.freeze({ id: "start-marks", name: "Start marks (X)" }),
 ]);
 
 export const LIBRARY_GROUPS = Object.freeze([

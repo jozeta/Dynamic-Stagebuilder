@@ -68,6 +68,7 @@ export function arrayCards(obj) {
 
 /** How many scoring targets and no-shoots the prop is. */
 export function arrayCounts(obj) {
+  if (obj.type === "mover") return { paper: Math.max(1, Math.min(4, Math.round(obj.params?.targets ?? 1))), noshoot: 0 };   // cards on one carrier
   const cards = presentation(obj.params?.presentation).cards;
   return { paper: cards.filter((c) => c[0] === T).length, noshoot: cards.filter((c) => c[0] === N).length };
 }

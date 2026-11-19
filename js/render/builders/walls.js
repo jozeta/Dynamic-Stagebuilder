@@ -204,3 +204,36 @@ export function buildDoor(obj) {
   g.add(hinge);
   return g;
 }
+
+// A wooden wall with a port that has a shutter: closed, the plate covers the port; open, it hangs
+// down flat toward the shooter from a hinge at the port's foot. Animate opens and closes it.
+export function buildPortShutterWall(obj) {
+  const g = buildPortWall(obj);
+  const { pw, ph, pb } = fitPort(obj.params, obj.params.length - 2 * STICK, obj.params.height);
+  const hinge = new THREE.Group();
+  hinge.position.set(0, pb, -PANEL / 2 - 0.008);
+  hinge.userData.anim = { kind: "shutter" };
+  hinge.add(box(pw, ph, 0.012, "steel-dark", 0, ph / 2, 0));
+  if (obj.params.shutter === "open") hinge.rotation.x = -Math.PI / 2;
+  g.add(hinge);
+  return g;
+}
+
+// A black hard-cover panel on feet.
+export function buildHardcoverPanel(obj) {
+  const { length: L, height: H } = obj.params;
+  const g = group(obj.id);
+  g.add(box(L, H, 0.02, "hard-cover", 0, H / 2, 0));
+  feet(g, L, "frame-black");
+  return g;
+}
+
+// A barricade raised on posts: a plywood panel with an open gap underneath.
+export function buildRaisedBarricade(obj) {
+  const { length: L, panelHeight: ph, gap } = obj.params;
+  const g = group(obj.id), H = gap + ph;
+  for (const x of [-L / 2 + STICK / 2, L / 2 - STICK / 2]) g.add(box(STICK, H, STICK, "wood", x, H / 2, 0));
+  g.add(box(L - 2 * STICK, ph, PANEL, "plywood", 0, gap + ph / 2, 0));
+  feet(g, L, "wood");
+  return g;
+}
