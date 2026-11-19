@@ -8,6 +8,7 @@ import { assignLabels, renumber, setLabel } from "./model/numbering.js";
 import { snapPoint, snapAngle, clampToBay } from "./model/snap.js";
 import { getProp } from "./model/props.js";
 import { snapToObjects, SNAP_RADIUS } from "./model/objsnap.js";
+import { cleanLook, LOOK_DEFAULTS } from "./model/look.js";
 
 const STAGE_TYPES = ["", "Short", "Medium", "Long"];
 const BRIEFING_TEXT = ["matchName", "designer", "startSignal", "startPosition", "gunCondition", "procedure", "stopTime", "notes", "scoring"];
@@ -83,9 +84,10 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
 
   // Undo/redo change the stage, not the surroundings the user is looking at.
   function keepEnvironment(step) {
-    const env = present().settings.environment;
+    const { environment: env, look } = present().settings;
     state.history = step(state.history);
     if (present().settings.environment !== env) state.history = replacePresent(state.history, setSetting(present(), "environment", env));
+    if (present().settings.look !== look) state.history = replacePresent(state.history, setSetting(present(), "look", look));
     state.selection = pruneSelection(state.selection, present());
   }
 
@@ -144,6 +146,11 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
     redo() { keepEnvironment(redo); },
     renumber() { edit(renumber(present())); },
     setLabel({ id, text }) { edit(setLabel(present(), id, text)); },
+    // The look (light, time of day, haze) is a view choice like the surroundings: no undo step.
+    setLook({ patch = {}, reset = false }) {
+      const look = reset ? { ...LOOK_DEFAULTS } : cleanLook({ ...present().settings.look, ...patch });
+      state.history = replacePresent(state.history, setSetting(present(), "look", look));
+    },
     setEnvironment({ name }) { state.history = replacePresent(state.history, setSetting(present(), "environment", name)); },
     setSetting({ key, value }) {
       if (key === "grid" && value) lastGrid = value;

@@ -5,7 +5,8 @@ import { PROPS, getProp, defaultParams, dimensionsOf, TARGET_SIZES } from "../js
 import { SCORING } from "../js/model/scoring-rules.js";
 
 const TYPES = ["paper-ipsc", "paper-mini", "noshoot", "noshoot-mini", "popper", "mini-popper",
-  "plate-round", "plate-square", "wall-mesh", "wall-mesh-port", "wall-wood", "wall-port", "barrel", "tyre", "tyre-stack", "crate", "plant-palm"];
+  "plate-round", "plate-square", "wall-mesh", "wall-mesh-port", "wall-wood", "wall-port", "barrel", "tyre", "tyre-stack", "crate", "plant-palm",
+  "wall-door", "ramp", "platform", "car", "table", "chair", "pallet", "sandbags", "cone"];
 
 const near = (a, b, tol = 0.005) => assert.ok(Math.abs(a - b) <= tol, `${a} ≈ ${b}`);
 const obj = (type, params = {}) => ({ type, params: { ...defaultParams(type), ...params } });
@@ -13,7 +14,7 @@ const obj = (type, params = {}) => ({ type, params: { ...defaultParams(type), ..
 test("every v1 prop type exists with a category", () => {
   for (const t of TYPES) {
     assert.ok(PROPS[t], t);
-    assert.ok(["paper", "steel", "wall", "obstacle"].includes(PROPS[t].category), t);
+    assert.ok(["paper", "steel", "wall", "structure", "obstacle"].includes(PROPS[t].category), t);
   }
   assert.equal(Object.keys(PROPS).length, TYPES.length);
 });
@@ -35,7 +36,7 @@ test("default params of a mesh wall", () => {
 
 test("paper target height is mount height plus the target", () => {
   const d = dimensionsOf(obj("paper-ipsc"));
-  near(d.h, 1.0 + TARGET_SIZES.ipsc.h);
+  near(d.h, 0.7 + TARGET_SIZES.ipsc.h);
   near(d.w, TARGET_SIZES.ipsc.w);
   near(dimensionsOf(obj("paper-ipsc", { mountHeight: 0.5 })).h, 0.5 + TARGET_SIZES.ipsc.h);
 });
@@ -79,4 +80,29 @@ test("the potted plant is a decorative obstacle that scores nothing", () => {
   assert.equal(getProp("plant-palm").scoring, null);
   const d = dimensionsOf(obj("plant-palm"));
   assert.ok(d.h > 1 && d.w > 0.5);
+});
+
+test("targets stand lower: the card's bottom edge at 0.7 m by default", () => {
+  assert.equal(defaultParams("paper-ipsc").mountHeight, 0.7);
+  assert.equal(defaultParams("noshoot-mini").mountHeight, 0.7);
+});
+
+test("barrels come in four colours, black by default", () => {
+  assert.deepEqual([...getProp("barrel").params.color.options], ["black", "blue", "red", "green"]);
+  assert.equal(defaultParams("barrel").color, "black");
+});
+
+test("new structures and range furniture have real sizes", () => {
+  near(dimensionsOf(obj("ramp", { length: 3, width: 1.2, height: 0.5 })).w, 3);
+  near(dimensionsOf(obj("ramp", { length: 3, width: 1.2, height: 0.5 })).h, 0.5);
+  near(dimensionsOf(obj("ramp", { length: 3, width: 1.2, height: 0.5 })).d, 1.2);
+  near(dimensionsOf(obj("platform")).h, 0.6);
+  const car = dimensionsOf(obj("car"));
+  assert.ok(car.w > 4 && car.w < 5 && car.h > 1.3 && car.h < 1.6 && car.d > 1.6 && car.d < 2, JSON.stringify(car));
+  near(dimensionsOf(obj("sandbags", { rows: 3 })).h, 3 * dimensionsOf(obj("sandbags", { rows: 1 })).h);
+  near(dimensionsOf(obj("pallet", { count: 4 })).h, 4 * dimensionsOf(obj("pallet", { count: 1 })).h);
+  assert.equal(getProp("ramp").category, "structure");
+  assert.equal(getProp("car").category, "obstacle");
+  assert.equal(getProp("wall-door").category, "wall");
+  assert.ok(defaultParams("wall-door").doorWidth >= 0.7);
 });

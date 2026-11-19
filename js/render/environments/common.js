@@ -1,6 +1,7 @@
 // Shared pieces for environments: a ground plane, canvas textures and a shadow-casting sun sized to
 // the bay. Environments only ever build into their own group.
 import * as THREE from "three";
+import { sunFromHour } from "../../model/look.js";
 
 export const hasDom = typeof document !== "undefined";
 
@@ -56,4 +57,27 @@ export function disposeGroup(group) {
     const mats = Array.isArray(c.material) ? c.material : c.material ? [c.material] : [];
     for (const m of mats) { m.map?.dispose(); m.dispose(); }
   });
+}
+
+// Apply the look settings (time of day, sun, ambient, shadows, haze, exposure) to an environment
+// built by technical() or outdoor(). Only lights, fog and the sky change; the stage never does.
+const WHITE = new THREE.Color(0xfff6ea), SUNSET = new THREE.Color(0xff9a52);
+
+export function applyLook(env, look, bay) {
+  const s = sunFromHour(look.hour);
+  const sunLight = env.sunLight, hemi = env.hemiLight;
+  const centre = new THREE.Vector3(0, 0, bay.depth / 2);
+  sunLight.position.copy(centre).addScaledVector(new THREE.Vector3(...s.direction), 70);
+  sunLight.target.position.copy(centre);
+  sunLight.color.copy(WHITE).lerp(SUNSET, Math.pow(s.warmth, 1.6) * env.warmth);
+  sunLight.intensity = env.sunStrength * look.sun * s.strength;
+  sunLight.castShadow = look.shadows;
+  sunLight.shadow.radius = look.softness;
+  hemi.intensity = env.hemiStrength * look.ambient * (0.7 + 0.3 * s.strength);
+  env.fog = look.haze > 0.01 && env.hazeColor
+    ? new THREE.Fog(env.hazeColor, 30 + (1 - look.haze) * 140, 90 + (1 - look.haze) * 260)
+    : null;
+  env.exposure = look.exposure;
+  env.paintSky?.(s.warmth);
+  return env;
 }

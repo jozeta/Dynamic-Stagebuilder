@@ -103,3 +103,25 @@ export function buildPortWall(obj) {
   g.add(panel);
   return g;
 }
+
+// A mesh doorway: end posts and a top rail, a framed door opening from the ground up to the door
+// height, mesh either side and above. A wall, so it snaps to other walls.
+export function buildDoorWall(obj) {
+  const p = obj.params;
+  const g = group(obj.id);
+  const fm = frameMaterial(p), mm = meshMaterial(p);
+  const L = p.length, H = p.height, F = PORT_FRAME;
+  for (const x of [-L / 2 + STICK / 2, L / 2 - STICK / 2]) g.add(box(STICK, H, STICK, fm, x, H / 2, 0));
+  g.add(box(L - 2 * STICK, STICK, STICK, fm, 0, H - STICK / 2, 0));
+  const dw = Math.min(p.doorWidth, L - 2 * STICK - 2 * F - 0.1), dh = Math.min(p.doorHeight, H - STICK - F - 0.05);
+  g.add(box(F, dh, STICK, fm, -dw / 2 - F / 2, dh / 2, 0));
+  g.add(box(F, dh, STICK, fm, dw / 2 + F / 2, dh / 2, 0));
+  g.add(box(dw + 2 * F, F, STICK, fm, 0, dh + F / 2, 0));
+  // Bottom rails either side of the door.
+  const side = (L - 2 * STICK - dw - 2 * F) / 2;
+  for (const s of [-1, 1]) g.add(box(side, STICK, STICK, fm, s * (dw / 2 + F + side / 2), STICK / 2, 0));
+  const inner = L / 2 - STICK;
+  for (const m of [meshRect(-inner, -dw / 2 - F, STICK, H - STICK, mm), meshRect(dw / 2 + F, inner, STICK, H - STICK, mm),
+    meshRect(-dw / 2 - F, dw / 2 + F, dh + F, H - STICK, mm)]) if (m) g.add(m);
+  return g;
+}

@@ -3,6 +3,7 @@
 import { technical } from "./technical.js";
 import { outdoor } from "./outdoor.js";
 import { disposeGroup } from "./common.js";
+export { applyLook } from "./common.js";
 
 const FACTORIES = { technical, outdoor };
 export const ENVIRONMENT_NAMES = Object.keys(FACTORIES);

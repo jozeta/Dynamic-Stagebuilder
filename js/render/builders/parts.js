@@ -26,3 +26,30 @@ export function group(id) {
   g.userData.id = id;
   return g;
 }
+
+export function mesh(geo, material) {
+  const m = new THREE.Mesh(geo, Array.isArray(material) ? material.map(getMaterial) : getMaterial(material));
+  m.castShadow = true;
+  m.receiveShadow = true;
+  return m;
+}
+
+/** A solid of revolution around y from [radius, y] points (a barrel, a tyre). */
+export function lathe(points, material, segments = 40) {
+  return mesh(new THREE.LatheGeometry(points.map(([r, y]) => new THREE.Vector2(r, y)), segments), material);
+}
+
+/**
+ * Scale a built model so its bounding box is exactly w × h × d, centred on x/z and standing on
+ * y = 0. Used for organic or detailed models (car, plant, chair) whose size comes from the catalogue.
+ */
+export function fitTo(inner, w, h, d) {
+  inner.updateMatrixWorld(true);
+  const size = new THREE.Box3().setFromObject(inner).getSize(new THREE.Vector3());
+  inner.scale.set(w / size.x, h / size.y, d / size.z);
+  inner.updateMatrixWorld(true);
+  const b = new THREE.Box3().setFromObject(inner);
+  const c = b.getCenter(new THREE.Vector3());
+  inner.position.set(-c.x, -b.min.y, -c.z);
+  return inner;
+}

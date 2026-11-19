@@ -1,5 +1,6 @@
 // The stage model: pure functions that return a new stage and never change their input.
 import { test } from "node:test";
+import { LOOK_DEFAULTS } from "../js/model/look.js";
 import assert from "node:assert/strict";
 import { createStage, addObject, updateObject, removeObjects, duplicateObjects, addLine, updateLine,
   setStart, setSetting, setBay, pruneSelection } from "../js/model/stage.js";
@@ -9,7 +10,7 @@ test("createStage defaults", () => {
   assert.equal(s.schema, 1);
   assert.equal(s.name, "Stage 1");
   assert.deepEqual(s.bay, { width: 20, depth: 30 });
-  assert.deepEqual(s.settings, { grid: 0.25, angleSnap: 15, environment: "outdoor", objectSnap: true });
+  assert.deepEqual(s.settings, { grid: 0.25, angleSnap: 15, environment: "outdoor", objectSnap: true, look: { ...LOOK_DEFAULTS } });
   assert.deepEqual(s.objects, []);
   assert.deepEqual(s.lines, []);
   assert.equal(s.start, null);

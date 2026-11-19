@@ -2,7 +2,7 @@
 // Scene layout: environment (ground, sky, surroundings), stage (props, built from stage data) and
 // helper (selection, gizmos) groups. Environments never touch the stage group.
 import * as THREE from "three";
-import { createEnvironment } from "./environments/index.js";
+import { createEnvironment, applyLook } from "./environments/index.js";
 
 export function createEngine(canvas) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
@@ -50,7 +50,15 @@ export function createEngine(canvas) {
 
   // Swap the surroundings: ground, lights, background and fog. The stage group is never touched.
   let env = null;
-  function setEnvironment(name, bay) {
+  function setLook(look, bay) {
+    if (!env) return;
+    applyLook(env, look, bay);
+    scene.fog = env.fog;
+    renderer.toneMappingExposure = env.exposure ?? 1.05;
+    requestRender();
+  }
+
+  function setEnvironment(name, bay, look = null) {
     if (env) {
       groups.environment.remove(env.group);
       for (const l of env.lights) { groups.environment.remove(l); if (l.target) groups.environment.remove(l.target); }
@@ -62,11 +70,12 @@ export function createEngine(canvas) {
     scene.background = env.background;
     scene.fog = env.fog;
     renderer.toneMappingExposure = env.exposure ?? 1.05;
+    if (look) setLook(look, bay);
     requestRender();
   }
 
   return {
-    scene, camera, renderer, groups, requestRender, resize, setEnvironment,
+    scene, camera, renderer, groups, requestRender, resize, setEnvironment, setLook,
     onRender(fn) { renderHooks.push(fn); },
     dispose() { observer.disconnect(); renderer.dispose(); },
   };

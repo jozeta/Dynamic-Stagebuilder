@@ -2,6 +2,7 @@
 // fresh stage from known keys only, so unknown and "__proto__" keys never get through, and it
 // rejects the whole stage on any error: nothing is ever applied halfway.
 import { PROPS } from "./props.js";
+import { cleanLook } from "./look.js";
 
 export const SCHEMA_VERSION = 1;
 export const ENVIRONMENTS = ["technical", "outdoor"];
@@ -109,7 +110,7 @@ export function validateStage(json) {
     name: str(json.name, "name", LIMITS.name),
     bay: { width, depth },
     settings: { grid: num(settings.grid, "settings.grid", 0, 5), angleSnap: num(settings.angleSnap, "settings.angleSnap", 0, 90),
-      environment: settings.environment, objectSnap: settings.objectSnap !== false },
+      environment: settings.environment, objectSnap: settings.objectSnap !== false, look: cleanLook(settings.look) },
     objects, lines, start, briefing, camera,
   };
   return errors.length ? { ok: false, errors } : { ok: true, stage };

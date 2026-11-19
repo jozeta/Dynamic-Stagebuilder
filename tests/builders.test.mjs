@@ -110,3 +110,36 @@ test("paper targets stand in a blue steel base", () => {
   const uses = (g, name) => { let found = false; g.traverse((c) => { if (c.material === getMaterial(name)) found = true; }); return found; };
   assert.ok(uses(buildProp(obj("paper-ipsc")), "stand-blue"));
 });
+
+// --- Detail update: new props, proportions ---
+for (const type of ["wall-door", "ramp", "platform", "car", "table", "chair", "pallet", "sandbags", "cone"]) {
+  test(`${type} is drawn at its real size`, () => checkSize(type));
+}
+
+test("stacks and resized structures keep their real size", () => {
+  checkSize("pallet", { count: 4 });
+  checkSize("sandbags", { length: 2.4, rows: 4 });
+  checkSize("ramp", { length: 3.5, width: 1.5, height: 0.8 });
+  checkSize("platform", { length: 3, width: 2, height: 1.2 });
+  checkSize("table", { length: 1.2 });
+  for (const color of ["blue", "red", "green"]) checkSize("barrel", { color });
+});
+
+test("a mesh doorway is open from the ground to the door height", () => {
+  const g = buildProp(obj("wall-door", { doorWidth: 0.8, doorHeight: 1.95 }));
+  g.updateMatrixWorld(true);
+  const ray = (x, y) => new Raycaster(new Vector3(x, y, -1), new Vector3(0, 0, 1)).intersectObject(g, true);
+  assert.equal(ray(0, 0.3).length, 0, "through the door low");
+  assert.equal(ray(0, 1.8).length, 0, "through the door high");
+  assert.ok(ray(0, 2.1).length > 0, "above the door");
+  assert.ok(ray(0.6, 1.0).length > 0, "beside the door");
+});
+
+test("target sticks reach only half way up the card", () => {
+  const o = obj("paper-ipsc");
+  const g = buildProp(o);
+  let stickTop = 0;
+  g.traverse((c) => { if (c.material === getMaterial("stick-wood")) stickTop = Math.max(stickTop, new Box3().setFromObject(c).max.y); });
+  const mount = o.params.mountHeight;
+  near(stickTop, mount + 0.58 / 2, 0.03, "stick top");
+});

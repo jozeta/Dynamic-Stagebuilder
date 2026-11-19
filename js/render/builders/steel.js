@@ -28,6 +28,9 @@ export function buildPopper(obj) {
   const bh = obj.params.baseHeight;
   if (bh > 0) g.add(box(POST, bh, POST, "steel-dark", 0, bh / 2, 0));
   g.add(box(s.w, BASE, s.d, "steel-dark", 0, bh + BASE / 2, 0));
+  // Hinge bracket the popper falls back on.
+  g.add(box(s.w * 0.55, 0.05, 0.05, "steel-dark", 0, bh + BASE + 0.025, PLATE * 2));
+  g.add(box(s.w * 0.3, 0.12, 0.03, "steel-dark", 0, bh + BASE + 0.06, s.d * 0.3));
   const body = extrude(popperShape(s.w, s.h - BASE), PLATE, `steel-${obj.params.paint || "yellow"}`, PLATE / 2);
   body.position.y = bh + BASE;
   g.add(body);

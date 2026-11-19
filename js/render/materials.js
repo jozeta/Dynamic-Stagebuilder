@@ -73,6 +73,80 @@ const cardboard = () => canvasTexture(256, (g, s, r) => {
   for (let i = 0; i < 2500; i++) { const v = r() > 0.5 ? 255 : 60; g.fillStyle = `rgba(${v},${v * 0.8},${v * 0.55},0.05)`; g.fillRect(r() * s, r() * s, 2, 2); }
 }, { seed: 7 });
 
+// A worn painted steel drum: paint, scratches showing bare metal, rust patches and drips, a
+// darker band where the rolling hoops scuff. Wraps once around the barrel (u) and bottom→top (v).
+function drumTexture(paint) {
+  return canvasTexture(512, (g, s, r) => {
+    g.fillStyle = paint; g.fillRect(0, 0, s, s);
+    for (let i = 0; i < 60; i++) {                          // mottled, faded paint
+      const x = r() * s, y = r() * s, rad = 10 + r() * 60;
+      const grd = g.createRadialGradient(x, y, 0, x, y, rad);
+      grd.addColorStop(0, `rgba(255,255,255,${0.03 + r() * 0.05})`); grd.addColorStop(1, "rgba(255,255,255,0)");
+      g.fillStyle = grd; g.fillRect(x - rad, y - rad, rad * 2, rad * 2);
+    }
+    for (let i = 0; i < 26; i++) {                          // rust patches
+      const x = r() * s, y = r() < 0.6 ? s * (0.82 + r() * 0.18) : r() * s, rad = 4 + r() * 22;
+      const grd = g.createRadialGradient(x, y, 0, x, y, rad);
+      grd.addColorStop(0, "rgba(122,62,28,0.75)"); grd.addColorStop(0.6, "rgba(150,82,40,0.35)"); grd.addColorStop(1, "rgba(150,82,40,0)");
+      g.fillStyle = grd; g.fillRect(x - rad, y - rad, rad * 2, rad * 2);
+    }
+    for (let i = 0; i < 18; i++) {                          // rust drips running down
+      const x = r() * s, y0 = s * (0.75 + r() * 0.2), len = 30 + r() * 120;
+      const grd = g.createLinearGradient(0, y0, 0, y0 - len);
+      grd.addColorStop(0, "rgba(120,60,26,0.5)"); grd.addColorStop(1, "rgba(120,60,26,0)");
+      g.fillStyle = grd; g.fillRect(x, y0 - len, 1.5 + r() * 2.5, len);
+    }
+    for (let i = 0; i < 220; i++) {                         // scratches to bare metal
+      const x = r() * s, y = r() * s, l = 4 + r() * 26, a = (r() - 0.5) * 0.8;
+      g.strokeStyle = `rgba(190,190,185,${0.25 + r() * 0.4})`; g.lineWidth = 0.6 + r();
+      g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(a) * l, y + Math.sin(a) * l); g.stroke();
+    }
+    for (const band of [0.33, 0.66]) {                      // scuffed rolling hoops
+      g.fillStyle = "rgba(40,30,24,0.35)"; g.fillRect(0, s * (1 - band) - 6, s, 12);
+    }
+  }, { seed: paint.length * 31 + paint.charCodeAt(1) });
+}
+
+// Tyre tread blocks around the circumference (u) across the tread width (v), plus a bump map.
+function treadTexture(bump) {
+  return canvasTexture(512, (g, s, r) => {
+    g.fillStyle = bump ? "#707070" : "#202123"; g.fillRect(0, 0, s, s);
+    const blocks = 24;
+    for (let i = 0; i < blocks; i++) {
+      const x = (i / blocks) * s;
+      g.fillStyle = bump ? "#d0d0d0" : "#2a2b2d";
+      g.fillRect(x + 3, s * 0.38, s / blocks - 8, s * 0.24);           // centre rib
+      g.fillRect(x + (i % 2 ? 6 : 0), s * 0.08, s / blocks - 10, s * 0.24);
+      g.fillRect(x + (i % 2 ? 0 : 6), s * 0.68, s / blocks - 10, s * 0.24);
+    }
+    if (!bump) for (let i = 0; i < 600; i++) { g.fillStyle = `rgba(120,110,95,${0.05 + r() * 0.12})`; g.fillRect(r() * s, r() * s, 2 + r() * 4, 1 + r() * 2); }
+  }, { seed: 13, color: !bump });
+}
+
+function burlap() {
+  return canvasTexture(256, (g, s, r) => {
+    g.fillStyle = "#b39a6c"; g.fillRect(0, 0, s, s);
+    for (let i = 0; i < s; i += 4) {
+      g.fillStyle = `rgba(90,70,40,${0.12 + r() * 0.1})`; g.fillRect(i, 0, 1.5, s); g.fillRect(0, i, s, 1.5);
+    }
+    for (let i = 0; i < 40; i++) { g.fillStyle = `rgba(70,50,30,${0.1 + r() * 0.15})`; g.beginPath(); g.arc(r() * s, r() * s, 5 + r() * 18, 0, 7); g.fill(); }
+  }, { seed: 17 });
+}
+
+function roughBoards() {
+  return canvasTexture(256, (g, s, r) => {
+    grain(g, s, r, { base: "#c79c63", dark: "110,70,34", lines: 60 });
+    for (let i = 0; i < 40; i++) { g.fillStyle = `rgba(60,40,20,${0.08 + r() * 0.12})`; g.fillRect(r() * s, r() * s, 1 + r() * 3, 8 + r() * 30); }
+  }, { seed: 19 });
+}
+
+function coneTexture() {
+  return canvasTexture(128, (g, s) => {
+    g.fillStyle = "#f06a1a"; g.fillRect(0, 0, s, s);
+    g.fillStyle = "#f4f4f0"; g.fillRect(0, s * 0.25, s, s * 0.14); g.fillRect(0, s * 0.52, s, s * 0.1);
+  }, { seed: 23 });
+}
+
 const std = (o) => new THREE.MeshStandardMaterial(o);
 const mapped = (tex, fallback, extra = {}) => std({ roughness: 0.85, ...(hasDom ? { map: tex() } : { color: fallback }), ...extra });
 
@@ -96,11 +170,34 @@ const specs = {
   wood: () => mapped(pine, 0xd8b47e),
   plywood: () => mapped(plywood, 0xd6b07a),
   rubber: () => std({ color: 0x1d1e20, roughness: 0.92 }),
+  "rubber-inner": () => std({ color: 0x151617, roughness: 0.95, side: THREE.DoubleSide }),
+  tread: () => std({ roughness: 0.95, ...(hasDom ? { map: treadTexture(false), bumpMap: treadTexture(true), bumpScale: 3 } : { color: 0x202123 }) }),
   barrel: () => std({ color: 0x1f2124, roughness: 0.4, metalness: 0.1 }),
+  "barrel-black": () => mapped(() => drumTexture("#1e1f22"), 0x1e1f22, { roughness: 0.55, metalness: 0.35 }),
+  "barrel-blue": () => mapped(() => drumTexture("#1f4fa8"), 0x1f4fa8, { roughness: 0.55, metalness: 0.35 }),
+  "barrel-red": () => mapped(() => drumTexture("#a8282a"), 0xa8282a, { roughness: 0.55, metalness: 0.35 }),
+  "barrel-green": () => mapped(() => drumTexture("#3d5f33"), 0x3d5f33, { roughness: 0.55, metalness: 0.35 }),
+  "bare-steel": () => std({ color: 0x8e9094, roughness: 0.45, metalness: 0.7 }),
+  "rough-wood": () => mapped(roughBoards, 0xc79c63, { roughness: 0.95 }),
+  burlap: () => mapped(burlap, 0xb39a6c, { roughness: 1 }),
+  cone: () => mapped(coneTexture, 0xf06a1a, { roughness: 0.6 }),
+  "car-white": () => std({ color: 0xe8e6df, roughness: 0.35, metalness: 0.4 }),
+  "car-red": () => std({ color: 0xa3221f, roughness: 0.35, metalness: 0.4 }),
+  "car-blue": () => std({ color: 0x23488f, roughness: 0.35, metalness: 0.4 }),
+  "car-grey": () => std({ color: 0x7c8086, roughness: 0.35, metalness: 0.45 }),
+  "car-rust": () => mapped(() => drumTexture("#7a4a2c"), 0x7a4a2c, { roughness: 0.8, metalness: 0.3 }),
+  glass: () => std({ color: 0x24313d, roughness: 0.08, metalness: 0.6, transparent: true, opacity: 0.82 }),
+  chrome: () => std({ color: 0xc8cbd0, roughness: 0.25, metalness: 0.9 }),
+  "plastic-dark": () => std({ color: 0x2a2c2f, roughness: 0.7 }),
+  "light-red": () => std({ color: 0xb0201a, roughness: 0.3, emissive: 0x300000 }),
+  "light-white": () => std({ color: 0xf4f0d8, roughness: 0.2, emissive: 0x302a10 }),
+  "anti-slip": () => std({ color: 0x2b2a28, roughness: 1 }),
   "fault-red": () => std({ color: 0xc9302a, roughness: 0.65 }),
   "area-fill": () => new THREE.MeshBasicMaterial({ color: 0xd8322a, transparent: true, opacity: 0.08, depthWrite: false }),
   "start-marker": () => std({ color: 0xf0f0f0, roughness: 0.8 }),
   leaf: () => std({ color: 0x5b8f3a, roughness: 0.8, flatShading: true, side: THREE.DoubleSide }),
+  "leaf-dark": () => std({ color: 0x3f6f2c, roughness: 0.8, flatShading: true, side: THREE.DoubleSide }),
+  soil: () => std({ color: 0x4a3626, roughness: 1 }),
   trunk: () => std({ color: 0x8a6a45, roughness: 0.9, flatShading: true }),
   pot: () => std({ color: 0x1c1d1f, roughness: 0.6 }),
 };

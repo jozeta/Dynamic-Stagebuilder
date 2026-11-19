@@ -43,3 +43,22 @@ test("instanced vegetation is disposed with the environment", () => {
   env.dispose();
   assert.ok(disposed >= 2, `instanced meshes disposed: ${disposed}`);
 });
+
+import { applyLook } from "../js/render/environments/common.js";
+import { LOOK_DEFAULTS } from "../js/model/look.js";
+
+test("the look moves the sun with the hour and switches shadows, never touching the stage", () => {
+  const stage = everyPropStage();
+  const before = structuredClone(stage);
+  for (const name of ENVIRONMENT_NAMES) {
+    const env = createEnvironment(name, stage.bay);
+    applyLook(env, { ...LOOK_DEFAULTS, hour: 13 }, stage.bay);
+    const noonY = env.sunLight.position.y;
+    applyLook(env, { ...LOOK_DEFAULTS, hour: 19, shadows: false, haze: 0 }, stage.bay);
+    assert.ok(env.sunLight.position.y < noonY, name);
+    assert.equal(env.sunLight.castShadow, false);
+    assert.equal(env.fog, null);
+    env.dispose();
+  }
+  assert.deepEqual(stage, before);
+});

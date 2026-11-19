@@ -34,15 +34,75 @@ function dirt(g, s, r) {
   }
 }
 
-function sky() {
-  return canvasTexture(256, (g, s) => {
-    const grd = g.createLinearGradient(0, 0, 0, s);
-    grd.addColorStop(0, "#7fa9d6");
-    grd.addColorStop(0.55, "#b9cfe0");
-    grd.addColorStop(0.85, "#ecd9b8");
-    grd.addColorStop(1, "#f3dcb0");
-    g.fillStyle = grd; g.fillRect(0, 0, s, s);
-  }, [1, 1]);
+// The sky: blue overhead fading to a warm horizon; warmer and deeper toward sunset.
+function paintSky(g, s, warmth) {
+  const mix = (a, b, t) => `rgb(${a.map((v, i) => Math.round(v + (b[i] - v) * t)).join(",")})`;
+  const grd = g.createLinearGradient(0, 0, 0, s);
+  grd.addColorStop(0, mix([127, 169, 214], [86, 112, 168], warmth));
+  grd.addColorStop(0.55, mix([185, 207, 224], [214, 170, 140], warmth));
+  grd.addColorStop(0.85, mix([236, 217, 184], [244, 176, 110], warmth));
+  grd.addColorStop(1, mix([243, 220, 176], [250, 190, 120], warmth));
+  g.fillStyle = grd; g.fillRect(0, 0, s, s);
+}
+
+// Tree prototypes: a bent, barked trunk with a few branches and a crown of leafy clusters.
+function barkTexture() {
+  return canvasTexture(128, (g, s, r) => {
+    g.fillStyle = "#6e5236"; g.fillRect(0, 0, s, s);
+    for (let i = 0; i < 70; i++) { g.fillStyle = `rgba(${r() > 0.5 ? "40,28,18" : "150,120,90"},${0.15 + r() * 0.3})`; g.fillRect(r() * s, 0, 1 + r() * 3, s); }
+  }, [1, 2], { seed: 29 });
+}
+function leafTexture() {
+  return canvasTexture(256, (g, s, r) => {
+    g.fillStyle = "#5d7c35"; g.fillRect(0, 0, s, s);
+    for (let i = 0; i < 1600; i++) {
+      const v = r();
+      g.fillStyle = v > 0.66 ? "rgba(160,180,90,0.5)" : v > 0.33 ? "rgba(60,90,40,0.5)" : "rgba(40,60,28,0.45)";
+      g.beginPath(); g.ellipse(r() * s, r() * s, 2 + r() * 4, 1 + r() * 2, r() * 3, 0, 7); g.fill();
+    }
+  }, [2, 2], { seed: 31 });
+}
+
+function jitter(geo, r, amount) {
+  const p = geo.attributes.position;
+  for (let i = 0; i < p.count; i++) p.setXYZ(i, p.getX(i) * (1 + (r() - 0.5) * amount), p.getY(i) * (1 + (r() - 0.5) * amount), p.getZ(i) * (1 + (r() - 0.5) * amount));
+  geo.computeVertexNormals();
+  return geo;
+}
+
+function makeTree(r, mats) {
+  const tree = new THREE.Group();
+  const h = 3.2 + r() * 2.6;
+  const trunkGeo = new THREE.CylinderGeometry(0.1, 0.2, h * 0.62, 8, 5);
+  const p = trunkGeo.attributes.position;
+  const bend = (r() - 0.5) * 0.5;
+  for (let i = 0; i < p.count; i++) { const t = p.getY(i) / (h * 0.62) + 0.5; p.setX(i, p.getX(i) + bend * t * t); }
+  trunkGeo.computeVertexNormals();
+  const trunk = new THREE.Mesh(trunkGeo, mats.bark);
+  trunk.position.y = h * 0.31;
+  trunk.castShadow = true;
+  tree.add(trunk);
+  const tips = [];
+  for (let b = 0; b < 4; b++) {
+    const a = (b / 4) * Math.PI * 2 + r(), len = 0.8 + r() * 0.8, y = h * (0.5 + r() * 0.15);
+    const br = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.07, len, 5), mats.bark);
+    br.position.set(bend * 0.6 + Math.cos(a) * len * 0.35, y + len * 0.3, Math.sin(a) * len * 0.35);
+    br.rotation.set(Math.sin(a) * 0.9, 0, -Math.cos(a) * 0.9);
+    br.castShadow = true;
+    tree.add(br);
+    tips.push([bend * 0.6 + Math.cos(a) * len * 0.7, y + len * 0.6, Math.sin(a) * len * 0.7]);
+  }
+  tips.push([bend, h * 0.85, 0]);
+  for (const [x, y, z] of tips) {
+    for (let k = 0; k < 3; k++) {
+      const rad = 0.55 + r() * 0.6;
+      const c = new THREE.Mesh(jitter(new THREE.IcosahedronGeometry(rad, 1), r, 0.35), k % 2 ? mats.leaf : mats.leafDark);
+      c.position.set(x + (r() - 0.5) * 0.8, y + (r() - 0.3) * 0.6, z + (r() - 0.5) * 0.8);
+      c.castShadow = true;
+      tree.add(c);
+    }
+  }
+  return tree;
 }
 
 // Height of the land around the bay: flat inside (with a 3 m apron), banks rising on the two sides
@@ -96,7 +156,12 @@ export function outdoor(bay) {
   geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
   geo.computeVertexNormals();
   const map = canvasTexture(1024, dirt, [W / 10, D / 10], { seed: 3 });
-  const ground = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: map ? 0xffffff : 0xb8916a, map, vertexColors: true, roughness: 1 }));
+  // A finer second layer of grit as a bump map gives the dirt relief in low sun.
+  const bump = canvasTexture(512, (g, s, rr) => {
+    g.fillStyle = "#808080"; g.fillRect(0, 0, s, s);
+    for (let i = 0; i < 7000; i++) { const v = rr() > 0.5 ? 200 : 40; g.fillStyle = `rgba(${v},${v},${v},${0.3 + rr() * 0.4})`; g.beginPath(); g.arc(rr() * s, rr() * s, 0.6 + rr() * 2.2, 0, 7); g.fill(); }
+  }, [W / 3, D / 3], { color: false, seed: 41 });
+  const ground = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: map ? 0xffffff : 0xb8916a, map, bumpMap: bump, bumpScale: 2.2, vertexColors: true, roughness: 1 }));
   ground.receiveShadow = true;
   ground.userData.ground = true;
   group.add(ground);
@@ -108,7 +173,8 @@ export function outdoor(bay) {
     const y = heightAt(x, z, bay, noise);
     if (y > 1.2) spots.push([x, y, z]);
   }
-  const bushGeo = new THREE.IcosahedronGeometry(1, 0);
+  // Bushes: rounded, lumpy clusters sunk into the slope (not floating blobs).
+  const bushGeo = jitter(new THREE.IcosahedronGeometry(1, 1), rng(53), 0.3);
   const bushMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9, flatShading: true });
   const bushes = new THREE.InstancedMesh(bushGeo, bushMat, spots.length);
   const m = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3(), p = new THREE.Vector3();
@@ -116,7 +182,7 @@ export function outdoor(bay) {
   spots.forEach(([x, y, z], i) => {
     const s = 0.18 + r() * 0.45;
     q.setFromEuler(new THREE.Euler(r(), r() * 6.28, r()));
-    m.compose(p.set(x, y + s * 0.4, z), q, sc.set(s * (1 + r() * 0.4), s * (0.6 + r() * 0.4), s));
+    m.compose(p.set(x, y + s * 0.15, z), q, sc.set(s * (1 + r() * 0.4), s * (0.55 + r() * 0.3), s));
     bushes.setMatrixAt(i, m);
     bushes.setColorAt(i, greens[(r() * greens.length) | 0]);
   });
@@ -143,29 +209,54 @@ export function outdoor(bay) {
   });
   group.add(grassMesh);
 
-  const trunkMat = new THREE.MeshStandardMaterial({ color: 0x6e5236, roughness: 1, flatShading: true });
-  const crownMat = new THREE.MeshStandardMaterial({ color: 0x5a7a34, roughness: 0.95, flatShading: true });
-  for (let i = 0; i < 26; i++) {
-    const side = i % 3;
-    const x = side === 0 ? -(bay.width / 2 + 14 + r() * 12) : side === 1 ? bay.width / 2 + 14 + r() * 12 : (r() - 0.5) * (bay.width + 30);
-    const z = side === 2 ? bay.depth + 13 + r() * 10 : r() * bay.depth * 1.1;
+  // Stones scattered over the range: many small ones everywhere, a few larger at the banks' foot.
+  const rockSpots = [];
+  for (let i = 0; i < 1500; i++) {
+    const x = (r() - 0.5) * (bay.width + 30), z = -10 + r() * (bay.depth + 24);
     const y = heightAt(x, z, bay, noise);
-    const h = 3 + r() * 3;
-    const tree = new THREE.Group();
-    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.2, h * 0.5, 6), trunkMat);
-    trunk.position.y = h * 0.25;
-    const crown = new THREE.Mesh(new THREE.IcosahedronGeometry(h * 0.32, 1), crownMat);
-    crown.position.y = h * 0.62;
-    crown.scale.set(1, 0.85, 1);
-    trunk.castShadow = crown.castShadow = true;
-    tree.add(trunk, crown);
-    tree.position.set(x, y - 0.1, z);
+    const big = y > 0.15 && y < 1.2 && r() < 0.25;
+    rockSpots.push([x, y, z, big ? 0.1 + r() * 0.18 : 0.02 + r() * 0.05]);
+  }
+  const rockMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.95, flatShading: true });
+  const rocks = new THREE.InstancedMesh(new THREE.DodecahedronGeometry(1, 0), rockMat, rockSpots.length);
+  const rockColors = ["#9c8c78", "#8a7a66", "#b3a38c", "#76695a"].map((h) => new THREE.Color(h));
+  rockSpots.forEach(([x, y, z, sz], i) => {
+    m.compose(p.set(x, y + sz * 0.1, z), q.setFromEuler(new THREE.Euler(r() * 3, r() * 3, r() * 3)), sc.set(sz * (1 + r() * 0.5), sz * 0.6, sz));
+    rocks.setMatrixAt(i, m);
+    rocks.setColorAt(i, rockColors[(r() * rockColors.length) | 0]);
+  });
+  rocks.receiveShadow = true;
+  group.add(rocks);
+
+  const mats = {
+    bark: new THREE.MeshStandardMaterial({ color: 0xffffff, map: barkTexture(), roughness: 1, flatShading: true }),
+    leaf: new THREE.MeshStandardMaterial({ color: 0xffffff, map: leafTexture(), roughness: 0.9, flatShading: true }),
+    leafDark: new THREE.MeshStandardMaterial({ color: 0xb8c8a8, map: leafTexture(), roughness: 0.9, flatShading: true }),
+  };
+  if (!mats.bark.map) { mats.bark.color.set(0x6e5236); mats.leaf.color.set(0x5d7c35); mats.leafDark.color.set(0x48652c); }
+  const prototypes = Array.from({ length: 4 }, () => makeTree(r, mats));
+  for (let i = 0; i < 30; i++) {
+    const side = i % 3;
+    const x = side === 0 ? -(bay.width / 2 + 13 + r() * 14) : side === 1 ? bay.width / 2 + 13 + r() * 14 : (r() - 0.5) * (bay.width + 34);
+    const z = side === 2 ? bay.depth + 12 + r() * 12 : r() * bay.depth * 1.1;
+    const tree = prototypes[i % prototypes.length].clone();
+    const k = 0.8 + r() * 0.5;
+    tree.scale.set(k, k * (0.9 + r() * 0.3), k);
+    tree.rotation.y = r() * 6.28;
+    tree.position.set(x, heightAt(x, z, bay, noise) - 0.1, z);
     group.add(tree);
   }
 
-  const lights = [
-    new THREE.HemisphereLight(0xf4efe6, 0x8c7a66, 1.5),
-    sun(bay, 0xffe0b8, 3.1, [-16, 15, 16]),          // low, warm, from behind the stage: long shadows
-  ];
-  return { group, lights, background: sky() ?? new THREE.Color(0xb9cfe0), fog: new THREE.Fog(0xe6d6bb, 55, 150), exposure: 1.05 };
+  const hemiLight = new THREE.HemisphereLight(0xf4efe6, 0x8c7a66, 1.5);
+  const sunLight = sun(bay, 0xffe0b8, 3.1, [-16, 15, 16]);
+  const skyTex = canvasTexture(256, (g, s) => paintSky(g, s, 0.5), [1, 1]);
+  return {
+    group, lights: [hemiLight, sunLight], hemiLight, sunLight, sunStrength: 3.4, hemiStrength: 1.5, warmth: 1,
+    hazeColor: 0xe6d6bb, background: skyTex ?? new THREE.Color(0xb9cfe0), fog: new THREE.Fog(0xe6d6bb, 55, 150), exposure: 1.05,
+    paintSky(warmth) {
+      if (!skyTex) return;
+      paintSky(skyTex.image.getContext("2d"), skyTex.image.width, warmth);
+      skyTex.needsUpdate = true;
+    },
+  };
 }

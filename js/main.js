@@ -15,6 +15,7 @@ import { createStats } from "./ui/stats.js";
 import { attachShortcuts } from "./ui/shortcuts.js";
 import { createAbout } from "./ui/about.js";
 import { createBriefing } from "./ui/briefing.js";
+import { createSettings } from "./ui/settings.js";
 import { renderPrint } from "./ui/print.js";
 import { h } from "./ui/dom.js";
 import { createStage } from "./model/stage.js";
@@ -49,6 +50,7 @@ const rig = createCameraRig(engine, canvas);
 const about = createAbout();
 
 let envKey = "";
+let lookShown = null;
 const highlight = new THREE.Group();
 const preview = new THREE.Group();
 engine.groups.helper.add(highlight, preview);
@@ -61,7 +63,8 @@ function render(state) {
   const stage = state.history.present;
   view.sync(stage);
   const key = `${stage.settings.environment}|${stage.bay.width}|${stage.bay.depth}`;
-  if (key !== envKey) { envKey = key; engine.setEnvironment(stage.settings.environment, stage.bay); }
+  if (key !== envKey) { envKey = key; lookShown = stage.settings.look; engine.setEnvironment(stage.settings.environment, stage.bay, stage.settings.look); }
+  else if (stage.settings.look !== lookShown) { lookShown = stage.settings.look; engine.setLook(stage.settings.look, stage.bay); }
 
   // Selection outline.
   for (const c of [...highlight.children]) { highlight.remove(c); c.geometry.dispose(); c.material.dispose(); }
@@ -124,6 +127,7 @@ function printBrief() {
 
 let picking = null;
 let briefing = null;
+let settings = null;
 const editor = createEditor({ stage: demoStage(), onChange: (state) => { render(state); scheduleSave(); } });
 picking = attachPicking({ engine, stageView: view, editor, cameraRig: rig, canvas });
 
@@ -208,7 +212,7 @@ const projects = createProjects({
 updaters.push(
   createToolbar(document.getElementById("toolbar"), {
     editor, rig, status, onAbout: () => about.open(), onBriefing: () => briefing.open(), onPrint: () => printBrief(),
-    onProjects: () => projects.open(),
+    onProjects: () => projects.open(), onSettings: () => settings.open(),
   }),
   createLibrary(document.getElementById("library"), { editor }),
   createInspector(document.getElementById("inspector-body"), { editor }),
@@ -216,6 +220,7 @@ updaters.push(
 );
 attachShortcuts({ editor, rig });
 briefing = createBriefing({ editor });
+settings = createSettings({ editor });
 
 render(editor.state);
 document.getElementById("boot-state")?.remove();

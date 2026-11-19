@@ -1,10 +1,10 @@
 // The prop library: search plus Paper, Steel, Walls and Obstacles. Tap an item to arm it, then tap
 // the ground; with a mouse, items can also be dragged onto the 3D view.
 import { h } from "./dom.js";
-import { PROPS, defaultParams, TARGET_SIZES, BARREL, TYRE } from "../model/props.js";
+import { PROPS, defaultParams, TARGET_SIZES, BARREL, TYRE, CAR, PALLET } from "../model/props.js";
 import { icon } from "./dom.js";
 
-const CATEGORIES = [["paper", "Paper"], ["steel", "Steel"], ["wall", "Walls"], ["obstacle", "Obstacles"]];
+const CATEGORIES = [["paper", "Paper"], ["steel", "Steel"], ["wall", "Walls"], ["structure", "Structures"], ["obstacle", "Obstacles and range furniture"]];
 const cm = (m) => `${Math.round(m * 100)}`;
 
 // The size people know each prop by: the target face, the plate, the wall panel.
@@ -23,6 +23,14 @@ function sizeText(type) {
     case "tyre-stack": return `${p.count} tyres`;
     case "crate": return `${cm(p.size)} cm cube`;
     case "plant-palm": return "Decoration";
+    case "ramp": case "platform": return `${p.length} × ${p.width} m, ${cm(p.height)} cm high`;
+    case "car": return `${CAR.length} × ${CAR.width} m`;
+    case "table": return `${p.length} m`;
+    case "chair": return "Range chair";
+    case "pallet": return `${PALLET.length} × ${PALLET.width} m`;
+    case "sandbags": return `${p.length} m, ${p.rows} rows`;
+    case "cone": return "70 cm";
+    case "wall-door": return `${p.length} × ${p.height} m, door ${cm(p.doorWidth)} cm`;
     default: return `${p.length} × ${p.height} m`;
   }
 }

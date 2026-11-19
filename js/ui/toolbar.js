@@ -1,10 +1,9 @@
 // The top toolbar: edit actions, drawing tools, surroundings, camera presets and About.
 import { h, icon } from "./dom.js";
 import { canUndo, canRedo } from "../model/history.js";
-import { ENVIRONMENT_NAMES, ENVIRONMENT_LABELS } from "../render/environments/index.js";
 import { PRESETS, PRESET_LABELS } from "../render/camera.js";
 
-export function createToolbar(root, { editor, rig, status, onAbout, onBriefing, onPrint, onProjects }) {
+export function createToolbar(root, { editor, rig, status, onAbout, onBriefing, onPrint, onProjects, onSettings }) {
   // Camera presets live in a bar over the 3D view (#camera-slot); the rest in the toolbar.
   const btn = (name, label, onclick, extra = {}) =>
     h("button", { type: "button", class: "lg-btn lg-btn-ghost tool", "aria-label": label, onclick, ...extra }, [icon(name), h("span", { text: label.split(" (")[0] })]);
@@ -23,13 +22,6 @@ export function createToolbar(root, { editor, rig, status, onAbout, onBriefing, 
   const wsbB = btn("doc", "Briefing", onBriefing);
   const printB = btn("print", "Print", onPrint);
 
-  const env = h("div", { class: "lg-segmented", role: "radiogroup", "aria-label": "Surroundings" });
-  for (const name of ENVIRONMENT_NAMES) {
-    const id = `env-${name}`;
-    env.append(h("input", { type: "radio", name: "env", id, value: name,
-      onchange: () => editor.dispatch({ type: "setEnvironment", name }) }), h("label", { for: id, text: ENVIRONMENT_LABELS[name] }));
-  }
-
   const cams = h("div", { class: "camera-bar lg-glass", role: "group", "aria-label": "Camera" }, [
     ...PRESETS.map((p, i) => h("button", { type: "button", class: "lg-btn lg-btn-ghost tool tool-text", title: `${PRESET_LABELS[p]} (${i + 1})`,
       onclick: () => rig.preset(p, editor.stage()), text: PRESET_LABELS[p] })),
@@ -43,8 +35,7 @@ export function createToolbar(root, { editor, rig, status, onAbout, onBriefing, 
     h("div", { class: "toolgroup", role: "group", "aria-label": "Draw" }, [lineB, areaB, startB, numB]),
     h("div", { class: "toolgroup", role: "group", "aria-label": "Snapping" }, [gridB, magB]),
     h("div", { class: "toolgroup", role: "group", "aria-label": "Brief" }, [wsbB, printB]),
-    env,
-    h("div", { class: "toolgroup end" }, [status, btn("info", "About", onAbout)]),
+    h("div", { class: "toolgroup end" }, [status, btn("sliders", "Settings", onSettings), btn("info", "About", onAbout)]),
   );
 
   return function update(state) {
@@ -59,7 +50,5 @@ export function createToolbar(root, { editor, rig, status, onAbout, onBriefing, 
     const st = state.history.present.settings;
     gridB.setAttribute("aria-pressed", String(st.grid > 0));
     magB.setAttribute("aria-pressed", String(st.objectSnap !== false));
-    const current = env.querySelector(`#env-${state.history.present.settings.environment}`);
-    if (current) current.checked = true;
   };
 }

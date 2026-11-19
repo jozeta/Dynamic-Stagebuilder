@@ -5,10 +5,11 @@ import { TARGET_SIZES, TARGET_STICK, STAND } from "../../model/props.js";
 import { getMaterial } from "../materials.js";
 import { box, group } from "./parts.js";
 
-// The IPSC target outline on a unit grid of 46 × 58 (cm), origin bottom-centre.
-const OUTLINE = [[-15, 0], [15, 0], [23, 13], [23, 38], [15, 46], [7.5, 46], [7.5, 58], [-7.5, 58], [-7.5, 46], [-15, 46], [-23, 38], [-23, 13]];
-// A-zone (body and head) and C-zone outline, same grid.
-const ZONES = [[-7.5, 25, 15, 15], [-4, 49, 8, 5], [-15, 12, 30, 30]];
+// The IPSC target outline (rulebook drawing, Appendix B2) on a grid of 46 × 58 cm, origin
+// bottom-centre: an octagonal body 46 wide and 43 tall, and a 15 × 15 cm head on top.
+const OUTLINE = [[-15, 0], [15, 0], [23, 8], [23, 34], [15, 43], [7.5, 43], [7.5, 58], [-7.5, 58], [-7.5, 43], [-15, 43], [-23, 34], [-23, 8]];
+// Scoring-zone lines: A zone of the body and head, the C zone and the D-zone head line.
+const ZONES = [[-7.5, 13, 15, 28], [-4, 48, 8, 6], [-15, 5, 30, 37], [-7.5, 43, 15, 15]];
 const CARD = 0.006;
 
 function outlineShape(sx, sy) {
@@ -47,7 +48,7 @@ export function buildPaper(obj) {
   const mount = obj.params.mountHeight;
   stand(g);
 
-  const stickH = mount + size.h * 0.7;
+  const stickH = mount + size.h * 0.5;     // sticks reach half way up the card
   for (const x of [-0.11, 0.11]) g.add(box(TARGET_STICK, stickH, TARGET_STICK, "stick-wood", x, stickH / 2, 0));
 
   const geo = new THREE.ExtrudeGeometry(outlineShape(sx, sy), { depth: CARD, bevelEnabled: false });

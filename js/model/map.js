@@ -3,7 +3,7 @@
 // is on the left, as in the 3D view.
 import { dimensionsOf, getProp, TARGET_SIZES } from "./props.js";
 
-const ROUND = new Set(["barrel", "tyre", "tyre-stack", "plate-round", "plant-palm"]);
+const ROUND = new Set(["barrel", "tyre", "tyre-stack", "plate-round", "plant-palm", "cone"]);
 const CARD_DEPTH = 0.03;   // paper targets are drawn as their thin face, not their stand
 
 function style(type) {

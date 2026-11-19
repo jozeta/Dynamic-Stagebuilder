@@ -39,6 +39,18 @@ export function demoStage() {
   add("plant-palm", [2.6, 8.2]);
   add("plant-palm", [8.6, 10.4]);
   add("tyre-stack", [-2.8, 10.2], 0, { count: 3 });
+  // 2/3-gun furniture: a car to shoot over, a ramp, a staging table, sandbags, pallets, cones.
+  add("car", [-6.5, 19.5], 15, { color: "rust" });
+  add("ramp", [6.6, 7.4], 90, { length: 2.4, width: 1, height: 0.4 });
+  add("table", [-5.8, 1.6], 0, { length: 1.2 });
+  add("sandbags", [1.2, 11.2], 0, { length: 1.8, rows: 3 });
+  add("pallet", [-8.3, 10.6], 30, { count: 3 });
+  add("wall-door", from([-3.5, 10], 90, 1.5), 90);
+  add("barrel", [3.6, 18.6], 0, { color: "blue" });
+  add("barrel", [4.2, 18.9], 0, { color: "red" });
+  add("cone", [-8.8, 3.4]);
+  add("cone", [8.2, 3.9]);
+  add("crate", [-4.5, 17.2], 20);
 
   s = addLine(s, "fault-line", [[-8.5, 3], [-3.5, 3], [-2.5, 5.2], [1.5, 5.2], [3.2, 3.6], [7.5, 3.6]], false).stage;
   s = addLine(s, "shooting-area", [[-2, 0.5], [2, 0.5], [2, 2.5], [-2, 2.5]], true).stage;

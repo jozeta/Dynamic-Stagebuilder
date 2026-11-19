@@ -17,10 +17,16 @@ export const TARGET_STICK = 0.03;  // wooden target stick section (m)
 export const STAND = Object.freeze({ w: 0.36, d: 0.26, h: 0.04 });   // blue steel target base
 export const PLATE_FOOT = 0.30;    // footprint of a plate stand (m)
 export const PLANT = Object.freeze({ diameter: 0.9, height: 1.5 });
+export const CAR = Object.freeze({ length: 4.4, height: 1.45, width: 1.8 });
+export const CHAIR = Object.freeze({ w: 0.46, h: 0.86, d: 0.5 });
+export const CONE = Object.freeze({ diameter: 0.36, height: 0.7 });
+export const PALLET = Object.freeze({ length: 1.2, height: 0.144, width: 0.8 });
+export const SANDBAG = Object.freeze({ height: 0.13, depth: 0.4 });
+export const TABLE = Object.freeze({ height: 0.75, depth: 0.75 });
 export const TYRE = Object.freeze({ diameter: 0.65, height: 0.22 });
 export const BARREL = Object.freeze({ diameter: 0.58, height: 0.88 });
 
-const mount = { mountHeight: { default: 1.0, min: 0.1, max: 2.0, step: 0.05 } };
+const mount = { mountHeight: { default: 0.7, min: 0.1, max: 2.0, step: 0.05 } };
 const paint = (d) => ({ paint: { default: d, options: ["white", "yellow"] } });
 const meshLook = { mesh: { default: "black", options: ["black", "blue"] }, frame: { default: "wood", options: ["wood", "black"] } };
 const port = {
@@ -52,13 +58,29 @@ const defs = [
     params: { ...wallSize, ...meshLook, ...port } },
   { type: "wall-wood", name: "Wooden wall", category: "wall", scoring: null, params: wallSize },
   { type: "wall-port", name: "Wooden wall with port", category: "wall", scoring: null, params: { ...wallSize, ...port } },
-  { type: "barrel", name: "Barrel (200 l)", category: "obstacle", scoring: null, params: {} },
+  { type: "wall-door", name: "Mesh doorway", category: "wall", scoring: null,
+    params: { length: { default: 1.5, min: 1.2, max: 3, step: 0.1 }, height: { default: 2.2, min: 2, max: 2.5, step: 0.05 },
+      doorWidth: { default: 0.8, min: 0.6, max: 1.2, step: 0.05 }, doorHeight: { default: 1.95, min: 1.7, max: 2.1, step: 0.05 }, ...meshLook } },
+  { type: "ramp", name: "Ramp", category: "structure", scoring: null,
+    params: { length: { default: 2.4, min: 1, max: 4, step: 0.1 }, width: { default: 1, min: 0.6, max: 2, step: 0.1 }, height: { default: 0.4, min: 0.1, max: 1, step: 0.05 } } },
+  { type: "platform", name: "Platform", category: "structure", scoring: null,
+    params: { length: { default: 2, min: 1, max: 4, step: 0.1 }, width: { default: 1.2, min: 0.8, max: 3, step: 0.1 }, height: { default: 0.6, min: 0.2, max: 1.5, step: 0.05 } } },
+  { type: "barrel", name: "Barrel (200 l)", category: "obstacle", scoring: null,
+    params: { color: { default: "black", options: ["black", "blue", "red", "green"] } } },
   { type: "tyre", name: "Tyre", category: "obstacle", scoring: null, params: {} },
   { type: "tyre-stack", name: "Tyre stack", category: "obstacle", scoring: null,
     params: { count: { default: 3, min: 1, max: 6, step: 1 } } },
   { type: "crate", name: "Wooden crate", category: "obstacle", scoring: null,
     params: { size: { default: 0.6, min: 0.3, max: 1.2, step: 0.05 } } },
   { type: "plant-palm", name: "Potted plant", category: "obstacle", scoring: null, params: {} },
+  { type: "car", name: "Car", category: "obstacle", scoring: null,
+    params: { color: { default: "white", options: ["white", "red", "blue", "grey", "rust"] } } },
+  { type: "table", name: "Table", category: "obstacle", scoring: null, params: { length: { default: 1.8, min: 1, max: 2.4, step: 0.1 } } },
+  { type: "chair", name: "Chair", category: "obstacle", scoring: null, params: {} },
+  { type: "pallet", name: "Pallets", category: "obstacle", scoring: null, params: { count: { default: 1, min: 1, max: 6, step: 1 } } },
+  { type: "sandbags", name: "Sandbag wall", category: "obstacle", scoring: null,
+    params: { length: { default: 1.2, min: 0.6, max: 3, step: 0.1 }, rows: { default: 2, min: 1, max: 5, step: 1 } } },
+  { type: "cone", name: "Traffic cone", category: "obstacle", scoring: null, params: {} },
 ];
 
 function deepFreeze(o) {
@@ -98,13 +120,20 @@ export function dimensionsOf(obj) {
     }
     case "plate-round": case "plate-square":
       [w, h, d] = [Math.max(p.size, PLATE_FOOT), p.baseHeight + p.size, PLATE_FOOT]; break;
-    case "wall-mesh": case "wall-mesh-port": case "wall-wood": case "wall-port":
+    case "wall-mesh": case "wall-mesh-port": case "wall-wood": case "wall-port": case "wall-door":
       [w, h, d] = [p.length, p.height, STICK]; break;
     case "barrel": [w, h, d] = [BARREL.diameter, BARREL.height, BARREL.diameter]; break;
     case "tyre": [w, h, d] = [TYRE.diameter, TYRE.height, TYRE.diameter]; break;
     case "tyre-stack": [w, h, d] = [TYRE.diameter, TYRE.height * p.count, TYRE.diameter]; break;
     case "crate": [w, h, d] = [p.size, p.size, p.size]; break;
     case "plant-palm": [w, h, d] = [PLANT.diameter, PLANT.height, PLANT.diameter]; break;
+    case "ramp": case "platform": [w, h, d] = [p.length, p.height, p.width]; break;
+    case "car": [w, h, d] = [CAR.length, CAR.height, CAR.width]; break;
+    case "table": [w, h, d] = [p.length, TABLE.height, TABLE.depth]; break;
+    case "chair": [w, h, d] = [CHAIR.w, CHAIR.h, CHAIR.d]; break;
+    case "pallet": [w, h, d] = [PALLET.length, PALLET.height * p.count, PALLET.width]; break;
+    case "sandbags": [w, h, d] = [p.length, SANDBAG.height * p.rows, SANDBAG.depth]; break;
+    case "cone": [w, h, d] = [CONE.diameter, CONE.height, CONE.diameter]; break;
     default: throw new Error(`Unknown prop type: ${obj.type}`);
   }
   return { w: round(w), h: round(h), d: round(d) };

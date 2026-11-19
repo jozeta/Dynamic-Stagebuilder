@@ -7,9 +7,11 @@ import { labelPrefix } from "../model/numbering.js";
 const PARAM_LABELS = {
   mountHeight: "Mount height (m)", baseHeight: "Base height (m)", size: "Size (m)", length: "Length (m)",
   height: "Height (m)", mesh: "Mesh colour", frame: "Frame", portWidth: "Port width (m)",
-  portHeight: "Port height (m)", portBottom: "Port bottom (m)", count: "Tyres", paint: "Paint",
+  portHeight: "Port height (m)", portBottom: "Port bottom (m)", count: "Count", paint: "Paint", color: "Colour", width: "Width (m)", rows: "Rows",
+  doorWidth: "Door width (m)", doorHeight: "Door height (m)",
 };
-const OPTION_LABELS = { black: "Black", blue: "Blue", wood: "Wood", white: "White", yellow: "Yellow" };
+const OPTION_LABELS = { black: "Black", blue: "Blue", wood: "Wood", white: "White", yellow: "Yellow", red: "Red",
+  green: "Green", grey: "Grey", rust: "Rusty" };
 const GRID_OPTIONS = [[0, "Off"], [0.1, "0.1 m"], [0.25, "0.25 m"], [0.5, "0.5 m"], [1, "1 m"]];
 const ANGLE_OPTIONS = [[0, "Off"], [5, "5°"], [15, "15°"], [45, "45°"], [90, "90°"]];
 let uid = 0;

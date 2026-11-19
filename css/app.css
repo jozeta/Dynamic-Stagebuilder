@@ -115,3 +115,9 @@ body { background: var(--lg-bg); overflow: hidden; }
 .proj-hint { font-size: var(--lg-fs-small); color: var(--lg-warn-text, var(--lg-warn)); }
 .proj-buttons { gap: var(--lg-space-xs); }
 .proj-confirm { overflow-wrap: anywhere; }
+
+.settings-body { display: grid; gap: var(--lg-space-m); min-width: min(440px, 80vw); }
+.settings-row { display: grid; grid-template-columns: 9.5em minmax(0, 1fr) 4.5em; align-items: center; gap: var(--lg-space-m); }
+.settings-row .lg-segmented, .settings-row .lg-toggle { grid-column: 2 / -1; justify-self: start; }
+.settings-row input[type=range] { width: 100%; min-height: var(--lg-touch); }
+.settings-value { text-align: right; color: var(--lg-muted); }

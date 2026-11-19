@@ -2,9 +2,10 @@
 // input, so the undo history can keep snapshots. Coordinates in metres: x across the bay (centred),
 // z down range (0 at the uprange edge). Rotation in degrees about the vertical axis.
 import { defaultParams, getProp } from "./props.js";
+import { LOOK_DEFAULTS } from "./look.js";
 
 const newId = () => crypto.randomUUID();
-const SETTINGS = ["grid", "angleSnap", "environment", "objectSnap"];
+const SETTINGS = ["grid", "angleSnap", "environment", "objectSnap", "look"];
 
 export function createStage({ name = "Stage 1", width = 20, depth = 30 } = {}) {
   return {
@@ -12,7 +13,7 @@ export function createStage({ name = "Stage 1", width = 20, depth = 30 } = {}) {
     id: newId(),
     name,
     bay: { width, depth },
-    settings: { grid: 0.25, angleSnap: 15, environment: "outdoor", objectSnap: true },
+    settings: { grid: 0.25, angleSnap: 15, environment: "outdoor", objectSnap: true, look: { ...LOOK_DEFAULTS } },
     objects: [],
     lines: [],
     start: null,
