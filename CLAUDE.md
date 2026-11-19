@@ -31,7 +31,7 @@ npm run lint        # ESLint, including the unsafe-DOM rule
 - `css/app.css`: the app's own styles on Låda Glass tokens
 - `js/main.js`: boot and wiring; `js/editor.js`: user actions → undoable stage edits (no DOM)
 - `js/model/`: pure stage data (props, scoring-rules, stage, history, snap, objsnap, numbering,
-  stats, schema, briefing, map)
+  stats, schema, briefing, map, look)
 - `js/render/`: Three.js (engine, stage-view, builders/, environments/, camera, labels, picking, ground)
 - `js/ui/`: Låda Glass panels (toolbar, library, inspector, stats, shortcuts, about, dom helpers)
 - `js/demo.js`: the example stage shown on open (until saved projects exist)
@@ -54,6 +54,9 @@ npm run lint        # ESLint, including the unsafe-DOM rule
   3D view is rebuilt from it. Every edit goes through `model/history.js` so it can be undone.
 - **Snapping order** (`editor.js` `landing`): Shift (fine) → no snap; else object snap (wall end to
   wall end, `model/objsnap.js`) → else grid; always clamped to the bay. Groups snap to the grid only.
+- **Look settings** (`settings.look`, `model/look.js`) are view choices like the surroundings:
+  saved with the stage, applied with `engine.setLook` / `environments/common.js applyLook`, never
+  undo steps, and undo/redo keep the current ones.
 - **Looks are generated in code** (canvas textures in `render/materials.js` and
   `environments/*.js`, seeded random), never downloaded. The Outdoor scene follows the reference
   photo (golden-hour dirt range); keep that feel when changing it.

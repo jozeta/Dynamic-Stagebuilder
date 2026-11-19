@@ -4,6 +4,17 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Environment settings dialog (toolbar *Settings*): surroundings (moved from the toolbar), time
+  of day 06:00–20:00 driving the sun's position and colour, sunlight, ambient light, shadows,
+  shadow softness, haze and exposure; `settings.look` in stage files (older files get defaults).
+- New props: ramp, platform (structures); car, table, chair, pallets, sandbag wall, traffic cone;
+  mesh doorway (a wall, it snaps). Barrels get a colour (black, blue, red, green).
+- More detail and texture: worn steel drums with hoops, chimes, bungs, scratches and rust;
+  treaded tyres; board crates with battens; palms with leaflets; trees with bark, branches and
+  leafy crowns; a bump-mapped gravel ground with scattered stones.
+- IPSC target outline after the rulebook drawing (43 cm body, 15 × 15 cm head); targets stand
+  lower (default 0.7 m to the card's bottom) on sticks reaching half way up; poppers get a hinge.
+
 - Object snapping: walls (mesh, mesh with port, wooden) snap end to end to nearby walls (35 cm),
   grid snap otherwise; *Grid* and *Objects* toggles in the toolbar; `settings.objectSnap` in stage
   files (older files read as on).

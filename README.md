@@ -20,7 +20,10 @@ training, and want a clear briefing sheet without drawing the map by hand.
   - steel: IPSC popper, mini popper, round plate, square plate
   - walls: mesh wall and mesh wall with port (black or blue 10 cm wire mesh, pine or black frame),
     wooden wall, wooden wall with port; ports are real openings
-  - obstacles: barrel, tyre, tyre stack, wooden crate, potted plant (decoration)
+  - mesh doorway (a wall with a door opening; it snaps like the other walls)
+  - structures: ramp, platform
+  - obstacles and range furniture: worn steel barrel (black, blue, red, green), tyre, tyre stack,
+    board crate, potted plant, car, table, chair, pallets, sandbag wall, traffic cone
   - fault lines, shooting areas and the start position
 - **Editing by eye:** tap or drag props in, drag them on the ground, rotate them, all with grid and
   angle snapping; multi-select, duplicate, delete, undo and redo.
@@ -33,8 +36,10 @@ training, and want a clear briefing sheet without drawing the map by hand.
   points are counted from the stage.
 - **Printable brief** (A4): briefing and a top-down map with a scale bar on page 1, a 3D view on
   page 2. Save it as a PDF from the print dialog.
-- **Two surroundings,** Outdoor (a dirt range at golden hour with earth banks, bushes and trees,
-  long soft shadows) and Technical (grey floor, grid). Switching never moves anything on the stage.
+- **Two surroundings,** Outdoor (a dirt range with earth banks, bushes and trees, gravel and stones)
+  and Technical (grey floor, grid). Switching never moves anything on the stage.
+- **Environment settings:** time of day (the sun moves and warms toward evening), sunlight,
+  ambient light, shadows and their softness, haze and exposure, saved with the stage.
 - **Cameras:** orbit, pan, zoom, Top, Isometric, Front and a shooter's-eye view from the start position.
 - **Projects** saved in the browser automatically, with JSON export and import.
 - **Works offline** and can be installed as an app (PWA).
@@ -50,6 +55,13 @@ not supported: below 768 px wide the app asks you to use a larger screen. Englis
 ## What's new
 
 ### Unreleased
+
+- Environment settings (toolbar *Settings*): surroundings, time of day, sunlight, ambient light,
+  shadows, shadow softness, haze and exposure.
+- New props: ramp, platform, car, table, chair, pallets, sandbag wall, traffic cone and a mesh
+  doorway; barrels come in four colours.
+- More detail: worn steel drums, treaded tyres, board crates, detailed palms and trees, a gravel
+  ground with stones; IPSC targets in the rulebook proportions, standing lower on shorter sticks.
 
 - Walls snap end to end to nearby walls; Grid and Objects snapping toggles in the toolbar.
 - Hold Shift while dragging for slow, fine moves.
@@ -88,6 +100,10 @@ not supported: below 768 px wide the app asks you to use a larger screen. Englis
   </tr>
   <tr>
     <td><img src="docs/screenshots/projects.png" alt="The Projects dialog" width="400"><br>Projects saved in this browser, with export hints</td>
+    <td><img src="docs/screenshots/settings.png" alt="The environment settings dialog" width="400"><br>Environment settings: surroundings, time of day, light, shadows, haze</td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/evening.png" alt="The stage at 19:30" width="400"><br>The same stage at 19:30: a low, warm sun and long shadows</td>
     <td></td>
   </tr>
 </table>
@@ -118,13 +134,19 @@ Stage settings are in the inspector when nothing is selected. They are saved wit
 | Grid snap | Positions snap to this grid: off, 0.1, 0.25, 0.5 or 1 m (toolbar *Grid* turns it on/off) | 0.25 m |
 | Object snap | Toolbar *Objects*: a wall's end jumps onto another wall's end within 35 cm | On |
 | Angle snap | Rotations snap to this step: off, 5°, 15°, 45° or 90° | 15° |
-| Surroundings | Outdoor (dirt range, sun) or Technical (grey floor, grid); never moves the stage | Outdoor |
+| Surroundings | *Settings*: Outdoor (dirt range) or Technical (grey floor, grid); never moves the stage | Outdoor |
+| Time of day | *Settings*: 06:00–20:00; the sun's height, direction and colour follow it | 17:30 |
+| Sunlight, Ambient light | *Settings*: 0–200 % | 100 % |
+| Shadows, Shadow softness | *Settings*: on/off, 0 (sharp) – 8 | On, 3 |
+| Haze | *Settings*: 0 (clear) – 100 % | 35 % |
+| Exposure | *Settings*: 0.5–1.6 | 1.05 |
 
 Prop settings (inspector, one prop selected): label (targets), rotation, and per prop: mount height
-for paper targets (0.1–2 m, default 1 m to the target's bottom), base height for steel, plate size
+for paper targets (0.1–2 m, default 0.7 m to the target's bottom), base height for steel, plate size
 (15–30 cm), wall length (0.5–4 m) and height (0.5–2.5 m), mesh colour (black/blue), frame
-(wood/black), port width, height and bottom edge, paint for poppers and plates (white/yellow),
-tyres in a stack (1–6), crate size.
+(wood/black), port width, height and bottom edge, door width and height, paint for poppers and
+plates (white/yellow), barrel and car colour, ramp and platform length, width and height, table
+length, pallets in a stack (1–6), sandbag wall length and rows, tyres in a stack (1–6), crate size.
 
 Scoring follows the IPSC Combined Competition Rules, January 2024 edition (Handgun): 2 hits per
 paper target and 1 per steel target (Comstock), 5 points per A-zone or steel hit, and Short ≤ 12,
@@ -153,7 +175,12 @@ it in the inspector; Renumber keeps hand-set labels and warns about duplicates.
 
 **Look at the stage.** Drag the empty ground to orbit, right-drag (two fingers on an iPad) to pan,
 scroll or pinch to zoom. The buttons over the view jump to Isometric, Top, Front, Shooter's eye or
-frame everything. Switch *Technical*/*Outdoor* at any time; nothing on the stage moves.
+frame everything.
+
+**Change the light and surroundings.** *Settings* switches between Outdoor and Technical and sets
+the time of day, sunlight, ambient light, shadows, haze and exposure. Changes show as you drag the
+sliders; *Reset to defaults* goes back to a late-afternoon sun. Nothing on the stage moves, and
+the printed 3D view uses the same light.
 
 **Undo anything** with Undo/Redo or ⌘Z / ⇧⌘Z (Ctrl on Windows).
 
