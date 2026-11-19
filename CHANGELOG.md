@@ -4,6 +4,14 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Look rework, step 2 (ground and berms): a compacted dirt-and-gravel floor with colour, normal,
+  roughness and ambient-occlusion maps baked in code from a tileable gravel height field
+  (256 px per metre); large-scale tones of dry dust, compacted earth and damp patches, a worn lane
+  through the middle; stones in three sizes sunk into the ground, denser toward the berms and
+  sparser in the lane; berms 2–3 m high with an irregular line and lumpy raw-earth faces, patchy
+  grass on top and grass cards on the tops, faces and foot. The overview now frames what is on
+  the stage (the bay when empty), with the berm edges at the frame's borders.
+
 - Look rework, step 1 (lighting and camera): a low golden sun (about 24° at the new default
   18:15) with long diagonal shadows and crisp edges (4096 shadow map on computers, tuned bias),
   a cool-sky / warm-ground fill light, image-based reflections from a generated late-afternoon

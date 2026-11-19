@@ -160,8 +160,7 @@ async function openProject(id) {
   autosave.markSaved(editor.stage(), rec.exportedAt ?? null);
   remember(id);
   setStatus("Saved", "lg-ok");
-  rig.preset("iso", editor.stage());
-  rig.frameAll(editor.stage());
+  rig.preset("iso", editor.stage());        // the high oblique overview of the whole bay
   return true;
 }
 async function addProject(stage) {
@@ -226,7 +225,6 @@ settings = createSettings({ editor });
 render(editor.state);
 document.getElementById("boot-state")?.remove();
 rig.preset("iso", editor.stage());
-rig.frameAll(editor.stage());
 
 // Open the last project, else the newest, else save the example stage as the first project.
 (async () => {

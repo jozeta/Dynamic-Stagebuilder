@@ -1,6 +1,6 @@
 // Camera navigation (orbit, pan, zoom; one finger rotates, two pan and zoom on touch) and presets.
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { obliqueView, VIEW } from "./view-math.js";
+import { obliqueView, stageArea, VIEW } from "./view-math.js";
 
 export const PRESETS = ["iso", "top", "front", "shooter"];
 export const PRESET_LABELS = { iso: "Isometric", top: "Top", front: "Front", shooter: "Shooter's eye" };
@@ -49,7 +49,7 @@ export function createCameraRig(engine, domElement) {
         break;
       }
       default: {
-        const v = obliqueView(stage.bay, camera.aspect || 1.6);
+        const v = obliqueView(stageArea(stage), camera.aspect || 1.6);
         look(v.position, v.target);
       }
     }
