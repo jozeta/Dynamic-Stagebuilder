@@ -4,6 +4,8 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- New View defaults: figures 20 %, position marks 30 %, route line 15 % opacity.
+
 - Much more detailed, realistic foliage: trees grow from branching, tapered, bark-textured
   skeletons carrying hundreds of leaf cards painted with leaves, needles or leaflets, shaded as
   volumes. Oak-like broadleaf trees, spruces in tiers of needle sprigs, Scots pines with orange

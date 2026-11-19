@@ -206,7 +206,7 @@ Stage settings are in the inspector when nothing is selected. They are saved wit
 | My surroundings | *Settings*: your own plan-based surroundings, with plan position, turn and strength | None |
 | Default target style | *Settings → Props*: Classic (octagon) or With head, for new paper targets | Classic |
 | Shooter's eye walking speed | *Settings → View*: slow walk 1.6, walk 2.4, quick move 3.4 or sprint 4.6 m/s, when Play is on (per browser) | Sprint |
-| Figures, position marks, route line | *Settings → View*, each: show or hide, colour (seven swatches or your own), opacity 10–100 % (per browser) | Shown, light grey, 30 % |
+| Figures, position marks, route line | *Settings → View*, each: show or hide, colour (seven swatches or your own), opacity 10–100 % (per browser) | Shown, light grey; figures 20 %, marks 30 %, route 15 % |
 | Camera view | Remembered per project as you move the camera (per browser) | The Isometric overview |
 
 Prop settings (inspector, one prop selected): label (targets), rotation, and per prop: stand height
