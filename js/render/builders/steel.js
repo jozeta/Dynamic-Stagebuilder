@@ -28,7 +28,7 @@ export function buildPopper(obj) {
   const bh = obj.params.baseHeight;
   if (bh > 0) g.add(box(POST, bh, POST, "steel-dark", 0, bh / 2, 0));
   g.add(box(s.w, BASE, s.d, "steel-dark", 0, bh + BASE / 2, 0));
-  const body = extrude(popperShape(s.w, s.h - BASE), PLATE, "steel", PLATE / 2);
+  const body = extrude(popperShape(s.w, s.h - BASE), PLATE, `steel-${obj.params.paint || "yellow"}`, PLATE / 2);
   body.position.y = bh + BASE;
   g.add(body);
   return g;
@@ -39,12 +39,13 @@ export function buildPlate(obj) {
   const g = group(obj.id);
   g.add(box(PLATE_FOOT, 0.02, PLATE_FOOT, "steel-dark", 0, 0.01, 0));
   g.add(box(POST, bh, POST, "steel-dark", 0, bh / 2, 0));
+  const paint = getMaterial(`steel-${obj.params.paint || "white"}`);
   let plate;
   if (obj.type === "plate-round") {
-    plate = new THREE.Mesh(new THREE.CylinderGeometry(size / 2, size / 2, PLATE, 32), getMaterial("steel"));
+    plate = new THREE.Mesh(new THREE.CylinderGeometry(size / 2, size / 2, PLATE, 32), paint);
     plate.rotation.x = Math.PI / 2;
   } else {
-    plate = new THREE.Mesh(new THREE.BoxGeometry(size, size, PLATE), getMaterial("steel"));
+    plate = new THREE.Mesh(new THREE.BoxGeometry(size, size, PLATE), paint);
   }
   plate.position.set(0, bh + size / 2, -POST / 2 - PLATE / 2);
   plate.castShadow = true;

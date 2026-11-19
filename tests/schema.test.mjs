@@ -68,3 +68,12 @@ test("__proto__ keys never reach Object.prototype and unknown keys are dropped",
   assert.equal(r.stage.polluted, undefined);
   assert.equal(Object.hasOwn(r.stage, "extra"), false);
 });
+
+test("files from before object snapping read with object snap on", () => {
+  const s = createStage();
+  const old = { ...s, settings: { grid: 0.25, angleSnap: 15, environment: "technical" } };
+  const r = validateStage(JSON.parse(JSON.stringify(old)));
+  assert.equal(r.ok, true, r.errors?.join("\n"));
+  assert.equal(r.stage.settings.objectSnap, true);
+  assert.equal(validateStage({ ...s, settings: { ...s.settings, objectSnap: false } }).stage.settings.objectSnap, false);
+});

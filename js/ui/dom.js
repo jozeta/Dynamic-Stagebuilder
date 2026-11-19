@@ -38,6 +38,8 @@ const PATHS = {
   doc: ["M6 3h9l4 4v14H6z", "M9 12h7M9 16h7M9 8h3"],
   print: ["M7 9V3h10v6", "M7 17H4v-7h16v7h-3", "M7 14h10v7H7z"],
   folder: ["M3 6h6l2 2h10v11H3z"],
+  grid: ["M4 4h16v16H4z", "M4 9.3h16M4 14.7h16M9.3 4v16M14.7 4v16"],
+  magnet: ["M6 4v8a6 6 0 0 0 12 0V4", "M6 4h3v8a3 3 0 0 0 6 0V4h3", "M6 8h3M15 8h3"],
   x: ["M6 6l12 12M18 6 6 18"],
 };
 

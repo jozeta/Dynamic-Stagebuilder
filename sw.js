@@ -18,6 +18,7 @@ const FILES = [
   "js/model/history.js",
   "js/model/map.js",
   "js/model/numbering.js",
+  "js/model/objsnap.js",
   "js/model/props.js",
   "js/model/schema.js",
   "js/model/scoring-rules.js",
@@ -67,7 +68,8 @@ const FILES = [
 ];
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE).then((c) => c.addAll(FILES)).then(() => self.skipWaiting()));
+  // cache: "reload" skips the browser's HTTP cache, so a new version never stores stale files.
+  event.waitUntil(caches.open(CACHE).then((c) => c.addAll(FILES.map((f) => new Request(f, { cache: "reload" })))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener("activate", (event) => {
@@ -83,7 +85,7 @@ const OWN = new Set(FILES.map((f) => new URL(f, self.location).pathname));
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
   if (event.request.method !== "GET" || url.origin !== self.location.origin || !OWN.has(url.pathname)) return;
-  event.respondWith(fetch(event.request).then((res) => {
+  event.respondWith(fetch(event.request, { cache: "no-cache" }).then((res) => {
     if (res.ok) { const copy = res.clone(); caches.open(CACHE).then((c) => c.put(url.pathname, copy)); }
     return res;
   }).catch(() => caches.match(url.pathname)));

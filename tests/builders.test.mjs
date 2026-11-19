@@ -83,3 +83,30 @@ test("start marker is a 1 m square on the ground", () => {
   near(s.x, 1, 0.01, "width");
   near(s.z, 1, 0.01, "depth");
 });
+
+// --- Snapping and look update ---
+for (const type of ["wall-mesh-port", "plant-palm"]) {
+  test(`${type} is drawn at its real size`, () => checkSize(type));
+}
+
+test("a mesh wall with port has a real opening with mesh around it", () => {
+  const g = buildProp(obj("wall-mesh-port", { portWidth: 0.4, portHeight: 0.4, portBottom: 1.0 }));
+  g.updateMatrixWorld(true);
+  const ray = (x, y) => new Raycaster(new Vector3(x, y, -1), new Vector3(0, 0, 1)).intersectObject(g, true);
+  assert.equal(ray(0, 1.2).length, 0, "through the port centre");
+  assert.ok(ray(0.6, 1.2).length > 0, "mesh beside the port");
+  assert.ok(ray(0, 0.5).length > 0, "mesh below the port");
+  assert.ok(ray(0, 1.7).length > 0, "mesh above the port");
+});
+
+test("steel paint comes from the prop's own setting", () => {
+  const uses = (g, name) => { let found = false; g.traverse((c) => { if (c.material === getMaterial(name)) found = true; }); return found; };
+  assert.ok(uses(buildProp(obj("popper")), "steel-yellow"));
+  assert.ok(uses(buildProp(obj("popper", { paint: "white" })), "steel-white"));
+  assert.ok(uses(buildProp(obj("plate-square")), "steel-white"));
+});
+
+test("paper targets stand in a blue steel base", () => {
+  const uses = (g, name) => { let found = false; g.traverse((c) => { if (c.material === getMaterial(name)) found = true; }); return found; };
+  assert.ok(uses(buildProp(obj("paper-ipsc")), "stand-blue"));
+});

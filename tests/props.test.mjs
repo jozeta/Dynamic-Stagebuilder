@@ -5,7 +5,7 @@ import { PROPS, getProp, defaultParams, dimensionsOf, TARGET_SIZES } from "../js
 import { SCORING } from "../js/model/scoring-rules.js";
 
 const TYPES = ["paper-ipsc", "paper-mini", "noshoot", "noshoot-mini", "popper", "mini-popper",
-  "plate-round", "plate-square", "wall-mesh", "wall-wood", "wall-port", "barrel", "tyre", "tyre-stack", "crate"];
+  "plate-round", "plate-square", "wall-mesh", "wall-mesh-port", "wall-wood", "wall-port", "barrel", "tyre", "tyre-stack", "crate", "plant-palm"];
 
 const near = (a, b, tol = 0.005) => assert.ok(Math.abs(a - b) <= tol, `${a} ≈ ${b}`);
 const obj = (type, params = {}) => ({ type, params: { ...defaultParams(type), ...params } });
@@ -30,7 +30,7 @@ test("scoring kinds", () => {
 });
 
 test("default params of a mesh wall", () => {
-  assert.deepEqual(defaultParams("wall-mesh"), { length: 2, height: 2, mesh: "black", frame: "black" });
+  assert.deepEqual(defaultParams("wall-mesh"), { length: 2, height: 2, mesh: "black", frame: "wood" });
 });
 
 test("paper target height is mount height plus the target", () => {
@@ -60,4 +60,23 @@ test("scoring constants are frozen and cite their rulebook", () => {
   assert.equal(SCORING.pointsPerSteelHit, 5);
   assert.deepEqual({ ...SCORING.courseLimits }, { Short: 12, Medium: 24, Long: 32 });
   assert.equal(SCORING.typeByRoundsOnly, false);
+});
+
+test("mesh wall with port has mesh and port settings", () => {
+  const p = defaultParams("wall-mesh-port");
+  assert.deepEqual(Object.keys(p).sort(), ["frame", "height", "length", "mesh", "portBottom", "portHeight", "portWidth"]);
+  assert.equal(getProp("wall-mesh-port").category, "wall");
+});
+
+test("steel has a paint colour; poppers default yellow, plates white", () => {
+  assert.equal(defaultParams("popper").paint, "yellow");
+  assert.equal(defaultParams("plate-round").paint, "white");
+  assert.deepEqual([...getProp("mini-popper").params.paint.options], ["white", "yellow"]);
+});
+
+test("the potted plant is a decorative obstacle that scores nothing", () => {
+  assert.equal(getProp("plant-palm").category, "obstacle");
+  assert.equal(getProp("plant-palm").scoring, null);
+  const d = dimensionsOf(obj("plant-palm"));
+  assert.ok(d.h > 1 && d.w > 0.5);
 });

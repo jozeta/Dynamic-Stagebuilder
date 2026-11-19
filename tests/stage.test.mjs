@@ -9,7 +9,7 @@ test("createStage defaults", () => {
   assert.equal(s.schema, 1);
   assert.equal(s.name, "Stage 1");
   assert.deepEqual(s.bay, { width: 20, depth: 30 });
-  assert.deepEqual(s.settings, { grid: 0.25, angleSnap: 15, environment: "technical" });
+  assert.deepEqual(s.settings, { grid: 0.25, angleSnap: 15, environment: "outdoor", objectSnap: true });
   assert.deepEqual(s.objects, []);
   assert.deepEqual(s.lines, []);
   assert.equal(s.start, null);
@@ -30,7 +30,7 @@ test("addObject returns a new stage and leaves the input alone", () => {
   assert.equal(o.id, id);
   assert.deepEqual(o.position, [1, 2]);
   assert.equal(o.rotation, 30);
-  assert.deepEqual(o.params, { length: 2, height: 2, mesh: "black", frame: "black" });
+  assert.deepEqual(o.params, { length: 2, height: 2, mesh: "black", frame: "wood" });
   assert.equal(o.label, null);
   assert.equal(o.labelManual, false);
 });

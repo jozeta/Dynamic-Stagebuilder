@@ -107,7 +107,8 @@ export function validateStage(json) {
     id: str(json.id, "id", LIMITS.id, { allowEmpty: false }),
     name: str(json.name, "name", LIMITS.name),
     bay: { width, depth },
-    settings: { grid: num(settings.grid, "settings.grid", 0, 5), angleSnap: num(settings.angleSnap, "settings.angleSnap", 0, 90), environment: settings.environment },
+    settings: { grid: num(settings.grid, "settings.grid", 0, 5), angleSnap: num(settings.angleSnap, "settings.angleSnap", 0, 90),
+      environment: settings.environment, objectSnap: settings.objectSnap !== false },
     objects, lines, start, briefing, camera,
   };
   return errors.length ? { ok: false, errors } : { ok: true, stage };

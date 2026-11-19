@@ -10,6 +10,8 @@ export function createEngine(canvas) {
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;   // warm, filmic highlights like a photo
+  renderer.toneMappingExposure = 1.05;
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(45, 1, 0.05, 1000);
@@ -59,6 +61,7 @@ export function createEngine(canvas) {
     for (const l of env.lights) { groups.environment.add(l); if (l.target) groups.environment.add(l.target); }
     scene.background = env.background;
     scene.fog = env.fog;
+    renderer.toneMappingExposure = env.exposure ?? 1.05;
     requestRender();
   }
 

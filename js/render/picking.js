@@ -7,7 +7,7 @@
 // - a rotate ring (TransformControls, vertical axis only) on a single selected object.
 import * as THREE from "three";
 import { TransformControls } from "three/addons/controls/TransformControls.js";
-import { groundPoint } from "./ground.js";
+import { groundPoint, createDragTracker } from "./ground.js";
 import { yawDegrees } from "./rotation.js";
 
 const TAP_PX = 6;
@@ -75,11 +75,15 @@ export function attachPicking({ engine, stageView, editor, cameraRig, canvas, on
     const moved = Math.hypot(e.clientX - press.x, e.clientY - press.y) > TAP_PX;
     if (!press.dragging && moved) {
       press.dragging = true;
+      press.tracker = createDragTracker();
       editor.dispatch({ type: "dragStart", ids: editor.state.selection });
     }
     if (press.dragging) {
       const g = groundAt(e);
-      if (g) editor.dispatch({ type: "dragMove", delta: [g[0] - press.ground[0], g[1] - press.ground[1]] });
+      if (!g) return;
+      // Shift: a fifth of the speed and no snapping, for fine placement.
+      const delta = press.tracker.update([g[0] - press.ground[0], g[1] - press.ground[1]], e.shiftKey);
+      editor.dispatch({ type: "dragMove", delta, fine: e.shiftKey });
     }
   });
 

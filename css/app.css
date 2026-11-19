@@ -85,7 +85,7 @@ body { background: var(--lg-bg); overflow: hidden; }
   padding: 2px; border-radius: var(--lg-radius-control); max-width: calc(100% - 2 * var(--lg-space-s)); box-sizing: border-box; }
 .camera-bar .lg-btn { font-size: var(--lg-fs-small); }
 
-@media (max-width: 1099px) { .brand { display: none; } }
+@media (max-width: 1439px) { .brand { display: none; } }
 
 /* Touch screens (iPad): every control at least 44 px. */
 @media (pointer: coarse) {

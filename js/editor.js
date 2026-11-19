@@ -7,6 +7,7 @@ import { createHistory, commit, replacePresent, undo, redo } from "./model/histo
 import { assignLabels, renumber, setLabel } from "./model/numbering.js";
 import { snapPoint, snapAngle, clampToBay } from "./model/snap.js";
 import { getProp } from "./model/props.js";
+import { snapToObjects } from "./model/objsnap.js";
 
 const STAGE_TYPES = ["", "Short", "Medium", "Long"];
 const BRIEFING_TEXT = ["matchName", "designer", "startSignal", "startPosition", "gunCondition", "procedure", "stopTime", "notes", "scoring"];
@@ -17,6 +18,18 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
   const state = { history: createHistory(assignLabels(stage)), selection: [], mode: "select", drag: null };
   const present = () => state.history.present;
   const fit = (p, s = present()) => clampToBay(snapPoint(p, s.settings.grid), s.bay);
+  let lastGrid = stage.settings.grid || 0.25;
+
+  // Where one object lands: on a nearby wall end (object snap), else on the grid; a fine (Shift)
+  // move skips both. Always inside the bay.
+  function landing(s, obj, raw, fine = false) {
+    if (fine) return clampToBay(raw, s.bay);
+    if (s.settings.objectSnap !== false) {
+      const r = snapToObjects(s, obj, raw);
+      if (r.snapped) return clampToBay(r.position, s.bay);
+    }
+    return fit(raw, s);
+  }
 
   function edit(next) {
     state.history = commit(state.history, assignLabels(next));
@@ -51,14 +64,19 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
     return [dx, dz];
   }
 
-  function moved(base, ids, rawDelta) {
+  function moved(base, ids, rawDelta, fine = false) {
     const delta = limitDelta(base, ids, rawDelta);
+    const place = (p) => (fine ? clampToBay(p, base.bay) : fit(p, base));
     let s = base;
+    if (ids.length === 1) {
+      const o = base.objects.find((x) => x.id === ids[0]);
+      if (o) return updateObject(s, o.id, { position: landing(base, o, [o.position[0] + delta[0], o.position[1] + delta[1]], fine) });
+    }
     for (const id of ids) {
       const o = base.objects.find((x) => x.id === id);
-      if (o) { s = updateObject(s, id, { position: fit([o.position[0] + delta[0], o.position[1] + delta[1]], base) }); continue; }
+      if (o) { s = updateObject(s, id, { position: place([o.position[0] + delta[0], o.position[1] + delta[1]]) }); continue; }
       const l = base.lines.find((x) => x.id === id);
-      if (l) s = { ...s, lines: s.lines.map((x) => x.id !== id ? x : { ...x, points: l.points.map((p) => fit([p[0] + delta[0], p[1] + delta[1]], base)) }) };
+      if (l) s = { ...s, lines: s.lines.map((x) => x.id !== id ? x : { ...x, points: l.points.map((p) => place([p[0] + delta[0], p[1] + delta[1]])) }) };
     }
     return s;
   }
@@ -79,16 +97,20 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
       else for (const id of ids) state.selection = state.selection.includes(id) ? state.selection.filter((x) => x !== id) : [...state.selection, id];
     },
     place({ propType, position, rotation = 0 }) {
-      const r = addObject(present(), propType, fit(position), snapAngle(rotation, present().settings.angleSnap));
-      edit(r.stage);
+      const r = addObject(present(), propType, position, snapAngle(rotation, present().settings.angleSnap));
+      const obj = r.stage.objects.find((o) => o.id === r.id);
+      edit(updateObject(r.stage, r.id, { position: landing(r.stage, obj, position) }));
       state.selection = [r.id];
       state.mode = "select";
     },
-    move({ id, position }) { edit(updateObject(present(), id, { position: fit(position) })); },
+    move({ id, position }) {
+      const o = present().objects.find((x) => x.id === id);
+      if (o) edit(updateObject(present(), id, { position: landing(present(), o, position) }));
+    },
     dragStart({ ids }) { state.drag = { base: state.history, ids: [...ids] }; },
-    dragMove({ delta }) {
+    dragMove({ delta, fine = false }) {
       if (!state.drag) return;
-      state.history = replacePresent(state.drag.base, moved(state.drag.base.present, state.drag.ids, delta));
+      state.history = replacePresent(state.drag.base, moved(state.drag.base.present, state.drag.ids, delta, fine));
     },
     dragEnd() {
       if (!state.drag) return;
@@ -123,7 +145,15 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
     renumber() { edit(renumber(present())); },
     setLabel({ id, text }) { edit(setLabel(present(), id, text)); },
     setEnvironment({ name }) { state.history = replacePresent(state.history, setSetting(present(), "environment", name)); },
-    setSetting({ key, value }) { edit(setSetting(present(), key, value)); },
+    setSetting({ key, value }) {
+      if (key === "grid" && value) lastGrid = value;
+      edit(setSetting(present(), key, value));
+    },
+    toggleGrid() {
+      const g = present().settings.grid;
+      if (g) lastGrid = g;
+      edit(setSetting(present(), "grid", g ? 0 : lastGrid));
+    },
     setBriefing({ patch }) {
       const clean = {};
       for (const [k, v] of Object.entries(patch)) {

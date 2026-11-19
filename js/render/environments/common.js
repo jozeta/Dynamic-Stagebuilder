@@ -4,13 +4,19 @@ import * as THREE from "three";
 
 export const hasDom = typeof document !== "undefined";
 
-export function canvasTexture(size, draw, repeat) {
+// Seeded random, so the surroundings look the same on every load.
+export function rng(seed) {
+  let s = seed >>> 0;
+  return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296);
+}
+
+export function canvasTexture(size, draw, repeat, { color = true, seed = 1 } = {}) {
   if (!hasDom) return null;
   const c = document.createElement("canvas");
   c.width = c.height = size;
-  draw(c.getContext("2d"), size);
+  draw(c.getContext("2d"), size, rng(seed));
   const t = new THREE.CanvasTexture(c);
-  t.colorSpace = THREE.SRGBColorSpace;
+  if (color) t.colorSpace = THREE.SRGBColorSpace;
   t.wrapS = t.wrapT = THREE.RepeatWrapping;
   t.repeat.set(repeat[0], repeat[1]);
   t.anisotropy = 8;
@@ -33,9 +39,10 @@ export function sun(bay, color, intensity, from) {
   light.castShadow = true;
   const r = Math.max(bay.width, bay.depth) * 0.75 + 5;
   Object.assign(light.shadow.camera, { left: -r, right: r, top: r, bottom: -r, near: 1, far: 200 });
-  light.shadow.mapSize.set(2048, 2048);
-  light.shadow.bias = -0.0005;
+  light.shadow.mapSize.set(4096, 4096);
+  light.shadow.bias = -0.0004;
   light.shadow.normalBias = 0.02;
+  light.shadow.radius = 3;      // soft shadow edges
   return light;
 }
 

@@ -22,6 +22,7 @@ function sizeText(type) {
     case "tyre": return `Ø ${cm(TYRE.diameter)} cm`;
     case "tyre-stack": return `${p.count} tyres`;
     case "crate": return `${cm(p.size)} cm cube`;
+    case "plant-palm": return "Decoration";
     default: return `${p.length} × ${p.height} m`;
   }
 }

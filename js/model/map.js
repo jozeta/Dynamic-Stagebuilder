@@ -1,9 +1,10 @@
 // The printed top-down map as plain shapes in millimetres (no DOM). Seen from above with down range
 // at the top; the map is the 3D world turned 180° (both axes mirrored), so +x (the shooter's left)
 // is on the left, as in the 3D view.
-import { dimensionsOf, getProp } from "./props.js";
+import { dimensionsOf, getProp, TARGET_SIZES } from "./props.js";
 
-const ROUND = new Set(["barrel", "tyre", "tyre-stack", "plate-round"]);
+const ROUND = new Set(["barrel", "tyre", "tyre-stack", "plate-round", "plant-palm"]);
+const CARD_DEPTH = 0.03;   // paper targets are drawn as their thin face, not their stand
 
 function style(type) {
   const p = getProp(type);
@@ -38,8 +39,10 @@ export function mapModel(stage, { width, height, margin = 4 }) {
       items.push({ kind: "circle", x, y, r: Math.max((diameter / 2) * scale, 0.6), style: st });
     } else {
       // Paper targets are thin: draw them at least 0.8 mm deep so they stay visible.
-      const depth = st === "paper" || st === "noshoot" ? Math.max(d.d * scale, 0.8) : Math.max(d.d * scale, 0.5);
-      items.push({ kind: "rect", x, y, w: d.w * scale, h: depth, rotation: o.rotation, style: st });
+      const paper = st === "paper" || st === "noshoot";
+      const width = paper ? TARGET_SIZES[o.type.endsWith("mini") ? "mini" : "ipsc"].w * scale : d.w * scale;
+      const depth = paper ? Math.max(CARD_DEPTH * scale, 0.8) : Math.max(d.d * scale, 0.5);
+      items.push({ kind: "rect", x, y, w: width, h: depth, rotation: o.rotation, style: st });
     }
     if (o.label && getProp(o.type).scoring) items.push({ kind: "label", x, y: y - 2.2, text: o.label, style: st });
   }

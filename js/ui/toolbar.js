@@ -17,6 +17,9 @@ export function createToolbar(root, { editor, rig, status, onAbout, onBriefing, 
   const areaB = btn("area", "Shooting area", () => editor.dispatch({ type: "beginDraw", lineType: "shooting-area" }), { "aria-pressed": "false" });
   const startB = btn("flag", "Start position", () => editor.dispatch({ type: "beginStart" }), { "aria-pressed": "false" });
   const numB = btn("hash", "Renumber", () => editor.dispatch({ type: "renumber" }));
+  const gridB = btn("grid", "Grid", () => editor.dispatch({ type: "toggleGrid" }), { "aria-pressed": "true", title: "Snap to the grid" });
+  const magB = btn("magnet", "Objects", () => editor.dispatch({ type: "setSetting", key: "objectSnap", value: editor.stage().settings.objectSnap === false }),
+    { "aria-pressed": "true", title: "Snap wall ends to other walls" });
   const wsbB = btn("doc", "Briefing", onBriefing);
   const printB = btn("print", "Print", onPrint);
 
@@ -38,6 +41,7 @@ export function createToolbar(root, { editor, rig, status, onAbout, onBriefing, 
     h("div", { class: "brand" }, [h("span", { class: "brand-name", text: "Dynamic-Stagebuilder" })]),
     h("div", { class: "toolgroup", role: "group", "aria-label": "Edit" }, [btn("folder", "Projects", onProjects), undoB, redoB, dupB, delB]),
     h("div", { class: "toolgroup", role: "group", "aria-label": "Draw" }, [lineB, areaB, startB, numB]),
+    h("div", { class: "toolgroup", role: "group", "aria-label": "Snapping" }, [gridB, magB]),
     h("div", { class: "toolgroup", role: "group", "aria-label": "Brief" }, [wsbB, printB]),
     env,
     h("div", { class: "toolgroup end" }, [status, btn("info", "About", onAbout)]),
@@ -52,6 +56,9 @@ export function createToolbar(root, { editor, rig, status, onAbout, onBriefing, 
     lineB.setAttribute("aria-pressed", String(state.mode?.draw === "fault-line"));
     areaB.setAttribute("aria-pressed", String(state.mode?.draw === "shooting-area"));
     startB.setAttribute("aria-pressed", String(state.mode === "start"));
+    const st = state.history.present.settings;
+    gridB.setAttribute("aria-pressed", String(st.grid > 0));
+    magB.setAttribute("aria-pressed", String(st.objectSnap !== false));
     const current = env.querySelector(`#env-${state.history.present.settings.environment}`);
     if (current) current.checked = true;
   };

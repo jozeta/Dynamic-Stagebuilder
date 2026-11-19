@@ -4,7 +4,7 @@
 import { defaultParams, getProp } from "./props.js";
 
 const newId = () => crypto.randomUUID();
-const SETTINGS = ["grid", "angleSnap", "environment"];
+const SETTINGS = ["grid", "angleSnap", "environment", "objectSnap"];
 
 export function createStage({ name = "Stage 1", width = 20, depth = 30 } = {}) {
   return {
@@ -12,7 +12,7 @@ export function createStage({ name = "Stage 1", width = 20, depth = 30 } = {}) {
     id: newId(),
     name,
     bay: { width, depth },
-    settings: { grid: 0.25, angleSnap: 15, environment: "technical" },
+    settings: { grid: 0.25, angleSnap: 15, environment: "outdoor", objectSnap: true },
     objects: [],
     lines: [],
     start: null,
