@@ -41,6 +41,7 @@ export function createBriefing({ editor }) {
       const { choice, custom } = choiceFor(key, b[key]);
       input.hidden = !custom;
       input.setAttribute("aria-label", `${label}, custom text`);
+      input.placeholder = "Type your own wording";
       const list = h("select", { class: "lg-select", onchange: (e) => {
         const v = e.target.value;
         input.hidden = v !== "custom";

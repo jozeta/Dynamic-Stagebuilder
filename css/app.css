@@ -37,6 +37,7 @@ body { background: var(--lg-bg); overflow: hidden; }
 .app.inspector-collapsed { --inspector-w: 56px; --inspector-h: 60px; }
 .library, .inspector { position: relative; }
 .panel-toggle { position: absolute; top: 6px; right: 6px; z-index: 1; }
+.side-head, .settings-head { min-height: 36px; }
 .panel-collapsed > :not(.panel-toggle) { display: none !important; }
 .panel-collapsed { overflow: hidden; }
 .panel-collapsed .panel-toggle { right: 50%; transform: translateX(50%); }
@@ -115,15 +116,22 @@ body { background: var(--lg-bg); overflow: hidden; }
 
 .camera-bar { position: absolute; top: var(--lg-space-s); left: var(--lg-space-s); display: flex; flex-wrap: wrap; gap: 2px;
   padding: 2px; border-radius: var(--lg-radius-control); max-width: calc(100% - 2 * var(--lg-space-s)); box-sizing: border-box; }
-.camera-bar .lg-btn { font-size: var(--lg-fs-small); }
+.camera-bar .lg-btn { font-size: var(--lg-fs-small); color: var(--lg-text); }
+/* A firmer backing so the view buttons stay readable over bright ground. */
+.camera-bar { background: color-mix(in srgb, var(--lg-bg) 78%, transparent); }
 
 @media (max-width: 1439px) { .brand { display: none; } }
 
 /* Touch screens (iPad): every control at least 44 px. */
 @media (pointer: coarse) {
   .tool, .tool-text, .lib-item, .camera-bar .lg-btn, .hint .lg-btn, .rot-row .lg-btn { min-height: var(--lg-touch); }
-  .rot-row .lg-btn { min-width: var(--lg-touch); }
+  .rot-row .lg-btn, .camera-bar .lg-btn { min-width: var(--lg-touch); }
+  .help-topic, .tool { min-height: var(--lg-touch); }
+  /* 16 px text in fields, so iPad Safari doesn't zoom the page when one gets focus. */
+  .lg-input, .lg-select, .lg-search > input, textarea { font-size: 16px; }
 }
+/* iPads with a trackpad report a fine pointer: keep their toolbar targets 44 px too. */
+@media (max-width: 1099px) { .tool { min-height: var(--lg-touch); } }
 @media (max-width: 899px) {
   .toolbar { gap: var(--lg-space-xs) var(--lg-space-s); }
   .tool { min-width: 44px; padding: 4px 3px; }
@@ -132,6 +140,7 @@ body { background: var(--lg-bg); overflow: hidden; }
 .small-screen { overflow-wrap: anywhere; }
 
 .wsb-choice .lg-input, .wsb-insert { margin-top: 4px; }
+#briefing .lg-kv > dd { text-align: right; }
 .wsb-choice .lg-select, .wsb-insert { width: 100%; text-overflow: ellipsis; }
 .wsb-insert { margin-bottom: 4px; }
 .briefing-body > .lg-field { align-self: start; }
@@ -191,7 +200,7 @@ body { background: var(--lg-bg); overflow: hidden; }
 .help-head .lg-modal-title { margin: 0; }
 .help-body { display: grid; grid-template-columns: 230px minmax(0, 1fr); min-height: 0; flex: 1; }
 .help-nav { display: grid; align-content: start; gap: 2px; padding: var(--lg-space-s); border-right: 1px solid var(--lg-border); overflow: auto; }
-.help-topic { display: flex; align-items: center; gap: 8px; min-height: 40px; padding: 6px 10px; border: 0; border-radius: var(--lg-radius-control);
+.help-topic { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 6px 10px; border: 0; border-radius: var(--lg-radius-control);
   background: transparent; color: var(--lg-muted); font: inherit; text-align: left; cursor: pointer; }
 .help-topic svg { width: 18px; height: 18px; flex: none; }
 .help-topic:hover { color: var(--lg-text); background: var(--lg-surface); }
@@ -209,7 +218,8 @@ body { background: var(--lg-bg); overflow: hidden; }
 .help-steps { display: flex; justify-content: space-between; gap: var(--lg-space-s); margin-top: var(--lg-space-l); flex-wrap: wrap; }
 @media (max-width: 900px) {
   .help-body { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); }
-  .help-nav { display: flex; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--lg-border); }
+  .help-nav { display: flex; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--lg-border);
+    -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent); mask-image: linear-gradient(90deg, #000 85%, transparent); }
   .help-topic { flex: none; min-height: 44px; }
 }
 /* Help drawings: theme colours from the tokens. */
