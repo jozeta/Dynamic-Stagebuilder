@@ -7,7 +7,7 @@ import { createStage } from "../js/model/stage.js";
 import { validateStage } from "../js/model/schema.js";
 
 test("defaults", () => {
-  assert.deepEqual({ ...LOOK_DEFAULTS }, { hour: 15.75, sun: 0.5, ambient: 1, shadows: true, softness: 4, shadowStrength: 0.5, haze: 0.35, exposure: 1 });
+  assert.deepEqual({ ...LOOK_DEFAULTS }, { hour: 15.75, sun: 0.5, ambient: 1, shadows: true, softness: 4, shadowStrength: 0.5, haze: 0.35, exposure: 1, ground: "sand" });
   assert.ok(Object.isFrozen(LOOK_DEFAULTS));
 });
 
@@ -56,7 +56,7 @@ test("old files read with the default look; a saved look round-trips", () => {
 
 test("Technical surroundings have their own light defaults; reset and switching use them", async () => {
   const { lookDefaults, TECHNICAL_LOOK } = await import("../js/model/look.js");
-  assert.deepEqual({ ...TECHNICAL_LOOK }, { hour: 16, sun: 1.15, ambient: 1.1, shadows: true, softness: 3, shadowStrength: 0.55, haze: 0.2, exposure: 1 });
+  assert.deepEqual({ ...TECHNICAL_LOOK }, { hour: 16, sun: 1.15, ambient: 1.1, shadows: true, softness: 3, shadowStrength: 0.55, haze: 0.2, exposure: 1, ground: "sand" });
   assert.deepEqual(lookDefaults("technical"), TECHNICAL_LOOK);
   assert.deepEqual(lookDefaults("outdoor"), LOOK_DEFAULTS);
   const ed = createEditor();
@@ -77,4 +77,12 @@ test("Blueprint has its own light defaults: bright, flat, soft light shadows, no
   assert.ok(BLUEPRINT_LOOK.shadowStrength <= 0.5 && BLUEPRINT_LOOK.ambient >= 1.2);
   const { ENVIRONMENTS } = await import("../js/model/schema.js");
   assert.ok(ENVIRONMENTS.includes("blueprint"));
+});
+
+test("Outdoor grounds: sand, light sand, dark sand, red dirt and gravel; unknown names fall back", async () => {
+  const { GROUNDS } = await import("../js/model/look.js");
+  assert.deepEqual(GROUNDS.map((g) => g.id), ["sand", "light-sand", "dark-sand", "red-dirt", "gravel"]);
+  assert.equal(cleanLook({ ground: "gravel" }).ground, "gravel");
+  assert.equal(cleanLook({ ground: "lava" }).ground, "sand");
+  assert.equal(cleanLook({ ground: 3 }).ground, "sand");
 });

@@ -92,5 +92,6 @@ export function applyLook(env, look, bay) {
   } else env.fog = env.baseFog ?? null;      // Blueprint keeps its distance fade
   env.exposure = look.exposure;
   env.paintSky?.(s.warmth);
+  if (env.setGround && look.ground && look.ground !== env.ground) env.setGround(look.ground);
   return env;
 }

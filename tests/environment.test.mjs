@@ -90,3 +90,17 @@ test("haze thickens the air at stage distances and shadow strength lightens shad
   assert.equal(env.sunLight.shadow.intensity, 0.4);
   env.dispose();
 });
+
+test("the Outdoor ground can be switched without touching the stage", async () => {
+  const { LOOK_DEFAULTS } = await import("../js/model/look.js");
+  const stage = everyPropStage();
+  const before = structuredClone(stage);
+  const env = createEnvironment("outdoor", stage.bay);
+  assert.equal(typeof env.setGround, "function");
+  for (const ground of ["dark-sand", "gravel", "sand"]) {
+    applyLook(env, { ...LOOK_DEFAULTS, ground }, stage.bay);
+    assert.equal(env.ground, ground);
+  }
+  env.dispose();
+  assert.deepEqual(stage, before);
+});

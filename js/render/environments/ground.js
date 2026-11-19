@@ -82,9 +82,33 @@ const TONE = {
   wear: new THREE.Color("#fbf4e8"), earth: new THREE.Color("#c99a72"), grass: new THREE.Color("#8e9a56"),
 };
 
+// Colour grades for the ground choices (Settings → Ground), applied to the photo scan: saturation,
+// gain, an added lift and a per-channel tint. The scan itself is a deep red-brown.
+const GRADES = {
+  sand: { sat: 0.62, gain: 1.22, add: [6, 6, 8], mul: [1, 1, 1] },
+  "light-sand": { sat: 0.42, gain: 1.5, add: [18, 15, 10], mul: [1, 0.99, 0.94] },
+  "dark-sand": { sat: 0.7, gain: 0.84, add: [0, 0, 0], mul: [1, 0.95, 0.88] },
+  "red-dirt": { sat: 0.98, gain: 1.04, add: [6, 0, 0], mul: [1.1, 0.9, 0.78] },
+  gravel: { sat: 0.1, gain: 1.12, add: [4, 6, 10], mul: [0.97, 1, 1.05] },
+};
+function gradeImage(img, name) {
+  const { sat, gain, add, mul } = GRADES[name] || GRADES.sand;
+  const c = document.createElement("canvas");
+  c.width = img.width; c.height = img.height;
+  const g = c.getContext("2d");
+  g.drawImage(img, 0, 0);
+  const d = g.getImageData(0, 0, c.width, c.height), px = d.data;
+  for (let i = 0; i < px.length; i += 4) {
+    const l = 0.3 * px[i] + 0.59 * px[i + 1] + 0.11 * px[i + 2];
+    for (let k = 0; k < 3; k++) px[i + k] = Math.min(255, ((l + (px[i + k] - l) * sat) * gain + add[k]) * mul[k]);
+  }
+  g.putImageData(d, 0, 0);
+  return c;
+}
+
 // Load the photo-scanned maps (same origin, cached offline by the service worker) and swap them
 // into the material when ready; `onUpdate` asks for a new frame.
-function loadPhotoMaps(mat, W, D, onUpdate) {
+function loadPhotoMaps(mat, W, D, onUpdate, control) {
   if (!hasDom) return;
   const loader = new THREE.TextureLoader();
   const prep = (t, color, repeat) => {
@@ -100,20 +124,16 @@ function loadPhotoMaps(mat, W, D, onUpdate) {
   // Colour map: graded once on load (lighter, a little less saturated) toward the warm tan of a
   // dusty range floor; the scan itself is a deep red-brown.
   new THREE.ImageLoader().load(`${PHOTO}_diff_2k.jpg`, (img) => {
-    const c = document.createElement("canvas");
-    c.width = img.width; c.height = img.height;
-    const g = c.getContext("2d");
-    g.drawImage(img, 0, 0);
-    const d = g.getImageData(0, 0, c.width, c.height), px = d.data;
-    for (let i = 0; i < px.length; i += 4) {
-      const r = px[i], gg = px[i + 1], b = px[i + 2], l = 0.3 * r + 0.59 * gg + 0.11 * b;
-      px[i] = Math.min(255, (l + (r - l) * 0.62) * 1.22 + 6);
-      px[i + 1] = Math.min(255, (l + (gg - l) * 0.62) * 1.22 + 6);
-      px[i + 2] = Math.min(255, (l + (b - l) * 0.62) * 1.22 + 8);
-    }
-    g.putImageData(d, 0, 0);
+    control.image = img;
     mat.map?.dispose();
-    mat.map = prep(new THREE.CanvasTexture(c), true, rep);
+    mat.map = prep(new THREE.CanvasTexture(gradeImage(img, control.ground)), true, rep);
+    control.regrade = (name) => {
+      const t = prep(new THREE.CanvasTexture(gradeImage(img, name)), true, rep);
+      mat.map?.dispose();
+      mat.map = t;
+      mat.needsUpdate = true;
+      onUpdate?.();
+    };
     done();
   }, undefined, () => done());
   loader.load(`${PHOTO}_nor_gl_2k.jpg`, (t) => { mat.normalMap?.dispose(); mat.normalMap = prep(t, false, rep); done(); }, undefined, () => done());
@@ -160,7 +180,14 @@ export function buildGround(bay, { onUpdate } = {}) {
 
   const stones = scatterStones(bay);
   group.add(...stones.meshes, grassCards(bay));
-  loadPhotoMaps(mat, W, D, onUpdate);
+  // The ground choice: regrade the photo when it has loaded, else remember it for when it does.
+  const control = { ground: "sand", regrade: null };
+  group.userData.setGround = (name) => {
+    if (name === control.ground) return;
+    control.ground = name;
+    control.regrade?.(name);
+  };
+  loadPhotoMaps(mat, W, D, onUpdate, control);
   return group;
 }
 

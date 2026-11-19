@@ -6,6 +6,7 @@
 import { h } from "./dom.js";
 import { LIBRARY_GROUPS, MARKINGS, isShown, setShown } from "../model/visibility.js";
 import { PROPS } from "../model/props.js";
+import { GROUNDS } from "../model/look.js";
 import { ENVIRONMENT_NAMES, ENVIRONMENT_LABELS } from "../render/environments/index.js";
 
 const SLIDERS = [
@@ -118,14 +119,19 @@ export function createSettings({ editor, panel, hide = [], onToggle = () => {}, 
       input.checked = (st.targetStyle || "classic") === value;
       ts.append(input, h("label", { for: id, text: label }));
     }
-    body.replaceChildren(
+    // The Outdoor range floor (the other surroundings have their own fixed floor).
+    const groundSel = h("select", { class: "lg-select", id: "set-ground", onchange: (e) => d({ type: "setLook", patch: { ground: e.target.value } }) },
+      GROUNDS.map((g) => h("option", { value: g.id, text: g.name })));
+    groundSel.value = look.ground || "sand";
+    body.replaceChildren(...[
       h("div", { class: "settings-row" }, [h("span", { class: "settings-label", text: "Surroundings" }), env]),
+      st.environment === "outdoor" ? h("div", { class: "settings-row" }, [h("label", { for: "set-ground", text: "Ground" }), groundSel]) : null,
       h("div", { class: "settings-row" }, [h("span", { class: "settings-label", text: "Default target style" }), ts]),
       ...rows.slice(0, 3),
       h("div", { class: "settings-row" }, [h("label", { for: "set-shadows", text: "Shadows" }), shadows]),
       ...rows.slice(3),
       h("p", { class: "lg-muted", text: "Saved with this stage and used for the printed 3D view. Changing these is not an undo step." }),
-    );
+    ].filter(Boolean));
   }
 
   return {

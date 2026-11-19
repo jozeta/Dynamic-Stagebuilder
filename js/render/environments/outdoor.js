@@ -98,7 +98,8 @@ function makeTree(r, mats) {
 export function outdoor(bay, { onUpdate } = {}) {
   const group = new THREE.Group();
   const r = rng(11);
-  group.add(buildGround(bay, { onUpdate }));
+  const groundGroup = buildGround(bay, { onUpdate });
+  group.add(groundGroup);
 
   // Vegetation: instanced flat-shaded bushes and grass tufts on the banks, trees beyond.
   const spots = [];
@@ -153,6 +154,8 @@ export function outdoor(bay, { onUpdate } = {}) {
     group, lights: [hemiLight, sunLight], hemiLight, sunLight, sunStrength: 5.4, hemiStrength: 0.95, warmth: 1,
     reflectionSky: reflectionSky(), reflectionStrength: 0.35,
     hazeColor: 0xd9c3a0, background: skyTex ?? new THREE.Color(0xb9cfe0), fog: new THREE.Fog(0xe6d6bb, 55, 150), exposure: 1.05,
+    ground: "sand",
+    setGround(name) { this.ground = name; groundGroup.userData.setGround(name); },
     paintSky(warmth) {
       if (!skyTex) return;
       paintSky(skyTex.image.getContext("2d"), skyTex.image.width, warmth);
