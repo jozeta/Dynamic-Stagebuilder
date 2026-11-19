@@ -5,7 +5,7 @@
   "description": "an Online IPSC 3d stage builder",
   "type": "module",
   "scripts": {
-    "test": "node --test tests/",
+    "test": "node --test \"tests/*.test.mjs\"",
     "lint": "eslint ."
   },
   "devDependencies": {
