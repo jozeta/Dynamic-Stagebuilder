@@ -4,6 +4,19 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Object snapping: walls (mesh, mesh with port, wooden) snap end to end to nearby walls (35 cm),
+  grid snap otherwise; *Grid* and *Objects* toggles in the toolbar; `settings.objectSnap` in stage
+  files (older files read as on).
+- Shift while dragging: slow fine moves (1/5 speed) without snapping.
+- New props: Mesh wall with port (a real, framed opening) and Potted plant (decoration). Poppers
+  and plates get a paint setting (white/yellow). The wooden "Wall with port" is now "Wooden wall
+  with port".
+- New look after the reference photo: pine frames and 10 cm square wire mesh, plywood walls,
+  cardboard targets on blue steel stands; Outdoor has earth banks with grass, bushes and trees, a
+  low warm sun with soft shadows, a gradient sky and haze; ACES tone mapping. Outdoor is now the
+  default for new stages, and mesh walls default to a pine frame.
+- Fixed: the service worker no longer stores stale files from the browser's HTTP cache.
+
 - 3D stage editor (Three.js 0.187.0, self-hosted): shooting bay, prop library with IPSC and mini
   targets, no-shoots, poppers, plates, mesh/wooden walls, a wall with a real port, barrels, tyres and
   crates, all at real size; fault lines, shooting areas and the start position.

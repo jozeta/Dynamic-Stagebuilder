@@ -30,7 +30,8 @@ npm run lint        # ESLint, including the unsafe-DOM rule
 - `index.html`: entry page (strict CSP with the import map's sha256, app grid, small-screen message)
 - `css/app.css`: the app's own styles on Låda Glass tokens
 - `js/main.js`: boot and wiring; `js/editor.js`: user actions → undoable stage edits (no DOM)
-- `js/model/`: pure stage data (props, scoring-rules, stage, history, snap, numbering, stats, schema)
+- `js/model/`: pure stage data (props, scoring-rules, stage, history, snap, objsnap, numbering,
+  stats, schema, briefing, map)
 - `js/render/`: Three.js (engine, stage-view, builders/, environments/, camera, labels, picking, ground)
 - `js/ui/`: Låda Glass panels (toolbar, library, inspector, stats, shortcuts, about, dom helpers)
 - `js/demo.js`: the example stage shown on open (until saved projects exist)
@@ -51,6 +52,11 @@ npm run lint        # ESLint, including the unsafe-DOM rule
   a node's `rotation.y = −degrees`.
 - **Stage data is plain JSON and the single source of truth.** It never holds Three.js objects; the
   3D view is rebuilt from it. Every edit goes through `model/history.js` so it can be undone.
+- **Snapping order** (`editor.js` `landing`): Shift (fine) → no snap; else object snap (wall end to
+  wall end, `model/objsnap.js`) → else grid; always clamped to the bay. Groups snap to the grid only.
+- **Looks are generated in code** (canvas textures in `render/materials.js` and
+  `environments/*.js`, seeded random), never downloaded. The Outdoor scene follows the reference
+  photo (golden-hour dirt range); keep that feel when changing it.
 - **Environments never touch stage data.** Scene groups: `environmentGroup` (ground, sky, lights)
   and `stageGroup` (props). A wall's mesh colour and frame are wall properties. A test asserts the
   stage JSON is identical before and after an environment switch.

@@ -18,11 +18,14 @@ training, and want a clear briefing sheet without drawing the map by hand.
 - **Prop library**, every prop drawn in 3D at real dimensions:
   - paper: IPSC target, mini target, no-shoot, mini no-shoot (on sticks, adjustable height)
   - steel: IPSC popper, mini popper, round plate, square plate
-  - walls: mesh wall (black or blue mesh, black or wood frame), wooden wall, wall with a real port
-  - obstacles: barrel, tyre, tyre stack, wooden crate
+  - walls: mesh wall and mesh wall with port (black or blue 10 cm wire mesh, pine or black frame),
+    wooden wall, wooden wall with port; ports are real openings
+  - obstacles: barrel, tyre, tyre stack, wooden crate, potted plant (decoration)
   - fault lines, shooting areas and the start position
 - **Editing by eye:** tap or drag props in, drag them on the ground, rotate them, all with grid and
   angle snapping; multi-select, duplicate, delete, undo and redo.
+- **Snapping:** walls snap end to end onto nearby walls, so a run of walls joins up cleanly; other
+  props snap to the grid. Hold **Shift** while dragging for slow, fine moves without snapping.
 - **Automatic target numbers** (T1…, P1… for steel, NS1… for no-shoots), with hand-set labels kept.
 - **Live statistics:** targets, no-shoots, minimum rounds, maximum points, suggested stage type.
 - **Written Stage Briefing** editor: match, stage name and number, designer, stage type, scoring,
@@ -30,8 +33,8 @@ training, and want a clear briefing sheet without drawing the map by hand.
   points are counted from the stage.
 - **Printable brief** (A4): briefing and a top-down map with a scale bar on page 1, a 3D view on
   page 2. Save it as a PDF from the print dialog.
-- **Two surroundings,** Technical (grey floor, grid) and Outdoor (dirt, sunlight). Switching never
-  moves anything on the stage.
+- **Two surroundings,** Outdoor (a dirt range at golden hour with earth banks, bushes and trees,
+  long soft shadows) and Technical (grey floor, grid). Switching never moves anything on the stage.
 - **Cameras:** orbit, pan, zoom, Top, Isometric, Front and a shooter's-eye view from the start position.
 - **Projects** saved in the browser automatically, with JSON export and import.
 - **Works offline** and can be installed as an app (PWA).
@@ -48,6 +51,11 @@ not supported: below 768 px wide the app asks you to use a larger screen. Englis
 
 ### Unreleased
 
+- Walls snap end to end to nearby walls; Grid and Objects snapping toggles in the toolbar.
+- Hold Shift while dragging for slow, fine moves.
+- New Mesh wall with port and Potted plant; poppers and plates can be white or yellow.
+- A new outdoor look after a real dirt range: pine-framed square wire mesh, cardboard targets on
+  blue steel stands, earth banks with grass and trees, warm low sun and soft shadows.
 - The 3D stage editor: shooting bay, prop library (paper, steel, walls with real ports, obstacles),
   fault lines, shooting areas and the start position; drag, rotate, duplicate, delete, undo/redo.
 - Automatic target numbers (T1, P1, NS1) and live round count, points and suggested stage type.
@@ -63,8 +71,12 @@ not supported: below 768 px wide the app asks you to use a larger screen. Englis
 
 <table>
   <tr>
-    <td><img src="docs/screenshots/editor-technical.png" alt="The editor with the Technical surroundings" width="400"><br>The editor: prop library, the stage in the Technical surroundings, stage statistics</td>
-    <td><img src="docs/screenshots/editor-outdoor.png" alt="The same stage outdoors with a wall selected" width="400"><br>The same stage outdoors, with a mesh wall selected and its rotate ring</td>
+    <td><img src="docs/screenshots/editor-outdoor.png" alt="The editor with the Outdoor surroundings" width="400"><br>The editor: prop library, the stage on an outdoor dirt range at golden hour, stage statistics</td>
+    <td><img src="docs/screenshots/outdoor-close.png" alt="Close-up of joined mesh walls with a port" width="400"><br>Close up: walls joined end to end, a mesh wall with port, targets on stands, lattice shadows</td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/editor-technical.png" alt="The same stage in the Technical surroundings with a wall selected" width="400"><br>The same stage in the Technical surroundings, with a wall selected and its rotate ring</td>
+    <td><img src="docs/screenshots/ipad-landscape.png" alt="The editor at iPad landscape width" width="400"><br>On an iPad (1024 px): the inspector moves under the 3D view</td>
   </tr>
   <tr>
     <td><img src="docs/screenshots/shooters-eye.png" alt="Shooter's eye view from the start position" width="400"><br>Shooter's eye: the view from the start position at 1.6 m</td>
@@ -76,7 +88,7 @@ not supported: below 768 px wide the app asks you to use a larger screen. Englis
   </tr>
   <tr>
     <td><img src="docs/screenshots/projects.png" alt="The Projects dialog" width="400"><br>Projects saved in this browser, with export hints</td>
-    <td><img src="docs/screenshots/ipad-landscape.png" alt="The editor at iPad landscape width" width="400"><br>On an iPad (1024 px): the inspector moves under the 3D view</td>
+    <td></td>
   </tr>
 </table>
 
@@ -103,14 +115,16 @@ Stage settings are in the inspector when nothing is selected. They are saved wit
 |---|---|---|
 | Bay width | Width of the shooting bay across the range, 1–200 m | 20 m |
 | Bay depth | Depth of the bay down range, 1–200 m | 30 m |
-| Grid snap | Positions snap to this grid: off, 0.1, 0.25, 0.5 or 1 m | 0.25 m |
+| Grid snap | Positions snap to this grid: off, 0.1, 0.25, 0.5 or 1 m (toolbar *Grid* turns it on/off) | 0.25 m |
+| Object snap | Toolbar *Objects*: a wall's end jumps onto another wall's end within 35 cm | On |
 | Angle snap | Rotations snap to this step: off, 5°, 15°, 45° or 90° | 15° |
-| Surroundings | Technical (grey floor, grid) or Outdoor (dirt, sun); never moves the stage | Technical |
+| Surroundings | Outdoor (dirt range, sun) or Technical (grey floor, grid); never moves the stage | Outdoor |
 
 Prop settings (inspector, one prop selected): label (targets), rotation, and per prop: mount height
 for paper targets (0.1–2 m, default 1 m to the target's bottom), base height for steel, plate size
 (15–30 cm), wall length (0.5–4 m) and height (0.5–2.5 m), mesh colour (black/blue), frame
-(black/wood), port width, height and bottom edge, tyres in a stack (1–6), crate size.
+(wood/black), port width, height and bottom edge, paint for poppers and plates (white/yellow),
+tyres in a stack (1–6), crate size.
 
 Scoring follows the IPSC Combined Competition Rules, January 2024 edition (Handgun): 2 hits per
 paper target and 1 per steel target (Comstock), 5 points per A-zone or steel hit, and Short ≤ 12,
@@ -123,6 +137,11 @@ is a suggestion from the round count.
 With a mouse you can also drag a prop from the library onto the stage. Drag a placed prop to move it;
 it snaps to the grid and stays inside the bay. Rotate the selected prop with the green ring, the
 ↺/↻ buttons in the inspector, or Q and E. Shift-click selects several props.
+
+**Join walls.** Drag or drop a wall so its end comes within about 35 cm of another wall's end and
+it jumps into place, end to end (in a straight line or at a corner). Turn *Objects* off in the
+toolbar to place walls freely, and *Grid* off to stop grid snapping. For fine adjustments, hold
+**Shift** while you drag: the prop moves at a fifth of the speed and doesn't snap.
 
 **Draw fault lines and shooting areas.** Choose *Fault line* or *Shooting area* in the toolbar, tap
 the points on the ground, then double-click, press Enter or tap *Finish*. Escape or *Cancel* stops.
@@ -162,6 +181,7 @@ aren't in an exported file shows a hint, so you know when to export a backup.
 | ⌘/Ctrl D | Duplicate the selection |
 | Delete / Backspace | Delete the selection |
 | Q / E | Rotate the selection by the angle snap |
+| Shift while dragging | Move slowly (1/5 speed), without snapping |
 | Enter / Escape | Finish / cancel drawing; Escape also clears the selection |
 | F | Frame all |
 | 1 2 3 4 | Isometric, Top, Front, Shooter's eye |
