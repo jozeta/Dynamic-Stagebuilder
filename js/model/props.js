@@ -12,7 +12,7 @@ export const TARGET_SIZES = Object.freeze({
   miniPopper: Object.freeze({ w: 0.20, h: 0.57, d: 0.25 }),
 });
 
-export const STICK = 0.045;        // wall frame section (m)
+export const STICK = 0.06;         // wall frame section (m): chunky pine, as on club ranges
 export const TARGET_STICK = 0.03;  // wooden target stick section (m)
 export const STAND = Object.freeze({ w: 0.36, d: 0.26, h: 0.04 });   // blue steel target base
 export const PLATE_FOOT = 0.30;    // footprint of a plate stand (m)
@@ -58,6 +58,8 @@ const defs = [
     params: { ...wallSize, ...meshLook, ...port } },
   { type: "wall-wood", name: "Wooden wall", category: "wall", scoring: null, params: wallSize },
   { type: "wall-port", name: "Wooden wall with port", category: "wall", scoring: null, params: { ...wallSize, ...port } },
+  { type: "wall-solid", name: "Solid panel", category: "wall", scoring: null,
+    params: { length: { default: 1, min: 0.5, max: 2, step: 0.1 }, height: { default: 2, min: 0.5, max: 2.5, step: 0.1 } } },
   { type: "wall-door", name: "Mesh doorway", category: "wall", scoring: null,
     params: { length: { default: 1.5, min: 1.2, max: 3, step: 0.1 }, height: { default: 2.2, min: 2, max: 2.5, step: 0.05 },
       doorWidth: { default: 0.8, min: 0.6, max: 1.2, step: 0.05 }, doorHeight: { default: 1.95, min: 1.7, max: 2.1, step: 0.05 }, ...meshLook } },
@@ -120,7 +122,7 @@ export function dimensionsOf(obj) {
     }
     case "plate-round": case "plate-square":
       [w, h, d] = [Math.max(p.size, PLATE_FOOT), p.baseHeight + p.size, PLATE_FOOT]; break;
-    case "wall-mesh": case "wall-mesh-port": case "wall-wood": case "wall-port": case "wall-door":
+    case "wall-mesh": case "wall-mesh-port": case "wall-wood": case "wall-port": case "wall-door": case "wall-solid":
       [w, h, d] = [p.length, p.height, STICK]; break;
     case "barrel": [w, h, d] = [BARREL.diameter, BARREL.height, BARREL.diameter]; break;
     case "tyre": [w, h, d] = [TYRE.diameter, TYRE.height, TYRE.diameter]; break;

@@ -2,7 +2,7 @@
 import * as THREE from "three";
 import { TARGET_SIZES, PLATE_FOOT } from "../../model/props.js";
 import { getMaterial } from "../materials.js";
-import { box, extrude, group } from "./parts.js";
+import { box, group } from "./parts.js";
 
 const PLATE = 0.012;   // steel thickness
 const BASE = 0.02;     // popper base plate thickness
@@ -31,7 +31,13 @@ export function buildPopper(obj) {
   // Hinge bracket the popper falls back on.
   g.add(box(s.w * 0.55, 0.05, 0.05, "steel-dark", 0, bh + BASE + 0.025, PLATE * 2));
   g.add(box(s.w * 0.3, 0.12, 0.03, "steel-dark", 0, bh + BASE + 0.06, s.d * 0.3));
-  const body = extrude(popperShape(s.w, s.h - BASE), PLATE, `steel-${obj.params.paint || "yellow"}`, PLATE / 2);
+  // A chunky popper with rounded (bevelled) edges, like painted steel seen on the range.
+  const BEVEL = 0.01, THICK = 0.016;
+  const geo = new THREE.ExtrudeGeometry(popperShape(s.w - 2 * BEVEL, s.h - BASE - 2 * BEVEL),
+    { depth: THICK, bevelEnabled: true, bevelThickness: BEVEL, bevelSize: BEVEL, bevelSegments: 3, curveSegments: 28 });
+  geo.translate(0, BEVEL, -THICK / 2);
+  const body = new THREE.Mesh(geo, getMaterial(`steel-${obj.params.paint || "yellow"}`));
+  body.castShadow = true;
   body.position.y = bh + BASE;
   g.add(body);
   return g;

@@ -2,6 +2,7 @@
 // painted on canvases in code (no downloads): square wire mesh, pine, plywood, cardboard. In Node
 // (tests) there is no canvas, so plain colours are used.
 import * as THREE from "three";
+import { OUTLINE, ZONES, GRID } from "./builders/target-shape.js";
 
 const cache = new Map();
 const hasDom = typeof document !== "undefined";
@@ -24,11 +25,12 @@ export function canvasTexture(size, draw, { repeat = 1, seed = 1, color = true }
   return t;
 }
 
-// Square welded wire mesh, 10 cm holes: one texture tile = 0.5 m = 5 × 5 holes.
-function meshTexture(color) {
+// Square welded wire mesh: one texture tile = 0.5 m. Black mesh: 5 × 5 holes of 10 cm with bold
+// wires; blue mesh: 8 × 8 denser holes with thicker painted wires, as on the reference range.
+function meshTexture(color, n = 5, wire = 11) {
   return canvasTexture(256, (g, s, r) => {
     g.clearRect(0, 0, s, s);
-    const n = 5, step = s / n, wire = 7;
+    const step = s / n;
     for (let i = 0; i < n; i++) {
       const p = i * step;
       g.fillStyle = color;
@@ -147,16 +149,56 @@ function coneTexture() {
   }, { seed: 23 });
 }
 
+// The printed face of a cardboard target: tan board with darker brown scoring-zone outlines.
+// Extrude cap UVs are in metres, so the texture is placed with repeat/offset over the card size.
+function cardTexture({ base, line, fibres }, size) {
+  const W = 512, H = Math.round((W * GRID.h) / GRID.w);
+  const c = document.createElement("canvas");
+  c.width = W; c.height = H;
+  const g = c.getContext("2d");
+  const r = (() => { let x = 7; return () => ((x = (x * 1664525 + 1013904223) >>> 0) / 4294967296); })();
+  const px = ([x, y]) => [((x + GRID.w / 2) / GRID.w) * W, H - (y / GRID.h) * H];
+  g.fillStyle = base; g.fillRect(0, 0, W, H);
+  for (let i = 0; i < 2600; i++) { const v = r() > 0.5 ? 255 : 70; g.fillStyle = `rgba(${v},${v * 0.82},${v * 0.6},${fibres})`; g.fillRect(r() * W, r() * H, 2, 2); }
+  g.strokeStyle = line; g.lineJoin = "round";
+  g.lineWidth = 5;
+  g.beginPath(); OUTLINE.forEach((p, i) => { const [x, y] = px(p); i ? g.lineTo(x, y) : g.moveTo(x, y); }); g.closePath(); g.stroke();
+  g.lineWidth = 4;
+  for (const [x, y, w, h] of ZONES) {
+    const [x0, y0] = px([x, y + h]), [x1, y1] = px([x + w, y]);
+    g.strokeRect(x0, y0, x1 - x0, y1 - y0);
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 8;
+  t.repeat.set(1 / size.w, 1 / size.h);
+  t.offset.set(0.5, 0);
+  return t;
+}
+
+function steelSheet() {
+  return canvasTexture(256, (g, s, r) => {
+    g.fillStyle = "#b9bec2"; g.fillRect(0, 0, s, s);
+    for (let i = 0; i < 400; i++) { g.fillStyle = `rgba(${r() > 0.5 ? "255,255,255" : "60,66,72"},${0.04 + r() * 0.06})`; g.fillRect(r() * s, r() * s, 1 + r() * 30, 1); }
+    for (let i = 0; i < 12; i++) { g.fillStyle = "rgba(90,96,102,0.25)"; g.beginPath(); g.arc(r() * s, r() * s, 1.5, 0, 7); g.fill(); }
+  }, { seed: 43 });
+}
+
 const std = (o) => new THREE.MeshStandardMaterial(o);
 const mapped = (tex, fallback, extra = {}) => std({ roughness: 0.85, ...(hasDom ? { map: tex() } : { color: fallback }), ...extra });
 
 const specs = {
   "target-tan": () => mapped(cardboard, 0xcfa06a, { roughness: 0.95 }),
+  "card-ipsc": () => std({ roughness: 0.95, ...(hasDom ? { map: cardTexture({ base: "#d0a16a", line: "#8a5d33", fibres: 0.05 }, { w: 0.46, h: 0.58 }) } : { color: 0xd0a16a }) }),
+  "card-mini": () => std({ roughness: 0.95, ...(hasDom ? { map: cardTexture({ base: "#d0a16a", line: "#8a5d33", fibres: 0.05 }, { w: 0.31, h: 0.39 }) } : { color: 0xd0a16a }) }),
+  "noshoot-ipsc": () => std({ roughness: 0.95, ...(hasDom ? { map: cardTexture({ base: "#f2efe6", line: "#9a958a", fibres: 0.03 }, { w: 0.46, h: 0.58 }) } : { color: 0xf2efe6 }) }),
+  "noshoot-mini": () => std({ roughness: 0.95, ...(hasDom ? { map: cardTexture({ base: "#f2efe6", line: "#9a958a", fibres: 0.03 }, { w: 0.31, h: 0.39 }) } : { color: 0xf2efe6 }) }),
+  "panel-grey": () => mapped(steelSheet, 0xc9ced2, { roughness: 0.55, metalness: 0.12 }),
   "card-edge": () => std({ color: 0x8b6a45, roughness: 1 }),
   "noshoot-white": () => std({ color: 0xf3f1ea, roughness: 0.95 }),
   "zone-line": () => new THREE.LineBasicMaterial({ color: 0x9c7a50, transparent: true, opacity: 0.7 }),
   "steel-white": () => std({ color: 0xeeece4, roughness: 0.55, metalness: 0.15 }),
-  "steel-yellow": () => std({ color: 0xf0c43a, roughness: 0.5, metalness: 0.15 }),
+  "steel-yellow": () => std({ color: 0xf2c81e, roughness: 0.45, metalness: 0.1 }),
   "steel-dark": () => std({ color: 0x3a3d42, roughness: 0.6, metalness: 0.5 }),
   "stand-blue": () => std({ color: 0x2a58c0, roughness: 0.45, metalness: 0.35 }),
   "stick-wood": () => mapped(pine, 0xd8b47e),
@@ -192,7 +234,7 @@ const specs = {
   "light-red": () => std({ color: 0xb0201a, roughness: 0.3, emissive: 0x300000 }),
   "light-white": () => std({ color: 0xf4f0d8, roughness: 0.2, emissive: 0x302a10 }),
   "anti-slip": () => std({ color: 0x2b2a28, roughness: 1 }),
-  "fault-red": () => std({ color: 0xc9302a, roughness: 0.65 }),
+  "fault-red": () => std({ color: 0xc4291f, roughness: 0.6 }),
   "area-fill": () => new THREE.MeshBasicMaterial({ color: 0xd8322a, transparent: true, opacity: 0.08, depthWrite: false }),
   "start-marker": () => std({ color: 0xf0f0f0, roughness: 0.8 }),
   leaf: () => std({ color: 0x5b8f3a, roughness: 0.8, flatShading: true, side: THREE.DoubleSide }),

@@ -95,17 +95,19 @@ export function buildPlant(obj) {
   soil.rotation.x = -Math.PI / 2;
   soil.position.y = 0.32;
   inner.add(soil);
-  for (let i = 0; i < 7; i++) {                                   // ringed trunk
-    const seg = mesh(new THREE.CylinderGeometry(0.036 - i * 0.002, 0.044 - i * 0.002, 0.1, 7), "trunk");
-    seg.position.y = 0.37 + i * 0.095;
-    seg.rotation.y = i;
-    inner.add(seg);
-  }
-  const fronds = 14;
-  for (let i = 0; i < fronds; i++) {
-    const m = mesh(frond(0.55 + (i % 3) * 0.08, 14), i % 2 ? "leaf" : "leaf-dark");
-    m.position.y = 1.0 + (i % 4) * 0.035;
-    m.rotation.set(-0.55 - (i % 3) * 0.25, (i / fronds) * Math.PI * 2 + (i % 2) * 0.2, 0, "YXZ");
+  // An areca palm: many slender stems rising from the pot, each arching into a frond.
+  const stems = 22;
+  for (let i = 0; i < stems; i++) {
+    const a = (i / stems) * Math.PI * 2 + (i % 3) * 0.4;
+    const lean = 0.12 + (i % 5) * 0.07;
+    const len = 0.75 + ((i * 7) % 5) * 0.08;
+    const stem = mesh(new THREE.CylinderGeometry(0.006, 0.01, len * 0.7, 4), "trunk");
+    stem.position.set(Math.cos(a) * lean * 0.3, 0.36 + len * 0.35, Math.sin(a) * lean * 0.3);
+    stem.rotation.set(Math.sin(a) * lean, 0, -Math.cos(a) * lean);
+    inner.add(stem);
+    const m = mesh(frond(0.5 + (i % 4) * 0.06, 16), i % 3 ? "leaf" : "leaf-dark");
+    m.position.set(Math.cos(a) * lean * 0.75, 0.36 + len * 0.68, Math.sin(a) * lean * 0.75);
+    m.rotation.set(-0.35 - lean, -a + Math.PI / 2, 0, "YXZ");
     inner.add(m);
   }
   g.add(fitTo(inner, PLANT.diameter, PLANT.height, PLANT.diameter));

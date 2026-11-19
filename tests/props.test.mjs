@@ -6,7 +6,7 @@ import { SCORING } from "../js/model/scoring-rules.js";
 
 const TYPES = ["paper-ipsc", "paper-mini", "noshoot", "noshoot-mini", "popper", "mini-popper",
   "plate-round", "plate-square", "wall-mesh", "wall-mesh-port", "wall-wood", "wall-port", "barrel", "tyre", "tyre-stack", "crate", "plant-palm",
-  "wall-door", "ramp", "platform", "car", "table", "chair", "pallet", "sandbags", "cone"];
+  "wall-door", "wall-solid", "ramp", "platform", "car", "table", "chair", "pallet", "sandbags", "cone"];
 
 const near = (a, b, tol = 0.005) => assert.ok(Math.abs(a - b) <= tol, `${a} ≈ ${b}`);
 const obj = (type, params = {}) => ({ type, params: { ...defaultParams(type), ...params } });
@@ -105,4 +105,10 @@ test("new structures and range furniture have real sizes", () => {
   assert.equal(getProp("car").category, "obstacle");
   assert.equal(getProp("wall-door").category, "wall");
   assert.ok(defaultParams("wall-door").doorWidth >= 0.7);
+});
+
+test("the solid panel is a wall (it snaps) and frames are 6 cm", () => {
+  assert.equal(getProp("wall-solid").category, "wall");
+  assert.deepEqual(defaultParams("wall-solid"), { length: 1, height: 2 });
+  near(dimensionsOf(obj("wall-mesh")).d, 0.06);
 });

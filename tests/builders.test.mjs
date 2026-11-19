@@ -154,3 +154,16 @@ test("short sandbag walls keep whole bags in every row", () => {
     for (const b of bags) assert.ok(b.max.y - b.min.y < 0.15, `length ${length}: a bag ${(b.max.y - b.min.y).toFixed(2)} m tall`);
   }
 });
+
+test("solid panel wall is drawn at its real size and blocks the view", () => {
+  checkSize("wall-solid");
+  const g = buildProp(obj("wall-solid"));
+  g.updateMatrixWorld(true);
+  assert.ok(new Raycaster(new Vector3(0, 1, -1), new Vector3(0, 0, 1)).intersectObject(g, true).length > 0);
+});
+
+test("paper targets print their scoring zones on the card (no line geometry)", () => {
+  let lines = 0;
+  buildProp(obj("paper-ipsc")).traverse((c) => { if (c.isLineSegments) lines++; });
+  assert.equal(lines, 0);
+});

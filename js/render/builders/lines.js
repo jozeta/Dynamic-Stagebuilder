@@ -3,8 +3,8 @@ import * as THREE from "three";
 import { getMaterial } from "../materials.js";
 import { box, group } from "./parts.js";
 
-const BAR_W = 0.1;
-const BAR_H = 0.05;
+const BAR_W = 0.1;   // red-painted timber, 10 × 8 cm
+const BAR_H = 0.08;
 
 export function buildLine(line) {
   const g = group(line.id);

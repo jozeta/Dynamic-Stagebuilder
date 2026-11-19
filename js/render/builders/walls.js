@@ -125,3 +125,12 @@ export function buildDoorWall(obj) {
     meshRect(-dw / 2 - F, dw / 2 + F, dh + F, H - STICK, mm)]) if (m) g.add(m);
   return g;
 }
+
+// A solid panel: a grey galvanised sheet in a pine frame, set into wall runs to block sight.
+export function buildSolidWall(obj) {
+  const { length: L, height: H } = obj.params;
+  const g = group(obj.id);
+  frame(g, L, H, "wood");
+  g.add(box(L - 2 * STICK, H - 2 * STICK, 0.012, "panel-grey", 0, H / 2, 0));
+  return g;
+}

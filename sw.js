@@ -33,6 +33,7 @@ const FILES = [
   "js/render/builders/paper.js",
   "js/render/builders/parts.js",
   "js/render/builders/steel.js",
+  "js/render/builders/target-shape.js",
   "js/render/builders/walls.js",
   "js/render/camera.js",
   "js/render/engine.js",

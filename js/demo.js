@@ -15,7 +15,7 @@ export function demoStage() {
 
   // Left bay: an L of black mesh with a blue return.
   add("wall-mesh", from([-7, 8], 0, 2), 0);
-  add("wall-mesh", from([-5, 8], 0, 1.5), 0, { length: 1.5 });
+  add("wall-solid", from([-5, 8], 0, 1.5), 0, { length: 1.5 });
   add("wall-mesh", from([-3.5, 8], 90, 2), 90, { mesh: "blue" });
   // Centre: a mesh wall with a port between two mesh walls.
   add("wall-mesh", from([-1.5, 6.5], 0, 1.5), 0, { length: 1.5 });

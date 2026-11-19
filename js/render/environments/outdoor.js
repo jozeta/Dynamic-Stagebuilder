@@ -4,7 +4,7 @@
 import * as THREE from "three";
 import { canvasTexture, sun, rng } from "./common.js";
 
-const SAND = "#ad9479";
+const SAND = "#a48a6f";
 
 function dirt(g, s, r) {
   g.fillStyle = SAND; g.fillRect(0, 0, s, s);
@@ -115,9 +115,11 @@ function heightAt(x, z, bay, noise) {
   if (d <= 0) return 0;
   const uprange = z < 0 ? Math.min(1, -z / 10) : 0;        // fade the side banks out up range
   const rise = (z < 0 && behind === 0) ? 1 - uprange : 1;
-  const bank = Math.min(1, d / 7);
-  const h = 4.2 * (bank * bank * (3 - 2 * bank)) * rise;
-  return h + noise(x, z) * 0.5 * Math.min(1, d / 3);
+  // A cut bank like the reference range: a steep earth face over about 2.5 m, then a gentle top.
+  const face = Math.min(1, d / 2.5);
+  const top = Math.max(0, d - 2.5) * 0.12;
+  const h = (3.6 * (face * face * (3 - 2 * face)) + Math.min(1.2, top)) * rise;
+  return h + noise(x, z) * 0.35 * Math.min(1, d / 2);
 }
 
 function makeNoise(seed) {
@@ -141,16 +143,17 @@ export function outdoor(bay) {
   geo.translate(0, 0, cz);
   const pos = geo.attributes.position;
   const colors = new Float32Array(pos.count * 3);
-  const dirtC = new THREE.Color("#ffffff"), grass = new THREE.Color("#8d9658"), dry = new THREE.Color("#b89c78");
+  const dirtC = new THREE.Color("#ffffff"), grass = new THREE.Color("#7f9a4c"), dry = new THREE.Color("#b98a62");
   const c = new THREE.Color();
   for (let i = 0; i < pos.count; i++) {
     const x = pos.getX(i), z = pos.getZ(i);
     const y = heightAt(x, z, bay, noise);
     pos.setY(i, y);
-    const t = Math.min(1, Math.max(0, (y - 2.2) / 1.6));
+    const t = Math.min(1, Math.max(0, (y - 3.3) / 0.6));      // grass only on the bank tops
     // Broad, non-repeating light and dark areas over the whole range hide the texture's tiling.
     const v = 0.93 + 0.07 * large(x, z);
-    c.copy(dirtC).multiplyScalar(v).lerp(dry, Math.min(1, y / 2.5) * 0.5).lerp(grass, t * 0.85);
+    // Bank faces show reddish cut earth; the range floor stays light gravel.
+    c.copy(dirtC).multiplyScalar(v).lerp(dry, Math.min(1, y / 1.2) * 0.75).lerp(grass, t * 0.9);
     colors.set([c.r, c.g, c.b], i * 3);
   }
   geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
@@ -168,19 +171,20 @@ export function outdoor(bay) {
 
   // Vegetation: instanced flat-shaded bushes and grass tufts on the banks, trees beyond.
   const spots = [];
-  for (let i = 0; i < 9000 && spots.length < 900; i++) {
+  // Dense shrubs along the bank tops and edges, a few lower down the faces.
+  for (let i = 0; i < 20000 && spots.length < 1400; i++) {
     const x = (r() - 0.5) * (bay.width + 44), z = -6 + r() * (bay.depth + 26);
     const y = heightAt(x, z, bay, noise);
-    if (y > 1.2) spots.push([x, y, z]);
+    if (y > 3.2 || (y > 1 && r() < 0.12)) spots.push([x, y, z]);
   }
   // Bushes: rounded, lumpy clusters sunk into the slope (not floating blobs).
   const bushGeo = jitter(new THREE.IcosahedronGeometry(1, 1), rng(53), 0.3);
   const bushMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9, flatShading: true });
   const bushes = new THREE.InstancedMesh(bushGeo, bushMat, spots.length);
   const m = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3(), p = new THREE.Vector3();
-  const greens = ["#6b8a3c", "#7c9a47", "#5d7a35", "#8fa357", "#9c9a52"].map((h) => new THREE.Color(h));
+  const greens = ["#5f8a32", "#73a03c", "#4f7a2c", "#86ab4c", "#6c8f3a"].map((h) => new THREE.Color(h));
   spots.forEach(([x, y, z], i) => {
-    const s = 0.18 + r() * 0.45;
+    const s = 0.25 + r() * 0.5;
     q.setFromEuler(new THREE.Euler(r(), r() * 6.28, r()));
     m.compose(p.set(x, y + s * 0.15, z), q, sc.set(s * (1 + r() * 0.4), s * (0.55 + r() * 0.3), s));
     bushes.setMatrixAt(i, m);
@@ -247,11 +251,11 @@ export function outdoor(bay) {
     group.add(tree);
   }
 
-  const hemiLight = new THREE.HemisphereLight(0xf4efe6, 0x8c7a66, 1.5);
+  const hemiLight = new THREE.HemisphereLight(0xf4efe6, 0x8c7a66, 1.1);
   const sunLight = sun(bay, 0xffe0b8, 3.1, [-16, 15, 16]);
   const skyTex = canvasTexture(256, (g, s) => paintSky(g, s, 0.5), [1, 1]);
   return {
-    group, lights: [hemiLight, sunLight], hemiLight, sunLight, sunStrength: 3.4, hemiStrength: 1.5, warmth: 1,
+    group, lights: [hemiLight, sunLight], hemiLight, sunLight, sunStrength: 4.0, hemiStrength: 1.1, warmth: 1,
     hazeColor: 0xe6d6bb, background: skyTex ?? new THREE.Color(0xb9cfe0), fog: new THREE.Fog(0xe6d6bb, 55, 150), exposure: 1.05,
     paintSky(warmth) {
       if (!skyTex) return;

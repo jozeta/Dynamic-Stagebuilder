@@ -35,7 +35,13 @@ function sizeText(type) {
   }
 }
 
+// Which groups are folded is remembered per browser (a convenience; it may be unavailable).
+const FOLD_KEY = "dsb:library-closed";
+function loadClosed() { try { return new Set(JSON.parse(localStorage.getItem(FOLD_KEY) || "[]")); } catch { return new Set(); } }
+function saveClosed(set) { try { localStorage.setItem(FOLD_KEY, JSON.stringify([...set])); } catch { /* private mode */ } }
+
 export function createLibrary(root, { editor }) {
+  const closed = loadClosed();
   const search = h("input", { type: "search", placeholder: "Search props", "aria-label": "Search props", oninput: () => filter() });
   const sections = [];
   const items = [];
@@ -55,18 +61,33 @@ export function createLibrary(root, { editor }) {
       items.push({ el: item, text: `${def.name} ${title}`.toLowerCase() });
       list.append(item);
     }
-    const sec = h("section", { class: "lib-section", "aria-label": title }, [h("h3", { class: "lg-label", text: title }), list]);
+    // A native <details>: the heading toggles the group with mouse, touch and keyboard.
+    const sec = h("details", { class: "lib-section", open: !closed.has(cat), dataset: { cat } }, [
+      h("summary", { class: "lib-summary" }, [h("span", { class: "lg-label", text: title }), h("span", { class: "lib-count lg-muted", text: String(list.children.length) })]),
+      list,
+    ]);
+    sec.addEventListener("toggle", () => {
+      if (filtering) return;
+      if (sec.open) closed.delete(cat); else closed.add(cat);
+      saveClosed(closed);
+    });
     sections.push(sec);
     root.append(sec);
   }
   const empty = h("p", { class: "lg-muted lib-empty", text: "No props match your search.", hidden: true });
   root.append(empty);
 
+  let filtering = false;
   function filter() {
     const q = search.value.trim().toLowerCase();
     let shown = 0;
     for (const it of items) { const ok = !q || it.text.includes(q); it.el.hidden = !ok; if (ok) shown++; }
-    for (const s of sections) s.hidden = ![...s.querySelectorAll(".lib-item")].some((b) => !b.hidden);
+    filtering = true;
+    for (const s of sections) {
+      s.hidden = ![...s.querySelectorAll(".lib-item")].some((b) => !b.hidden);
+      s.open = q ? !s.hidden : !closed.has(s.dataset.cat);     // a search opens groups with matches
+    }
+    setTimeout(() => { filtering = false; });
     empty.hidden = shown > 0;
   }
 
