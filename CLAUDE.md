@@ -38,14 +38,15 @@ npm run lint        # ESLint, including the unsafe-DOM rule
   positions from sight lines (library stages), camera-view = validated remembered view)
 - `js/render/`: Three.js (engine, stage-view, builders/, environments/, camera, labels, picking, ground,
   figure-fade = figures fade as the camera comes close)
-- `js/ui/`: Låda Glass panels (toolbar, library, inspector, stats, settings with Light/Props tabs,
-  projects in the left panel, panels = folding side panels, prefs = per-browser preferences, help,
+- `js/ui/`: Låda Glass panels (toolbar, library, inspector, stats, settings with Environment/View/Props tabs,
+  projects in the left panel, layers = the On stage list, context-menu = the right-click menu; the side
+  panels dock with Låda Glass's `LadaGlass.dock` (main.js), prefs = per-browser preferences, help,
   briefing, print, shortcuts, about, dom helpers)
 - `js/render/builders/car.js`: cars lofted from the CAR_MODELS profile curves (glass is a material
   group of the body); `moving.js`: swinger, drop turner, clamshell, mover, Texas star, plate rack,
   dueling tree
 - `js/demo.js`: the example stage shown on open (until saved projects exist)
-- `vendor/three/0.187.0/`, `vendor/lada-glass/2.3.0/`: self-hosted libraries (don't edit)
+- `vendor/three/0.187.0/`, `vendor/lada-glass/2.4.0/`: self-hosted libraries (don't edit)
 - `vendor/textures/polyhaven/gravelly_sand/`: CC0 photo-scanned ground texture (see its SOURCE.md)
 - `tests/`: `node --test` (model, editor, builders and environments run in Node; Three.js from
   node_modules, pinned to the vendored version)
@@ -86,7 +87,7 @@ npm run lint        # ESLint, including the unsafe-DOM rule
 
 ## Design
 
-Låda Glass 2.3.0 (`~/Desktop/code/tools/design`, preview: `design/preview.html` there): dark frosted
+Låda Glass 2.4.0 (`~/Desktop/code/tools/design`, preview: `design/preview.html` there): dark frosted
 glass is the main theme, light the alternative, compact density. Use its `lg-` components and
 tokens instead of new styles; don't edit the vendored copy (update it when `claude-check` says it's
 old). The 3D viewport is the app's own canvas.

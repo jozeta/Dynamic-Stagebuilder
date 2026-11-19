@@ -6,7 +6,8 @@
   <meta name="color-scheme" content="dark light">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-CIq23Q/15Qd4etb6G6BJsTzAatGsQJZhB+k5vG+djZI='; style-src 'self'; img-src 'self' data: blob:; object-src 'none'; base-uri 'none'; form-action 'self'; require-trusted-types-for 'script'">
   <title>Dynamic-Stagebuilder</title>
-  <link rel="stylesheet" href="vendor/lada-glass/2.3.0/lada-glass.css">
+  <link rel="stylesheet" href="vendor/lada-glass/2.4.0/lada-glass.css">
+  <script src="vendor/lada-glass/2.4.0/lada-glass.js"></script>
   <link rel="stylesheet" href="css/app.css">
   <link rel="stylesheet" href="css/print.css">
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
@@ -22,7 +23,8 @@
   <p class="small-screen">Dynamic-Stagebuilder needs a computer or an iPad.</p>
   <div class="app">
     <header class="toolbar lg-glass" id="toolbar" aria-label="Tools"></header>
-    <aside class="library lg-glass" id="library" aria-label="Prop library">
+    <div class="lg-dock-layout app-dock" id="dock" data-lg-dock="dsb">
+    <aside class="library lg-glass" id="library" aria-label="Props and stage" data-lg-dock-panel="library" data-lg-dock-side="left">
       <div id="left-main">
         <div id="left-tabs"></div>
         <div id="library-body" role="tabpanel" aria-labelledby="left-tab-props"></div>
@@ -30,7 +32,7 @@
       </div>
       <section id="projects" class="side-panel projects-panel" aria-label="Projects" hidden></section>
     </aside>
-    <main class="viewport-wrap">
+    <main class="viewport-wrap" data-lg-dock-main>
       <canvas id="viewport" aria-label="3D stage view" tabindex="0"></canvas>
       <div class="lg-state lg-state-loading viewport-state" id="boot-state" role="status">
         <span class="lg-state-icon"><span class="lg-spinner" aria-hidden="true"></span></span>
@@ -40,11 +42,12 @@
       <div id="camera-slot"></div>
       <div class="hint lg-glass" id="hint" role="status" aria-live="polite" hidden></div>
     </main>
-    <aside class="inspector lg-glass" id="inspector" aria-label="Inspector">
+    <aside class="inspector lg-glass" id="inspector" aria-label="Inspector" data-lg-dock-panel="inspector" data-lg-dock-side="right">
       <div id="inspector-body"></div>
       <div id="stats" class="stats"></div>
       <section id="settings-panel" class="settings-panel" aria-label="Settings" hidden></section>
     </aside>
+    </div>
   </div>
   <div id="print" aria-hidden="true"></div>
 </body>

@@ -1,4 +1,4 @@
-/* Låda Glass 2.3.0: the shared look of Johan's apps (tools/design).
+/* Låda Glass 2.4.0: the shared look of Johan's apps (tools/design).
    Dark charcoal frosted glass is the main theme, light the alternative; compact density; custom
    accents. Values come from Låda (tokens.json); no build step, no dependencies, works from file://.
 
@@ -1062,6 +1062,58 @@ hr.lg-divider { height: 1px; margin: var(--lg-space-m) 0; border: 0; background:
 .lg-state-error   { --lg-tone: var(--lg-bad); }
 .lg-state-success { --lg-tone: var(--lg-ok); }
 
+/* ---- 2.4 dockable panels: .lg-dock-layout (LadaGlass.dock) -------------------------------------------- */
+/* A main view with docks on the left, right and bottom; panels move between them, stack when they
+   share one, resize from the dock's inner edge (.lg-dock-resize) and fold to a rail. The JS sets
+   --lg-dock-left / -right / -bottom (0 for an empty dock). */
+.lg-dock-layout { --lg-dock-left: 0px; --lg-dock-right: 0px; --lg-dock-bottom: 0px;
+  position: relative; display: grid; min-width: 0; min-height: 0;
+  grid-template-columns: var(--lg-dock-left) minmax(0, 1fr) var(--lg-dock-right);
+  grid-template-rows: minmax(0, 1fr) var(--lg-dock-bottom);
+  grid-template-areas: "left main right" "left bottom right"; }
+.lg-dock-layout > [data-lg-dock-main] { grid-area: main; min-width: 0; min-height: 0; }
+.lg-dock { display: flex; gap: var(--lg-space-s); min-width: 0; min-height: 0; box-sizing: border-box; }
+.lg-dock[data-side="left"] { grid-area: left; flex-direction: column; padding-right: var(--lg-space-s); }
+.lg-dock[data-side="right"] { grid-area: right; flex-direction: column; padding-left: var(--lg-space-s); }
+.lg-dock[data-side="bottom"] { grid-area: bottom; flex-direction: row; padding-top: var(--lg-space-s); }
+.lg-dock[data-empty] { display: none; }
+.lg-dock-panel { position: relative; flex: 1 1 0; min-width: 0; min-height: 0; overflow: auto; box-sizing: border-box; }
+.lg-dock-tools { position: absolute; top: var(--lg-space-xs); right: var(--lg-space-xs); z-index: 2; display: flex; gap: var(--lg-space-xxs); }
+.lg-dock-tools .lg-btn { width: 28px; height: 28px; min-width: 0; min-height: 0; padding: 0; }
+.lg-dock-tools .lg-icon { width: 16px; height: 16px; }
+.lg-dock-grip { cursor: grab; touch-action: none; }
+.lg-dock-dragging .lg-dock-grip { cursor: grabbing; }
+/* Folded: only the panel's tools show; in a dock where every panel is folded, the dock is a rail. */
+.lg-dock-panel.lg-dock-folded { flex: 0 0 auto; min-height: 36px; overflow: visible; }
+.lg-dock-panel.lg-dock-folded > :not(.lg-dock-tools) { display: none !important; }
+.lg-dock[data-folded] { padding: 0; }
+.lg-dock[data-folded] .lg-dock-panel { flex: 1 1 0; padding: 0; background: none; border-color: transparent; box-shadow: none; }
+.lg-dock[data-folded]:not([data-side="bottom"]) .lg-dock-tools { position: static; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
+.lg-dock[data-side="bottom"][data-folded] .lg-dock-tools { position: static; justify-content: center; width: 100%; height: 100%; align-items: center; }
+/* The resize separator straddles the dock's inner edge. */
+.lg-dock-resize { z-index: 3; touch-action: none; background: transparent; border-radius: 4px; }
+.lg-dock-resize[data-side="left"] { grid-area: left; justify-self: end; width: 8px; margin-right: -4px; cursor: col-resize; }
+.lg-dock-resize[data-side="right"] { grid-area: right; justify-self: start; width: 8px; margin-left: -4px; cursor: col-resize; }
+.lg-dock-resize[data-side="bottom"] { grid-area: bottom; align-self: start; height: 8px; margin-top: -4px; cursor: row-resize; }
+.lg-dock-resize[hidden] { display: none; }
+.lg-dock-resize:is(:hover, :focus-visible, .is-dragging) { background: color-mix(in srgb, var(--lg-accent) 45%, transparent); outline: none; }
+/* While a grip is dragged: where it would land. */
+.lg-dock-targets { position: absolute; inset: 0; z-index: 20; pointer-events: none; display: none; }
+.lg-dock-dragging .lg-dock-targets { display: block; }
+.lg-dock-target { position: absolute; display: grid; place-items: center; border: 2px dashed color-mix(in srgb, var(--lg-accent) 55%, transparent);
+  border-radius: var(--lg-radius-card); color: var(--lg-text); font-size: var(--lg-fs-small); text-transform: capitalize;
+  background: color-mix(in srgb, var(--lg-accent) 8%, transparent); }
+.lg-dock-target[data-side="left"] { left: 0; top: 0; bottom: 0; width: 22%; }
+.lg-dock-target[data-side="right"] { right: 0; top: 0; bottom: 0; width: 22%; }
+.lg-dock-target[data-side="bottom"] { left: 22%; right: 22%; bottom: 0; height: 30%; }
+.lg-dock-target.is-active { background: color-mix(in srgb, var(--lg-accent) 26%, transparent); border-style: solid; }
+@media (pointer: coarse) {
+  .lg-dock-tools .lg-btn { width: var(--lg-touch); height: var(--lg-touch); }
+  .lg-dock-resize[data-side="left"], .lg-dock-resize[data-side="right"] { width: 16px; }
+  .lg-dock-resize[data-side="left"] { margin-right: -8px; } .lg-dock-resize[data-side="right"] { margin-left: -8px; }
+  .lg-dock-resize[data-side="bottom"] { height: 16px; margin-top: -8px; }
+}
+
 /* ---- accessibility preferences ------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   .lg, .lg *, .lg *::before, .lg *::after { animation: none !important; transition-duration: 1ms !important; scroll-behavior: auto !important; }
@@ -1087,6 +1139,7 @@ hr.lg-divider { height: 1px; margin: var(--lg-space-m) 0; border: 0; background:
   .lg-backdrop { background: var(--lg-bg); }
 }
 @media (forced-colors: active) {
+  .lg-dock-target { border-color: Highlight; } .lg-dock-target.is-active { background: Highlight; color: HighlightText; } .lg-dock-resize:is(:hover, :focus-visible, .is-dragging) { background: Highlight; }
   .lg-glass, .lg-card, .lg-sidebar, .lg-toast, .lg-popup, .lg-empty, .lg-modal, .lg-drawer, .lg-palette, .lg-popover, .lg-menu, .lg-combobox, .lg-notifications { border: 1px solid CanvasText; }
   .lg-toggle, .lg-check, .lg-select, .lg-stepper { border: 1px solid CanvasText; }
   .lg-shimmer { background: none; color: CanvasText; }

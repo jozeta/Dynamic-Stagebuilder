@@ -51,7 +51,8 @@ training, and want a clear briefing sheet without drawing the map by hand.
 - **Printable brief** (A4): a header with the stage number and key figures, the briefing grid, the
   procedure and a top-down map with a legend and scale bar on page 1, a 3D view on page 2. Save it
   as a PDF from the print dialog.
-- **Help** guide with a drawing for every main task, and side panels that fold away and resize.
+- **Help** guide with a drawing for every main task, and side panels you can dock left, right or
+  under the view, fold away and resize (remembered).
 - **Your own surroundings** from a blueprint or site plan, measured with one known length, plus
   building pieces (walls, pillars, columns, berms, containers, fences, barriers), saved as templates.
 - **Activation links** from poppers, plates, step pads and pull levers to the moving targets they
@@ -194,8 +195,9 @@ Stage settings are in the inspector when nothing is selected. They are saved wit
 | Cloud speed | *Settings → Environment* (Outdoor): 0 (still) – 300 %; 100 % ≈ 8 m/s; they move only with Play on | 100 % |
 | Wind direction | *Settings → Environment* (Outdoor): which way the clouds drift, 0° = toward down range, 90° = toward +x | 60° |
 | Hidden props | *Settings → Props*: groups and single props the props panel leaves out (per browser) | None |
-| Folded panels | The arrow at the top of each side panel (per browser) | Both open |
-| Panel sizes | Drag a side panel's inner edge, or arrow keys on it; double-click resets (per browser) | 232 / 280 px |
+| Panel places | Each side panel's grip (⋮⋮): drag it to the left, the right or the bottom, or click it for *Move to…* (per browser) | Props left, Inspector right (under the view on a narrow screen) |
+| Folded panels | The arrow beside the grip (per browser) | Both open |
+| Panel sizes | Drag a dock's inner edge, or arrow keys on it (Shift: bigger steps); double-click resets (per browser) | 260 / 300 px, bottom 260 px |
 | My surroundings | *Settings*: your own plan-based surroundings, with plan position, turn and strength | None |
 | Default target style | *Settings*: Classic (octagon) or With head, for new paper targets | Classic |
 | Shooter's eye walking speed | *Settings → View*: slow walk 1.6, walk 2.4, quick move 3.4 or sprint 4.6 m/s, when Play is on (per browser) | Sprint |
@@ -221,7 +223,8 @@ is a suggestion from the round count.
 **Build a stage.** The props panel on the left is grouped (Stage markings, Paper, Steel, Moving
 and reactive, Walls, Structures, Obstacles and range furniture); click a group's heading to fold it
 away, or hide groups and props you never use in *Settings → Props*. The arrow at the top of each
-side panel folds the whole panel to give the 3D view more room. Pick a prop in the library, then tap (or click) the ground to place it.
+side panel folds the whole panel to give the 3D view more room, and the grip beside it (⋮⋮) moves the
+panel to the left, the right or under the view (drag it there, or click it and choose). Pick a prop in the library, then tap (or click) the ground to place it.
 With a mouse you can also drag a prop from the library onto the stage. Drag a placed prop to move it;
 it snaps to the grid and stays inside the bay. Rotate the selected prop with the green ring, the
 ↺/↻ buttons in the inspector, or Q and E. Shift-click selects several props.

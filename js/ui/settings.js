@@ -242,7 +242,7 @@ export function createSettings({ editor, panel, hide = [], onToggle = () => {}, 
 
   return {
     // Open, or close when it's open and in view; when it's open but its panel is folded, unfold it.
-    open() { if (isOpen && !panel.closest(".panel-collapsed")) return close(); if (isOpen) return show(true); fill(); show(true); panel.querySelector("input, button")?.focus(); },
+    open() { if (isOpen && !panel.closest(".lg-dock-folded")) return close(); if (isOpen) return show(true); fill(); show(true); panel.querySelector("input, button")?.focus(); },
     close,
     get isOpen() { return isOpen; },
   };

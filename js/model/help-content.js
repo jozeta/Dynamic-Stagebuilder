@@ -13,7 +13,7 @@ export const HELP_TOPICS = Object.freeze([
   { id: "start", title: "Getting started", icon: "info", art: "steps",
     text: ["Dynamic-Stagebuilder lays out one IPSC stage at real scale, shows it in 3D and prints the Written Stage Briefing with a top-down map.",
       "The props panel is on the left, the 3D stage in the middle and the inspector on the right. Pick something on the left, tap the ground to place it, then fine-tune it in the inspector."],
-    tips: ["Everything is saved in this browser as you work.", "Fold either side panel with its arrow to give the 3D view more room."] },
+    tips: ["Everything is saved in this browser as you work.", "Move a side panel to the left, the right or under the view: drag its grip (⋮⋮) or click it. Its arrow folds it to give the 3D view more room; drag a panel's inner edge to resize it."] },
   { id: "props", title: "Placing props", icon: "grid", art: "place",
     text: ["Tap a prop in the props panel to pick it, then tap the ground. With a mouse you can also drag a prop straight onto the stage.",
       "Each group can be folded with its heading. Search finds a prop by name. Settings → Props hides groups or single props you never use."],

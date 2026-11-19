@@ -4,6 +4,11 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Dockable side panels (Låda Glass 2.4.0): drag a panel's grip (⋮⋮) to the left, the right or
+  under the view, or click it for *Move to…*; panels sharing a side stack. Fold with the arrow,
+  resize from the inner edge. Where they are, their sizes and folds are remembered. The Inspector
+  under the view shows its settings and the statistics side by side.
+
 - On stage panel (a tab beside Props in the left panel): every prop on the stage in a list; click a
   row to select it and see its settings, Shift / ⌘-click or *Select several* to pick more. Group
   props, rename, fold, hide and lock groups, drag rows into groups or use *Move to…*, and copy,

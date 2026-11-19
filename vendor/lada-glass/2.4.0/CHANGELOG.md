@@ -3,6 +3,20 @@
 Newest first. Apps vendor a version under `vendor/lada-glass/<version>/`; `claude-check` reports an
 older copy as advice (DES-FAMILY-2).
 
+## 2.4.0 (2026-11-19)
+
+Dockable panels: side panels that move between a left, a right and a bottom dock around the main
+view, and where they are is remembered. Nothing existing changed: apps copy the new files over the
+old ones (`claude-update --lada <repo>`) and opt in with the markup below.
+
+### Added (web)
+
+- **Dockable panels** (`.lg-dock-layout`, `LadaGlass.dock.init(layout, {key, tools, onChange})`): a main view (`[data-lg-dock-main]`) with docks on the left, right and bottom; panels (`[data-lg-dock-panel="id"]`, default side in `data-lg-dock-side`) stack when they share a dock. Each panel gets a grip (drag it onto a dock; while dragging, `.lg-dock-target` areas show where it lands; click it for a *Move to…* menu on `.lg-menu`, keyboard included) and a fold button; a dock whose panels are all folded becomes a 28 px rail. Each dock in use resizes from its inner edge (`.lg-dock-resize`, a separator: drag, arrow keys, Shift for bigger steps, Home/End, double-click resets); the main view keeps at least 35 %. Positions, sizes and folds are remembered per browser (`localStorage` key `lg-dock:<key>`; nothing breaks without storage). The controller has `move`, `fold`, `side`, `folded`, `state`, `reset` and `destroy`; changes also fire `lg-dock-change`. `tools: false` leaves the buttons to the app. 44 px buttons and wider separators on touch; outlined in forced colours.
+- Pure helpers `dock.clean(saved, panels)` (a saved state checked against the panels), `dock.sizes(state, panels)` and `dock.clampSize(side, px, room)`, with unit tests; DOM tests in `design/tests/dock.dom.js`.
+- Preview: a "Dockable panels" demo with three panels.
+
+SwiftUI: nothing new (macOS and iPadOS apps use the system's split views and inspectors).
+
 ## 2.3.0 (2026-11-17)
 
 Shared app parts, so every app in the family gets the same About, first-run, Settings, severity and

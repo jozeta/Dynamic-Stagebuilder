@@ -35,7 +35,7 @@ test("the service worker version matches package.json", () => {
 test("every app file is cached, and every cached file exists", () => {
   const sw = read("sw.js");
   const files = JSON.parse(sw.match(/const FILES = (\[[\s\S]*?\]);/)[1]);
-  const needed = ["./", "index.html", "manifest.webmanifest", "package.json", "vendor/lada-glass/2.3.0/lada-glass.css",
+  const needed = ["./", "index.html", "manifest.webmanifest", "package.json", "vendor/lada-glass/2.4.0/lada-glass.css",
     ...walk("js"), ...walk("css"), ...walk("icons"), ...walk("vendor/three/0.187.0").filter((f) => f.endsWith(".js"))];
   for (const f of needed) assert.ok(files.includes(f), `missing from cache list: ${f}`);
   for (const f of files) if (f !== "./") assert.ok(existsSync(join(root, f)), `cached file does not exist: ${f}`);

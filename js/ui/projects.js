@@ -111,7 +111,7 @@ export function createProjects({ panel, hide = [], onToggle = () => {}, onOpenLi
 
   return {
     // Open, or close when it's open and in view; when it's open but its panel is folded, unfold it.
-    async open() { if (isOpen && !panel.closest(".panel-collapsed")) return close(); if (isOpen) return show(true); say(""); await fill(); fillLibrary(); show(true); panel.querySelector("button")?.focus(); },
+    async open() { if (isOpen && !panel.closest(".lg-dock-folded")) return close(); if (isOpen) return show(true); say(""); await fill(); fillLibrary(); show(true); panel.querySelector("button")?.focus(); },
     close,
     get isOpen() { return isOpen; },
   };

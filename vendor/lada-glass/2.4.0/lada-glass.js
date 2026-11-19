@@ -1,11 +1,11 @@
-/* Låda Glass 2.3.0: behaviour for lada-glass.css (tools/design). Generated from design/js/ by build.py; do not edit. */
+/* Låda Glass 2.4.0: behaviour for lada-glass.css (tools/design). Generated from design/js/ by build.py; do not edit. */
 // Opens the wrapper that 99-foot.js closes. build.py concatenates design/js/*.js in name order
 // into lada-glass.js; every part in between is plain statements that attach to LG.
 (function (root) {
 "use strict";
 
 const LG = {};
-LG.version = "2.3.0";            // build.py: design/VERSION
+LG.version = "2.4.0";            // build.py: design/VERSION
 LG.tokens = {"accents": [{"name": "fjord", "d": "#5A93C4", "l": "#2B5B84"}, {"name": "arctic-teal", "d": "#459AA3", "l": "#216B73"}, {"name": "slate-steel", "d": "#7D91A8", "l": "#415164"}, {"name": "frost-cyan", "d": "#88C0D0", "l": "#2A7288"}, {"name": "aurora-green", "d": "#A3BE8C", "l": "#45763E"}, {"name": "aurora-violet", "d": "#B48EAD", "l": "#714D88"}, {"name": "lingonberry", "d": "#D96E75", "l": "#A83541"}, {"name": "cloudberry", "d": "#E0915C", "l": "#AD591D"}, {"name": "birch-gold", "d": "#E1BC6D", "l": "#8C6A16"}, {"name": "midnight-indigo", "d": "#8D95E3", "l": "#41479C"}]};       // build.py: { accents: [{name, d, l}, …] } from tokens.json, in its order
 LG._added = [];                      // functions called with each element added to the document (one shared MutationObserver, set up in 04-stepper.js)
 LG._init = [];                       // parts push setup functions (delegated listeners); 99-foot.js runs them once the DOM is ready
@@ -2779,6 +2779,281 @@ LG._init.push(() => {
   };
 
   Object.assign(LG.notifications, { relative, ago, bucket, safeHref, parse, serialize });
+})();
+
+// Dockable panels (LadaGlass.dock): side panels that move between a left dock, a right dock and a
+// bottom dock around the main view, stack when they share a dock, resize from the dock's inner
+// edge and fold to a slim rail. Where each panel is, the dock sizes and which panels are folded
+// are remembered per browser (localStorage, when it's available).
+//
+// Markup: a .lg-dock-layout holding one [data-lg-dock-main] (the view) and panels
+//   <section data-lg-dock-panel="props" data-lg-dock-side="left" aria-label="Props">…</section>
+// (data-lg-dock-side is the default side: left, right or bottom).
+//   dock.init(layout, {key, tools, onChange}) → controller
+//       key       storage key (default: the layout's data-lg-dock or its id)
+//       tools     false: no move/fold buttons on the panels (the app calls move/fold itself)
+//       onChange  called with the state after every change (also the "lg-dock-change" event)
+//   controller.move(id, side) · .fold(id, folded) · .side(id) · .folded(id) · .state() · .reset() · .destroy()
+// Each panel gets a grip (drag it onto a dock, or click it for a Move to… menu: left, right,
+// bottom) and a fold button. Each dock in use gets a separator on its inner edge: drag it, arrow
+// keys (Shift: bigger steps), Home/End, double-click resets.
+// Pure helpers for apps and tests: dock.clean(saved, panels) and dock.sizes(state, panels).
+(function () {
+  const SIDES = ["left", "right", "bottom"];
+  const DEFAULT_SIZE = { left: 260, right: 300, bottom: 260 };
+  const MIN = { left: 180, right: 180, bottom: 120 };
+  const RAIL = 28;
+  const STEP = 16;
+  const NAMES = { left: "left", right: "right", bottom: "bottom" };
+
+  // A saved state checked against the panels ({id, side} each, side = the default): every panel
+  // gets a known side, sizes are numbers within reason, folded lists known panels only.
+  function clean(saved, panels) {
+    const s = saved && typeof saved === "object" ? saved : {};
+    const sides = {};
+    for (const p of panels) {
+      const want = s.sides && s.sides[p.id];
+      sides[p.id] = SIDES.includes(want) ? want : SIDES.includes(p.side) ? p.side : "left";
+    }
+    const sizes = {};
+    for (const side of SIDES) {
+      const v = s.sizes && s.sizes[side];
+      sizes[side] = typeof v === "number" && Number.isFinite(v) ? Math.round(Math.min(2000, Math.max(MIN[side], v))) : DEFAULT_SIZE[side];
+    }
+    const ids = new Set(panels.map((p) => p.id));
+    const folded = Array.isArray(s.folded) ? s.folded.filter((id) => ids.has(id)) : [];
+    return { sides, sizes, folded: [...new Set(folded)] };
+  }
+
+  // What each dock takes on screen: 0 when no panel is in it, the rail when all its panels are
+  // folded, else its size.
+  function sizes(state, panels) {
+    const out = {};
+    for (const side of SIDES) {
+      const here = panels.filter((p) => state.sides[p.id] === side);
+      out[side] = !here.length ? 0 : here.every((p) => state.folded.includes(p.id)) ? RAIL : state.sizes[side];
+    }
+    return out;
+  }
+
+  // What fits: the side docks together, and the bottom dock, leave the main view 35 % of the room
+  // (a narrow window shrinks them in proportion; the chosen sizes are kept for a wider one).
+  function fit(s, width, height) {
+    const out = { ...s };
+    const sides = s.left + s.right;
+    if (width > 0 && sides > width * 0.65) { const k = (width * 0.65) / sides; out.left = Math.round(s.left * k); out.right = Math.round(s.right * k); }
+    if (height > 0 && s.bottom > height * 0.65) out.bottom = Math.round(height * 0.65);
+    return out;
+  }
+
+  // A dock size the room allows: at least the minimum, and the main view keeps 35 % of the room.
+  function clampSize(side, px, room) {
+    return Math.round(Math.max(MIN[side], Math.min(px, Math.max(MIN[side], room * 0.65))));
+  }
+
+  const storage = {
+    load(key) { try { return JSON.parse(localStorage.getItem(`lg-dock:${key}`) || "null"); } catch { return null; } },
+    save(key, v) { try { localStorage.setItem(`lg-dock:${key}`, JSON.stringify(v)); } catch { /* private mode or blocked */ } },
+  };
+
+  function init(layout, opts) {
+    const o = opts || {};
+    const key = o.key || layout.getAttribute("data-lg-dock") || layout.id || "layout";
+    const U = LG.util;
+    const panelEls = Array.from(layout.querySelectorAll("[data-lg-dock-panel]"));
+    const panels = panelEls.map((el) => ({ id: el.getAttribute("data-lg-dock-panel"), side: el.getAttribute("data-lg-dock-side"), el }));
+    const label = (p) => p.el.getAttribute("aria-label") || p.id;
+    let state = clean(storage.load(key), panels);
+    const docks = {}, handles = {};
+    const cleanup = [];
+
+    for (const side of SIDES) {
+      docks[side] = U.el("div", { class: "lg-dock", attrs: { "data-side": side } });
+      layout.append(docks[side]);
+    }
+
+    // The move menu, shared by every grip.
+    const menuId = U.uid("lg-dock-menu");
+    const menu = U.el("div", { class: "lg-menu lg-dock-menu", attrs: { role: "menu", id: menuId, "aria-label": "Move the panel" } });
+    document.body.append(menu);
+    let menuFor = null;
+    function fillMenu(p) {
+      menuFor = p;
+      const here = state.sides[p.id];
+      menu.replaceChildren(...SIDES.map((side) => U.el("button", {
+        text: `Move to the ${NAMES[side]}`,
+        attrs: { type: "button", role: "menuitem", "data-value": side, ...(side === here ? { "aria-disabled": "true" } : {}) },
+      })), U.el("div", { class: "lg-menu-sep", attrs: { role: "separator" } }),
+      U.el("button", { text: state.folded.includes(p.id) ? "Show the panel" : "Fold the panel", attrs: { type: "button", role: "menuitem", "data-value": "fold" } }));
+    }
+    const onSelect = (e) => {
+      const v = e.detail && e.detail.value;
+      if (!menuFor || !v) return;
+      if (v === "fold") ctl.fold(menuFor.id, !state.folded.includes(menuFor.id));
+      else ctl.move(menuFor.id, v);
+    };
+    menu.addEventListener("lg-select", onSelect);
+
+    // Drag a grip onto a dock: three drop targets over the layout.
+    const targets = U.el("div", { class: "lg-dock-targets", attrs: { "aria-hidden": "true" } },
+      SIDES.map((side) => U.el("div", { class: "lg-dock-target", text: NAMES[side], attrs: { "data-side": side } })));
+    layout.append(targets);
+    const sideAt = (x, y) => {
+      const r = layout.getBoundingClientRect();
+      const fx = (x - r.left) / r.width, fy = (y - r.top) / r.height;
+      if (fy > 0.7 && fx > 0.2 && fx < 0.8) return "bottom";
+      return fx < 0.5 ? "left" : "right";
+    };
+
+    for (const p of panels) {
+      p.el.classList.add("lg-dock-panel");
+      if (o.tools === false) continue;
+      const grip = U.el("button", { class: "lg-btn lg-btn-ghost lg-btn-icon lg-dock-grip",
+        attrs: { type: "button", "aria-label": `Move the ${label(p)} panel`, title: "Drag to another side, or click to choose", "data-lg-menu": menuId } },
+      [U.svg("svg", { class: "lg-icon", viewBox: "0 0 24 24", "aria-hidden": "true" }, ["M9 5h.01M15 5h.01M9 12h.01M15 12h.01M9 19h.01M15 19h.01"].map((d) =>
+        U.svg("path", { d, fill: "none", stroke: "currentColor", "stroke-width": "3", "stroke-linecap": "round" })))]);
+      const fold = U.el("button", { class: "lg-btn lg-btn-ghost lg-btn-icon lg-dock-fold", attrs: { type: "button" } });
+      fold.addEventListener("click", () => ctl.fold(p.id, !state.folded.includes(p.id)));
+      grip.addEventListener("pointerdown", () => fillMenu(p));
+      grip.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " " || e.key === "ArrowDown" || e.key === "ArrowUp") fillMenu(p); });
+      let drag = null;
+      grip.addEventListener("pointerdown", (e) => {
+        if (e.button !== 0) return;
+        drag = { x: e.clientX, y: e.clientY, id: e.pointerId, moving: false };
+        try { grip.setPointerCapture(e.pointerId); } catch { /* not capturable */ }   // a quick drag that leaves the grip still counts
+      });
+      grip.addEventListener("pointermove", (e) => {
+        if (!drag || e.pointerId !== drag.id) return;
+        if (!drag.moving && Math.hypot(e.clientX - drag.x, e.clientY - drag.y) > 6) {
+          drag.moving = true;
+          layout.classList.add("lg-dock-dragging");
+        }
+        if (drag.moving) {
+          const side = sideAt(e.clientX, e.clientY);
+          for (const t of targets.children) t.classList.toggle("is-active", t.getAttribute("data-side") === side);
+        }
+      });
+      const end = (e, drop) => {
+        if (!drag || e.pointerId !== drag.id) return;
+        const moved = drag.moving;
+        drag = null;
+        layout.classList.remove("lg-dock-dragging");
+        for (const t of targets.children) t.classList.remove("is-active");
+        if (!moved) return;
+        grip.addEventListener("click", (c) => { c.stopPropagation(); c.preventDefault(); }, { once: true, capture: true });   // not a menu click
+        if (drop) ctl.move(p.id, sideAt(e.clientX, e.clientY));
+      };
+      grip.addEventListener("pointerup", (e) => end(e, true));
+      grip.addEventListener("pointercancel", (e) => end(e, false));
+      p.tools = { grip, fold };
+      p.el.prepend(U.el("div", { class: "lg-dock-tools" }, [grip, fold]));
+    }
+
+    // Resizing a dock from its inner edge.
+    for (const side of SIDES) {
+      const vertical = side !== "bottom";
+      const hd = U.el("div", { class: "lg-dock-resize", attrs: { "data-side": side, role: "separator", tabindex: "0",
+        "aria-orientation": vertical ? "vertical" : "horizontal", "aria-label": `Resize the ${NAMES[side]} panels`, title: "Drag to resize · double-click to reset" } });
+      const room = () => { const r = layout.getBoundingClientRect(); return vertical ? r.width : r.height; };
+      const set = (px) => { state.sizes[side] = clampSize(side, px, room()); apply(); save(); };
+      hd.addEventListener("pointerdown", (e) => {
+        if (e.button !== 0) return;
+        e.preventDefault();
+        try { hd.setPointerCapture(e.pointerId); } catch { /* not capturable */ }
+        const start = vertical ? e.clientX : e.clientY, from = state.sizes[side];
+        const sign = side === "left" ? 1 : -1;
+        const move = (ev) => set(from + sign * ((vertical ? ev.clientX : ev.clientY) - start));
+        const up = () => { hd.removeEventListener("pointermove", move); hd.removeEventListener("pointerup", up); hd.removeEventListener("pointercancel", up); hd.classList.remove("is-dragging"); };
+        hd.classList.add("is-dragging");
+        hd.addEventListener("pointermove", move);
+        hd.addEventListener("pointerup", up);
+        hd.addEventListener("pointercancel", up);
+      });
+      hd.addEventListener("keydown", (e) => {
+        const grow = side === "left" ? "ArrowRight" : side === "right" ? "ArrowLeft" : "ArrowUp";
+        const shrink = side === "left" ? "ArrowLeft" : side === "right" ? "ArrowRight" : "ArrowDown";
+        const step = e.shiftKey ? STEP * 4 : STEP;
+        if (e.key === grow) set(state.sizes[side] + step);
+        else if (e.key === shrink) set(state.sizes[side] - step);
+        else if (e.key === "Home") set(MIN[side]);
+        else if (e.key === "End") set(room());
+        else return;
+        e.preventDefault();
+      });
+      hd.addEventListener("dblclick", () => set(DEFAULT_SIZE[side]));
+      handles[side] = hd;
+      layout.append(hd);
+    }
+
+    function save() { storage.save(key, state); }
+    function apply() {
+      for (const p of panels) {
+        const dock = docks[state.sides[p.id]];
+        if (p.el.parentElement !== dock) dock.append(p.el);
+        const f = state.folded.includes(p.id);
+        p.el.classList.toggle("lg-dock-folded", f);
+        p.el.setAttribute("data-lg-dock-at", state.sides[p.id]);
+        if (p.tools) {
+          const side = state.sides[p.id];
+          p.tools.fold.setAttribute("aria-expanded", String(!f));
+          p.tools.fold.setAttribute("aria-label", `${f ? "Show" : "Fold"} the ${label(p)} panel`);
+          p.tools.fold.title = `${f ? "Show" : "Fold"} the ${label(p)} panel`;
+          const point = side === "left" ? (f ? "M9 5l7 7-7 7" : "M15 5l-7 7 7 7") : side === "right" ? (f ? "M15 5l-7 7 7 7" : "M9 5l7 7-7 7") : (f ? "M5 15l7-7 7 7" : "M5 9l7 7 7-7");
+          p.tools.fold.replaceChildren(U.svg("svg", { class: "lg-icon", viewBox: "0 0 24 24", "aria-hidden": "true" },
+            [U.svg("path", { d: point, fill: "none", stroke: "currentColor", "stroke-width": "2", "stroke-linecap": "round", "stroke-linejoin": "round" })]));
+        }
+      }
+      const s = fit(sizes(state, panels), layout.clientWidth, layout.clientHeight);
+      for (const side of SIDES) {
+        layout.style.setProperty(`--lg-dock-${side}`, `${s[side]}px`);
+        docks[side].toggleAttribute("data-empty", s[side] === 0);
+        docks[side].toggleAttribute("data-folded", s[side] === RAIL);
+        handles[side].hidden = s[side] === 0 || s[side] === RAIL;
+        handles[side].setAttribute("aria-valuenow", String(state.sizes[side]));
+        handles[side].setAttribute("aria-valuemin", String(MIN[side]));
+      }
+      const snapshot = JSON.parse(JSON.stringify(state));
+      if (o.onChange) o.onChange(snapshot);
+      layout.dispatchEvent(new CustomEvent("lg-dock-change", { detail: snapshot }));
+    }
+
+    // Fit again when the layout changes size.
+    if (typeof ResizeObserver === "function") {
+      let last = "";
+      const ro = new ResizeObserver(() => { const k = `${layout.clientWidth}x${layout.clientHeight}`; if (k !== last) { last = k; apply(); } });
+      ro.observe(layout);
+      cleanup.push(() => ro.disconnect());
+    }
+
+    const ctl = {
+      move(id, side) {
+        if (!SIDES.includes(side) || !(id in state.sides) || state.sides[id] === side) return;
+        state.sides[id] = side;
+        apply(); save();
+      },
+      fold(id, folded) {
+        if (!(id in state.sides)) return;
+        const has = state.folded.includes(id);
+        if (folded === has) return;
+        state.folded = folded ? [...state.folded, id] : state.folded.filter((x) => x !== id);
+        apply(); save();
+      },
+      side: (id) => state.sides[id],
+      folded: (id) => state.folded.includes(id),
+      state: () => JSON.parse(JSON.stringify(state)),
+      reset() { state = clean(null, panels); apply(); save(); },
+      destroy() {
+        menu.removeEventListener("lg-select", onSelect);
+        menu.remove(); targets.remove();
+        for (const side of SIDES) handles[side].remove();
+        for (const fn of cleanup) fn();
+      },
+    };
+    apply();
+    return ctl;
+  }
+
+  LG.dock = { init, clean, sizes, fit, clampSize, SIDES, RAIL, MIN, DEFAULT_SIZE };
 })();
 
 // Closes the wrapper opened in 00-head.js: Node gets the object from require(); browsers get the

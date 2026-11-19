@@ -24,7 +24,6 @@ import { openStore, memoryStore } from "./storage/db.js";
 import { projectRecord, sortProjects, nextProjectAfterDelete } from "./storage/projects.js";
 import { exportFileName, stageToJson } from "./storage/files.js";
 import { createProjects } from "./ui/projects.js";
-import { makeCollapsible, makeResizable } from "./ui/panels.js";
 import { createHelp } from "./ui/help.js";
 import { createAnimator } from "./render/animate.js";
 import { fadeFigures } from "./render/figure-fade.js";
@@ -380,7 +379,6 @@ updaters.push(
   createStats(document.getElementById("stats")),
 );
 attachShortcuts({ editor, rig });
-const appEl = document.querySelector(".app");
 // Play / pause for animated props, in the bar over the 3D view (shown when any prop is animated).
 playButton = (() => {
   const b = h("button", { type: "button", class: "lg-btn lg-btn-ghost tool-text anim-play", "aria-pressed": "true", hidden: true,
@@ -406,10 +404,15 @@ playButton = (() => {
   b.update();
   return b;
 })();
-folds.library = makeCollapsible(document.getElementById("library"), { app: appEl, name: "library", label: "props" });
-folds.inspector = makeCollapsible(document.getElementById("inspector"), { app: appEl, name: "inspector", label: "inspector" });
-makeResizable(document.getElementById("library"), { app: appEl, name: "library", label: "props" });
-makeResizable(document.getElementById("inspector"), { app: appEl, name: "inspector", label: "inspector" });
+// Dockable side panels (Låda Glass dock): the Props panel and the Inspector move to the left, the
+// right or under the view (drag the grip, or click it), fold to a rail and resize; remembered per
+// browser. On a narrow screen (an iPad upright) the Inspector starts under the view.
+const dockEl = document.getElementById("dock");
+if (matchMedia("(max-width: 1099px)").matches) document.getElementById("inspector").setAttribute("data-lg-dock-side", "bottom");
+const dock = window.LadaGlass.dock.init(dockEl, { key: "dsb", onChange: () => engine.resize?.() });
+const fold = (id) => ({ set: (f) => dock.fold(id, f), get collapsed() { return dock.folded(id); } });
+folds.library = fold("library");
+folds.inspector = fold("inspector");
 briefing = createBriefing({ editor });
 // Your own surroundings (templates in this browser); the store is ready once projects have opened.
 let mine = null;
