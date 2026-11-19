@@ -17,7 +17,7 @@ import { createAbout } from "./ui/about.js";
 import { createBriefing } from "./ui/briefing.js";
 import { createSettings } from "./ui/settings.js";
 import { renderPrint } from "./ui/print.js";
-import { h } from "./ui/dom.js";
+import { h, icon } from "./ui/dom.js";
 import { createStage } from "./model/stage.js";
 import { validateStage } from "./model/schema.js";
 import { openStore, memoryStore } from "./storage/db.js";
@@ -26,6 +26,7 @@ import { exportFileName, stageToJson } from "./storage/files.js";
 import { createProjects } from "./ui/projects.js";
 import { makeCollapsible } from "./ui/panels.js";
 import { createHelp } from "./ui/help.js";
+import { createAnimator } from "./render/animate.js";
 import { createSurroundings } from "./ui/surroundings.js";
 import { takeBuildingPieces } from "./model/surroundings.js";
 import { libraryStage } from "./model/stage-library.js";
@@ -64,11 +65,25 @@ const ACCENT = 0x5a93c4;
 
 const hint = document.getElementById("hint");
 const updaters = [];
-let surroundingsVersion = 0;       // bumped when your own surroundings change, so the 3D view rebuilds them
+let playButton = null;
+let surroundingsVersion = 0;
+// Animated props: the animator moves the ones switched on while Play is on; the view then draws
+// every frame, and only then.
+const animator = createAnimator(engine.groups.stage);
+let animStart = performance.now();
+function animationFrame() {
+  if (!animator.active()) return;
+  animator.update((performance.now() - animStart) / 1000);
+  engine.requestRender();
+}
+engine.onRender(animationFrame);       // bumped when your own surroundings change, so the 3D view rebuilds them
 
 function render(state) {
   const stage = state.history.present;
   view.sync(stage);
+  animator.sync(stage);
+  playButton?.update();
+  if (animator.active()) engine.requestRender();
   if (viewing) { const v = viewing; viewing = null; viewingFrom(v); }   // rebuilt nodes: keep the viewed marker hidden
   const key = `${stage.settings.environment}|${stage.bay.width}|${stage.bay.depth}|${surroundingsVersion}`;
   if (key !== envKey) { envKey = key; lookShown = stage.settings.look; engine.setEnvironment(stage.settings.environment, stage.bay, stage.settings.look); }
@@ -274,6 +289,27 @@ updaters.push(
 );
 attachShortcuts({ editor, rig });
 const appEl = document.querySelector(".app");
+// Play / pause for animated props, in the bar over the 3D view (shown when any prop is animated).
+playButton = (() => {
+  const b = h("button", { type: "button", class: "lg-btn lg-btn-ghost tool-text anim-play", "aria-pressed": "true", hidden: true,
+    onclick: () => {
+      animator.setPlaying(!animator.playing());
+      if (animator.playing()) animStart = performance.now() - pausedAt * 1000;
+      else pausedAt = (performance.now() - animStart) / 1000;
+      b.update();
+      engine.requestRender();
+    } });
+  let pausedAt = 0;
+  b.update = () => {
+    b.hidden = animator.count() === 0;
+    b.setAttribute("aria-pressed", String(animator.playing()));
+    b.replaceChildren(icon(animator.playing() ? "pause" : "play"), animator.playing() ? "Pause" : "Play");
+    b.title = `${animator.playing() ? "Stop" : "Start"} the animated props (${animator.count()})`;
+  };
+  document.querySelector(".camera-bar")?.append(b);
+  b.update();
+  return b;
+})();
 makeCollapsible(document.getElementById("library"), { app: appEl, name: "library", label: "props" });
 makeCollapsible(document.getElementById("inspector"), { app: appEl, name: "inspector", label: "inspector" });
 briefing = createBriefing({ editor });

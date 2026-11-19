@@ -30,7 +30,7 @@ const FILES = [
   "js/render/builders/index.js",
   "js/render/builders/lines.js",
   "js/render/builders/obstacles.js",
-  "js/render/builders/paper.js", "js/render/builders/moving.js", "js/render/builders/car.js", "js/render/builders/building.js", "js/model/surroundings.js", "js/render/builders/position.js", "js/model/positions.js",
+  "js/render/builders/paper.js", "js/render/builders/moving.js", "js/render/builders/car.js", "js/render/builders/building.js", "js/model/surroundings.js", "js/model/animation.js", "js/render/animate.js", "js/render/builders/position.js", "js/model/positions.js",
   "js/render/builders/parts.js",
   "js/render/builders/steel.js",
   "js/render/builders/target-shape.js",

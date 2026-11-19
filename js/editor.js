@@ -44,7 +44,8 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
     for (const [k, v] of Object.entries(params)) {
       const spec = getProp(type).params[k];
       if (!spec) continue;
-      if (spec.options) { if (spec.options.includes(v)) out[k] = v; }
+      if (spec.bool) { if (typeof v === "boolean") out[k] = v; }
+      else if (spec.options) { if (spec.options.includes(v)) out[k] = v; }
       else if (Number.isFinite(Number(v))) out[k] = clampNum(Number(v), spec.min, spec.max);
     }
     return out;
@@ -137,7 +138,9 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
     setParams({ id, params }) {
       const o = present().objects.find((x) => x.id === id);
       if (!o) return;
-      let next = { ...o.params, ...cleanParams(o.type, params) };
+      const clean = cleanParams(o.type, params);
+      if (!Object.keys(clean).length) return;          // nothing valid: no edit, no empty undo step
+      let next = { ...o.params, ...clean };
       const paper = o.type === "paper-ipsc" || o.type === "paper-mini";
       // A new presentation or style that would put the top over the IPSC limit lowers the stand
       // (a stand height set by hand is kept; the inspector then warns).

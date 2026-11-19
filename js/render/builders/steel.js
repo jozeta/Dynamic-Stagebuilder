@@ -39,8 +39,12 @@ export function buildPopper(obj) {
   const body = new THREE.Mesh(geo, getMaterial(`steel-${obj.params.paint || "yellow"}`));
   body.castShadow = true;
   body.receiveShadow = true;
-  body.position.y = bh + BASE;
-  g.add(body);
+  // The popper hinges at its foot and falls back when hit.
+  const hinge = new THREE.Group();
+  hinge.position.y = bh + BASE;
+  hinge.userData.anim = { kind: "fall", delay: 0, period: 3.2 };
+  hinge.add(body);
+  g.add(hinge);
   return g;
 }
 

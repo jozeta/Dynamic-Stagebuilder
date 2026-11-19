@@ -9,7 +9,7 @@ const PARAM_LABELS = {
   presentation: "Presentation", hardCover: "Hard cover", mountHeight: "Stand height (m)", style: "Target style", baseHeight: "Base height (m)", size: "Size (m)", length: "Length (m)",
   height: "Height (m)", mesh: "Mesh colour", frame: "Frame", portWidth: "Port width (m)",
   portHeight: "Port height (m)", portBottom: "Port bottom (m)", count: "Count", paint: "Paint", color: "Colour", width: "Width (m)", rows: "Rows",
-  doorWidth: "Door width (m)", plates: "Plates", model: "Model", stance: "Stance", thickness: "Thickness (m)", material: "Material", diameter: "Diameter (m)", depth: "Base depth (m)", pitch: "Look up/down (°)", doorHeight: "Door height (m)",
+  doorWidth: "Door width (m)", plates: "Plates", model: "Model", stance: "Stance", animate: "Animate (moves when Play is on)", thickness: "Thickness (m)", material: "Material", diameter: "Diameter (m)", depth: "Base depth (m)", pitch: "Look up/down (°)", doorHeight: "Door height (m)",
 };
 const OPTION_LABELS = { classic: "Classic (octagon)", head: "With head", orange: "Orange", black: "Black", blue: "Blue", wood: "Wood", white: "White", yellow: "Yellow", red: "Red",
   green: "Green", grey: "Grey", rust: "Rusty", concrete: "Concrete", brick: "Brick", metal: "Metal", "20ft": "20 ft", "40ft": "40 ft", standing: "Standing", crouching: "Crouching", kneeling: "Kneeling", sitting: "Sitting", prone: "Prone", sedan: "Saloon", hatchback: "Hatchback", pickup: "Pickup", van: "Van",
@@ -52,6 +52,14 @@ export function createInspector(root, { editor }) {
     ])));
     for (const [k, spec] of Object.entries(def.params)) {
       const set = (v) => d({ type: "setParams", id: o.id, params: { [k]: v } });
+      if (spec.bool) {
+        // A switch (true/false), e.g. Animate: the label sits beside it.
+        const id = `f${++uid}`;
+        const sw = h("input", { type: "checkbox", class: "lg-toggle", id, dataset: { field: k }, onchange: (e) => set(e.target.checked) });
+        sw.checked = o.params[k] === true;
+        nodes.push(h("div", { class: "lg-field inspector-switch" }, [h("label", { for: id, text: PARAM_LABELS[k] || k }), sw]));
+        continue;
+      }
       nodes.push(field(PARAM_LABELS[k] || k, spec.options
         ? select(k, o.params[k], spec.options.map((v) => [v, OPTION_LABELS[v] || v]), set)
         : numberInput(k, o.params[k], spec, set)));

@@ -7,6 +7,7 @@
 
 import { PAPER_SIZES, TARGET_STYLES, PRESENTATIONS, HARD_COVERS, paperSize, arrayExtent } from "./arrays.js";
 import { STANCES, positionSize } from "./positions.js";
+import { ANIMATE_PARAM } from "./animation.js";
 export { PAPER_SIZES, TARGET_STYLES, paperSize };
 
 export const TARGET_SIZES = Object.freeze({
@@ -121,28 +122,28 @@ const defs = [
   { type: "paper-ipsc", name: "IPSC target", category: "paper", scoring: "paper", params: mount },
   { type: "paper-mini", name: "IPSC mini target", category: "paper", scoring: "paper", params: mount },
   { type: "popper", name: "IPSC popper", category: "steel", scoring: "steel",
-    params: { baseHeight: { default: 0, min: 0, max: 1.5, step: 0.05 }, ...paint("yellow") } },
+    params: { ...ANIMATE_PARAM, baseHeight: { default: 0, min: 0, max: 1.5, step: 0.05 }, ...paint("yellow") } },
   { type: "mini-popper", name: "Mini popper", category: "steel", scoring: "steel",
-    params: { baseHeight: { default: 0, min: 0, max: 1.5, step: 0.05 }, ...paint("yellow") } },
+    params: { ...ANIMATE_PARAM, baseHeight: { default: 0, min: 0, max: 1.5, step: 0.05 }, ...paint("yellow") } },
   { type: "plate-round", name: "Round plate", category: "steel", scoring: "steel",
     params: { size: { default: 0.2, min: 0.15, max: 0.3, step: 0.01 }, baseHeight: { default: 1.0, min: 0.2, max: 1.5, step: 0.05 }, ...paint("white") } },
   { type: "plate-square", name: "Square plate", category: "steel", scoring: "steel",
     params: { size: { default: 0.15, min: 0.15, max: 0.3, step: 0.01 }, baseHeight: { default: 1.0, min: 0.2, max: 1.5, step: 0.05 }, ...paint("white") } },
-  { type: "swinger", name: "Swinger", category: "moving", scoring: "paper", params: { style: mount.style },
+  { type: "swinger", name: "Swinger", category: "moving", scoring: "paper", params: { ...ANIMATE_PARAM, style: mount.style },
     note: "A paper target on a weighted arm that swings once activated (usually by a popper)." },
-  { type: "drop-turner", name: "Drop turner", category: "moving", scoring: "paper", params: { style: mount.style },
+  { type: "drop-turner", name: "Drop turner", category: "moving", scoring: "paper", params: { ...ANIMATE_PARAM, style: mount.style },
     note: "Starts edge-on, drops, turns to face the shooter and turns away again once activated." },
-  { type: "clamshell", name: "Clamshell", category: "moving", scoring: "paper", params: { style: mount.style },
+  { type: "clamshell", name: "Clamshell", category: "moving", scoring: "paper", params: { ...ANIMATE_PARAM, style: mount.style },
     note: "A paper target behind a steel cover that drops away once activated." },
   { type: "mover", name: "Mover on a track", category: "moving", scoring: "paper",
-    params: { style: mount.style, length: { default: 3, min: 1.5, max: 6, step: 0.5 } },
+    params: { ...ANIMATE_PARAM, style: mount.style, length: { default: 3, min: 1.5, max: 6, step: 0.5 } },
     note: "A paper target that runs across on a track once activated." },
   { type: "texas-star", name: "Texas star", category: "moving", scoring: "steel", plates: (p) => p.plates,
-    params: { plates: { default: 5, min: 5, max: 10, step: 5 }, ...paint("white") }, note: `A spinning star of steel plates. ${CARNIVAL}` },
+    params: { ...ANIMATE_PARAM, plates: { default: 5, min: 5, max: 10, step: 5 }, ...paint("white") }, note: `A spinning star of steel plates. ${CARNIVAL}` },
   { type: "plate-rack", name: "Plate rack", category: "moving", scoring: "steel", plates: (p) => p.plates,
-    params: { plates: { default: 6, min: 4, max: 8, step: 1 }, ...paint("white") }, note: `Falling plates in a row. ${CARNIVAL}` },
+    params: { ...ANIMATE_PARAM, plates: { default: 6, min: 4, max: 8, step: 1 }, ...paint("white") }, note: `Falling plates in a row. ${CARNIVAL}` },
   { type: "dueling-tree", name: "Dueling tree", category: "moving", scoring: "steel", plates: () => 6,
-    params: { ...paint("white") }, note: `Six paddles that swing over from one side of the post to the other. ${CARNIVAL}` },
+    params: { ...ANIMATE_PARAM, ...paint("white") }, note: `Six paddles that swing over from one side of the post to the other. ${CARNIVAL}` },
   { type: "building-wall", name: "Building wall", category: "building", scoring: null,
     params: { length: { default: 5, min: 0.5, max: 30, step: 0.1 }, height: { default: 3, min: 0.5, max: 8, step: 0.1 },
       thickness: { default: 0.25, min: 0.1, max: 0.8, step: 0.05 }, ...MATERIAL } },

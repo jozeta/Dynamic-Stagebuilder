@@ -74,7 +74,9 @@ export function validateStage(json) {
     for (const [k, spec] of Object.entries(def?.params || {})) {
       // Steel saved before the paint setting existed was white; keep it white.
       const v = Object.hasOwn(pin, k) ? pin[k] : k === "paint" ? "white" : spec.default;
-      if (spec.options) {
+      if (spec.bool) {
+        if (typeof v !== "boolean") err(`${path}.params.${k}`, "must be true or false");
+      } else if (spec.options) {
         if (!spec.options.includes(v)) err(`${path}.params.${k}`, `must be one of ${spec.options.join(", ")}`);
       } else num(v, `${path}.params.${k}`, spec.min, spec.max);
       params[k] = v;

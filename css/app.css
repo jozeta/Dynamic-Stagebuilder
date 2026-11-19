@@ -130,6 +130,8 @@ body { background: var(--lg-bg); overflow: hidden; }
 .camera-bar .lg-btn { font-size: var(--lg-fs-small); color: var(--lg-text); }
 /* A firmer backing so the view buttons stay readable over bright ground. */
 .camera-bar { background: color-mix(in srgb, var(--lg-bg) 78%, transparent); }
+.inspector-switch { display: flex; align-items: center; justify-content: space-between; gap: var(--lg-space-s); }
+.anim-play[hidden] { display: none; }
 .eye-steps { display: flex; align-items: center; gap: 2px; padding-left: 6px; margin-left: 2px; border-left: 1px solid var(--lg-border); }
 .eye-steps[hidden] { display: none; }
 .eye-step-label { font-size: var(--lg-fs-small); color: var(--lg-text); padding: 0 4px; white-space: nowrap; }
