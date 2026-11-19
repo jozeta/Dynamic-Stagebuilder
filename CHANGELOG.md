@@ -4,6 +4,9 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Sight lines: select a shooting position to see which targets it sees (at its stance's eye
+  height) and which are hidden, in the inspector, with a green sight line to each target seen.
+
 - Safety checks under the stage statistics, from the IPSC Combined Competition Rules (January
   2024): steel closer than 7 m to where a shooter may stand, fault lines closer than 8 m to steel
   (rule 2.1.3), targets that can only be shot, or can also be shot, with the muzzle past 90° from

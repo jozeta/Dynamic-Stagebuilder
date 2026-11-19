@@ -48,6 +48,8 @@ import { revealOnSelect } from "./model/layout.js";
 import { activationLinks } from "./model/activation.js";
 import { isHidden } from "./model/layers.js";
 import { measureText } from "./model/measure.js";
+import { sightFrom } from "./model/safety.js";
+import { eyeHeight } from "./model/positions.js";
 import { createContextMenu } from "./ui/context-menu.js";
 import { createLayers } from "./ui/layers.js";
 import { createAutosave } from "./storage/autosave.js";
@@ -151,6 +153,18 @@ function render(state) {
     line.computeLineDistances();
     line.renderOrder = 5;
     highlight.add(line);
+  }
+
+  // Sight lines from a selected shooting position: thin green lines from its eye to each target seen.
+  const pos = state.selection.length === 1 && !state.drag ? stage.objects.find((o) => o.id === state.selection[0] && o.type === "shooting-position") : null;
+  if (pos) {
+    const eye = eyeHeight(pos.params.stance);
+    for (const { aim } of sightFrom(stage, pos.position, eye).seen) {
+      const pts = [new THREE.Vector3(pos.position[0], eye, pos.position[1]), new THREE.Vector3(aim[0], aim[2], aim[1])];
+      const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({ color: 0x4fd18b, transparent: true, opacity: 0.85, depthTest: false }));
+      line.renderOrder = 6;
+      highlight.add(line);
+    }
   }
 
   // Measurements: a dashed line on the ground with its length over the middle, and the first point

@@ -6,6 +6,8 @@ import { labelPrefix } from "../model/numbering.js";
 import { PRESENTATIONS, HARD_COVERS, arrayIssues } from "../model/arrays.js";
 import { canBeActivated, isActivator, activatorsFor, activatorOf, activationLinks, describe } from "../model/activation.js";
 import { isLocked } from "../model/layers.js";
+import { sightFrom } from "../model/safety.js";
+import { eyeHeight } from "../model/positions.js";
 
 const PARAM_LABELS = {
   presentation: "Presentation", hardCover: "Hard cover", mountHeight: "Stand height (m)", style: "Target style", baseHeight: "Base height (m)", size: "Size (m)", length: "Length (m)",
@@ -92,6 +94,17 @@ export function createInspector(root, { editor }) {
     if (o.group && stage.groups?.some((g) => g.id === o.group && (g.locked || g.hidden))) {
       nodes.push(h("p", { class: "lg-muted hint-text", text: "Its group is locked or hidden (On stage panel)." }));
     }
+    // What the shooter sees from a shooting position (at its stance's eye height); the 3D view
+    // draws a green sight line to each target seen.
+    if (o.type === "shooting-position") {
+      const r = sightFrom(stage, o.position, eyeHeight(o.params.stance));
+      const name = (id) => { const t = stage.objects.find((x) => x.id === id); return t.label || getProp(t.type).name; };
+      nodes.push(h("div", { class: "lg-stack sight" }, [
+        h("span", { class: "lg-label", text: "From here" }),
+        h("p", { class: "sight-seen", text: r.seen.length ? `Sees ${r.seen.map((x) => name(x.id)).join(", ")}` : "Sees no targets." }),
+        r.hidden.length ? h("p", { class: "lg-muted sight-hidden", text: `Hidden: ${r.hidden.map(name).join(", ")}` }) : null,
+      ].filter(Boolean)));
+    }
     // Rule problems with a paper target array (cited from the Target Array Handbook).
     if (def.note) nodes.splice(1, 0, h("p", { class: "lg-muted hint-text", text: def.note }));
     if (o.type.startsWith("paper-")) for (const text of arrayIssues(o)) nodes.push(h("p", { class: "lg-alert lg-alert-warn inspector-warning", role: "status", text }));
@@ -137,7 +150,8 @@ export function createInspector(root, { editor }) {
     const lines = stage.lines.filter((l) => sel.includes(l.id));
     const links = stage.objects.filter((o) => isActivator(o.type) || o.activatedBy).map((o) => [o.id, o.label, o.activatedBy]);
     links.push(stage.groups ?? null);
-    const key = JSON.stringify([sel, objs, lines, links, sel.length ? null : [stage.bay, stage.settings.grid, stage.settings.angleSnap]]);
+    const sights = objs.length === 1 && objs[0].type === "shooting-position" ? stage.objects : null;     // what it sees changes with the rest
+    const key = JSON.stringify([sel, objs, lines, links, sights, sel.length ? null : [stage.bay, stage.settings.grid, stage.settings.angleSnap]]);
     if (key === lastKey) return;
     lastKey = key;
     const focused = root.contains(document.activeElement) ? document.activeElement.dataset.field : null;

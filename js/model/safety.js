@@ -88,3 +88,18 @@ export function stageChecks(stage) {
   }
   return out;
 }
+
+/**
+ * Sight lines from one place (eye height in metres): { seen: [{ id, aim: [x, z, y] }], hidden: [ids] }
+ * for every paper and steel target. `aim` is the first point of the target the eye can see.
+ */
+export function sightFrom(stage, point, eye) {
+  const bs = blockers(stage);
+  const seen = [], hidden = [];
+  for (const o of stage.objects) {
+    if (!["paper", "steel"].includes(getProp(o.type).scoring)) continue;
+    const aim = aimPoints(o).find(([x, z, y]) => canSee(bs, point, eye, [x, z], y));
+    if (aim) seen.push({ id: o.id, aim }); else hidden.push(o.id);
+  }
+  return { seen, hidden };
+}

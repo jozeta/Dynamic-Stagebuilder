@@ -79,3 +79,15 @@ test("no library stage breaks a safety rule (warnings are allowed)", async () =>
     assert.deepEqual(bad.map((c) => c.text), [], spec.id);
   }
 });
+
+test("sight lines from a position: which targets it sees, and where it sees each one", async () => {
+  const { sightFrom } = await import("../js/model/safety.js");
+  let s = createStage();
+  s = addObject(s, "wall-solid", [0, 6], 0, { length: 2, height: 2.5 }).stage;
+  const hidden = addObject(s, "paper-ipsc", [0, 8]); s = hidden.stage;
+  const seen = addObject(s, "paper-ipsc", [6, 8]); s = seen.stage;
+  const r = sightFrom(s, [0, 1], 1.6);
+  assert.deepEqual(r.seen.map((x) => x.id), [seen.id]);
+  assert.deepEqual(r.hidden, [hidden.id]);
+  assert.equal(r.seen[0].aim.length, 3, "a point [x, z, y] on the target to draw the line to");
+});

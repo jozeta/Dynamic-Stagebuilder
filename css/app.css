@@ -365,3 +365,5 @@ body { background: var(--lg-bg); overflow: hidden; }
 .safety-item { display: flex; align-items: flex-start; gap: var(--lg-space-s); font-size: var(--lg-fs-small); }
 .safety-item > span { flex: 1; }
 .safety-show { flex: none; }
+.sight p { margin: 0; font-size: var(--lg-fs-small); }
+.sight-seen::before { content: ""; display: inline-block; width: 10px; height: 2px; margin: 0 6px 3px 0; background: #4fd18b; }
