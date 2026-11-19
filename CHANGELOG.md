@@ -26,8 +26,8 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
   - tables with a pistol, magazines or a gun case for table starts
   - map colours as on stage diagrams (steel blue, hard cover black)
   - more start positions and gun conditions in the briefing
-- Fixed: opening Projects or Settings while its side panel was folded opened it out of sight; the
-  panel now unfolds.
+- Fixed: opening Projects or Settings while its side panel was folded, or clicking it again after
+  folding the panel with it open, left it out of sight; the panel now unfolds and shows it.
 
 - **Door:** a wooden door in a frame (Walls group, snaps onto wall runs) with door width, height,
   how far it stands open, hinge side and whether it opens away from or toward the shooter;
