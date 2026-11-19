@@ -62,7 +62,7 @@ test("positions are numbered 1, 2, 3 and kept in that order; they are not target
 for (const stance of ["standing", "crouching", "kneeling", "sitting", "prone"]) {
   test(`a ${stance} shooting position is drawn at its real size`, () => {
     const o = pos({ stance });
-    const b = new Box3().setFromObject(buildProp(o));
+    const b = new Box3().setFromObject(buildProp(o), true);          // exact: the limbs lie at angles
     const s = b.getSize(new Vector3()), d = dimensionsOf(o);
     near(s.x, d.w, 0.01, "width"); near(s.y, d.h, 0.01, "height"); near(s.z, d.d, 0.01, "depth");
     near(b.min.y, 0, 0.002, "on the ground");

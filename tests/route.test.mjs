@@ -73,3 +73,12 @@ test("grab points: add, drag (one undo step), remove; saved with the stage and c
   json.objects[1].via = Array.from({ length: 300 }, () => [0, 5]);
   assert.equal(validateStage(json).ok, false, "too many grab points are refused");
 });
+
+test("the drawn line stops short of the rings at each end", async () => {
+  const { trimPolyline } = await import("../js/model/route.js");
+  const t = trimPolyline([[0, 0], [0, 4], [3, 4]], 0.5, 0.5);
+  assert.deepEqual(t[0], [0, 0.5]);
+  assert.deepEqual(t.at(-1).map((v) => +v.toFixed(9)), [2.5, 4]);
+  assert.ok(t.some((p) => p[0] === 0 && p[1] === 4), "keeps the bend");
+  assert.equal(trimPolyline([[0, 0], [0, 0.6]], 0.5, 0.5).length, 0, "too short to draw");
+});

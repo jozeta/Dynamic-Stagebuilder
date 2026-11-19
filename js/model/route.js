@@ -76,3 +76,17 @@ export function insertIndex(pts, p) {
   }
   return best;
 }
+
+/** The part of a polyline from `a` metres after its start to `b` metres before its end ([] if none). */
+export function trimPolyline(pts, a, b) {
+  const total = legLength(pts);
+  if (total - a - b <= 0.05) return [];
+  const out = [pointAlong(pts, a / total)];
+  let run = 0;
+  for (let i = 1; i < pts.length - 1; i++) {
+    run += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
+    if (run > a && run < total - b) out.push([pts[i][0], pts[i][1]]);
+  }
+  out.push(pointAlong(pts, (total - b) / total));
+  return out;
+}

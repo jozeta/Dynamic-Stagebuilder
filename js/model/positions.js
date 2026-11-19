@@ -2,32 +2,80 @@
 // (the object's rotation: 0 looks down range), a look-up/down angle (pitch, degrees) and a stance.
 // The shooter's-eye camera steps through them. Pure: no DOM, no Three.js.
 
-// Stance: eye height (m) and a simple figure for the 3D marker, as capsules
-// [x, y, z, radius, length, lying] (lying = along the facing, else upright) and spheres [x, y, z, r].
+// Stance: eye height (m) and a mannequin for the 3D marker, facing +z (down range): limbs as
+// segments { a: [x, y, z], b: [x, y, z], r } (capsules), the head and joints as spheres
+// [x, y, z, r], and boxes [x, y, z, w, h, d] for the feet and the pistol held out in both hands.
+const arms = (sh, el, hand) => [{ a: [0.19, ...sh], b: [0.12, ...el], r: 0.045 }, { a: [-0.19, ...sh], b: [-0.12, ...el], r: 0.045 },
+  { a: [0.12, ...el], b: [0.03, ...hand], r: 0.038 }, { a: [-0.12, ...el], b: [-0.03, ...hand], r: 0.038 }];
+const gun = (hand) => [[0, hand[0] + 0.05, hand[1] + 0.07, 0.035, 0.1, 0.19]];
+const hands = (hand) => [[0, hand[0], hand[1], 0.055]];
+const torso = (pelvis, chestTop, neck) => [
+  { a: pelvis, b: [pelvis[0], pelvis[1] + 0.08, pelvis[2]], r: 0.14 },
+  { a: [pelvis[0], pelvis[1] + 0.1, pelvis[2]], b: chestTop, r: 0.15 },
+  { a: chestTop, b: neck, r: 0.05 },
+];
+function stance(id, name, eye, p) {
+  const segs = [...torso(p.pelvis, p.chest, p.neck), ...p.legs, ...arms(p.shoulder, p.elbow, p.hand)];
+  const spheres = [[...p.head, 0.11], ...hands(p.hand), ...p.joints];
+  const boxes = [...p.feet, ...gun(p.hand)];
+  return { id, name, eye, segments: segs, spheres, boxes };
+}
+const leg = (hip, knee, ankle) => [{ a: hip, b: knee, r: 0.07 }, { a: knee, b: ankle, r: 0.055 }];
 export const STANCES = Object.freeze([
-  { id: "standing", name: "Standing", eye: 1.6, capsules: [[0.1, 0.455, 0, 0.08, 0.75, 0], [-0.1, 0.455, 0, 0.08, 0.75, 0], [0, 1.15, 0, 0.17, 0.5, 0], [0, 1.38, 0.3, 0.06, 0.42, 1]], spheres: [[0, 1.63, 0, 0.11]] },
-  { id: "crouching", name: "Crouching", eye: 1.15, capsules: [[0.1, 0.305, 0.04, 0.08, 0.45, 0], [-0.1, 0.305, 0.04, 0.08, 0.45, 0], [0, 0.78, 0.06, 0.17, 0.42, 0], [0, 0.98, 0.34, 0.06, 0.42, 1]], spheres: [[0, 1.16, 0.1, 0.11]] },
-  { id: "kneeling", name: "Kneeling", eye: 0.95, capsules: [[0.1, 0.07, -0.22, 0.07, 0.4, 1], [-0.1, 0.27, 0.16, 0.08, 0.3, 0], [0, 0.6, 0, 0.17, 0.42, 0], [0, 0.8, 0.3, 0.06, 0.42, 1]], spheres: [[0, 0.95, 0, 0.11]] },
-  { id: "sitting", name: "Sitting", eye: 1.15, capsules: [[0.1, 0.42, 0.2, 0.08, 0.35, 1], [-0.1, 0.42, 0.2, 0.08, 0.35, 1], [0.1, 0.2, 0.42, 0.07, 0.26, 0], [-0.1, 0.2, 0.42, 0.07, 0.26, 0], [0, 0.74, 0, 0.17, 0.42, 0], [0, 0.92, 0.32, 0.06, 0.42, 1]], spheres: [[0, 1.11, 0, 0.11]] },
-  { id: "prone", name: "Prone", eye: 0.3, capsules: [[0.12, 0.08, -0.62, 0.08, 0.7, 1], [-0.12, 0.08, -0.62, 0.08, 0.7, 1], [0, 0.17, 0, 0.17, 0.5, 1], [0, 0.16, 0.8, 0.06, 0.4, 1]], spheres: [[0, 0.24, 0.52, 0.11]] },
+  stance("standing", "Standing", 1.6, {
+    pelvis: [0, 0.9, 0], chest: [0, 1.36, 0.02], neck: [0, 1.5, 0.02], head: [0, 1.63, 0.03],
+    shoulder: [1.38, 0.02], elbow: [1.34, 0.28], hand: [1.36, 0.52],
+    legs: [...leg([0.1, 0.92, 0], [0.12, 0.5, 0.02], [0.13, 0.08, 0]), ...leg([-0.1, 0.92, 0], [-0.12, 0.5, 0.02], [-0.13, 0.08, 0])],
+    joints: [[0.12, 0.5, 0.02, 0.06], [-0.12, 0.5, 0.02, 0.06]],
+    feet: [[0.13, 0.03, 0.06, 0.1, 0.06, 0.25], [-0.13, 0.03, 0.06, 0.1, 0.06, 0.25]],
+  }),
+  stance("crouching", "Crouching", 1.15, {
+    pelvis: [0, 0.6, -0.1], chest: [0, 0.97, 0.12], neck: [0, 1.07, 0.16], head: [0, 1.18, 0.19],
+    shoulder: [0.96, 0.12], elbow: [0.94, 0.38], hand: [0.97, 0.6],
+    legs: [...leg([0.1, 0.62, -0.1], [0.13, 0.45, 0.26], [0.13, 0.08, 0.05]), ...leg([-0.1, 0.62, -0.1], [-0.13, 0.45, 0.26], [-0.13, 0.08, 0.05])],
+    joints: [[0.13, 0.45, 0.26, 0.06], [-0.13, 0.45, 0.26, 0.06]],
+    feet: [[0.13, 0.03, 0.1, 0.1, 0.06, 0.25], [-0.13, 0.03, 0.1, 0.1, 0.06, 0.25]],
+  }),
+  stance("kneeling", "Kneeling", 0.95, {
+    pelvis: [0, 0.53, 0], chest: [0, 0.86, 0.02], neck: [0, 0.98, 0.03], head: [0, 1.1, 0.04],
+    shoulder: [0.86, 0.02], elbow: [0.83, 0.28], hand: [0.86, 0.52],
+    // Left knee up (foot flat in front), right knee on the ground with the shin behind.
+    legs: [...leg([0.1, 0.55, 0], [0.13, 0.5, 0.4], [0.13, 0.08, 0.42]), ...leg([-0.1, 0.55, 0], [-0.12, 0.07, 0.06], [-0.12, 0.07, -0.36])],
+    joints: [[0.13, 0.5, 0.4, 0.06], [-0.12, 0.07, 0.06, 0.06]],
+    feet: [[0.13, 0.03, 0.48, 0.1, 0.06, 0.25], [-0.12, 0.04, -0.46, 0.1, 0.08, 0.16]],
+  }),
+  stance("sitting", "Sitting", 1.15, {
+    pelvis: [0, 0.48, -0.02], chest: [0, 0.94, 0.02], neck: [0, 1.06, 0.03], head: [0, 1.18, 0.04],
+    shoulder: [0.94, 0.02], elbow: [0.9, 0.28], hand: [0.93, 0.52],
+    legs: [...leg([0.1, 0.48, 0], [0.11, 0.48, 0.42], [0.11, 0.08, 0.45]), ...leg([-0.1, 0.48, 0], [-0.11, 0.48, 0.42], [-0.11, 0.08, 0.45])],
+    joints: [[0.11, 0.48, 0.42, 0.06], [-0.11, 0.48, 0.42, 0.06]],
+    feet: [[0.11, 0.03, 0.51, 0.1, 0.06, 0.25], [-0.11, 0.03, 0.51, 0.1, 0.06, 0.25]],
+  }),
+  stance("prone", "Prone", 0.3, {
+    pelvis: [0, 0.15, -0.25], chest: [0, 0.17, 0.32], neck: [0, 0.2, 0.44], head: [0, 0.24, 0.55],
+    shoulder: [0.17, 0.32], elbow: [0.12, 0.6], hand: [0.15, 0.86],
+    legs: [...leg([0.1, 0.14, -0.28], [0.14, 0.1, -0.7], [0.16, 0.08, -1.1]), ...leg([-0.1, 0.14, -0.28], [-0.14, 0.1, -0.7], [-0.16, 0.08, -1.1])],
+    joints: [[0.14, 0.1, -0.7, 0.06], [-0.14, 0.1, -0.7, 0.06]],
+    feet: [[0.16, 0.04, -1.17, 0.1, 0.08, 0.12], [-0.16, 0.04, -1.17, 0.1, 0.08, 0.12]],
+  }),
 ].map((s) => Object.freeze(s)));
 
 export const MARKER_RADIUS = 0.4;   // the ring on the ground (m)
-const stance = (id) => STANCES.find((s) => s.id === id) || STANCES[0];
+const stance_ = (id) => STANCES.find((s) => s.id === id) || STANCES[0];
 
 /** Eye height above the ground for a stance (m). */
-export const eyeHeight = (id) => stance(id).eye;
+export const eyeHeight = (id) => stance_(id).eye;
 
 /** The marker's size { w, h, d } at rotation 0: the ring and the figure. */
 export function positionSize(id) {
-  const st = stance(id);
-  let w = MARKER_RADIUS, h = 0.01, d = MARKER_RADIUS, dMin = -MARKER_RADIUS;
-  for (const [x, y, z, r, len, lying] of st.capsules) {
-    const hy = lying ? r : len / 2 + r, hz = lying ? len / 2 + r : r;
-    w = Math.max(w, Math.abs(x) + r); h = Math.max(h, y + hy); d = Math.max(d, z + hz); dMin = Math.min(dMin, z - hz);
-  }
-  for (const [x, y, z, r] of st.spheres) { w = Math.max(w, Math.abs(x) + r); h = Math.max(h, y + r); d = Math.max(d, z + r); dMin = Math.min(dMin, z - r); }
-  return { w: 2 * w, h, d: d - dMin, zMin: dMin, zMax: d };
+  const st = stance_(id);
+  let x0 = -MARKER_RADIUS, x1 = MARKER_RADIUS, z0 = -MARKER_RADIUS, z1 = MARKER_RADIUS, h = 0.01;
+  const grow = (x, y, z, ex, ey, ez) => { x0 = Math.min(x0, x - ex); x1 = Math.max(x1, x + ex); z0 = Math.min(z0, z - ez); z1 = Math.max(z1, z + ez); h = Math.max(h, y + ey); };
+  for (const { a, b, r } of st.segments) { grow(...a, r, r, r); grow(...b, r, r, r); }
+  for (const [x, y, z, r] of st.spheres) grow(x, y, z, r, r, r);
+  for (const [x, y, z, w, bh, d] of st.boxes) grow(x, y, z, w / 2, bh / 2, d / 2);
+  // The figure is drawn centred across (x) on the marker, so the width is symmetric.
+  return { w: 2 * Math.max(-x0, x1), h, d: z1 - z0, zMin: z0, zMax: z1 };
 }
 
 const rad = (deg) => (deg * Math.PI) / 180;

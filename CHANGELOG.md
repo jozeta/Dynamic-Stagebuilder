@@ -4,6 +4,11 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Shooting positions are light grey and see-through, with a detailed mannequin for each stance
+  (head, body, arms holding a pistol in a firing grip, legs and feet) and a small chevron on the
+  ring for the facing. The route line stops at each ring, has fewer, smaller arrows, and its grab
+  points are flat discs in the line's colour.
+
 - **The shooter's route:** a dashed line with arrows on the ground runs from the start through the
   shooting positions, lying on ramps, platforms and step boxes. Click the line to add a grab
   point; drag one to reshape the route; click one to remove it (each an undo step, saved with the
