@@ -4,6 +4,8 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Fault lines and shooting areas are a muted, weathered red instead of a bright one.
+
 - Fix: CI's test run (Node 22) names the test files by pattern instead of the folder.
 
 - New Blueprint defaults: the sun set by hand like Outdoor and Technical, a deep blue paper
