@@ -16,8 +16,8 @@ export const LOOK_DEFAULTS = Object.freeze({ hour: 15.75, sun: 0.5, ambient: 1, 
 // The Technical surroundings: brighter afternoon light with softer, lighter shadows.
 export const TECHNICAL_LOOK = Object.freeze({ hour: 16, sun: 1.15, ambient: 1.1, shadows: true, softness: 3, shadowStrength: 0.55, haze: 0.2, exposure: 1, ground: "sand" });
 
-// Blueprint: bright, even light with soft, light shadows, so the drawing stays clean; no haze.
-export const BLUEPRINT_LOOK = Object.freeze({ hour: 13, sun: 0.9, ambient: 1.3, shadows: true, softness: 4, shadowStrength: 0.4, haze: 0, exposure: 1, ground: "sand" });
+// Blueprint: late-morning light with soft shadows; no haze.
+export const BLUEPRINT_LOOK = Object.freeze({ hour: 11, sun: 1, ambient: 1.15, shadows: true, softness: 4, shadowStrength: 0.7, haze: 0, exposure: 1.05, ground: "sand" });
 
 /** The light defaults for a surroundings name ("outdoor", "technical" or "blueprint"). */
 export const lookDefaults = (environment) => (environment === "technical" || String(environment).startsWith("custom:") ? TECHNICAL_LOOK

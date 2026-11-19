@@ -70,11 +70,10 @@ test("Technical surroundings have their own light defaults; reset and switching 
   assert.deepEqual(ed.stage().settings.look, { ...TECHNICAL_LOOK });
 });
 
-test("Blueprint has its own light defaults: bright, flat, soft light shadows, no haze", async () => {
+test("Blueprint has its own light defaults: 11:00, ambient 115 %, softness 4, shadows 70 %, no haze, exposure 1.05", async () => {
   const { lookDefaults, BLUEPRINT_LOOK } = await import("../js/model/look.js");
   assert.deepEqual(lookDefaults("blueprint"), BLUEPRINT_LOOK);
-  assert.equal(BLUEPRINT_LOOK.haze, 0);
-  assert.ok(BLUEPRINT_LOOK.shadowStrength <= 0.5 && BLUEPRINT_LOOK.ambient >= 1.2);
+  assert.deepEqual({ ...BLUEPRINT_LOOK }, { hour: 11, sun: 1, ambient: 1.15, shadows: true, softness: 4, shadowStrength: 0.7, haze: 0, exposure: 1.05, ground: "sand" });
   const { ENVIRONMENTS } = await import("../js/model/schema.js");
   assert.ok(ENVIRONMENTS.includes("blueprint"));
 });

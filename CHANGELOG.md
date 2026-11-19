@@ -8,11 +8,11 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
   how far it stands open, hinge side and whether it opens away from or toward the shooter;
   *Animate* opens and shuts it.
 
-- **Blueprint** now looks like a real architect's sheet: a bright blue drafting paper with a fine grid
-  and floor plans all round the stage (hatched walls, rooms with names and areas, door swings,
-  windows, stairs, furniture, dimension chains and callouts), over faint older drawings. The bay
-  stays clear.
-
+- **Blueprint** now looks like a worn, much-handled drafting sheet: bright blue paper with a fine
+  grid, grit, stains, faded patches, scratches and fold creases, and round the stage handwritten
+  comments, leader arrows, revision clouds, callouts, loose dimensions, level and section marks,
+  stamps, check marks, scribbles, tape and a coffee ring. The bay stays clear. New Blueprint light
+  defaults: 11:00, sunlight 100 %, ambient 115 %, softness 4, shadow strength 70 %, exposure 1.05.
 - Fixed: dueling-tree paddles now swing round the post, behind it, to the other side at the same
   height, instead of flipping up over the top.
 

@@ -54,7 +54,7 @@ training, and want a clear briefing sheet without drawing the map by hand.
   dueling trees, poppers) with a per-prop switch and one Play / Pause button.
 - **Three surroundings,** Outdoor (a dirt range with earth banks, bushes and trees, stones, and a
   choice of sand, light sand, dark sand, red dirt or gravel), Technical (grey floor, grid) and
-  Blueprint (an endless blue drafting sheet with grid, title block and notes). Switching never moves
+  Blueprint (an endless, worn blue drafting sheet with grid, title block, comments, arrows and stamps). Switching never moves
   anything on the stage.
 - **Environment settings:** time of day (the sun moves and warms toward evening), sunlight,
   ambient light, shadows and their softness, haze and exposure, saved with the stage.

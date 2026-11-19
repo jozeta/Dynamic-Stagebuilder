@@ -105,9 +105,9 @@ test("the Outdoor ground can be switched without touching the stage", async () =
   assert.deepEqual(stage, before);
 });
 
-test("Blueprint: a drafting sheet of floor plans round the stage, keeping the bay itself clear", async () => {
+test("Blueprint: a worn drafting sheet with comments, arrows and marks round the stage, keeping the bay clear", async () => {
   const { Box3, Vector3 } = await import("three");
-  const { sheetPlans } = await import("../js/render/environments/blueprint.js");
+  const { sheetMarks } = await import("../js/render/environments/blueprint.js");
   const bay = { width: 20, depth: 30 };
   const env = createEnvironment("blueprint", bay);
   const sheet = env.group.children.find((c) => c.userData.sheet);
@@ -115,15 +115,13 @@ test("Blueprint: a drafting sheet of floor plans round the stage, keeping the ba
   const s = new Box3().setFromObject(sheet).getSize(new Vector3());
   assert.ok(s.x >= 80 && s.z >= 80, `sheet ${s.x} × ${s.z} m`);
   env.dispose();
-  const plans = sheetPlans(bay, 7);
-  assert.ok(plans.length >= 6, `${plans.length} floor plans`);
-  for (const p of plans) {
-    assert.ok(p.rooms.length >= 2, "plans are split into rooms");
-    const clear = p.x1 < -bay.width / 2 - 3 || p.x0 > bay.width / 2 + 3 || p.z1 < -3 || p.z0 > bay.depth + 3;
-    assert.ok(clear, `plan at ${p.x0},${p.z0} stays out of the bay`);
-  }
-  for (let i = 0; i < plans.length; i++) for (let j = i + 1; j < plans.length; j++) {
-    const a = plans[i], b = plans[j];
-    assert.ok(a.x1 <= b.x0 || b.x1 <= a.x0 || a.z1 <= b.z0 || b.z1 <= a.z0, "plans don't overlap");
+  const marks = sheetMarks(bay, 7);
+  assert.ok(marks.length >= 30, `${marks.length} marks`);
+  const kinds = new Set(marks.map((m) => m.kind));
+  for (const k of ["note", "arrow", "cloud", "callout", "stamp", "scribble", "stain", "dimension"]) assert.ok(kinds.has(k), k);
+  assert.equal(kinds.has("plan"), false, "no house plans");
+  for (const m of marks) {
+    const out = m.x < -bay.width / 2 - 3 || m.x > bay.width / 2 + 3 || m.z < -3 || m.z > bay.depth + 3;
+    assert.ok(out, `${m.kind} at ${m.x.toFixed(1)}, ${m.z.toFixed(1)} stays out of the bay`);
   }
 });
