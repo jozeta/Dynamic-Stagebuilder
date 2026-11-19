@@ -167,6 +167,10 @@ const defs = [
   { type: "wall-port", name: "Wooden wall with port", category: "wall", scoring: null, params: { ...wallSize, ...port } },
   { type: "wall-solid", name: "Solid panel", category: "wall", scoring: null,
     params: { length: { default: 1, min: 0.5, max: 2, step: 0.1 }, height: { default: 2, min: 0.5, max: 2.5, step: 0.1 } } },
+  { type: "door", name: "Door", category: "wall", scoring: null,
+    params: { ...ANIMATE_PARAM, doorWidth: { default: 0.9, min: 0.6, max: 1.2, step: 0.05 }, height: { default: 2.2, min: 2, max: 2.5, step: 0.05 },
+      open: { default: 0, min: 0, max: 90, step: 5 }, hinge: { default: "left", options: ["left", "right"] }, swing: { default: "away", options: ["away", "toward"] } },
+    note: "A wooden door in a frame. Open sets how far it stands open; Animate opens and shuts it." },
   { type: "wall-door", name: "Mesh doorway", category: "wall", scoring: null,
     params: { length: { default: 1.5, min: 1.2, max: 3, step: 0.1 }, height: { default: 2.2, min: 2, max: 2.5, step: 0.05 },
       doorWidth: { default: 0.8, min: 0.6, max: 1.2, step: 0.05 }, doorHeight: { default: 1.95, min: 1.7, max: 2.1, step: 0.05 }, ...meshLook } },
@@ -244,6 +248,11 @@ export function dimensionsOf(obj) {
     case "pallet": [w, h, d] = [PALLET.length, PALLET.height * p.count, PALLET.width]; break;
     case "sandbags": [w, h, d] = [p.length, SANDBAG.height * p.rows, SANDBAG.depth]; break;
     case "cone": [w, h, d] = [CONE.diameter, CONE.height, CONE.diameter]; break;
+    case "door": {
+      // The frame stands on feet 40 cm deep; an open leaf reaches out on one side.
+      const a = (p.open * Math.PI) / 180, leaf = (p.doorWidth - 0.005) * Math.sin(a) + 0.02 * Math.cos(a);   // the leaf's far edge
+      [w, h, d] = [p.doorWidth + 2 * STICK + 0.02, p.height, WALL_FOOT / 2 + Math.max(WALL_FOOT / 2, leaf)]; break;
+    }
     case "building-wall": [w, h, d] = [p.length, p.height, p.thickness]; break;
     case "pillar": [w, h, d] = [p.size, p.height, p.size]; break;
     case "column": [w, h, d] = [p.diameter, p.height, p.diameter]; break;

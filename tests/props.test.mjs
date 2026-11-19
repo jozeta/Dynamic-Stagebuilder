@@ -7,7 +7,7 @@ import { SCORING } from "../js/model/scoring-rules.js";
 const TYPES = ["paper-ipsc", "paper-mini", "popper", "mini-popper",
   "plate-round", "plate-square", "wall-mesh", "wall-mesh-port", "wall-wood", "wall-port", "barrel", "tyre", "tyre-stack", "crate", "plant-palm",
   "wall-door", "wall-solid", "ramp", "platform", "car", "table", "chair", "pallet", "sandbags", "cone",
-  "swinger", "drop-turner", "clamshell", "mover", "texas-star", "plate-rack", "dueling-tree", "shooting-position",
+  "swinger", "drop-turner", "clamshell", "mover", "texas-star", "plate-rack", "dueling-tree", "shooting-position", "door",
   "building-wall", "pillar", "column", "berm", "container", "fence", "barrier"];
 
 const near = (a, b, tol = 0.005) => assert.ok(Math.abs(a - b) <= tol, `${a} ≈ ${b}`);

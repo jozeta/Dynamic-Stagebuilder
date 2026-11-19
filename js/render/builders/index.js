@@ -2,7 +2,7 @@
 // The stage view positions and rotates it.
 import { buildPaper } from "./paper.js";
 import { buildPopper, buildPlate } from "./steel.js";
-import { buildMeshWall, buildMeshPortWall, buildWoodWall, buildPortWall, buildDoorWall, buildSolidWall } from "./walls.js";
+import { buildMeshWall, buildMeshPortWall, buildWoodWall, buildPortWall, buildDoorWall, buildSolidWall, buildDoor } from "./walls.js";
 import { buildRamp, buildPlatform, buildTable, buildChair, buildPallet, buildSandbags, buildCone } from "./furniture.js";
 import { buildCar } from "./car.js";
 import { buildBuildingWall, buildPillar, buildColumn, buildBerm, buildContainer, buildFence, buildBarrier } from "./building.js";
@@ -16,7 +16,7 @@ const BUILDERS = {
   "paper-ipsc": buildPaper, "paper-mini": buildPaper, noshoot: buildPaper, "noshoot-mini": buildPaper,
   popper: buildPopper, "mini-popper": buildPopper, "plate-round": buildPlate, "plate-square": buildPlate,
   "wall-mesh": buildMeshWall, "wall-mesh-port": buildMeshPortWall, "wall-wood": buildWoodWall, "wall-port": buildPortWall,
-  barrel: buildBarrel, tyre: buildTyre, "tyre-stack": buildTyre, crate: buildCrate, "plant-palm": buildPlant, "wall-door": buildDoorWall, "wall-solid": buildSolidWall,
+  barrel: buildBarrel, tyre: buildTyre, "tyre-stack": buildTyre, crate: buildCrate, "plant-palm": buildPlant, "wall-door": buildDoorWall, door: buildDoor, "wall-solid": buildSolidWall,
   ramp: buildRamp, platform: buildPlatform, car: buildCar, table: buildTable, chair: buildChair,
   pallet: buildPallet, sandbags: buildSandbags, cone: buildCone,
   "shooting-position": buildShootingPosition,

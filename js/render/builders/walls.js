@@ -181,3 +181,26 @@ export function buildSolidWall(obj) {
   feet(g, obj.params.length, "wood");
   return g;
 }
+
+// A wooden door in a pine frame on feet. The leaf hangs on the left or right post (as the shooter
+// sees it), opens away from or toward the shooter, and stands `open` degrees open; with Animate on
+// it opens and shuts.
+export function buildDoor(obj) {
+  const p = obj.params;
+  const g = group(obj.id);
+  const dw = p.doorWidth, H = p.height, L = dw + 2 * STICK + 0.02;
+  for (const x of [-L / 2 + STICK / 2, L / 2 - STICK / 2]) g.add(box(STICK, H, STICK, "wood", x, H / 2, 0));
+  g.add(box(L - 2 * STICK, STICK, STICK, "wood", 0, H - STICK / 2, 0));
+  feet(g, L, "wood");
+  const side = p.hinge === "right" ? -1 : 1;                 // the shooter's left is +x
+  const hinge = new THREE.Group();
+  hinge.position.set(side * (dw / 2), 0, 0);
+  const sign = side * (p.swing === "toward" ? -1 : 1);
+  hinge.rotation.y = (sign * p.open * Math.PI) / 180;
+  hinge.userData.anim = { kind: "door", sign, rest: (p.open * Math.PI) / 180 };
+  const leafH = H - STICK - 0.02;
+  hinge.add(box(dw - 0.01, leafH, 0.04, "plywood", -side * (dw / 2), leafH / 2 + 0.01, 0));
+  hinge.add(box(0.12, 0.03, 0.06, "chrome", -side * (dw - 0.12), 1.0, 0));       // the handle
+  g.add(hinge);
+  return g;
+}

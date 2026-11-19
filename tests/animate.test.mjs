@@ -12,7 +12,7 @@ import { createStageView } from "../js/render/stage-view.js";
 import { createAnimator } from "../js/render/animate.js";
 
 test("every moving prop has an Animate switch, off by default", () => {
-  assert.deepEqual(ANIMATED_TYPES, ["swinger", "drop-turner", "clamshell", "mover", "texas-star", "plate-rack", "dueling-tree", "popper", "mini-popper"]);
+  assert.deepEqual(ANIMATED_TYPES, ["swinger", "drop-turner", "clamshell", "mover", "texas-star", "plate-rack", "dueling-tree", "popper", "mini-popper", "door"]);
   for (const t of ANIMATED_TYPES) {
     assert.equal(PROPS[t].params.animate?.bool, true, t);
     assert.equal(defaultParams(t).animate, false, t);
@@ -83,4 +83,25 @@ test("dueling-tree paddles swing round the post, behind it, at the same height (
   animator.update(1.5);                       // the first paddle has crossed over
   const done = at(paddles[0]);
   assert.ok(Math.sign(done.x) === -Math.sign(rest[0].x) && Math.abs(Math.abs(done.x) - Math.abs(rest[0].x)) < 1e-3, "now on the other side");
+});
+
+test("a door: a framed door that opens, in the walls group, at its real size when open or shut", async () => {
+  const { Box3, Vector3 } = await import("three");
+  const { dimensionsOf } = await import("../js/model/props.js");
+  const { buildProp } = await import("../js/render/builders/index.js");
+  assert.equal(PROPS.door.category, "wall");
+  assert.deepEqual(PROPS.door.params.hinge.options, ["left", "right"]);
+  assert.deepEqual(PROPS.door.params.swing.options, ["away", "toward"]);
+  assert.equal(defaultParams("door").open, 0);
+  for (const open of [0, 30, 90]) for (const hinge of ["left", "right"]) for (const swing of ["away", "toward"]) {
+    const o = { id: "d", type: "door", position: [0, 0], rotation: 0, params: { ...defaultParams("door"), open, hinge, swing } };
+    const b = new Box3().setFromObject(buildProp(o));
+    const s = b.getSize(new Vector3()), d = dimensionsOf(o);
+    for (const [k, v] of [["x", d.w], ["y", d.h], ["z", d.d]]) assert.ok(Math.abs(s[k] - v) < 0.01, `${open}° ${hinge} ${swing} ${k}: ${s[k]} vs ${v}`);
+    assert.ok(Math.abs(b.min.y) < 0.002);
+    if (open === 90) {
+      const leafSide = swing === "away" ? b.max.z : -b.min.z;
+      assert.ok(leafSide > d.d / 2, `${hinge} ${swing}: the open leaf sticks out ${swing === "away" ? "down range" : "toward the shooter"}`);
+    }
+  }
 });

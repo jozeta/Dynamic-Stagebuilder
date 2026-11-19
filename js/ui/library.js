@@ -35,6 +35,7 @@ function sizeText(type) {
     case "texas-star": return `${p.plates} plates, not IPSC`;
     case "plate-rack": return `${p.plates} plates, not IPSC`;
     case "dueling-tree": return "6 paddles, not IPSC";
+    case "door": return `${cm(p.doorWidth)} × ${cm(p.height)} cm, opens`;
     case "building-wall": return `${p.length} × ${p.height} m, concrete, brick, wood or metal`;
     case "pillar": return `${cm(p.size)} cm square, ${p.height} m`;
     case "column": return `Ø ${cm(p.diameter)} cm, ${p.height} m`;

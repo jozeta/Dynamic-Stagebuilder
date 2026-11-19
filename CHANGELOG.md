@@ -4,6 +4,10 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- **Door:** a wooden door in a frame (Walls group, snaps onto wall runs) with door width, height,
+  how far it stands open, hinge side and whether it opens away from or toward the shooter;
+  *Animate* opens and shuts it.
+
 - **Blueprint** now looks like a real architect's sheet: a bright blue drafting paper with a fine grid
   and floor plans all round the stage (hatched walls, rooms with names and areas, door swings,
   windows, stairs, furniture, dimension chains and callouts), over faint older drawings. The bay

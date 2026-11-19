@@ -25,6 +25,7 @@ const MOTIONS = {
   fall: (n, t, a) => { n.rotation.x = fallAngle(t, a.delay, a.period); },
   // Dueling tree: the paddle's arm turns round the vertical post, swinging back behind it to the
   // other side at the same height (−side: a paddle on +x passes through +z, away from the shooter).
+  door: (n, t, a) => { n.rotation.y = a.sign * (0.5 - 0.5 * Math.cos(t * 0.9)) * (Math.PI / 2); },
   flip: (n, t, a) => { n.rotation.y = -a.side * (fallAngle(t, a.delay, a.period) / 1.45) * Math.PI; },
 };
 
