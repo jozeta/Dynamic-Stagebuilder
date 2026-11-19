@@ -17,11 +17,11 @@ test("real sizes: Classic 45 × 57 cm (mini 30 × 37.5), With head 46 × 76 cm (
   assert.deepEqual({ ...PAPER_SIZES.classic.mini }, { w: 0.3, h: 0.375 });
   assert.deepEqual({ ...PAPER_SIZES.head.ipsc }, { w: 0.46, h: 0.76 });
   assert.deepEqual({ ...PAPER_SIZES.head.mini }, { w: 0.31, h: 0.51 });
-  assert.deepEqual(paperSize(obj("noshoot-mini", { style: "head" })), PAPER_SIZES.head.mini);
+  assert.deepEqual(paperSize(obj("paper-mini", { style: "head", presentation: "noshoot" })), PAPER_SIZES.head.mini);
 });
 
 test("every paper target has a style switch, Classic by default, and a stand height", () => {
-  for (const t of ["paper-ipsc", "paper-mini", "noshoot", "noshoot-mini"]) {
+  for (const t of ["paper-ipsc", "paper-mini"]) {
     assert.deepEqual([...getProp(t).params.style.options], ["classic", "head"], t);
     assert.equal(defaultParams(t).style, "classic");
     assert.ok(getProp(t).params.mountHeight.max >= 2);
@@ -34,8 +34,8 @@ test("a target's height is the stand height plus the card for its style", () => 
 });
 
 test("both styles are drawn at their real size, and the sticks follow the stand height", () => {
-  for (const style of ["classic", "head"]) for (const t of ["paper-ipsc", "paper-mini", "noshoot"]) {
-    const o = obj(t, { style, mountHeight: 0.9 });
+  for (const style of ["classic", "head"]) for (const [t, presentation] of [["paper-ipsc", "target"], ["paper-mini", "target"], ["paper-ipsc", "noshoot"]]) {
+    const o = obj(t, { style, mountHeight: 0.9, presentation });
     const s = new Box3().setFromObject(buildProp(o)).getSize(new Vector3());
     const d = dimensionsOf(o);
     near(s.y, d.h, 0.01, `${t} ${style} height`);

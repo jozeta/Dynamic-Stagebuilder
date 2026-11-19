@@ -13,6 +13,13 @@ const BRIEFING_TEXT = ["matchName", "designer", "stageType", "startSignal", "sta
 const isObj = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
 const isNum = (v) => typeof v === "number" && Number.isFinite(v);
 
+// Stages saved before no-shoots became a target presentation had separate no-shoot props.
+const OLD_NOSHOOTS = { noshoot: "paper-ipsc", "noshoot-mini": "paper-mini" };
+function migrateObject(o) {
+  if (!Object.hasOwn(OLD_NOSHOOTS, o.type)) return o;
+  return { ...o, type: OLD_NOSHOOTS[o.type], params: { ...(isObj(o.params) ? o.params : {}), presentation: "noshoot" } };
+}
+
 export function validateStage(json) {
   const errors = [];
   const err = (path, msg) => { if (errors.length < 50) errors.push(`${path}: ${msg}`); };
@@ -58,6 +65,7 @@ export function validateStage(json) {
   const objects = objectsIn.length > LIMITS.objects ? [] : objectsIn.map((o, i) => {
     const path = `objects[${i}]`;
     if (!isObj(o)) { err(path, "not an object"); return null; }
+    o = migrateObject(o);
     const def = typeof o.type === "string" && Object.hasOwn(PROPS, o.type) ? PROPS[o.type] : null;
     if (!def) err(`${path}.type`, `unknown prop type ${JSON.stringify(o.type)}`);
     const params = {};

@@ -21,7 +21,7 @@ function checkSize(type, params) {
   assert.equal(g.userData.id, o.id);
 }
 
-for (const type of ["paper-ipsc", "paper-mini", "noshoot", "noshoot-mini", "popper", "mini-popper", "plate-round", "plate-square"]) {
+for (const type of ["paper-ipsc", "paper-mini", "popper", "mini-popper", "plate-round", "plate-square"]) {
   test(`${type} is drawn at its real size`, () => checkSize(type));
 }
 
@@ -207,4 +207,34 @@ test("cars carry the small parts: wheel wells, wipers, mirrors, handles, aerial,
   assert.equal(count("exhaust"), 1);
   assert.equal(count("indicator"), 2);
   checkSize("car", { color: "blue" });
+});
+
+test("every target presentation is drawn at its real size, with one card per target and no-shoot", async () => {
+  const { PRESENTATIONS, arrayCounts } = await import("../js/model/arrays.js");
+  for (const t of ["paper-ipsc", "paper-mini"]) for (const p of PRESENTATIONS) for (const style of ["classic", "head"]) {
+    checkSize(t, { presentation: p.id, style, mountHeight: 0.4 });
+    const g = buildProp(obj(t, { presentation: p.id, style }));
+    let targets = 0, noshoots = 0;
+    g.traverse((c) => { if (c.userData.card === "target") targets++; if (c.userData.card === "noshoot") noshoots++; });
+    const n = arrayCounts(obj(t, { presentation: p.id }));
+    assert.deepEqual([targets, noshoots], [n.paper, n.noshoot], `${t} ${p.id}`);
+  }
+});
+
+test("hard cover is painted black on the first card, inside its outline", async () => {
+  const { HARD_COVERS } = await import("../js/model/arrays.js");
+  for (const c of HARD_COVERS) {
+    const g = buildProp(obj("paper-ipsc", { hardCover: c.id }));
+    const covers = [];
+    g.traverse((m) => { if (m.userData.part === "cover") covers.push(m); });
+    assert.equal(covers.length, c.id === "none" ? 0 : 1, c.id);
+    if (covers.length) {
+      const b = new Box3().setFromObject(covers[0]);
+      assert.ok(b.max.y <= 0.7 + 0.57 + 1e-6 && b.min.y >= 0.7 - 1e-6, `${c.id} stays on the card`);
+      if (c.id.startsWith("lower")) {
+        const f = { "lower-1/4": 0.25, "lower-1/3": 1 / 3, "lower-1/2": 0.5 }[c.id];
+        near(b.max.y, 0.7 + 0.57 * f, 0.002, `${c.id} top`);
+      }
+    }
+  }
 });

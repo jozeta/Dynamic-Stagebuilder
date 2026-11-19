@@ -1,15 +1,15 @@
 // The printed top-down map as plain shapes in millimetres (no DOM). Seen from above with down range
 // at the top; the map is the 3D world turned 180° (both axes mirrored), so +x (the shooter's left)
 // is on the left, as in the 3D view.
-import { dimensionsOf, getProp, paperSize, STICK } from "./props.js";
+import { dimensionsOf, getProp, STICK } from "./props.js";
+import { arrayCounts } from "./arrays.js";
 
 const ROUND = new Set(["barrel", "tyre", "tyre-stack", "plate-round", "plant-palm", "cone"]);
 const CARD_DEPTH = 0.03;   // paper targets are drawn as their thin face, not their stand
 
-function style(type) {
-  const p = getProp(type);
-  if (p.scoring === "noshoot") return "noshoot";
-  if (p.scoring === "paper") return "paper";
+function style(o) {
+  const p = getProp(o.type);
+  if (p.scoring === "paper") return arrayCounts(o).paper ? "paper" : "noshoot";
   if (p.scoring === "steel") return "steel";
   if (p.category === "wall") return "wall";
   return "obstacle";
@@ -33,7 +33,7 @@ export function mapModel(stage, { width, height, margin = 4 }) {
   for (const o of stage.objects) {
     const [x, y] = pt(o.position);
     const d = dimensionsOf(o);
-    const st = style(o.type);
+    const st = style(o);
     if (ROUND.has(o.type)) {
       const diameter = o.type === "plate-round" ? o.params.size : d.w;
       items.push({ kind: "circle", x, y, r: Math.max((diameter / 2) * scale, 0.6), style: st });
@@ -41,7 +41,7 @@ export function mapModel(stage, { width, height, margin = 4 }) {
       // Paper targets are thin: draw them at least 0.8 mm deep so they stay visible.
       const paper = st === "paper" || st === "noshoot";
       // Walls are drawn as their frame (not the feet); paper targets as their thin face.
-      const width = paper ? paperSize(o).w * scale : d.w * scale;
+      const width = d.w * scale;
       const depth = paper ? Math.max(CARD_DEPTH * scale, 0.8) : st === "wall" ? Math.max(STICK * scale, 0.6) : Math.max(d.d * scale, 0.5);
       items.push({ kind: "rect", x, y, w: width, h: depth, rotation: o.rotation, style: st });
     }

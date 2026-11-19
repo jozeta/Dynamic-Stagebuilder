@@ -534,6 +534,7 @@ const specs = {
   "noshoot-head-mini": card(NOSHOOT_INK, "head", "mini"),
   "panel-grey": () => mapped(steelSheet, 0xc9ced2, { roughness: 0.55, metalness: 0.12 }),
   "card-edge": () => std({ color: 0x8b6a45, roughness: 1 }),
+  "hard-cover": () => std({ color: 0x141414, roughness: 0.95, side: THREE.DoubleSide }),
   "steel-white": () => mapped(() => steelPaint("#e2ded4"), 0xe2ded4, { roughness: 0.7, metalness: 0.1 }),
   "steel-yellow": () => mapped(() => steelPaint("#dcb52a"), 0xdcb52a, { roughness: 0.65, metalness: 0.1 }),
   "steel-dark": () => mapped(rawSteel, 0x3b3c3f, { roughness: 0.7, metalness: 0.55 }),

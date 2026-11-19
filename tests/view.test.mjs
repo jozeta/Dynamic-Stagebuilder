@@ -27,10 +27,9 @@ test("the whole bay fits in the frame, a bigger bay moves the camera back", () =
   assert.ok(dist(obliqueView(bayArea({ width: 20, depth: 30 }), 0.8)) > dist(near));
 });
 
-test("by default the sun is low (20–28°), warm, and shadows fall diagonally", () => {
+test("by default (15:45) the afternoon sun is about 50° high and shadows fall diagonally", () => {
   const s = sunFromHour(LOOK_DEFAULTS.hour);
-  assert.ok(s.elevation >= 20 && s.elevation <= 28, `elevation ${s.elevation}`);
-  assert.ok(s.warmth > 0.5);
+  assert.ok(s.elevation >= 45 && s.elevation <= 55, `elevation ${s.elevation}`);
   const [x, , z] = s.direction;
   const angle = deg(Math.atan2(Math.abs(z), Math.abs(x)));
   assert.ok(angle >= 25 && angle <= 65, `shadow heading ${angle}° from the x axis`);

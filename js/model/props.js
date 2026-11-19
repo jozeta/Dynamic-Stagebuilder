@@ -5,19 +5,8 @@
 // IPSC Popper 85 cm tall with a 30 cm head, Mini Popper 2/3 of that (Appendix C2); plates 15–30 cm
 // (Appendix C3a). The appendix drawings are images, so these are the commonly published sizes.
 
-// Paper target card sizes per style (see render/builders/target-shape.js): the octagonal Classic
-// 45 × 57 cm (mini 30 × 37.5 cm) and the tall target with a head 46 × 76 cm (mini 31 × 51 cm).
-export const PAPER_SIZES = Object.freeze({
-  classic: Object.freeze({ ipsc: Object.freeze({ w: 0.45, h: 0.57 }), mini: Object.freeze({ w: 0.3, h: 0.375 }) }),
-  head: Object.freeze({ ipsc: Object.freeze({ w: 0.46, h: 0.76 }), mini: Object.freeze({ w: 0.31, h: 0.51 }) }),
-});
-export const TARGET_STYLES = ["classic", "head"];
-
-/** The card size { w, h } of a paper target or no-shoot, for its style. */
-export function paperSize(obj) {
-  const style = obj.params?.style === "head" ? "head" : "classic";
-  return PAPER_SIZES[style][obj.type.endsWith("mini") ? "mini" : "ipsc"];
-}
+import { PAPER_SIZES, TARGET_STYLES, PRESENTATIONS, HARD_COVERS, paperSize, arrayExtent } from "./arrays.js";
+export { PAPER_SIZES, TARGET_STYLES, paperSize };
 
 export const TARGET_SIZES = Object.freeze({
   ipsc: PAPER_SIZES.classic.ipsc,
@@ -42,7 +31,13 @@ export const TYRE = Object.freeze({ diameter: 0.65, height: 0.22 });
 export const BARREL = Object.freeze({ diameter: 0.58, height: 0.88 });
 
 // Paper targets: the stand height (how high the sticks hold the card's bottom edge) and the style.
-const mount = { mountHeight: { default: 0.7, min: 0.1, max: 2.0, step: 0.05 }, style: { default: "classic", options: TARGET_STYLES } };
+// presentation: the target, a no-shoot or a combination (model/arrays.js); hardCover: painted cover.
+const mount = {
+  presentation: { default: "target", options: PRESENTATIONS.map((p) => p.id) },
+  hardCover: { default: "none", options: HARD_COVERS.map((c) => c.id) },
+  mountHeight: { default: 0.7, min: 0.1, max: 2.0, step: 0.05 },
+  style: { default: "classic", options: TARGET_STYLES },
+};
 const paint = (d) => ({ paint: { default: d, options: ["white", "yellow"] } });
 const meshLook = { mesh: { default: "orange", options: ["orange", "black", "blue"] }, frame: { default: "wood", options: ["wood", "black"] } };
 const port = {
@@ -58,8 +53,6 @@ const wallSize = {
 const defs = [
   { type: "paper-ipsc", name: "IPSC target", category: "paper", scoring: "paper", params: mount },
   { type: "paper-mini", name: "IPSC mini target", category: "paper", scoring: "paper", params: mount },
-  { type: "noshoot", name: "No-shoot", category: "paper", scoring: "noshoot", params: mount },
-  { type: "noshoot-mini", name: "Mini no-shoot", category: "paper", scoring: "noshoot", params: mount },
   { type: "popper", name: "IPSC popper", category: "steel", scoring: "steel",
     params: { baseHeight: { default: 0, min: 0, max: 1.5, step: 0.05 }, ...paint("yellow") } },
   { type: "mini-popper", name: "Mini popper", category: "steel", scoring: "steel",
@@ -126,9 +119,10 @@ export function dimensionsOf(obj) {
   const p = { ...defaultParams(obj.type), ...obj.params };
   let w, h, d;
   switch (obj.type) {
-    case "paper-ipsc": case "noshoot": case "paper-mini": case "noshoot-mini": {
-      const c = paperSize({ type: obj.type, params: p });
-      [w, h, d] = [Math.max(c.w, STAND.w), p.mountHeight + c.h, STAND.d]; break;
+    case "paper-ipsc": case "paper-mini": {
+      // The builder centres the array on the object's position.
+      const e = arrayExtent({ type: obj.type, params: p }, STAND.w);
+      [w, h, d] = [e.maxX - e.minX, p.mountHeight + e.top, STAND.d]; break;
     }
     case "popper": {
       const s = TARGET_SIZES.popper; [w, h, d] = [s.w, p.baseHeight + s.h, s.d]; break;

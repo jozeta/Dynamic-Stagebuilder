@@ -7,7 +7,7 @@ import { createStage } from "../js/model/stage.js";
 import { validateStage } from "../js/model/schema.js";
 
 test("defaults", () => {
-  assert.deepEqual({ ...LOOK_DEFAULTS }, { hour: 18.25, sun: 1, ambient: 1, shadows: true, softness: 1, shadowStrength: 0.85, haze: 0.2, exposure: 1 });
+  assert.deepEqual({ ...LOOK_DEFAULTS }, { hour: 15.75, sun: 0.5, ambient: 1, shadows: true, softness: 4, shadowStrength: 0.5, haze: 0.35, exposure: 1 });
   assert.ok(Object.isFrozen(LOOK_DEFAULTS));
 });
 

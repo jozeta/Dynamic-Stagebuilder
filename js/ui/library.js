@@ -12,7 +12,7 @@ function sizeText(type) {
   const p = defaultParams(type);
   const face = (s) => `${cm(s.w)} × ${cm(s.h)} cm`;
   switch (type) {
-    case "paper-ipsc": case "noshoot": case "paper-mini": case "noshoot-mini": return `${face(paperSize({ type, params: p }))}, classic or with head`;
+    case "paper-ipsc": case "paper-mini": return `${face(paperSize({ type, params: p }))}, no-shoots, arrays, hard cover`;
     case "popper": return `${cm(TARGET_SIZES.popper.h)} cm tall`;
     case "mini-popper": return `${cm(TARGET_SIZES.miniPopper.h)} cm tall`;
     case "plate-round": return `Ø ${cm(p.size)} cm`;

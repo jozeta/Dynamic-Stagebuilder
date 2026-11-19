@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { PROPS, getProp, defaultParams, dimensionsOf, TARGET_SIZES } from "../js/model/props.js";
 import { SCORING } from "../js/model/scoring-rules.js";
 
-const TYPES = ["paper-ipsc", "paper-mini", "noshoot", "noshoot-mini", "popper", "mini-popper",
+const TYPES = ["paper-ipsc", "paper-mini", "popper", "mini-popper",
   "plate-round", "plate-square", "wall-mesh", "wall-mesh-port", "wall-wood", "wall-port", "barrel", "tyre", "tyre-stack", "crate", "plant-palm",
   "wall-door", "wall-solid", "ramp", "platform", "car", "table", "chair", "pallet", "sandbags", "cone"];
 
@@ -26,7 +26,6 @@ test("getProp rejects unknown types", () => {
 test("scoring kinds", () => {
   assert.equal(getProp("paper-mini").scoring, "paper");
   assert.equal(getProp("plate-round").scoring, "steel");
-  assert.equal(getProp("noshoot").scoring, "noshoot");
   assert.equal(getProp("barrel").scoring, null);
 });
 
@@ -84,7 +83,7 @@ test("the potted plant is a decorative obstacle that scores nothing", () => {
 
 test("targets stand lower: the card's bottom edge at 0.7 m by default", () => {
   assert.equal(defaultParams("paper-ipsc").mountHeight, 0.7);
-  assert.equal(defaultParams("noshoot-mini").mountHeight, 0.7);
+  assert.equal(defaultParams("paper-mini").mountHeight, 0.7);
 });
 
 test("barrels come in four colours, black by default", () => {

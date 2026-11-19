@@ -7,7 +7,10 @@ import { labelPrefix, assignLabels, renumber, setLabel, duplicateLabels } from "
 function build(types) {
   let stage = createStage();
   const ids = [];
-  for (const t of types) { const r = addObject(stage, t, [0, 1]); stage = r.stage; ids.push(r.id); }
+  for (const t of types) {
+    const r = t === "noshoot" ? addObject(stage, "paper-ipsc", [0, 1], 0, { presentation: "noshoot" }) : addObject(stage, t, [0, 1]);
+    stage = r.stage; ids.push(r.id);
+  }
   return { stage: assignLabels(stage), ids };
 }
 const labels = (s) => s.objects.map((o) => o.label);
@@ -16,7 +19,7 @@ test("prefixes", () => {
   assert.equal(labelPrefix("paper-mini"), "T");
   assert.equal(labelPrefix("mini-popper"), "P");
   assert.equal(labelPrefix("plate-square"), "P");
-  assert.equal(labelPrefix("noshoot-mini"), "NS");
+  assert.equal(labelPrefix({ type: "paper-mini", params: { presentation: "noshoot" } }), "NS");
   assert.equal(labelPrefix("barrel"), null);
 });
 

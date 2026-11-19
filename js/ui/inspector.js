@@ -3,15 +3,17 @@
 import { h, icon } from "./dom.js";
 import { getProp } from "../model/props.js";
 import { labelPrefix } from "../model/numbering.js";
+import { PRESENTATIONS, HARD_COVERS, arrayIssues } from "../model/arrays.js";
 
 const PARAM_LABELS = {
-  mountHeight: "Stand height (m)", style: "Target style", baseHeight: "Base height (m)", size: "Size (m)", length: "Length (m)",
+  presentation: "Presentation", hardCover: "Hard cover", mountHeight: "Stand height (m)", style: "Target style", baseHeight: "Base height (m)", size: "Size (m)", length: "Length (m)",
   height: "Height (m)", mesh: "Mesh colour", frame: "Frame", portWidth: "Port width (m)",
   portHeight: "Port height (m)", portBottom: "Port bottom (m)", count: "Count", paint: "Paint", color: "Colour", width: "Width (m)", rows: "Rows",
   doorWidth: "Door width (m)", doorHeight: "Door height (m)",
 };
 const OPTION_LABELS = { classic: "Classic (octagon)", head: "With head", orange: "Orange", black: "Black", blue: "Blue", wood: "Wood", white: "White", yellow: "Yellow", red: "Red",
-  green: "Green", grey: "Grey", rust: "Rusty" };
+  green: "Green", grey: "Grey", rust: "Rusty",
+  ...Object.fromEntries([...PRESENTATIONS, ...HARD_COVERS].map((p) => [p.id, p.name])) };
 const GRID_OPTIONS = [[0, "Off"], [0.1, "0.1 m"], [0.25, "0.25 m"], [0.5, "0.5 m"], [1, "1 m"]];
 const ANGLE_OPTIONS = [[0, "Off"], [5, "5°"], [15, "15°"], [45, "45°"], [90, "90°"]];
 let uid = 0;
@@ -38,7 +40,7 @@ export function createInspector(root, { editor }) {
   function objectPanel(o, angle) {
     const def = getProp(o.type);
     const nodes = [h("h2", { class: "lg-subtitle panel-title", text: def.name })];
-    if (labelPrefix(o.type)) {
+    if (labelPrefix(o)) {
       nodes.push(field("Label", h("input", { class: "lg-input", value: o.label ?? "", maxlength: "12", dataset: { field: "label" },
         placeholder: "Automatic", onchange: (e) => d({ type: "setLabel", id: o.id, text: e.target.value }) })));
     }
@@ -54,6 +56,8 @@ export function createInspector(root, { editor }) {
         ? select(k, o.params[k], spec.options.map((v) => [v, OPTION_LABELS[v] || v]), set)
         : numberInput(k, o.params[k], spec, set)));
     }
+    // Rule problems with a paper target array (cited from the Target Array Handbook).
+    if (def.scoring === "paper") for (const text of arrayIssues(o)) nodes.push(h("p", { class: "lg-alert lg-alert-warn inspector-warning", role: "status", text }));
     return nodes;
   }
 

@@ -4,7 +4,7 @@ const SPEC = {
   hour: [6, 20], sun: [0, 2], ambient: [0, 2], softness: [0, 8], shadowStrength: [0, 1], haze: [0, 1], exposure: [0.5, 1.6],
 };
 
-export const LOOK_DEFAULTS = Object.freeze({ hour: 18.25, sun: 1, ambient: 1, shadows: true, softness: 1, shadowStrength: 0.85, haze: 0.2, exposure: 1 });
+export const LOOK_DEFAULTS = Object.freeze({ hour: 15.75, sun: 0.5, ambient: 1, shadows: true, softness: 4, shadowStrength: 0.5, haze: 0.35, exposure: 1 });
 // The Technical surroundings: brighter afternoon light with softer, lighter shadows.
 export const TECHNICAL_LOOK = Object.freeze({ hour: 16, sun: 1.15, ambient: 1.1, shadows: true, softness: 3, shadowStrength: 0.55, haze: 0.2, exposure: 1 });
 

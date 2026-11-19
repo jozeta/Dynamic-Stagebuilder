@@ -22,3 +22,18 @@ export const SCORING = Object.freeze({
   courseLimits,
   typeByRoundsOnly: false,
 });
+
+// Target arrays. Source: IPSC Target Array Handbook, January 2019 Edition,
+// https://www.ipsc.org/wp-content/uploads/2019/10/Target-Arrays-2019.pdf
+// - 1.2: hard cover is painted on the lower portion, a diagonal portion or the sides only.
+// - 1.5: the top of an IPSC Target or No-shoot must never exceed 1.8 m, a Mini Target 1.6 m.
+// - 2.1: the upper portion of a target or no-shoot must never be concealed.
+// - 2.3 / 2.4: a no-shoot may be in front of or behind two adjoining targets; overlapping arrays
+//   are two scoring targets, or two scoring targets with a no-shoot between them.
+// - 4.1: "carnival" arrays such as stars, plate racks and trees are not acceptable in IPSC.
+export const TARGET_ARRAY_RULES = Object.freeze({
+  edition: "IPSC Target Array Handbook, January 2019 Edition",
+  maxTop: Object.freeze({ ipsc: 1.8, mini: 1.6 }),
+  heightRule: "1.5",
+  carnivalRule: "4.1",
+});

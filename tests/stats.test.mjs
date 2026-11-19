@@ -28,7 +28,7 @@ test("over 32 rounds stays Long and flags overLimit", () => {
 });
 
 test("no-shoots and props add no rounds or points; empty stage has no type", () => {
-  const s = stageStats(withTypes({ noshoot: 3, "wall-mesh": 4, barrel: 1 }));
+  const s = stageStats({ objects: [...withTypes({ "wall-mesh": 4, barrel: 1 }).objects, ...[1, 2, 3].map((i) => ({ id: `n${i}`, type: "paper-ipsc", params: { presentation: "noshoot" } }))] });
   assert.equal(s.noShoots, 3);
   assert.equal(s.minRounds, 0);
   assert.equal(s.maxPoints, 0);
