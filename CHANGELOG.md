@@ -4,6 +4,11 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- More bay shapes: L and reverse L (full width at the front, one side carries on to the back), T (a
+  narrow stem at the front opening to full width), U (two arms to the back round a berm), reverse U
+  (two arms reaching to the front), and dogleg (Z) and reverse dogleg (S), where the back part is
+  shifted to one side. Each has its own size fields; the banks, walls and printed map follow it.
+
 - Fix: the app no longer hangs at start-up when an older copy is open in another tab or window; it
   says to close the other copies (and a newer copy opened elsewhere reloads this one).
 - Fix: *Line up on the shooter's left / right* went the wrong way.

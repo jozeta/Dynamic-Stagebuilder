@@ -16,7 +16,7 @@ training, and want a clear briefing sheet without drawing the map by hand.
 ## What it does
 
 - **Shooting bay** at real scale: width × depth in metres (default 20 × 30 m), 1 m grid; a
-  rectangle, tapered, or with a back corner cut away.
+  rectangle or tapered, L, T, U, dogleg or with a corner cut away.
 - **Safety distances** from the IPSC rules (January 2024): rings round a target at 7 and 8 m for
   steel, 3 m for paper.
 - **Sight lines** from a shooting position, a **run-time estimate**, a printed **setup sheet**, and
@@ -167,7 +167,7 @@ Stage settings are in the inspector when nothing is selected. They are saved wit
 |---|---|---|
 | Bay width | Width of the shooting bay across the range, 1–200 m | 20 m |
 | Bay depth | Depth of the bay down range, 1–200 m | 30 m |
-| Bay shape | Rectangle; *Tapered* (narrow end back or front, its width); *Corner cut away* (back left or right, cut width and depth). Width and depth stay the outer rectangle | Rectangle |
+| Bay shape | Rectangle; *Tapered* (narrow end back or front, its width); *Corner cut away* (back left or right, cut width and depth); *L* / *Reverse L* (width of the back part, depth of the full-width front); *T* (width and depth of the front stem); *U* (arm width, depth of the full-width front); *Reverse U* (arm width, depth of the front arms); *Dogleg (Z)* / *Reverse dogleg (S)* (width of each part, where it bends). Width and depth stay the outer rectangle | Rectangle |
 | Grid snap | Positions snap to this grid: off, 0.1, 0.25, 0.5 or 1 m (toolbar *Grid* turns it on/off) | 0.25 m |
 | Object snap | Toolbar *Objects*: a wall's end jumps onto another wall's end within 35 cm | On |
 | Angle snap | Rotations snap to this step: off, 5°, 15°, 45° or 90° | 15° |
@@ -315,8 +315,10 @@ stance's height) to each target it can see, and the inspector lists the targets 
 minimum rounds, the walk along the route through the shooting positions, and a reload every 15
 rounds) and the hit factors they give with all A hits. A rule of thumb for designers.
 
-**Shape the bay.** With nothing selected, *Bay shape* makes the bay tapered (narrower at the back
-or front) or cuts a back corner away, for ranges that aren't rectangles. Props move onto the floor if
+**Shape the bay.** With nothing selected, *Bay shape* fits the bay to a range that isn't a
+rectangle: tapered, a back corner cut away, an L or reverse L, a T, a U (a berm jutting in from the
+back) or reverse U (from the front), or a dogleg (Z or S) where the back is shifted to one side. Each
+shape has its own sizes; "left" is the shooter's left. Props move onto the floor if
 they would be off it; the Outdoor banks, Technical walls and the printed map follow the shape.
 
 **Number targets.** Targets are numbered as you place them: T1… for paper, P1… for steel, NS1… for

@@ -8,6 +8,7 @@ import { canBeActivated, isActivator, activatorsFor, activatorOf, activationLink
 import { isLocked } from "../model/layers.js";
 import { sightFrom, safetyRings } from "../model/safety.js";
 import { eyeHeight } from "../model/positions.js";
+import { BAY_SHAPE_NAMES, bayShapeFields as shapeFieldsOf } from "../model/bay.js";
 
 const PARAM_LABELS = {
   presentation: "Presentation", hardCover: "Hard cover", mountHeight: "Stand height (m)", style: "Target style", baseHeight: "Base height (m)", size: "Size (m)", length: "Length (m)",
@@ -140,20 +141,20 @@ export function createInspector(root, { editor }) {
   // The bay's shape: a rectangle, tapered (narrower at one end) or with a back corner cut away.
   // Width and depth stay the outer rectangle.
   function bayShapeFields(bay) {
-    const set = (patch) => d({ type: "setBay", width: bay.width, depth: bay.depth, ...bay, ...patch });
+    const set = (patch) => d({ type: "setBay", ...bay, ...patch });
     const shape = bay.shape || "rect";
-    const out = [field("Bay shape", select("bayShape", shape, [["rect", "Rectangle"], ["taper", "Tapered"], ["notch", "Corner cut away"]],
-      (v) => d({ type: "setBay", width: bay.width, depth: bay.depth, shape: v })))];
-    if (shape === "taper") out.push(
-      field("Narrow end", select("narrowEnd", bay.narrowEnd, [["back", "Back (down range)"], ["front", "Front (up range)"]], (v) => set({ narrowEnd: v }))),
-      field("Width at the narrow end (m)", numberInput("narrowWidth", bay.narrowWidth, { min: 1, max: bay.width - 1, step: 0.5 }, (v) => set({ narrowWidth: v }))));
-    if (shape === "notch") out.push(
-      field("Cut corner", select("notchSide", bay.notchSide, [["left", "Back left"], ["right", "Back right"]], (v) => set({ notchSide: v }))),
-      h("div", { class: "pos-fields" }, [
-        field("Cut width (m)", numberInput("notchWidth", bay.notchWidth, { min: 1, max: bay.width - 1, step: 0.5 }, (v) => set({ notchWidth: v }))),
-        field("Cut depth (m)", numberInput("notchDepth", bay.notchDepth, { min: 1, max: bay.depth - 1, step: 0.5 }, (v) => set({ notchDepth: v })))]));
+    const out = [field("Bay shape", select("bayShape", shape, BAY_SHAPE_NAMES, (v) => d({ type: "setBay", width: bay.width, depth: bay.depth, shape: v })))];
+    const fields = shapeFieldsOf(bay).map((f) => field(f.label, f.options
+      ? select(f.key, bay[f.key], f.options, (v) => set({ [f.key]: v }))
+      : numberInput(f.key, bay[f.key], { min: f.min, max: f.max, step: 0.5 }, (v) => set({ [f.key]: v }))));
+    // Two size fields side by side; a choice (which end, which side) on its own row above them.
+    const choices = fields.filter((_, i) => shapeFieldsOf(bay)[i].options), sizes = fields.filter((_, i) => !shapeFieldsOf(bay)[i].options);
+    out.push(...choices);
+    if (sizes.length) out.push(h("div", { class: "pos-fields" }, sizes));
+    if (shape !== "rect") out.push(h("p", { class: "lg-muted hint-text", text: "Width and depth are the outer rectangle; the shape is the floor inside it. Seen from behind the shooter, left is the shooter's left." }));
     return out;
   }
+
 
   function stagePanel(stage) {
     return [

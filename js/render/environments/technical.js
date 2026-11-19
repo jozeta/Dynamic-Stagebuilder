@@ -4,7 +4,7 @@
 import * as THREE from "three";
 import { canvasTexture, ground, sun } from "./common.js";
 import { hsvToRgb } from "../../model/look.js";
-import { bayOutline, isRect } from "../../model/bay.js";
+import { bayOutline, isRect, isFrontEdge } from "../../model/bay.js";
 
 const FLOOR = 900;                 // metres a side: well past the fog, so it reads as endless
 const BG = 0xb7bcc2;
@@ -57,8 +57,9 @@ export function technical(bay) {
     // A tapered or notched bay: a wall 1.25 m outside each edge but the open front; the ones
     // across the back (facing up range) are backstop height.
     const o = bayOutline(bay);
-    for (let i = 1; i < o.length; i++) {           // edge 0 (o[0] → o[1]) is the open front
+    for (let i = 0; i < o.length; i++) {
       const a = o[i], b = o[(i + 1) % o.length];
+      if (isFrontEdge(a, b)) continue;                                  // the open front: no wall
       const dx = b[0] - a[0], dz = b[1] - a[1], len = Math.hypot(dx, dz);
       if (len < 0.01) continue;
       const nx = dz / len, nz = -dx / len;                              // outward (the outline runs anticlockwise seen from above)

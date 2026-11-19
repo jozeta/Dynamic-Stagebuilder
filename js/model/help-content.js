@@ -76,7 +76,7 @@ export const HELP_TOPICS = Object.freeze([
       "The statistics also estimate a fast and a steady run time and the hit factors they give."],
     tips: ["The rings are a designer's aid, not a range approval."] },
   { id: "bay-setup", title: "Bay shape, setup sheet and sharing", icon: "frame", art: "files",
-    text: ["With nothing selected, Bay shape makes the bay tapered or cuts a back corner away; the banks and walls follow it.",
+    text: ["With nothing selected, Bay shape fits the bay to your range: tapered, a corner cut away, L or reverse L, T, U or reverse U, or a dogleg (Z or S). The banks and walls follow it.",
       "The printed brief ends with a setup sheet: every prop measured from the left side line, the up-range edge and both up-range corners.",
       "Copy share link (Projects) copies a link holding the stage itself; whoever opens it gets a copy as a new project. Nothing is uploaded."],
     tips: ["A very large stage may be too big for a link: export a file instead."] },
