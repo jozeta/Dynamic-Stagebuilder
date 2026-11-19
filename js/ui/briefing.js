@@ -1,8 +1,10 @@
-// The Written Stage Briefing dialog. Free-text fields commit on change; counted values are shown
+// The Written Stage Briefing dialog. Free-text fields commit on change; common fields offer a list
+// of usual wordings plus "Custom text…" (model/briefing-options.js). Counted values are shown
 // read-only because they come from the stage.
 import { h } from "./dom.js";
 import { stageStats } from "../model/stats.js";
 import { targetsText } from "../model/briefing.js";
+import { BRIEFING_OPTIONS, choiceFor } from "../model/briefing-options.js";
 
 const TEXT_FIELDS = [
   ["matchName", "Match name"], ["designer", "Designer"], ["scoring", "Scoring"],
@@ -31,10 +33,45 @@ export function createBriefing({ editor }) {
     const stage = editor.stage();
     const b = stage.briefing;
     const s = stageStats(stage);
-    const text = (key, label) => field(label, h("input", { class: "lg-input", value: b[key], maxlength: "4000",
-      onchange: (e) => d({ type: "setBriefing", patch: { [key]: e.target.value } }) }));
-    const area = (key, label) => field(label, h("textarea", { class: "lg-input", maxlength: "4000", rows: "5",
-      onchange: (e) => d({ type: "setBriefing", patch: { [key]: e.target.value } }) }, [b[key]]), true);
+    const set = (key, value) => d({ type: "setBriefing", patch: { [key]: value } });
+    const text = (key, label) => {
+      const input = h("input", { class: "lg-input", value: b[key], maxlength: "4000", onchange: (e) => set(key, e.target.value) });
+      if (!BRIEFING_OPTIONS[key]) return field(label, input);
+      // A list of common wordings; "Custom text…" shows the text box for your own.
+      const { choice, custom } = choiceFor(key, b[key]);
+      input.hidden = !custom;
+      input.setAttribute("aria-label", `${label}, custom text`);
+      const list = h("select", { class: "lg-select", onchange: (e) => {
+        const v = e.target.value;
+        input.hidden = v !== "custom";
+        if (v === "custom") { input.value = ""; input.focus(); } else set(key, v);
+      } }, [
+        h("option", { value: "", text: "Not set" }),
+        ...BRIEFING_OPTIONS[key].map((o) => h("option", { value: o, text: o })),
+        h("option", { value: "custom", text: "Custom text…" }),
+      ]);
+      list.value = choice;
+      const f = field(label, list);
+      f.append(input);
+      f.classList.add("wsb-choice");
+      return f;
+    };
+    const area = (key, label) => {
+      const ta = h("textarea", { class: "lg-input", maxlength: "4000", rows: "5", onchange: (e) => set(key, e.target.value) }, [b[key]]);
+      const f = field(label, ta, true);
+      if (BRIEFING_OPTIONS[key]) {
+        // Add a common sentence to the text (it stays editable).
+        const add = h("select", { class: "lg-select wsb-insert", "aria-label": `Add a common ${label.toLowerCase()} sentence`, onchange: (e) => {
+          const v = e.target.value;
+          e.target.value = "";
+          if (!v) return;
+          ta.value = ta.value.trim() ? `${ta.value.trim()}\n${v}` : v;
+          set(key, ta.value);
+        } }, [h("option", { value: "", text: "Add a common sentence…" }), ...BRIEFING_OPTIONS[key].map((o) => h("option", { value: o, text: o }))]);
+        f.insertBefore(add, ta);
+      }
+      return f;
+    };
     const type = h("select", { class: "lg-select", onchange: (e) => d({ type: "setBriefing", patch: { stageType: e.target.value } }) }, [
       h("option", { value: "", text: s.suggestedType ? `Suggested: ${s.suggestedType}` : "Suggested (no targets yet)" }),
       ...["Short", "Medium", "Long"].map((t) => h("option", { value: t, text: t }))]);

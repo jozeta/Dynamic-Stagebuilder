@@ -16,7 +16,7 @@ const FILES = [
   "js/main.js",
   "js/model/briefing.js",
   "js/model/history.js",
-  "js/model/look.js", "js/model/arrays.js", "js/model/visibility.js", "js/ui/prefs.js",
+  "js/model/look.js", "js/model/arrays.js", "js/model/visibility.js", "js/model/briefing-options.js", "js/ui/prefs.js",
   "js/model/map.js",
   "js/model/numbering.js",
   "js/model/objsnap.js",
