@@ -166,6 +166,8 @@ body { background: var(--lg-bg); overflow: hidden; }
 .eye-steps { display: flex; align-items: center; gap: 2px; padding-left: 6px; margin-left: 2px; border-left: 1px solid var(--lg-border); }
 .eye-steps[hidden] { display: none; }
 .eye-step-label { font-size: var(--lg-fs-small); color: var(--lg-text); padding: 0 4px; white-space: nowrap; }
+.eye-step-hint { font-size: var(--lg-fs-small); color: var(--lg-muted); padding: 0 6px; }
+.eye-step-hint[hidden], .eye-step-label[hidden] { display: none; }
 
 @media (max-width: 1439px) { .brand { display: none; } }
 

@@ -234,8 +234,8 @@ appears once something is animated) starts and stops all of them together.
 **Plan the shooter's run.** Pick *Shooting position* in Stage markings and tap each place the
 shooter shoots from; they are numbered 1, 2, 3…. In the inspector set the stance (standing,
 crouching, kneeling, sitting, prone), the facing and the look up/down angle. Click *Shooter's eye*:
-the arrows next to the view buttons (or [ and ]) step from the start to each position, seen from
-that stance's eye height. Look around and press *Save view* to store the facing and angle.
+the arrows under the view buttons (or [ and ]) walk the camera from the start to each position,
+at that stance's eye height, and *Play run* walks the whole course, pausing at each position. Look around and press *Save view* to store the facing and angle.
 
 **Number targets.** Targets are numbered as you place them: T1… for paper, P1… for steel, NS1… for
 a lone no-shoot (an array with a target is one T label; its targets and no-shoots all count in the

@@ -4,6 +4,11 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- **Shooter's eye walks the run:** stepping between the start and the shooting positions now walks
+  the camera from one to the next (turning the short way, changing eye height with the stance),
+  and *Play run* walks the whole course, pausing at every position. Grab the view to stop. The
+  bar now always shows in Shooter's eye, with a hint on how to add positions when there are none.
+
 - Fixed: a side panel you had resized didn't fold (it kept its width with the handle in the middle).
 
 - A folded side panel is now only a slim grab handle at the edge of the 3D view (a horizontal one

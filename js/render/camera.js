@@ -1,7 +1,7 @@
 // Camera navigation (orbit, pan, zoom; one finger rotates, two pan and zoom on touch) and presets.
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { obliqueView, stageArea, VIEW } from "./view-math.js";
-import { viewFromPosition, anglesFromView } from "../model/positions.js";
+import { viewFromPosition, anglesFromView, walkBetween, walkDuration } from "../model/positions.js";
 
 export const PRESETS = ["iso", "top", "front", "shooter"];
 export const PRESET_LABELS = { iso: "Isometric", top: "Top", front: "Front", shooter: "Shooter's eye" };
@@ -79,5 +79,43 @@ export function createCameraRig(engine, domElement) {
     return anglesFromView(camera.position.toArray(), controls.target.toArray());
   }
 
-  return { controls, preset, frameAll, viewFrom, currentAngles, dispose: () => controls.dispose() };
+  // Shooter's eye on the move: a view is { eye: [x, y, z], yaw, pitch } in the shooting-position
+  // convention (yaw 0 looks down range). walkTo() walks the camera there (or jumps, when the
+  // system asks for reduced motion) and resolves true when it arrives, false if interrupted.
+  const rad = (d) => (d * Math.PI) / 180;
+  function lookFrom(v) {
+    const dir = [-Math.sin(rad(v.yaw)) * Math.cos(rad(v.pitch)), Math.sin(rad(v.pitch)), Math.cos(rad(v.yaw)) * Math.cos(rad(v.pitch))];
+    look(v.eye, v.eye.map((p, i) => p + dir[i] * 0.1));
+  }
+  let walking = null;
+  function stopWalk() { if (walking) { cancelAnimationFrame(walking.frame); walking.done(false); walking = null; } }
+  function walkTo(to) {
+    stopWalk();
+    lens(VIEW.eyeFov);
+    const a = currentAngles();
+    const from = { eye: camera.position.toArray(), yaw: a.rotation, pitch: a.pitch };
+    const reduce = typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const ms = reduce ? 0 : walkDuration(from.eye, to.eye) * 1000;
+    return new Promise((done) => {
+      const t0 = performance.now();
+      const w = { done, frame: 0 };
+      walking = w;
+      const step = () => {
+        const t = ms ? (performance.now() - t0) / ms : 1;
+        lookFrom(walkBetween(from, to, t));
+        if (t < 1) w.frame = requestAnimationFrame(step);
+        else { if (walking === w) walking = null; done(true); }
+      };
+      step();
+    });
+  }
+  /** The view from the start position, or from a shooting position. */
+  const startView = (stage) => {
+    const p = stage.start?.position ?? [0, 0.5];
+    return { eye: [p[0], EYE, p[1]], yaw: -(stage.start?.facing ?? 0), pitch: 0 };
+  };
+  const positionView = (o) => ({ eye: viewFromPosition(o).eye, yaw: o.rotation || 0, pitch: o.params?.pitch || 0 });
+  controls.addEventListener("start", stopWalk);      // grabbing the view stops a walk
+
+  return { controls, preset, frameAll, viewFrom, currentAngles, walkTo, stopWalk, startView, positionView, dispose: () => controls.dispose() };
 }

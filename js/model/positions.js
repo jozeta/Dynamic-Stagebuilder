@@ -57,3 +57,24 @@ export function shootingPositions(stage) {
   const n = (o) => (Number.isFinite(Number(o.label)) ? Number(o.label) : 1e9);
   return stage.objects.filter((o) => o.type === "shooting-position").sort((a, b) => n(a) - n(b));
 }
+
+const easeInOut = (t) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2);
+
+/**
+ * A point on the walk from view a to view b ({ eye: [x, y, z], yaw: degrees, pitch? }) at t (0–1):
+ * eased in and out, eye height blended (for a change of stance), turning the shorter way round.
+ */
+export function walkBetween(a, b, t) {
+  const k = easeInOut(Math.min(1, Math.max(0, t)));
+  const turn = ((((b.yaw - a.yaw) % 360) + 540) % 360) - 180;
+  return {
+    eye: a.eye.map((v, i) => v + (b.eye[i] - v) * k),
+    yaw: a.yaw + turn * k,
+    pitch: (a.pitch ?? 0) + ((b.pitch ?? 0) - (a.pitch ?? 0)) * k,
+  };
+}
+
+/** Seconds for the walk: about a brisk walking pace, between 0.8 and 3 s. */
+export function walkDuration(from, to) {
+  return Math.min(3, Math.max(0.8, Math.hypot(to[0] - from[0], to[2] - from[2]) / 3.5));
+}

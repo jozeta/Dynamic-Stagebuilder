@@ -80,3 +80,17 @@ test("Save view stores the facing and look angle in one undo step", () => {
   assert.equal(o.params.pitch, -8);
   assert.equal(ed.state.history.past.length, steps + 1);
 });
+
+test("walking between two views: along the ground, turning the short way, easing in and out", async () => {
+  const { walkBetween } = await import("../js/model/positions.js");
+  const a = { eye: [0, 1.6, 2], yaw: 350 }, b = { eye: [4, 0.95, 8], yaw: 20 };
+  const s = walkBetween(a, b, 0), e = walkBetween(a, b, 1), m = walkBetween(a, b, 0.5);
+  assert.deepEqual(s.eye, a.eye);
+  assert.deepEqual(e.eye.map((v) => +v.toFixed(9)), b.eye);
+  near(m.eye[0], 2, 1e-9, "half way across"); near(m.eye[2], 5, 1e-9, "half way down range");
+  near(((m.yaw % 360) + 360) % 360, 5, 1e-6, "turns 30° the short way through 0°, not 330° the long way");
+  assert.ok(walkBetween(a, b, 0.1).eye[0] < 0.4, "eases in");
+  assert.ok(m.duration === undefined);
+  const { walkDuration } = await import("../js/model/positions.js");
+  assert.ok(walkDuration(a.eye, b.eye) >= 0.8 && walkDuration(a.eye, b.eye) <= 3, "a walking pace, never too slow");
+});
