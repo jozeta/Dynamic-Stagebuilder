@@ -4,6 +4,13 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Much more detailed, realistic foliage: trees grow from branching, tapered, bark-textured
+  skeletons carrying hundreds of leaf cards painted with leaves, needles or leaflets, shaded as
+  volumes. Oak-like broadleaf trees, spruces in tiers of needle sprigs, Scots pines with orange
+  upper bark, white birches with hanging twigs, umbrella acacias, coconut palms with arching
+  fronds, dead fronds and coconuts, ribbed saguaros with spines, flowering barrel cacti and prickly
+  pear with fruit; bushes built from leaf cards in each kind's own leaves.
+
 - New Outdoor defaults: sun 31° high at 35°, warm white; sunlight 85 %, ambient 105 %, shadow
   softness 4, haze 15 %, exposure 1.00, clouds 45 % at 50 % speed.
 
