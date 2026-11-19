@@ -131,3 +131,12 @@ test("each check says where the problem is: from the target to the spot it is ab
   assert.deepEqual(muzzle.from, [6, 1]);
   assert.ok(muzzle.to[1] > 1, "a place down range of the target");
 });
+
+test("with props selected, only the checks about them are listed", async () => {
+  const { checksAbout } = await import("../js/model/safety.js");
+  const checks = [{ ids: ["a"] }, { ids: ["b", "line1"] }, { ids: ["c"] }];
+  assert.deepEqual(checksAbout(checks, []), checks, "nothing selected: all of them");
+  assert.deepEqual(checksAbout(checks, ["b"]), [checks[1]]);
+  assert.deepEqual(checksAbout(checks, ["line1", "c"]), [checks[1], checks[2]]);
+  assert.deepEqual(checksAbout(checks, ["x"]), []);
+});

@@ -3,7 +3,8 @@ import { h } from "./dom.js";
 import { stageStats } from "../model/stats.js";
 import { duplicateLabels } from "../model/numbering.js";
 import { SCORING } from "../model/scoring-rules.js";
-import { stageChecks, SAFETY } from "../model/safety.js";
+import { stageChecks, checksAbout, SAFETY } from "../model/safety.js";
+import { getProp } from "../model/props.js";
 import { runEstimate } from "../model/estimate.js";
 
 export function createStats(root, { onShow = () => {}, onPoint = () => {} } = {}) {
@@ -31,10 +32,17 @@ export function createStats(root, { onShow = () => {}, onPoint = () => {} } = {}
     const warnings = [];
     if (s.overLimit) warnings.push(`More than ${SCORING.courseLimits.Long} rounds: over the Long course limit.`);
     if (dups.length) warnings.push(`Duplicate target labels: ${dups.join(", ")}. Use Renumber or change a label.`);
+    // With props selected, only the checks about them (the rest are one tap away: select nothing).
+    const sel = state.selection;
+    const shown = checksAbout(checks, sel);
+    const one = sel.length === 1 ? stage.objects.find((o) => o.id === sel[0]) : null;
+    const heading = sel.length
+      ? `Safety checks: ${one ? one.label || getProp(one.type).name : `${sel.length} selected`}${shown.length ? ` (${shown.length})` : ""}`
+      : `Safety checks${checks.length ? ` (${checks.length})` : ""}`;
     const safety = h("section", { class: "safety", "aria-labelledby": "safety-title" }, [
-      h("h3", { class: "lg-label", id: "safety-title", text: `Safety checks${checks.length ? ` (${checks.length})` : ""}` }),
-      checks.length
-        ? h("ul", { class: "safety-list" }, checks.map((c) => h("li", {
+      h("h3", { class: "lg-label", id: "safety-title", text: heading }),
+      shown.length
+        ? h("ul", { class: "safety-list" }, shown.map((c) => h("li", {
           class: `lg-alert lg-alert-${c.level === "bad" ? "bad" : "warn"} safety-item${pinned?.key === c.text ? " is-pinned" : ""}`,
           dataset: { checkKey: c.text }, tabindex: "0", "aria-label": `${c.text} Press to point at it.`,
           onpointerenter: () => { hovered = { key: c.text, ids: c.ids, level: c.level }; point(); },
@@ -46,7 +54,10 @@ export function createStats(root, { onShow = () => {}, onPoint = () => {} } = {}
           h("span", { text: c.text }),
           h("button", { type: "button", class: "lg-btn lg-btn-ghost safety-show", onclick: () => onShow(c.ids), text: "Show" }),
         ])))
-        : h("p", { class: "lg-muted hint-text", text: "No problems found. Steel 7 m away, targets within 90° of down range, every target can be seen." }),
+        : h("p", { class: "lg-muted hint-text", text: sel.length
+          ? `No problems with ${one ? one.label || getProp(one.type).name : "the selection"}.`
+          : "No problems found. Steel 7 m away, targets within 90° of down range, every target can be seen." }),
+      sel.length && checks.length > shown.length ? h("p", { class: "lg-muted hint-text", text: `${checks.length} on the whole stage: select nothing to see them all.` }) : null,
       h("p", { class: "lg-muted hint-text", text: `From ${SAFETY.edition}, rules ${SAFETY.muzzleRule} and ${SAFETY.distanceRule}. A designer's aid, not a range approval.` }),
     ]);
     const estNote = est ? h("p", { class: "lg-muted hint-text", text: `Estimate: draw, ${est.rounds} shots, ${est.metres} m of movement${est.reloads ? `, ${est.reloads} reload${est.reloads === 1 ? "" : "s"}` : ""}. A rule of thumb, not a rule.` }) : null;

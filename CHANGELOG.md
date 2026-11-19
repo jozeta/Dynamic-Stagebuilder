@@ -12,6 +12,8 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
   iPad), and a line in the warning's colour runs on the ground from the target to the spot the check
   is about (the nearest place a shooter may stand, the nearest point of the fault line, or the
   nearest place it is shot from past 90°), with the distance.
+- With a target (or several props) selected, the safety checks list only the problems about it,
+  and say how many the whole stage has; select nothing to see them all.
 
 ## 0.4.0 (2026-11-19)
 

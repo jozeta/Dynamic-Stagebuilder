@@ -137,3 +137,6 @@ export function safetyRings(obj) {
   ];
   return [];
 }
+
+/** The checks about any of the selected ids (all of them when nothing is selected). */
+export const checksAbout = (checks, selection) => (selection.length ? checks.filter((c) => c.ids.some((id) => selection.includes(id))) : checks);

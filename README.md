@@ -315,7 +315,8 @@ can also be seen from places down range of it (amber), and a target nobody can s
 may stand. *Show* selects the props concerned. Select a target, or hover over a warning (tap it on an iPad to pin
 it), and a line in the warning's colour runs on the ground from the target to the spot the check is
 about, with the distance: the nearest place to stand, the nearest point of the fault line, or the
-nearest place it would be shot from past 90°. To see the distances themselves, select a paper or steel
+nearest place it would be shot from past 90°. With a target selected, the list shows only its own
+problems (and how many the whole stage has); select nothing to see them all. To see the distances themselves, select a paper or steel
 target and switch on *Show safety distances*: rings on the ground at 7 m (red) and 8 m (yellow) round
 steel, and 3 m (yellow) round paper, each explained in the inspector. It's a designer's aid, not a range approval: it
 doesn't know your berms, ricochet angles or stage-specific muzzle angles.
