@@ -4,6 +4,8 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+## 0.4.0 (2026-11-19)
+
 - Share links: *Copy share link* (Projects) copies a link that holds the stage itself after the #,
   so nothing is uploaded. Opening it adds the stage as a new project, checked like an imported file.
 - Run-time estimate: the stage statistics give a time for a fast and a steady run (draw, shots,

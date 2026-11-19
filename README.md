@@ -4,7 +4,7 @@ A browser-based 3D stage builder for IPSC practical shooting. Lay out a stage at
 it from any angle, and print a Written Stage Briefing with a stage map for range officers and
 competitors.
 
-**Version:** 0.3.0 · **Try it:** [jozeta.github.io/Dynamic-Stagebuilder](https://jozeta.github.io/Dynamic-Stagebuilder/)
+**Version:** 0.4.0 · **Try it:** [jozeta.github.io/Dynamic-Stagebuilder](https://jozeta.github.io/Dynamic-Stagebuilder/)
 (runs in the browser; nothing to install, nothing leaves your device) · Started 2026-11-18 (see the
 [v1 design](docs/superpowers/specs/2026-11-18-stage-builder-v1-design.md)).
 
@@ -96,16 +96,17 @@ not supported: below 768 px wide the app asks you to use a larger screen. Englis
 
 ## What's new
 
-### 0.3.0 (2026-11-19)
+### 0.4.0 (2026-11-19)
 
-- **Matches:** under Projects, a match of one or more stages in order. Add new stages or ones you
-  already made, reorder them, and print the whole match; each stage gets the match name and its
-  number in its briefing.
-- **Measuring tool:** tap two points to see the distance, snapped to props (toolbar *Measure* or M).
-- **Looks:** new Blueprint defaults (deep blue paper, faint white grid) and a muted red for fault
-  lines and shooting areas.
-- **Fixes:** CI runs the tests on Node 22; a Projects tab shown after a reload fills only once
-  projects have loaded. Development tools updated (ESLint 10).
+- **Build day:** a setup sheet page in the print (every prop measured from the bay's edges and
+  corners), exact position fields, and mirror, align and spread tools.
+- **Safety checks** from the IPSC rules (January 2024, 2.1.2 and 2.1.3): steel within 7 m, fault
+  lines within 8 m of steel, targets past the 90° muzzle angle, targets nobody can see. Library
+  stages fixed to keep steel at 7 m.
+- **Sight lines** from a shooting position and a **run-time estimate** with hit factors.
+- **Bay shapes:** tapered, or with a back corner cut away.
+- **Sharing:** share links that carry the stage itself, and match files with all their stages.
+- Paper target stands have dark brown feet.
 
 Older versions are listed in [CHANGELOG.md](CHANGELOG.md).
 
