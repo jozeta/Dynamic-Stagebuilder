@@ -19,17 +19,21 @@ export function labelPrefix(objOrType) {
 const span = (o, p) => (p === PREFIX.paper ? Math.max(1, arrayCounts(o).paper) : 1);
 const labelFor = (p, n, k) => (k > 1 ? `${p}${n}–${n + k - 1}` : `${p}${n}`);
 
-// The last number a label uses ("T2–3" → 3), or null when it isn't an automatic-style label.
-function numberOf(label, prefix) {
-  const m = typeof label === "string" && label.match(/^([A-Z]+)(\d+)(?:–(\d+))?$/);
-  return m && m[1] === prefix ? Number(m[3] ?? m[2]) : null;
-}
+// The numbers a label uses ("T2–3" → [2, 3]); [] when it isn't an automatic-style label. Labels
+// can be typed by hand or come from a file, so a range only counts when it is as short as an array
+// can be (otherwise just its first number), which keeps renumbering quick.
+const MAX_SPAN = 4;
 function numbersOf(label, prefix) {
   const m = typeof label === "string" && label.match(/^([A-Z]+)(\d+)(?:–(\d+))?$/);
   if (!m || m[1] !== prefix) return [];
-  const out = [];
-  for (let n = Number(m[2]); n <= Number(m[3] ?? m[2]); n++) out.push(n);
-  return out;
+  const a = Number(m[2]), b = m[3] === undefined ? a : Number(m[3]);
+  if (!(b >= a && b - a < MAX_SPAN)) return [a];
+  return [...Array(b - a + 1)].map((_, i) => a + i);
+}
+// The last number a label uses ("T2–3" → 3), or null.
+function numberOf(label, prefix) {
+  const ns = numbersOf(label, prefix);
+  return ns.length ? ns[ns.length - 1] : null;
 }
 
 export function assignLabels(stage) {

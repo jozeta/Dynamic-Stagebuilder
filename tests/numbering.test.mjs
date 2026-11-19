@@ -59,3 +59,13 @@ test("assignLabels returns the same stage when nothing changes", () => {
   const { stage } = build(["paper-ipsc"]);
   assert.equal(assignLabels(stage), stage);
 });
+
+test("a hand-set range label can't make renumbering count through a huge range", () => {
+  let { stage, ids } = build(["paper-ipsc", "paper-ipsc"]);
+  stage = setLabel(stage, ids[0], "T1–999999999");
+  const t = Date.now();
+  const out = renumber(stage);
+  assert.ok(Date.now() - t < 200, "renumber stays quick");
+  assert.equal(out.objects[0].label, "T1–999999999", "the hand-set label is kept");
+  assert.equal(out.objects[1].label, "T2");
+});
