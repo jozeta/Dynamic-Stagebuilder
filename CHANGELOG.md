@@ -4,6 +4,8 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+## 0.6.0 (2026-11-19)
+
 - More bay shapes: L and reverse L (full width at the front, one side carries on to the back), T (a
   narrow stem at the front opening to full width), U (two arms to the back round a berm), reverse U
   (two arms reaching to the front), and dogleg (Z) and reverse dogleg (S), where the back part is

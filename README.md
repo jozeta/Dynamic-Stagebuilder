@@ -4,7 +4,7 @@ A browser-based 3D stage builder for IPSC practical shooting. Lay out a stage at
 it from any angle, and print a Written Stage Briefing with a stage map for range officers and
 competitors.
 
-**Version:** 0.5.0 · **Try it:** [jozeta.github.io/Dynamic-Stagebuilder](https://jozeta.github.io/Dynamic-Stagebuilder/)
+**Version:** 0.6.0 · **Try it:** [jozeta.github.io/Dynamic-Stagebuilder](https://jozeta.github.io/Dynamic-Stagebuilder/)
 (runs in the browser; nothing to install, nothing leaves your device) · Started 2026-11-18 (see the
 [v1 design](docs/superpowers/specs/2026-11-18-stage-builder-v1-design.md)).
 
@@ -96,11 +96,14 @@ not supported: below 768 px wide the app asks you to use a larger screen. Englis
 
 ## What's new
 
-### 0.5.0 (2026-11-19)
+### 0.6.0 (2026-11-19)
 
-- **Safety distances:** select a paper or steel target and switch on *Show safety distances* for
-  rings at the IPSC rulebook's distances: steel 7 m (red) and 8 m (yellow), paper 3 m (yellow).
-- The safety checks list from 0.4.0 is removed; the library's steel stays at 7 m.
+- **More bay shapes:** L and reverse L, T, U and reverse U, and dogleg (Z) and reverse dogleg (S),
+  each with its own sizes; the banks, walls and printed map follow the shape.
+- **Fixes:** no hang at start-up when an older copy is open elsewhere; *Line up on the shooter's
+  left / right* goes the right way; mirroring swaps one-sided no-shoots and hard cover; share links
+  pasted into an open tab work; a stage is in one match only; match name and number aren't undo
+  steps; deleting a project takes it out of its match; group drags in shaped bays keep their shape.
 
 Older versions are listed in [CHANGELOG.md](CHANGELOG.md).
 
