@@ -49,7 +49,7 @@ import { revealOnSelect } from "./model/layout.js";
 import { activationLinks } from "./model/activation.js";
 import { isHidden } from "./model/layers.js";
 import { measureText } from "./model/measure.js";
-import { sightFrom, safetyRings } from "./model/safety.js";
+import { sightFrom, safetyRings, stageChecks } from "./model/safety.js";
 import { eyeHeight } from "./model/positions.js";
 import { createContextMenu } from "./ui/context-menu.js";
 import { createLayers } from "./ui/layers.js";
@@ -92,50 +92,38 @@ engine.groups.helper.add(highlight, preview, measuring, rings);
 const RING_COLOR = { bad: 0xd9483b, warn: 0xf0b93a };
 let ringsFor = null;
 
-// A line from a safety warning to the props it is about, in the warning's colour, drawn over the
-// page (an SVG that takes no clicks). Followed every frame while shown, so it stays on the target
-// as the camera moves.
-const pointer = (() => {
-  const NS = "http://www.w3.org/2000/svg";
-  const svg = document.createElementNS(NS, "svg");
-  svg.classList.add("check-pointer");
-  svg.setAttribute("aria-hidden", "true");
-  document.body.append(svg);
-  let want = null, frame = 0;
-  const at = (id) => {
-    const s = editor.stage();
-    const o = s.objects.find((x) => x.id === id);
-    if (o) return [o.position[0], 0.9, o.position[1]];
-    const l = s.lines.find((x) => x.id === id);
-    if (!l) return null;
-    const m = l.points.reduce((a, p) => [a[0] + p[0] / l.points.length, a[1] + p[1] / l.points.length], [0, 0]);
-    return [m[0], 0.05, m[1]];
-  };
-  function draw() {
-    frame = 0;
-    svg.replaceChildren();
-    const item = want && document.querySelector(`#stats [data-check-key="${CSS.escape(want.key)}"]`);
-    if (!item || item.closest("[hidden], .lg-dock-folded, .lg-dock-inactive")) { if (want) frame = requestAnimationFrame(draw); return; }
-    const colour = want.level === "bad" ? "#d9483b" : "#f0b93a";          // the warning's colour, as the rings
-    const box = item.getBoundingClientRect(), cv = engine.renderer.domElement.getBoundingClientRect();
-    for (const id of want.ids) {
-      const p = at(id);
-      if (!p) continue;
-      const v = new THREE.Vector3(...p).project(engine.camera);
-      if (v.z > 1) continue;                                           // behind the camera
-      const x = cv.left + ((v.x + 1) / 2) * cv.width, y = cv.top + ((1 - v.y) / 2) * cv.height;
-      const sx = x < box.left ? box.left : box.right, sy = box.top + box.height / 2;
-      const el = (tag, attrs) => { const e = document.createElementNS(NS, tag); for (const [k, val] of Object.entries(attrs)) e.setAttribute(k, String(val)); return e; };
-      const seg = { x1: sx, y1: sy, x2: x, y2: y, "stroke-linecap": "round" };
-      // A dark edge under the coloured line keeps it readable on light and dark ground.
-      svg.append(el("line", { ...seg, stroke: "rgba(0,0,0,0.55)", "stroke-width": 5 }), el("line", { ...seg, stroke: colour, "stroke-width": 2.5 }),
-        el("circle", { cx: x, cy: y, r: 9, fill: "none", stroke: "rgba(0,0,0,0.55)", "stroke-width": 5 }), el("circle", { cx: x, cy: y, r: 9, fill: "none", stroke: colour, "stroke-width": 2.5 }),
-        el("circle", { cx: sx, cy: sy, r: 3.5, fill: colour }));
+// Safety-check lines on the ground, from a target to the spot each of its checks is about, in the
+// check's colour: for the selected targets, and for the warning pointed at in the stats panel.
+let pointed = null;                                   // { key } of the warning hovered or pinned
+const pointer = { set(p) { pointed = p; render(editor.state); engine.requestRender(); } };
+let checksStage = null, checksCache = [];
+const checksOf = (stage) => { if (stage !== checksStage) { checksStage = stage; checksCache = stageChecks(stage); } return checksCache; };
+function drawCheckLines(stage, state, group) {
+  if (state.drag) return;
+  for (const c of checksOf(stage)) {
+    if (!c.to || !(state.selection.includes(c.ids[0]) || pointed?.key === c.text)) continue;
+    const colour = RING_COLOR[c.level];
+    const [ax, az] = c.from, [bx, bz] = c.to, len = Math.hypot(bx - ax, bz - az);
+    const mat = () => new THREE.MeshBasicMaterial({ color: colour, transparent: true, opacity: 0.95, depthTest: false, depthWrite: false });
+    if (len > 0.05) {
+      const strip = new THREE.Mesh(new THREE.PlaneGeometry(len, 0.07), mat());
+      strip.rotation.set(-Math.PI / 2, 0, Math.atan2(-(bz - az), bx - ax));
+      strip.position.set((ax + bx) / 2, 0.06, (az + bz) / 2);
+      strip.renderOrder = 7;
+      const label = createLabel(`${len.toFixed(1)} m`);
+      label.scale.multiplyScalar(2);
+      label.position.set((ax + bx) / 2, 0.5, (az + bz) / 2);
+      group.add(strip, label);
     }
-    frame = requestAnimationFrame(draw);
+    for (const [x, z, r] of [[bx, bz, 0.3], [ax, az, 0.45]]) {
+      const ring = new THREE.Mesh(new THREE.RingGeometry(r - 0.06, r, 48), mat());
+      ring.rotation.x = -Math.PI / 2;
+      ring.position.set(x, 0.06, z);
+      ring.renderOrder = 7;
+      group.add(ring);
+    }
   }
-  return { set(p) { want = p; if (!frame) frame = requestAnimationFrame(draw); if (!p) { cancelAnimationFrame(frame); frame = 0; svg.replaceChildren(); } } };
-})();
+}
 // Rebuilt when the stage changes: a flat ring and a distance label (on the shooter's side) for each
 // rulebook distance of every target with Show safety distances on (and not hidden).
 function drawRings(stage) {
@@ -210,7 +198,7 @@ function render(state) {
   else if (stage.settings.look !== lookShown) { lookShown = stage.settings.look; engine.setLook(stage.settings.look, stage.bay); }
 
   // Selection outline.
-  for (const c of [...highlight.children]) { highlight.remove(c); c.geometry.dispose(); c.material.dispose(); }
+  for (const c of [...highlight.children]) { highlight.remove(c); c.geometry?.dispose(); c.material?.map?.dispose(); c.material?.dispose(); }
   for (const id of state.selection) {
     const node = view.objectFor(id);
     if (node) highlight.add(new THREE.BoxHelper(node, ACCENT));
@@ -226,6 +214,7 @@ function render(state) {
   }
 
   drawRings(stage);
+  drawCheckLines(stage, state, highlight);
 
   // Sight lines from a selected shooting position: thin green lines from its eye to each target seen.
   const pos = state.selection.length === 1 && !state.drag ? stage.objects.find((o) => o.id === state.selection[0] && o.type === "shooting-position") : null;

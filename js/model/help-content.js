@@ -74,7 +74,7 @@ export const HELP_TOPICS = Object.freeze([
     text: ["Under the stage statistics, Safety checks lists steel closer than 7 m to where a shooter may stand, fault lines closer than 8 m to steel (IPSC rule 2.1.3), targets past the 90° muzzle angle (rule 2.1.2) and targets nobody can see. Show selects them.",
       "Select a shooting position to see green sight lines to every target it can see, and which ones are hidden.",
       "The statistics also estimate a fast and a steady run time and the hit factors they give."],
-    tips: ["Hover over a warning (tap it on an iPad) to draw a line to its target.", "Select a target and switch on Show safety distances for rings at the rulebook's distances.", "The checks are a designer's aid, not a range approval."] },
+    tips: ["Select a target, or hover over a warning (tap it on an iPad), to draw a line from the target to the spot the check is about.", "Select a target and switch on Show safety distances for rings at the rulebook's distances.", "The checks are a designer's aid, not a range approval."] },
   { id: "bay-setup", title: "Bay shape, setup sheet and sharing", icon: "frame", art: "files",
     text: ["With nothing selected, Bay shape makes the bay tapered or cuts a back corner away; the banks and walls follow it.",
       "The printed brief ends with a setup sheet: every prop measured from the left side line, the up-range edge and both up-range corners.",

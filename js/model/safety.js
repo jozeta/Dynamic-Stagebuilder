@@ -19,14 +19,20 @@ export const SAFETY = Object.freeze({
 });
 const EYES = [1.6, 1.15, 0.95], STEP = 0.5, PAST = 0.05;     // standing, crouching, kneeling
 
-// Distance from p to the segment a–b.
-function segDist(p, a, b) {
+const r2 = (v) => Math.round(v * 100) / 100 + 0;
+// The nearest point to p on the segment a–b, and how far it is.
+function segNear(p, a, b) {
   const v = [b[0] - a[0], b[1] - a[1]], L = v[0] * v[0] + v[1] * v[1];
   const k = L ? Math.max(0, Math.min(1, ((p[0] - a[0]) * v[0] + (p[1] - a[1]) * v[1]) / L)) : 0;
-  return Math.hypot(p[0] - a[0] - v[0] * k, p[1] - a[1] - v[1] * k);
+  const q = [a[0] + v[0] * k, a[1] + v[1] * k];
+  return { point: q, dist: Math.hypot(p[0] - q[0], p[1] - q[1]) };
 }
-const polyDist = (p, poly) => (insidePolygon(p, poly) ? 0 : Math.min(...poly.map((a, i) => segDist(p, a, poly[(i + 1) % poly.length]))));
-const lineDist = (p, pts, closed) => Math.min(...pts.slice(0, closed ? pts.length : -1).map((a, i) => segDist(p, a, pts[(i + 1) % pts.length])));
+const nearest = (list) => list.reduce((best, x) => (x.dist < best.dist ? x : best), { point: null, dist: Infinity });
+// The nearest point on a polyline (closed: a polygon's edges).
+const lineNear = (p, pts, closed) => nearest(pts.slice(0, closed ? pts.length : -1).map((a, i) => segNear(p, a, pts[(i + 1) % pts.length])));
+// The nearest point of a polygon: p itself when inside, else on an edge.
+const polyNear = (p, poly) => (insidePolygon(p, poly) ? { point: [...p], dist: 0 } : lineNear(p, poly, true));
+const spot = (q) => q.map(r2);
 
 /** Where a shooter may stand: sampled points, plus the areas themselves (for exact distances). */
 export function shooterPlaces(stage, step = STEP) {
@@ -47,7 +53,11 @@ export function shooterPlaces(stage, step = STEP) {
 const label = (o) => o.label || getProp(o.type).name;
 const m1 = (v) => `${v.toFixed(1)} m`;
 
-/** The checks that fail: [{ rule, level: "bad" | "warn", text, ids }]. */
+/**
+ * The checks that fail: [{ rule, level: "bad" | "warn", text, ids, from?, to? }]. `from` is the
+ * target, `to` the spot the check is about (the nearest place to stand, the nearest point of the fault
+ * line, or the nearest place it is shot from past 90°), both [x, z].
+ */
 export function stageChecks(stage) {
   const { areas, points } = shooterPlaces(stage);
   if (!points.length) return [];
@@ -57,15 +67,16 @@ export function stageChecks(stage) {
 
   // 2.1.3: 7 m from steel, to the nearest place a shooter may stand.
   for (const o of steel) {
-    const d = Math.min(...areas.map((a) => polyDist(o.position, a)), ...points.map((p) => Math.hypot(p[0] - o.position[0], p[1] - o.position[1])));
-    if (d < SAFETY.steelMin - 1e-6) out.push({ rule: SAFETY.distanceRule, level: "bad", ids: [o.id],
+    const n = nearest([...areas.map((a) => polyNear(o.position, a)), ...points.map((p) => ({ point: p, dist: Math.hypot(p[0] - o.position[0], p[1] - o.position[1]) }))]);
+    const d = n.dist;
+    if (d < SAFETY.steelMin - 1e-6) out.push({ rule: SAFETY.distanceRule, level: "bad", ids: [o.id], from: [...o.position], to: spot(n.point),
       text: `${label(o)} is ${m1(d)} from where a shooter may stand; steel needs at least ${SAFETY.steelMin} m (rule ${SAFETY.distanceRule}).` });
   }
   // 2.1.3: a fault line limiting the approach to steel sits at least 8 m from it.
   for (const l of stage.lines.filter((x) => x.type === "fault-line" && x.points.length >= 2)) {
     for (const o of steel) {
-      const d = lineDist(o.position, l.points, l.closed);
-      if (d < SAFETY.faultLineMin - 1e-6) out.push({ rule: `${SAFETY.distanceRule} fault line`, level: "warn", ids: [o.id, l.id],
+      const n = lineNear(o.position, l.points, l.closed), d = n.dist;
+      if (d < SAFETY.faultLineMin - 1e-6) out.push({ rule: `${SAFETY.distanceRule} fault line`, level: "warn", ids: [o.id, l.id], from: [...o.position], to: spot(n.point),
         text: `A fault line is ${m1(d)} from ${label(o)}; if it limits the approach to the steel it must be at least ${SAFETY.faultLineMin} m away (rule ${SAFETY.distanceRule}).` });
     }
   }
@@ -81,7 +92,8 @@ export function stageChecks(stage) {
     const past = from.filter((p) => o.position[1] - p[1] < -PAST);       // the target is up range of the shooter
     if (!past.length) continue;
     const ok = past.length < from.length;
-    out.push({ rule: SAFETY.muzzleRule, level: ok ? "warn" : "bad", ids: [o.id],
+    const worst = nearest(past.map((p) => ({ point: p, dist: Math.hypot(p[0] - o.position[0], p[1] - o.position[1]) }))).point;   // the nearest such place
+    out.push({ rule: SAFETY.muzzleRule, level: ok ? "warn" : "bad", ids: [o.id], from: [...o.position], to: spot(worst),
       text: ok
         ? `${label(o)} can be seen from places down range of it: shot from there, the muzzle points past ${SAFETY.muzzleAngle}° (rule ${SAFETY.muzzleRule}). Consider a fault line or a vision barrier.`
         : `${label(o)} can only be shot with the muzzle past ${SAFETY.muzzleAngle}° from down range (rule ${SAFETY.muzzleRule}).` });

@@ -375,7 +375,6 @@ body { background: var(--lg-bg); overflow: hidden; }
 .ring-legend .ring-bad::before { border-color: #d9483b; }
 .ring-legend .ring-warn::before { border-color: #f0b93a; }
 
-/* The line from a safety warning to its target: over everything, never in the way of a click. */
-.check-pointer { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 900; overflow: visible; }
+/* A safety warning that is pointed at (its line is drawn on the ground). */
 .safety-item { cursor: pointer; }
 .safety-item.is-pinned { outline: 2px solid currentColor; outline-offset: 1px; }

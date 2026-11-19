@@ -115,3 +115,19 @@ test("the safety-ring switch is a saved flag on the target, undoable, and kept b
   ed.dispatch({ type: "undo" });
   assert.equal(ed.stage().objects[0].safetyRings, undefined);
 });
+
+test("each check says where the problem is: from the target to the spot it is about", () => {
+  let s = area(createStage(), box(0, 3));
+  const near = addObject(s, "popper", [1, 9]); s = near.stage;
+  s = addLine(s, "fault-line", [[-3, 5], [3, 5]], false).stage;
+  const behind = addObject(s, "paper-ipsc", [6, 1]); s = behind.stage;
+  const c = stageChecks(s);
+  const dist = c.find((x) => x.rule === "2.1.3");
+  assert.deepEqual(dist.from, [1, 9]);
+  assert.deepEqual(dist.to, [1, 3], "the nearest point of the shooting area");
+  const fault = c.find((x) => x.rule === "2.1.3 fault line");
+  assert.deepEqual(fault.to, [1, 5], "the nearest point on the fault line");
+  const muzzle = c.find((x) => x.rule === "2.1.2" && x.ids[0] === behind.id);
+  assert.deepEqual(muzzle.from, [6, 1]);
+  assert.ok(muzzle.to[1] > 1, "a place down range of the target");
+});
