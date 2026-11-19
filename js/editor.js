@@ -5,7 +5,7 @@ import { createStage, addObject, updateObject, removeObjects, duplicateObjects, 
   setSetting, setBay, setBriefing, pruneSelection } from "./model/stage.js";
 import { createHistory, commit, replacePresent, undo, redo } from "./model/history.js";
 import { assignLabels, renumber, setLabel } from "./model/numbering.js";
-import { fitStand, arrayCounts } from "./model/arrays.js";
+import { fitStand, arrayCounts, arrayExtent } from "./model/arrays.js";
 import { snapPoint, snapAngle, clampToBay } from "./model/snap.js";
 import { getProp } from "./model/props.js";
 import { snapToObjects, SNAP_RADIUS } from "./model/objsnap.js";
@@ -141,6 +141,12 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
       // A new presentation or style that would put the top over the IPSC limit lowers the stand
       // (a stand height set by hand is kept; the inspector then warns).
       if (paper && !Object.hasOwn(params, "mountHeight") && (Object.hasOwn(params, "presentation") || Object.hasOwn(params, "style"))) {
+        // A new presentation keeps the top of the targets where it was: the sticks get shorter or
+        // longer instead (never below 10 cm). Then the IPSC height limit still applies.
+        if (Object.hasOwn(params, "presentation")) {
+          const keep = o.params.mountHeight + arrayExtent(o).top - arrayExtent({ type: o.type, params: next }).top;
+          next = { ...next, mountHeight: Math.round(Math.min(2, Math.max(0.1, keep)) * 1e6) / 1e6 };
+        }
         next = { ...next, mountHeight: fitStand({ type: o.type, params: next }) };
       }
       // An automatic label follows a change in how many targets the array is.

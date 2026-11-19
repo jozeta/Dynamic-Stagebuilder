@@ -136,3 +136,18 @@ test("changing how many targets an array has gives it fresh numbers", async () =
   ed.dispatch({ type: "renumber" });
   assert.deepEqual(ed.stage().objects.map((o) => o.label), ["T1–2", "T3"]);
 });
+
+test("switching presentation keeps the top of the targets at the same height: the sticks change instead", async () => {
+  const { createEditor } = await import("../js/editor.js");
+  const { arrayExtent } = await import("../js/model/arrays.js");
+  const ed = createEditor({ stage: createStage() });
+  ed.dispatch({ type: "place", propType: "paper-ipsc", position: [0, 5] });
+  const id = ed.stage().objects.at(-1).id;
+  const top = () => { const o = ed.stage().objects.find((x) => x.id === id); return o.params.mountHeight + arrayExtent(o).top; };
+  const start = top();
+  for (const p of ["stacked", "ns-lower", "two-ns-between", "stacked-ns", "target"]) {
+    ed.dispatch({ type: "setParams", id, params: { presentation: p } });
+    assert.ok(Math.abs(top() - start) < 1e-6, `${p}: top at ${top().toFixed(3)}, was ${start.toFixed(3)}`);
+  }
+  assert.ok(Math.abs(ed.stage().objects.find((x) => x.id === id).params.mountHeight - 0.7) < 1e-9, "back to the original stand height");
+});
