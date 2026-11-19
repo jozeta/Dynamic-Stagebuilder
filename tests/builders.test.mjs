@@ -167,3 +167,12 @@ test("paper targets print their scoring zones on the card (no line geometry)", (
   buildProp(obj("paper-ipsc")).traverse((c) => { if (c.isLineSegments) lines++; });
   assert.equal(lines, 0);
 });
+
+test("orange netting is the default mesh, and walls have corner gussets and feet", () => {
+  const uses = (g, name) => { let found = false; g.traverse((c) => { if (c.material === getMaterial(name)) found = true; }); return found; };
+  const g = buildProp(obj("wall-mesh"));
+  assert.ok(uses(g, "mesh-orange"));
+  let gussets = 0;
+  g.traverse((c) => { if (c.userData.gusset) gussets++; });
+  assert.equal(gussets, 4);
+});

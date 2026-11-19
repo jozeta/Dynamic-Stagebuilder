@@ -16,14 +16,14 @@ export function demoStage() {
   // Left bay: an L of black mesh with a blue return.
   add("wall-mesh", from([-7, 8], 0, 2), 0);
   add("wall-solid", from([-5, 8], 0, 1.5), 0, { length: 1.5 });
-  add("wall-mesh", from([-3.5, 8], 90, 2), 90, { mesh: "blue" });
+  add("wall-mesh", from([-3.5, 8], 90, 2), 90);
   // Centre: a mesh wall with a port between two mesh walls.
   add("wall-mesh", from([-1.5, 6.5], 0, 1.5), 0, { length: 1.5 });
   add("wall-mesh-port", from([0, 6.5], 0, 2), 0);
-  add("wall-mesh", from([2, 6.5], 0, 2), 0, { mesh: "blue" });
+  add("wall-mesh", from([2, 6.5], 0, 2), 0);
   // Right: a V of mesh walls with a barrel and target inside.
   add("wall-mesh", from([4.5, 11], 45, 2), 45);
-  add("wall-mesh", from([4.5 + Math.SQRT2, 11 + Math.SQRT2], 135, 2), 135, { mesh: "blue" });
+  add("wall-mesh", from([4.5 + Math.SQRT2, 11 + Math.SQRT2], 135, 2), 135);
   add("wall-wood", [-0.5, 12.5], 0, { length: 1.2, height: 1.2 });
 
   // Targets on stands behind the walls.

@@ -2,13 +2,43 @@
 // framed port, a plywood wall, and a plywood wall with a port. Centred on the origin, length along
 // x, thickness along z. Ports are real openings.
 import * as THREE from "three";
-import { STICK } from "../../model/props.js";
+import { STICK, WALL_FOOT } from "../../model/props.js";
 import { getMaterial } from "../materials.js";
 import { box, extrude, group } from "./parts.js";
 
 const MESH_TILE = 0.5;    // one texture tile of wire mesh (5 × 5 holes of 10 cm), in metres
 const PANEL = 0.018;
 const PORT_FRAME = 0.035;
+
+// Triangular gussets screwed into the frame's inside corners, as on DIY training walls.
+function gussets(g, length, height, material) {
+  const leg = Math.min(0.16, length / 6, height / 6);
+  const tri = new THREE.Shape([new THREE.Vector2(0, 0), new THREE.Vector2(leg, 0), new THREE.Vector2(0, leg)]);
+  const geo = new THREE.ExtrudeGeometry(tri, { depth: STICK * 0.5, bevelEnabled: false });
+  geo.translate(0, 0, -STICK * 0.25);
+  const x0 = -length / 2 + STICK, x1 = length / 2 - STICK, y0 = STICK, y1 = height - STICK;
+  for (const [x, y, rz] of [[x0, y0, 0], [x1, y0, Math.PI / 2], [x1, y1, Math.PI], [x0, y1, -Math.PI / 2]]) {
+    const m = new THREE.Mesh(geo, getMaterial(material));
+    m.position.set(x, y, 0);
+    m.rotation.z = rz;
+    m.castShadow = true;
+    m.userData.gusset = true;
+    g.add(m);
+  }
+}
+
+// Feet: a board across the bottom of each end post with two short braces up to the post.
+function feet(g, length, material) {
+  for (const x of [-length / 2 + STICK / 2, length / 2 - STICK / 2]) {
+    g.add(box(STICK, 0.035, WALL_FOOT, material, x, 0.0175, 0));
+    for (const s of [-1, 1]) {
+      const len = Math.hypot(WALL_FOOT / 2 - 0.02, 0.22);
+      const b = box(STICK * 0.8, 0.03, len, material, x, 0.13, s * (WALL_FOOT / 4));
+      b.rotation.x = s * Math.atan2(0.22, WALL_FOOT / 2 - 0.02);
+      g.add(b);
+    }
+  }
+}
 
 function frame(g, length, height, material) {
   const posts = [-length / 2 + STICK / 2, length / 2 - STICK / 2];
@@ -25,7 +55,7 @@ function meshRect(x0, x1, y0, y1, material) {
   const w = x1 - x0, h = y1 - y0;
   if (w <= 0.001 || h <= 0.001) return null;
   const geo = new THREE.PlaneGeometry(w, h);
-  geo.translate(x0 + w / 2, y0 + h / 2, 0);
+  geo.translate(x0 + w / 2, y0 + h / 2, -STICK / 2 - 0.003);   // stapled to the front of the frame
   const pos = geo.attributes.position, uv = geo.attributes.uv;
   for (let i = 0; i < uv.count; i++) uv.setXY(i, pos.getX(i) / MESH_TILE, pos.getY(i) / MESH_TILE);
   const m = new THREE.Mesh(geo, getMaterial(material));
@@ -42,13 +72,16 @@ function fitPort(p, inner, height) {
 }
 
 const frameMaterial = (p) => (p.frame === "black" ? "frame-black" : "wood");
-const meshMaterial = (p) => (p.mesh === "blue" ? "mesh-blue" : "mesh-black");
+const meshMaterial = (p) => `mesh-${p.mesh === "blue" || p.mesh === "black" ? p.mesh : "orange"}`;
 
 export function buildMeshWall(obj) {
   const p = obj.params;
   const g = group(obj.id);
   frame(g, p.length, p.height, frameMaterial(p));
-  const m = meshRect(-p.length / 2 + STICK, p.length / 2 - STICK, STICK, p.height - STICK, meshMaterial(p));
+  gussets(g, p.length, p.height, frameMaterial(p));
+  feet(g, p.length, frameMaterial(p));
+  // The netting covers the whole frame front, edge to edge.
+  const m = meshRect(-p.length / 2, p.length / 2, 0, p.height, meshMaterial(p));
   if (m) g.add(m);
   return g;
 }
@@ -74,6 +107,7 @@ export function buildMeshPortWall(obj) {
   const L = -inner / 2, R = inner / 2, B = STICK, T = p.height - STICK;
   for (const m of [meshRect(L, -pw / 2 - F, B, T, mm), meshRect(pw / 2 + F, R, B, T, mm),
     meshRect(-pw / 2 - F, pw / 2 + F, B, y0 - F, mm), meshRect(-pw / 2 - F, pw / 2 + F, y1 + F, T, mm)]) if (m) g.add(m);
+  feet(g, obj.params.length, frameMaterial(obj.params));
   return g;
 }
 
@@ -82,6 +116,7 @@ export function buildWoodWall(obj) {
   const g = group(obj.id);
   for (const x of [-length / 2 + STICK / 2, length / 2 - STICK / 2]) g.add(box(STICK, height, STICK, "wood", x, height / 2, 0));
   g.add(box(length - 2 * STICK, height, PANEL, "plywood", 0, height / 2, 0));
+  feet(g, obj.params.length, "wood");
   return g;
 }
 
@@ -101,6 +136,7 @@ export function buildPortWall(obj) {
   const uv = panel.geometry.attributes.uv;
   for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) / 1.2, uv.getY(i) / 1.2);
   g.add(panel);
+  feet(g, obj.params.length, "wood");
   return g;
 }
 
@@ -123,6 +159,7 @@ export function buildDoorWall(obj) {
   const inner = L / 2 - STICK;
   for (const m of [meshRect(-inner, -dw / 2 - F, STICK, H - STICK, mm), meshRect(dw / 2 + F, inner, STICK, H - STICK, mm),
     meshRect(-dw / 2 - F, dw / 2 + F, dh + F, H - STICK, mm)]) if (m) g.add(m);
+  feet(g, obj.params.length, frameMaterial(obj.params));
   return g;
 }
 
@@ -132,5 +169,6 @@ export function buildSolidWall(obj) {
   const g = group(obj.id);
   frame(g, L, H, "wood");
   g.add(box(L - 2 * STICK, H - 2 * STICK, 0.012, "panel-grey", 0, H / 2, 0));
+  feet(g, obj.params.length, "wood");
   return g;
 }

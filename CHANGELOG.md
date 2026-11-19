@@ -4,6 +4,18 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Ground: a photo-scanned sand-and-gravel texture (Poly Haven "Gravelly Sand", CC0, kept in
+  `vendor/textures/`) with colour, normal, roughness and AO, graded toward a dusty tan; many
+  more random stones in four sizes, the larger ones broken and angular, scattered everywhere.
+- Barrels rebuilt after real 216 l steel drums: rolled rims, corrugated rolling hoops, a
+  recessed lid with a pressed ring and 2" and 3/4" bung caps, glossy enamel with a clear-coat
+  sheen (black more worn and matte), scuffs on the hoops, dust at the base, a label on worn lids.
+- Mesh walls look like DIY range walls: orange safety-barrier netting (new default; black and
+  blue remain) stapled to the front of light 45 mm pine frames with corner gussets; every wall
+  stands on feet (40 cm deep footprint; the print map still draws the wall's frame).
+- Crates rebuilt as shipping crates: light pine boards, a nailed cleat frame round every face,
+  diagonal braces on the sides, stencilled arrows and FRAGILE on the front.
+
 - Look rework, step 2 (ground and berms): a compacted dirt-and-gravel floor with colour, normal,
   roughness and ambient-occlusion maps baked in code from a tileable gravel height field
   (256 px per metre); large-scale tones of dry dust, compacted earth and damp patches, a worn lane

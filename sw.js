@@ -71,7 +71,10 @@ const FILES = [
   "vendor/three/0.187.0/addons/controls/OrbitControls.js",
   "vendor/three/0.187.0/addons/controls/TransformControls.js",
   "vendor/three/0.187.0/three.core.js",
-  "vendor/three/0.187.0/three.module.js"
+  "vendor/three/0.187.0/three.module.js",
+  "vendor/textures/polyhaven/gravelly_sand/gravelly_sand_arm_1k.jpg",
+  "vendor/textures/polyhaven/gravelly_sand/gravelly_sand_diff_2k.jpg",
+  "vendor/textures/polyhaven/gravelly_sand/gravelly_sand_nor_gl_2k.jpg"
 ];
 
 self.addEventListener("install", (event) => {

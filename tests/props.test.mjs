@@ -31,7 +31,7 @@ test("scoring kinds", () => {
 });
 
 test("default params of a mesh wall", () => {
-  assert.deepEqual(defaultParams("wall-mesh"), { length: 2, height: 2, mesh: "black", frame: "wood" });
+  assert.deepEqual(defaultParams("wall-mesh"), { length: 2, height: 2, mesh: "orange", frame: "wood" });
 });
 
 test("paper target height is mount height plus the target", () => {
@@ -107,8 +107,15 @@ test("new structures and range furniture have real sizes", () => {
   assert.ok(defaultParams("wall-door").doorWidth >= 0.7);
 });
 
-test("the solid panel is a wall (it snaps) and frames are 6 cm", () => {
+test("the solid panel is a wall (it snaps); walls stand on feet 40 cm deep", () => {
   assert.equal(getProp("wall-solid").category, "wall");
   assert.deepEqual(defaultParams("wall-solid"), { length: 1, height: 2 });
-  near(dimensionsOf(obj("wall-mesh")).d, 0.06);
+  near(dimensionsOf(obj("wall-mesh")).d, 0.4);
+});
+
+test("mesh walls default to orange safety netting in a light pine frame", () => {
+  assert.equal(defaultParams("wall-mesh").mesh, "orange");
+  assert.deepEqual([...getProp("wall-mesh").params.mesh.options], ["orange", "black", "blue"]);
+  assert.equal(defaultParams("wall-mesh-port").mesh, "orange");
+  assert.equal(defaultParams("wall-door").frame, "wood");
 });

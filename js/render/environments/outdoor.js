@@ -95,10 +95,10 @@ function makeTree(r, mats) {
   return tree;
 }
 
-export function outdoor(bay) {
+export function outdoor(bay, { onUpdate } = {}) {
   const group = new THREE.Group();
   const r = rng(11);
-  group.add(buildGround(bay));
+  group.add(buildGround(bay, { onUpdate }));
 
   // Vegetation: instanced flat-shaded bushes and grass tufts on the banks, trees beyond.
   const spots = [];

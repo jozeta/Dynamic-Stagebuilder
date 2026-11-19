@@ -3,24 +3,43 @@ import * as THREE from "three";
 import { BARREL, TYRE, PLANT } from "../../model/props.js";
 import { box, group, mesh, lathe, fitTo } from "./parts.js";
 
-// A 200 l steel drum: two rolling hoops, rolled chimes top and bottom, a recessed lid with two
-// bung caps; paint worn with scratches and rust (material per colour).
+// A 200 l (216.5 l) steel drum after the reference photos: rolled chimes standing proud at top
+// and bottom; at a third and two thirds of the height a main rolling hoop with a smaller
+// corrugation bead either side; a recessed lid with a pressed ring and two bung caps (2" with a
+// raised flange, 3/4" plain). Paint per colour (materials "barrel-…" and "barrel-lid-…").
 export function buildBarrel(obj) {
   const g = group(obj.id);
-  const R = BARREL.diameter / 2, H = BARREL.height;
-  const body = R - 0.008;
-  const hoop = (y) => [[body, y - 0.022], [R - 0.002, y - 0.01], [R, y], [R - 0.002, y + 0.01], [body, y + 0.022]];
+  const color = obj.params.color || "black";
+  const R = BARREL.diameter / 2, H = BARREL.height, body = R - 0.006, lidY = H - 0.016;
+  const bead = (y, w, out) => [[body, y - w], [body + out * 0.6, y - w * 0.5], [body + out, y], [body + out * 0.6, y + w * 0.5], [body, y + w]];
+  const hoops = (y) => [...bead(y - 0.036, 0.007, 0.0035), ...bead(y, 0.013, 0.006), ...bead(y + 0.036, 0.007, 0.0035)];
   const profile = [
-    [0, 0], [body - 0.01, 0], [R, 0.012], [R - 0.004, 0.024], [body, 0.03],
-    ...hoop(H / 3), ...hoop((2 * H) / 3),
-    [body, H - 0.03], [R - 0.004, H - 0.022], [R, H - 0.006], [body - 0.012, H - 0.002], [body - 0.016, H - 0.018], [0, H - 0.018],
+    [0, 0.002], [R - 0.02, 0.002], [R - 0.004, 0.004], [R, 0.012], [R - 0.002, 0.02], [body, 0.028],
+    ...hoops(H / 3), ...hoops((2 * H) / 3),
+    [body, H - 0.028], [R - 0.002, H - 0.02], [R, H - 0.012], [R - 0.004, H - 0.003], [R - 0.012, H], [R - 0.02, H - 0.004],
+    [R - 0.024, lidY + 0.002],
   ];
-  g.add(lathe(profile, `barrel-${obj.params.color || "black"}`, 48));
-  for (const [x, z, r] of [[R * 0.55, 0, 0.032], [-R * 0.6, R * 0.2, 0.02]]) {
-    const bung = mesh(new THREE.CylinderGeometry(r, r, 0.014, 14), "bare-steel");
-    bung.position.set(x, H - 0.012, z);
-    g.add(bung);
-  }
+  // Bottom at y = 0 exactly: the first ring sits at 0.002 above a closing disc at 0.
+  const bodyMesh = lathe(profile, `barrel-${color}`, 56);
+  g.add(bodyMesh);
+  const base = mesh(new THREE.CircleGeometry(R - 0.02, 40), `barrel-${color}`);
+  base.rotation.x = Math.PI / 2;
+  g.add(base);
+  const lid = mesh(new THREE.CircleGeometry(R - 0.024, 48), `barrel-lid-${color}`);
+  lid.rotation.x = -Math.PI / 2;
+  lid.position.y = lidY;
+  g.add(lid);
+  // Bungs on opposite sides of the lid.
+  const big = new THREE.Group();
+  const flange = mesh(new THREE.TorusGeometry(0.036, 0.006, 8, 24), "bare-steel");
+  flange.rotation.x = Math.PI / 2;
+  const cap = mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.01, 6), "bare-steel");
+  cap.position.y = 0.004;
+  big.add(flange, cap);
+  big.position.set(R * 0.62, lidY + 0.004, 0);
+  const small = mesh(new THREE.CylinderGeometry(0.017, 0.017, 0.012, 16), "bare-steel");
+  small.position.set(-R * 0.66, lidY + 0.006, R * 0.08);
+  g.add(big, small);
   return g;
 }
 
@@ -48,23 +67,43 @@ export function buildTyre(obj) {
   return g;
 }
 
-// A crate of rough boards: four horizontal boards per side with small gaps, corner battens and a
-// boarded lid with two cleats.
+// A shipping crate after the reference photos: light pine board sheathing on every face, a
+// picture frame of thicker nailed cleats round each face, diagonal braces on the sides, and
+// stencilled "this side up" arrows and FRAGILE on the front.
 export function buildCrate(obj) {
   const g = group(obj.id);
-  const s = obj.params.size, t = 0.02, bat = 0.045, gap = 0.008;
-  const boards = 4, bh = (s - t - (boards - 1) * gap) / boards;
-  for (let i = 0; i < boards; i++) {
-    const y = i * (bh + gap) + bh / 2;
-    g.add(box(s - 2 * bat, bh, t, "rough-wood", 0, y, -s / 2 + t / 2));
-    g.add(box(s - 2 * bat, bh, t, "rough-wood", 0, y, s / 2 - t / 2));
-    g.add(box(t, bh, s - 2 * bat, "rough-wood", -s / 2 + t / 2, y, 0));
-    g.add(box(t, bh, s - 2 * bat, "rough-wood", s / 2 - t / 2, y, 0));
+  const s = obj.params.size, ct = Math.max(0.018, s * 0.035), cw = Math.max(0.05, s * 0.12);
+  const inner = s - 2 * ct;
+  // Sheathed core: boards on every side, the stencilled face toward the front (−z).
+  const core = mesh(new THREE.BoxGeometry(inner, inner, inner), ["crate-boards", "crate-boards", "crate-boards", "crate-boards", "crate-boards", "crate-stencil"]);
+  core.position.y = s / 2;
+  g.add(core);
+  // A frame of cleats on each face. Faces: normal axis and sign.
+  const half = s / 2, k = half - ct / 2;
+  const faces = [["x", 1], ["x", -1], ["z", 1], ["z", -1], ["y", 1]];
+  for (const [axis, sign] of faces) {
+    const put = (along, len, offA, offB) => {
+      // along: which in-face axis the cleat runs on ("u" or "v"); offA/offB: position in the face.
+      let w, h, d, x, y, z;
+      if (axis === "x") { [w, h, d] = along === "u" ? [ct, cw, len] : [ct, len, cw]; [x, y, z] = [sign * k, half + offB, offA]; }
+      else if (axis === "z") { [w, h, d] = along === "u" ? [len, cw, ct] : [cw, len, ct]; [x, y, z] = [offA, half + offB, sign * k]; }
+      else { [w, h, d] = along === "u" ? [len, ct, cw] : [cw, ct, len]; [x, y, z] = [offA, s - ct / 2, offB]; }
+      g.add(box(w, h, d, "crate-cleat", x, y, z));
+    };
+    const e = half - cw / 2;
+    if (axis === "y") {
+      put("u", s, 0, -e); put("u", s, 0, e); put("v", s - 2 * cw, -e, 0); put("v", s - 2 * cw, e, 0);
+    } else {
+      put("u", s, 0, -e); put("u", s, 0, e); put("v", s - 2 * cw, -e, 0); put("v", s - 2 * cw, e, 0);
+    }
+    // Diagonal brace across the side faces.
+    if (axis === "x") {
+      const len = Math.hypot(s - 2 * cw, s - 2 * cw);
+      const brace = box(ct * 0.9, cw * 0.9, len, "crate-cleat", sign * k, half, 0);
+      brace.rotation.x = Math.PI / 4 * sign;
+      g.add(brace);
+    }
   }
-  for (const [x, z] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) g.add(box(bat, s - t, bat, "rough-wood", (x * (s - bat)) / 2, (s - t) / 2, (z * (s - bat)) / 2));
-  const lid = 5, lw = (s - (lid - 1) * gap) / lid;
-  for (let i = 0; i < lid; i++) g.add(box(lw, t, s, "rough-wood", -s / 2 + lw / 2 + i * (lw + gap), s - t / 2, 0));
-  for (const z of [-s / 3, s / 3]) g.add(box(s * 0.92, t * 0.6, 0.06, "rough-wood", 0, s - t * 0.3, z));
   return g;
 }
 

@@ -36,6 +36,7 @@ npm run lint        # ESLint, including the unsafe-DOM rule
 - `js/ui/`: Låda Glass panels (toolbar, library, inspector, stats, shortcuts, about, dom helpers)
 - `js/demo.js`: the example stage shown on open (until saved projects exist)
 - `vendor/three/0.187.0/`, `vendor/lada-glass/2.3.0/`: self-hosted libraries (don't edit)
+- `vendor/textures/polyhaven/gravelly_sand/`: CC0 photo-scanned ground texture (see its SOURCE.md)
 - `tests/`: `node --test` (model, editor, builders and environments run in Node; Three.js from
   node_modules, pinned to the vendored version)
 - `docs/superpowers/`: the v1 design and the implementation plans
@@ -58,7 +59,9 @@ npm run lint        # ESLint, including the unsafe-DOM rule
   saved with the stage, applied with `engine.setLook` / `environments/common.js applyLook`, never
   undo steps, and undo/redo keep the current ones.
 - **Looks are generated in code** (canvas textures in `render/materials.js` and
-  `environments/*.js`, seeded random), never downloaded. The Outdoor scene follows the reference
+  `environments/*.js`, seeded random). The one exception: photo-scanned **CC0** textures kept in
+  `vendor/textures/<source>/<name>/` with a `SOURCE.md` (source URL, author, licence), loaded
+  same-origin and listed in `sw.js` FILES. Never hotlink, never use non-CC0 or stock images. The Outdoor scene follows the reference
   photo (golden-hour dirt range); keep that feel when changing it.
 - **Environments never touch stage data.** Scene groups: `environmentGroup` (ground, sky, lights)
   and `stageGroup` (props). A wall's mesh colour and frame are wall properties. A test asserts the

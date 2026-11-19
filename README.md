@@ -18,13 +18,14 @@ training, and want a clear briefing sheet without drawing the map by hand.
 - **Prop library**, every prop drawn in 3D at real dimensions:
   - paper: IPSC target, mini target, no-shoot, mini no-shoot (on sticks, adjustable height)
   - steel: IPSC popper, mini popper, round plate, square plate
-  - walls: mesh wall and mesh wall with port (black or blue 10 cm wire mesh, pine or black frame),
+  - walls: mesh wall and mesh wall with port (orange safety netting, or black or blue wire mesh,
+    in a light pine or black frame on feet),
     wooden wall, wooden wall with port; ports are real openings
   - mesh doorway (a wall with a door opening) and solid panel (a grey sheet in a pine frame);
     both snap like the other walls
   - structures: ramp, platform
-  - obstacles and range furniture: worn steel barrel (black, blue, red, green), tyre, tyre stack,
-    board crate, potted plant, car, table, chair, pallets, sandbag wall, traffic cone
+  - obstacles and range furniture: 200 l steel drum (black, blue, red, green), tyre, tyre stack,
+    shipping crate, potted plant, car, table, chair, pallets, sandbag wall, traffic cone
   - fault lines, shooting areas and the start position
 - **Editing by eye:** tap or drag props in, drag them on the ground, rotate them, all with grid and
   angle snapping; multi-select, duplicate, delete, undo and redo.
@@ -227,6 +228,12 @@ aren't in an exported file shows a hint, so you know when to export a backup.
 npm test            # node --test: tests/*.test.mjs
 npm run lint        # ESLint, including the unsafe-DOM rule
 ```
+
+## Credits
+
+- Ground texture: [Gravelly Sand](https://polyhaven.com/a/gravelly_sand) by Dario Barresi,
+  Poly Haven, CC0 (kept in `vendor/textures/polyhaven/gravelly_sand/`).
+- [Three.js](https://threejs.org) (MIT), self-hosted in `vendor/three/`.
 
 ## License
 

@@ -1,14 +1,17 @@
-// The Outdoor range floor and berms (Step 2 of the look): a compacted dirt-and-gravel material
-// with colour, normal, roughness and ambient-occlusion maps baked from a tileable gravel height
-// field (generated in code), large-scale tonal variation (dry dust, compacted earth, damp patches,
-// a worn lane), raw earth faces and patchy grass on the berms, sunk stones in three sizes and
-// grass cards on the banks.
+// The Outdoor range floor and berms: a photo-scanned CC0 sand-and-gravel material (Poly Haven
+// "Gravelly Sand", vendored in vendor/textures/, see SOURCE.md there) with colour, normal,
+// roughness and AO maps; until it has loaded, maps baked in code from a gravel height field stand
+// in. Large-scale tonal variation (dry dust, compacted earth, damp patches, a worn lane) hides the
+// tiling; raw earth faces and patchy grass on the berms, many sunk stones in four sizes and grass
+// cards on the banks.
 import * as THREE from "three";
 import { rng } from "./common.js";
 import { heightAt, groundTone, heightToNormal, cavityAO, BERM, fbm } from "./terrain.js";
 
 const hasDom = typeof document !== "undefined";
-const TILE = 4;          // metres per texture tile (1024 px → 256 px per metre)
+const TILE = 4;          // metres per procedural tile (1024 px → 256 px per metre)
+const PHOTO_TILE = 2.48; // metres per photo-scanned tile (its real-world size)
+const PHOTO = "vendor/textures/polyhaven/gravelly_sand/gravelly_sand";
 const MAP = 1024;
 
 // A tileable gravel height field: grit everywhere and pebbles (wrapped round the edges).
@@ -75,11 +78,54 @@ function bakeGroundMaps() {
 // Ground tone multipliers (vertex colours): dry dust, compacted earth, damp, the worn lane,
 // raw berm earth and grass on the berm tops.
 const TONE = {
-  dry: new THREE.Color("#efe4d2"), compact: new THREE.Color("#cdbaa2"), damp: new THREE.Color("#a99886"),
-  wear: new THREE.Color("#f3ead9"), earth: new THREE.Color("#bb8a62"), grass: new THREE.Color("#8e9a56"),
+  dry: new THREE.Color("#f4ece0"), compact: new THREE.Color("#d9cbb8"), damp: new THREE.Color("#b9aa98"),
+  wear: new THREE.Color("#fbf4e8"), earth: new THREE.Color("#c99a72"), grass: new THREE.Color("#8e9a56"),
 };
 
-export function buildGround(bay) {
+// Load the photo-scanned maps (same origin, cached offline by the service worker) and swap them
+// into the material when ready; `onUpdate` asks for a new frame.
+function loadPhotoMaps(mat, W, D, onUpdate) {
+  if (!hasDom) return;
+  const loader = new THREE.TextureLoader();
+  const prep = (t, color, repeat) => {
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    t.anisotropy = 8;
+    if (color) t.colorSpace = THREE.SRGBColorSpace;
+    t.repeat.set(...repeat);
+    return t;
+  };
+  const rep = [W / PHOTO_TILE, D / PHOTO_TILE];
+  let pending = 3;
+  const done = () => { if (--pending === 0) { mat.needsUpdate = true; onUpdate?.(); } };
+  // Colour map: graded once on load (lighter, a little less saturated) toward the warm tan of a
+  // dusty range floor; the scan itself is a deep red-brown.
+  new THREE.ImageLoader().load(`${PHOTO}_diff_2k.jpg`, (img) => {
+    const c = document.createElement("canvas");
+    c.width = img.width; c.height = img.height;
+    const g = c.getContext("2d");
+    g.drawImage(img, 0, 0);
+    const d = g.getImageData(0, 0, c.width, c.height), px = d.data;
+    for (let i = 0; i < px.length; i += 4) {
+      const r = px[i], gg = px[i + 1], b = px[i + 2], l = 0.3 * r + 0.59 * gg + 0.11 * b;
+      px[i] = Math.min(255, (l + (r - l) * 0.62) * 1.22 + 6);
+      px[i + 1] = Math.min(255, (l + (gg - l) * 0.62) * 1.22 + 6);
+      px[i + 2] = Math.min(255, (l + (b - l) * 0.62) * 1.22 + 8);
+    }
+    g.putImageData(d, 0, 0);
+    mat.map?.dispose();
+    mat.map = prep(new THREE.CanvasTexture(c), true, rep);
+    done();
+  }, undefined, () => done());
+  loader.load(`${PHOTO}_nor_gl_2k.jpg`, (t) => { mat.normalMap?.dispose(); mat.normalMap = prep(t, false, rep); done(); }, undefined, () => done());
+  loader.load(`${PHOTO}_arm_1k.jpg`, (t) => {
+    mat.aoMap?.dispose(); mat.roughnessMap?.dispose();
+    mat.aoMap = prep(t, false, rep);
+    mat.roughnessMap = mat.aoMap;                           // roughness is in the green channel
+    done();
+  }, undefined, () => done());
+}
+
+export function buildGround(bay, { onUpdate } = {}) {
   const group = new THREE.Group();
   const W = bay.width + 120, D = bay.depth + 120;
   const geo = new THREE.PlaneGeometry(W, D, 260, 260);
@@ -112,44 +158,57 @@ export function buildGround(bay) {
   ground.userData.ground = true;
   group.add(ground);
 
-  group.add(...scatterStones(bay), grassCards(bay));
+  const stones = scatterStones(bay);
+  group.add(...stones.meshes, grassCards(bay));
+  loadPhotoMaps(mat, W, D, onUpdate);
   return group;
 }
 
-// A pebble: a lumpy, smooth-shaded rock (not a faceted low-poly blob).
-function pebbleGeometry(seed) {
-  const g = new THREE.IcosahedronGeometry(1, 2);
-  const n = fbm(seed), p = g.attributes.position;
+// A stone: a lumpy, smooth-shaded pebble, or for bigger rocks a broken, angular one with flat
+// fracture faces (cut by random planes), never a faceted low-poly blob.
+function pebbleGeometry(seed, angular = false) {
+  const g = new THREE.IcosahedronGeometry(1, angular ? 3 : 2);
+  const n = fbm(seed), p = g.attributes.position, r = rng(seed);
+  const cuts = angular ? Array.from({ length: 5 }, () => {
+    const v = new THREE.Vector3(r() - 0.5, (r() - 0.3) * 0.8, r() - 0.5).normalize();
+    return { v, d: 0.55 + r() * 0.3 };
+  }) : [];
+  const v = new THREE.Vector3();
   for (let i = 0; i < p.count; i++) {
-    const x = p.getX(i), y = p.getY(i), z = p.getZ(i), k = 1 + n(x * 1.7 + 3, z * 1.7 + y) * 0.28;
-    p.setXYZ(i, x * k, y * k * 0.7, z * k);
+    v.set(p.getX(i), p.getY(i), p.getZ(i));
+    v.multiplyScalar(1 + n(v.x * 1.7 + 3, v.z * 1.7 + v.y) * (angular ? 0.18 : 0.28));
+    for (const c of cuts) { const over = v.dot(c.v) - c.d; if (over > 0) v.addScaledVector(c.v, -over); }
+    p.setXYZ(i, v.x, v.y * 0.72, v.z);
   }
   g.computeVertexNormals();
   return g;
 }
 
-const STONE_COLORS = ["#9a8b78", "#8c7d6b", "#a89882", "#7a6d5e", "#b09f88", "#837667"].map((h) => new THREE.Color(h));
+const STONE_COLORS = ["#b6aa98", "#a59a8a", "#c4b8a4", "#958a7c", "#cbbfac", "#a39484", "#8d8478"].map((h) => new THREE.Color(h));
 
-// Stones in three sizes, randomly turned and sunk into the ground: denser toward the berms,
-// sparser in the worn lane; the larger ones cast shadows.
+// Stones in four sizes, randomly turned and sunk into the ground all over the range: grit and
+// small rocks everywhere (denser toward the berms, a little sparser in the worn lane), scattered
+// fist-sized rocks, and larger ones at the berms' foot. The bigger ones cast shadows.
 function scatterStones(bay) {
   const r = rng(83);
   const sizes = [
-    { count: 9000, min: 0.008, max: 0.025, shadow: false },
-    { count: 1400, min: 0.03, max: 0.08, shadow: true },
-    { count: 90, min: 0.12, max: 0.32, shadow: true, foot: true },
+    { count: 14000, min: 0.008, max: 0.025, shadow: false },
+    { count: 4500, min: 0.025, max: 0.07, shadow: true },
+    { count: 700, min: 0.07, max: 0.15, shadow: true, anywhere: true },
+    { count: 110, min: 0.15, max: 0.35, shadow: true, foot: true },
   ];
-  const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.82 });
+  const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.85 });
   const m = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3(), p = new THREE.Vector3(), e = new THREE.Euler();
-  return sizes.map((s, si) => {
-    const mesh = new THREE.InstancedMesh(pebbleGeometry(400 + si), mat, s.count);
+  const meshes = sizes.map((s, si) => {
+    const mesh = new THREE.InstancedMesh(pebbleGeometry(400 + si, si >= 2), mat, s.count);
     let placed = 0, tries = 0;
     while (placed < s.count && tries++ < s.count * 12) {
       const x = (r() - 0.5) * (bay.width + 2 * (BERM.setback + BERM.run + 2)), z = -6 + r() * (bay.depth + BERM.setback + BERM.run + 8);
       const y = heightAt(x, z, bay);
       const edge = Math.max(Math.abs(x) - bay.width / 2, z - bay.depth, 0);     // metres past the bay edge
       const nearBerm = Math.min(1, edge / BERM.setback);
-      const keep = s.foot ? (y > 0.05 && y < 1.4) : (0.35 + 0.65 * nearBerm) * (1 - groundTone(x, z, bay).wear * 0.75);
+      const keep = s.foot ? (y > 0.05 && y < 1.4) : s.anywhere ? (1 - groundTone(x, z, bay).wear * 0.5)
+        : (0.45 + 0.55 * nearBerm) * (1 - groundTone(x, z, bay).wear * 0.6);
       if (r() > keep) continue;
       const k = s.min + (s.max - s.min) * r() ** 2;
       e.set(r() * 6.28, r() * 6.28, r() * 6.28);
@@ -163,6 +222,7 @@ function scatterStones(bay) {
     mesh.receiveShadow = true;
     return mesh;
   });
+  return { meshes, material: mat };
 }
 
 // Grass cards: two crossed quads with a painted blade texture (alpha tested), in dry yellow-green

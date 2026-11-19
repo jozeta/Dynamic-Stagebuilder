@@ -9,10 +9,10 @@ const FACTORIES = { technical, outdoor };
 export const ENVIRONMENT_NAMES = Object.keys(FACTORIES);
 export const ENVIRONMENT_LABELS = { technical: "Technical", outdoor: "Outdoor" };
 
-export function createEnvironment(name, bay) {
+export function createEnvironment(name, bay, options = {}) {
   const make = FACTORIES[name];
   if (!make) throw new Error(`Unknown environment: ${name}`);
-  const env = make(bay);
+  const env = make(bay, options);
   return {
     ...env,
     dispose() {

@@ -65,7 +65,7 @@ export function createEngine(canvas) {
       for (const l of env.lights) { groups.environment.remove(l); if (l.target) groups.environment.remove(l.target); }
       env.dispose();
     }
-    env = createEnvironment(name, bay);
+    env = createEnvironment(name, bay, { onUpdate: requestRender });
     groups.environment.add(env.group);
     for (const l of env.lights) { groups.environment.add(l); if (l.target) groups.environment.add(l.target); }
     scene.background = env.background;
