@@ -4,11 +4,12 @@
 import { dimensionsOf, getProp, STICK } from "./props.js";
 import { arrayCounts } from "./arrays.js";
 
-const ROUND = new Set(["barrel", "tyre", "tyre-stack", "plate-round", "plant-palm", "cone"]);
+const ROUND = new Set(["shooting-position", "barrel", "tyre", "tyre-stack", "plate-round", "plant-palm", "cone"]);
 const CARD_DEPTH = 0.03;   // paper targets are drawn as their thin face, not their stand
 
 function style(o) {
   const p = getProp(o.type);
+  if (p.scoring === "position") return "position";
   if (p.scoring === "paper") return arrayCounts(o).paper ? "paper" : "noshoot";
   if (p.scoring === "steel") return "steel";
   if (p.category === "wall") return "wall";

@@ -25,7 +25,12 @@ export function attachShortcuts({ editor, rig, onEscape }) {
     if (k === "q") return d({ type: "rotate", by: -step });
     if (k === "e") return d({ type: "rotate", by: step });
     if (k === "f") { e.preventDefault(); rig.frameAll(editor.stage()); return; }
+    if (k === "[" || k === "]") { e.preventDefault(); document.getElementById("toolbar")?.eyeSteps?.step(k === "]" ? 1 : -1); return; }
     const n = Number(k);
-    if (n >= 1 && n <= PRESETS.length) { e.preventDefault(); rig.preset(PRESETS[n - 1], editor.stage()); }
+    if (n >= 1 && n <= PRESETS.length) {
+      e.preventDefault();
+      const steps = document.getElementById("toolbar")?.eyeSteps;
+      if (PRESETS[n - 1] === "shooter" && steps) steps.reset(); else { steps?.hide(); rig.preset(PRESETS[n - 1], editor.stage()); }
+    }
   });
 }

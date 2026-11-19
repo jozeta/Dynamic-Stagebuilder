@@ -6,6 +6,7 @@
 // (Appendix C3a). The appendix drawings are images, so these are the commonly published sizes.
 
 import { PAPER_SIZES, TARGET_STYLES, PRESENTATIONS, HARD_COVERS, paperSize, arrayExtent } from "./arrays.js";
+import { STANCES, positionSize } from "./positions.js";
 export { PAPER_SIZES, TARGET_STYLES, paperSize };
 
 export const TARGET_SIZES = Object.freeze({
@@ -109,6 +110,9 @@ const wallSize = {
 };
 
 const defs = [
+  { type: "shooting-position", name: "Shooting position", category: "marking", scoring: "position",
+    params: { stance: { default: "standing", options: STANCES.map((s) => s.id) }, pitch: { default: 0, min: -45, max: 30, step: 1 } },
+    note: "A place the shooter shoots from. Shooter's eye steps through the positions in number order." },
   { type: "paper-ipsc", name: "IPSC target", category: "paper", scoring: "paper", params: mount },
   { type: "paper-mini", name: "IPSC mini target", category: "paper", scoring: "paper", params: mount },
   { type: "popper", name: "IPSC popper", category: "steel", scoring: "steel",
@@ -219,6 +223,7 @@ export function dimensionsOf(obj) {
     case "pallet": [w, h, d] = [PALLET.length, PALLET.height * p.count, PALLET.width]; break;
     case "sandbags": [w, h, d] = [p.length, SANDBAG.height * p.rows, SANDBAG.depth]; break;
     case "cone": [w, h, d] = [CONE.diameter, CONE.height, CONE.diameter]; break;
+    case "shooting-position": { const s = positionSize(p.stance); [w, h, d] = [s.w, s.h, s.d]; break; }
     case "texas-star": {
       const s = MOVING.star, pts = starPlates(p.plates);
       w = Math.max(s.base, 2 * Math.max(...pts.map(([x]) => Math.abs(x))) + s.plate);

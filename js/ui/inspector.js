@@ -9,10 +9,10 @@ const PARAM_LABELS = {
   presentation: "Presentation", hardCover: "Hard cover", mountHeight: "Stand height (m)", style: "Target style", baseHeight: "Base height (m)", size: "Size (m)", length: "Length (m)",
   height: "Height (m)", mesh: "Mesh colour", frame: "Frame", portWidth: "Port width (m)",
   portHeight: "Port height (m)", portBottom: "Port bottom (m)", count: "Count", paint: "Paint", color: "Colour", width: "Width (m)", rows: "Rows",
-  doorWidth: "Door width (m)", plates: "Plates", model: "Model", doorHeight: "Door height (m)",
+  doorWidth: "Door width (m)", plates: "Plates", model: "Model", stance: "Stance", pitch: "Look up/down (°)", doorHeight: "Door height (m)",
 };
 const OPTION_LABELS = { classic: "Classic (octagon)", head: "With head", orange: "Orange", black: "Black", blue: "Blue", wood: "Wood", white: "White", yellow: "Yellow", red: "Red",
-  green: "Green", grey: "Grey", rust: "Rusty", sedan: "Saloon", hatchback: "Hatchback", pickup: "Pickup", van: "Van",
+  green: "Green", grey: "Grey", rust: "Rusty", standing: "Standing", crouching: "Crouching", kneeling: "Kneeling", sitting: "Sitting", prone: "Prone", sedan: "Saloon", hatchback: "Hatchback", pickup: "Pickup", van: "Van",
   ...Object.fromEntries([...PRESENTATIONS, ...HARD_COVERS].map((p) => [p.id, p.name])) };
 const GRID_OPTIONS = [[0, "Off"], [0.1, "0.1 m"], [0.25, "0.25 m"], [0.5, "0.5 m"], [1, "1 m"]];
 const ANGLE_OPTIONS = [[0, "Off"], [5, "5°"], [15, "15°"], [45, "45°"], [90, "90°"]];
@@ -40,7 +40,7 @@ export function createInspector(root, { editor }) {
   function objectPanel(o, angle) {
     const def = getProp(o.type);
     const nodes = [h("h2", { class: "lg-subtitle panel-title", text: def.name })];
-    if (labelPrefix(o)) {
+    if (labelPrefix(o) !== null) {
       nodes.push(field("Label", h("input", { class: "lg-input", value: o.label ?? "", maxlength: "12", dataset: { field: "label" },
         placeholder: "Automatic", onchange: (e) => d({ type: "setLabel", id: o.id, text: e.target.value }) })));
     }

@@ -12,7 +12,7 @@ function mapBox(stage) {
   const r = mapRegion(stage, "content");
   return { width: MAP_WIDTH, height: Math.round(Math.min(165, Math.max(90, (MAP_WIDTH * (r.maxZ - r.minZ)) / (r.maxX - r.minX)))) };
 }
-const FILL = { paper: "#c9a273", noshoot: "#ffffff", steel: "#8d9096", wall: "#1d1f22", obstacle: "#6f5638" };
+const FILL = { paper: "#c9a273", noshoot: "#ffffff", steel: "#8d9096", wall: "#1d1f22", obstacle: "#6f5638", position: "#2f7bff" };
 
 function s(tag, attrs = {}, text) {
   const el = document.createElementNS(SVG, tag);
@@ -42,7 +42,9 @@ export function mapSvg(stage) {
       }
       case "rect": layers.obj.append(s("rect", { x: -it.w / 2, y: -it.h / 2, width: it.w, height: it.h, fill: FILL[it.style],
         stroke: it.style === "noshoot" ? "#222" : "none", "stroke-width": 0.25, transform: `translate(${it.x} ${it.y}) rotate(${it.rotation})` })); break;
-      case "circle": layers.obj.append(s("circle", { cx: it.x, cy: it.y, r: it.r, fill: FILL[it.style] })); break;
+      case "circle": layers.obj.append(it.style === "position"
+        ? s("circle", { cx: it.x, cy: it.y, r: it.r, fill: "none", stroke: FILL.position, "stroke-width": 0.5 })
+        : s("circle", { cx: it.x, cy: it.y, r: it.r, fill: FILL[it.style] })); break;
       case "label": layers.text.append(s("text", { x: it.x, y: it.y - 0.5, "font-size": 2.6, "font-weight": 700, "text-anchor": "middle",
         fill: "#111", stroke: "#fff", "stroke-width": 0.6, "paint-order": "stroke" }, it.text)); break;
       case "start": {
@@ -79,6 +81,7 @@ function legend() {
     ["Obstacle", () => [s("rect", { x: 1.5, y: 0.6, width: 5, height: 2.8, fill: FILL.obstacle })]],
     ["Fault line", () => [s("line", { x1: 0.5, y1: 2, x2: 7.5, y2: 2, stroke: "#d8322a", "stroke-width": 0.8 })]],
     ["Shooting area", () => [s("rect", { x: 0.8, y: 0.6, width: 6.4, height: 2.8, fill: "rgba(216,50,42,0.07)", stroke: "#d8322a", "stroke-width": 0.4, "stroke-dasharray": "1.2 0.8" })]],
+    ["Shooting position", () => [s("circle", { cx: 4, cy: 2, r: 1.5, fill: "none", stroke: FILL.position, "stroke-width": 0.5 })]],
     ["Start", () => [s("rect", { x: 2.4, y: 0.4, width: 3.2, height: 3.2, fill: "none", stroke: "#111", "stroke-width": 0.3 }), s("path", { d: "M4 1 L4.8 3 L3.2 3Z", fill: "#111" })]],
   ];
   return h("ul", { class: "print-legend" }, entries.map(([label, draw]) => h("li", {}, [sw(draw), h("span", { text: label })])));

@@ -1,6 +1,7 @@
 // Camera navigation (orbit, pan, zoom; one finger rotates, two pan and zoom on touch) and presets.
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { obliqueView, stageArea, VIEW } from "./view-math.js";
+import { viewFromPosition, anglesFromView } from "../model/positions.js";
 
 export const PRESETS = ["iso", "top", "front", "shooter"];
 export const PRESET_LABELS = { iso: "Isometric", top: "Top", front: "Front", shooter: "Shooter's eye" };
@@ -12,7 +13,7 @@ export function createCameraRig(engine, domElement) {
   controls.enableDamping = false;
   controls.screenSpacePanning = false;
   controls.maxPolarAngle = Math.PI / 2 - 0.02;   // never below the ground
-  controls.minDistance = 0.5;
+  controls.minDistance = 0.05;   // the shooter's eye turns in place round a point 10 cm ahead
   controls.maxDistance = 250;
   controls.addEventListener("change", () => engine.requestRender());
 
@@ -67,5 +68,16 @@ export function createCameraRig(engine, domElement) {
     look([cx + dir.x * d, Math.max(dir.y * d, 2), cz + dir.z * d], [cx, 0, cz]);
   }
 
-  return { controls, preset, frameAll, dispose: () => controls.dispose() };
+  // Shooter's eye from a shooting position: its eye height, facing and look angle.
+  function viewFrom(o) {
+    lens(VIEW.eyeFov);
+    const v = viewFromPosition(o);
+    look(v.eye, v.target);
+  }
+  /** Where the camera looks now, as a shooting position's facing and pitch. */
+  function currentAngles() {
+    return anglesFromView(camera.position.toArray(), controls.target.toArray());
+  }
+
+  return { controls, preset, frameAll, viewFrom, currentAngles, dispose: () => controls.dispose() };
 }

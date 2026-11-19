@@ -6,6 +6,7 @@ export const SHORTCUTS = Object.freeze([
   ["Shift while dragging", "Move slowly, without snapping"], ["Shift-click", "Add to or remove from the selection"],
   ["Enter", "Finish a fault line or shooting area"], ["Escape", "Cancel drawing or placing; clear the selection"],
   ["F", "Frame everything"], ["1 2 3 4", "Isometric, Top, Front, Shooter's eye"],
+  ["[ / ]", "In Shooter's eye: previous / next shooting position"],
 ]);
 
 export const HELP_TOPICS = Object.freeze([
@@ -27,7 +28,8 @@ export const HELP_TOPICS = Object.freeze([
     tips: ["Turn Objects off in the toolbar to place walls freely.", "Port size and height are set in the inspector."] },
   { id: "markings", title: "Fault lines, areas and the start", icon: "line", art: "markings",
     text: ["Stage markings are at the top of the props panel. Fault line: tap the points on the ground, then press Enter or tap Finish. Shooting area: tap the corners and finish the same way.",
-      "Start position: tap where the shooter starts. The Shooter's eye camera stands there."],
+      "Start position: tap where the shooter starts. Shooting position: tap each place the shooter shoots from; they are numbered 1, 2, 3… and each has a facing, a look up/down angle and a stance (standing, crouching, kneeling, sitting or prone).",
+      "In Shooter's eye, the arrows next to the view buttons (or [ and ]) step from the start to each shooting position, at that stance's eye height. Look around, then Save view stores the facing and angle for that position."],
     tips: ["Escape or Cancel stops drawing.", "Drag a finished line or area to move it."] },
   { id: "targets", title: "Targets, no-shoots and arrays", icon: "hash", art: "arrays",
     text: ["The IPSC target and the mini target have a Presentation choice: a target, a no-shoot, a target with no-shoots over its lower half or sides, two overlapping targets, two targets with a no-shoot between, or two stacked one above the other.",

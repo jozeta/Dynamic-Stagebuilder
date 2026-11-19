@@ -10,6 +10,7 @@ export const MARKINGS = Object.freeze([
   Object.freeze({ id: "fault-line", name: "Fault line" }),
   Object.freeze({ id: "shooting-area", name: "Shooting area" }),
   Object.freeze({ id: "start", name: "Start position" }),
+  Object.freeze({ id: "shooting-position", name: "Shooting position" }),
 ]);
 
 export const LIBRARY_GROUPS = Object.freeze([

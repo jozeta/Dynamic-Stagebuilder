@@ -4,7 +4,8 @@
 import { getProp } from "./props.js";
 import { arrayCounts } from "./arrays.js";
 
-const PREFIX = { paper: "T", steel: "P", noshoot: "NS" };
+// Shooting positions are plain numbers (1, 2, 3…): an empty prefix.
+const PREFIX = { paper: "T", steel: "P", noshoot: "NS", position: "" };
 const MAX_LABEL = 12;
 
 /** The label prefix for an object (or a prop type): a paper array that is only no-shoots is NS. */
@@ -24,7 +25,7 @@ const labelFor = (p, n, k) => (k > 1 ? `${p}${n}–${n + k - 1}` : `${p}${n}`);
 // can be (otherwise just its first number), which keeps renumbering quick.
 const MAX_SPAN = 4;
 function numbersOf(label, prefix) {
-  const m = typeof label === "string" && label.match(/^([A-Z]+)(\d+)(?:–(\d+))?$/);
+  const m = typeof label === "string" && label.match(/^([A-Z]*)(\d+)(?:–(\d+))?$/);
   if (!m || m[1] !== prefix) return [];
   const a = Number(m[2]), b = m[3] === undefined ? a : Number(m[3]);
   if (!(b >= a && b - a < MAX_SPAN)) return [a];
@@ -40,13 +41,13 @@ export function assignLabels(stage) {
   const highest = {};
   for (const o of stage.objects) {
     const p = labelPrefix(o);
-    const n = p && numberOf(o.label, p);
+    const n = p !== null && numberOf(o.label, p);
     if (n) highest[p] = Math.max(highest[p] || 0, n);
   }
   let changed = false;
   const objects = stage.objects.map((o) => {
     const p = labelPrefix(o);
-    if (!p || o.label !== null) return o;
+    if (p === null || o.label !== null) return o;
     changed = true;
     const k = span(o, p), n = (highest[p] || 0) + 1;
     highest[p] = n + k - 1;
@@ -59,12 +60,12 @@ export function renumber(stage) {
   const taken = {};
   for (const o of stage.objects) {
     const p = labelPrefix(o);
-    if (p && o.labelManual) for (const n of numbersOf(o.label, p)) (taken[p] ||= new Set()).add(n);
+    if (p !== null && o.labelManual) for (const n of numbersOf(o.label, p)) (taken[p] ||= new Set()).add(n);
   }
   const next = {};
   const objects = stage.objects.map((o) => {
     const p = labelPrefix(o);
-    if (!p || o.labelManual) return o;
+    if (p === null || o.labelManual) return o;
     const k = span(o, p);
     let n = (next[p] || 0) + 1;
     while ([...Array(k)].some((_, i) => taken[p]?.has(n + i))) n++;

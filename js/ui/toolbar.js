@@ -2,8 +2,9 @@
 import { h, icon } from "./dom.js";
 import { canUndo, canRedo } from "../model/history.js";
 import { PRESETS, PRESET_LABELS } from "../render/camera.js";
+import { createEyeSteps } from "./eye-steps.js";
 
-export function createToolbar(root, { editor, rig, status, onAbout, onHelp, onBriefing, onPrint, onProjects, onSettings }) {
+export function createToolbar(root, { editor, rig, status, onViewing = () => {}, onAbout, onHelp, onBriefing, onPrint, onProjects, onSettings }) {
   // Camera presets live in a bar over the 3D view (#camera-slot); the rest in the toolbar.
   const btn = (name, label, onclick, extra = {}) =>
     h("button", { type: "button", class: "lg-btn lg-btn-ghost tool", "aria-label": label, onclick, ...extra }, [icon(name), h("span", { text: label.split(" (")[0] })]);
@@ -21,10 +22,12 @@ export function createToolbar(root, { editor, rig, status, onAbout, onHelp, onBr
 
   const cams = h("div", { class: "camera-bar lg-glass", role: "group", "aria-label": "Camera" }, [
     ...PRESETS.map((p, i) => h("button", { type: "button", class: "lg-btn lg-btn-ghost tool tool-text", title: `${PRESET_LABELS[p]} (${i + 1})`,
-      onclick: () => rig.preset(p, editor.stage()), text: PRESET_LABELS[p] })),
+      onclick: () => (p === "shooter" ? eyeSteps.reset() : (eyeSteps.hide(), rig.preset(p, editor.stage()))), text: PRESET_LABELS[p] })),
     h("button", { type: "button", class: "lg-btn lg-btn-ghost tool-text", title: "Frame all (F)", onclick: () => rig.frameAll(editor.stage()) }, [icon("frame"), "Frame all"]),
   ]);
   document.getElementById("camera-slot").append(cams);
+  const eyeSteps = createEyeSteps({ editor, rig, bar: cams, onViewing });
+  root.eyeSteps = eyeSteps;
 
   root.append(
     h("div", { class: "brand" }, [h("span", { class: "brand-name", text: "Dynamic-Stagebuilder" })]),
@@ -35,6 +38,7 @@ export function createToolbar(root, { editor, rig, status, onAbout, onHelp, onBr
   );
 
   return function update(state) {
+    eyeSteps.update();
     undoB.disabled = !canUndo(state.history);
     redoB.disabled = !canRedo(state.history);
     const anyObj = state.selection.some((id) => state.history.present.objects.some((o) => o.id === id));

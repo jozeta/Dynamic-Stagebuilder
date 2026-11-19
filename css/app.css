@@ -61,6 +61,13 @@ body { background: var(--lg-bg); overflow: hidden; }
 .proj-actions .lg-btn { justify-content: flex-start; }
 .projects-panel .proj-row { display: grid; gap: 6px; }
 .projects-panel .proj-buttons { flex-wrap: wrap; }
+.stage-library { display: grid; gap: var(--lg-space-s); margin-top: var(--lg-space-l); padding-top: var(--lg-space-m); border-top: 1px solid var(--lg-border); }
+.stage-library-title { margin: 0; }
+.stage-library .lg-select { width: 100%; }
+.lib-stages { display: grid; gap: var(--lg-space-xs); }
+.lib-stage { display: grid; gap: 4px; padding: 8px 10px; border: 1px solid var(--lg-border); border-radius: var(--lg-radius-control); background: var(--lg-surface); }
+.lib-stage-summary { color: var(--lg-text); font-size: var(--lg-fs-small); line-height: 1.4; }
+.lib-stage .lg-btn { justify-self: start; }
 
 .small-screen { display: none; }
 @media (max-width: 767px) {
@@ -119,6 +126,9 @@ body { background: var(--lg-bg); overflow: hidden; }
 .camera-bar .lg-btn { font-size: var(--lg-fs-small); color: var(--lg-text); }
 /* A firmer backing so the view buttons stay readable over bright ground. */
 .camera-bar { background: color-mix(in srgb, var(--lg-bg) 78%, transparent); }
+.eye-steps { display: flex; align-items: center; gap: 2px; padding-left: 6px; margin-left: 2px; border-left: 1px solid var(--lg-border); }
+.eye-steps[hidden] { display: none; }
+.eye-step-label { font-size: var(--lg-fs-small); color: var(--lg-text); padding: 0 4px; white-space: nowrap; }
 
 @media (max-width: 1439px) { .brand { display: none; } }
 
@@ -167,7 +177,7 @@ body { background: var(--lg-bg); overflow: hidden; }
 .settings-body { display: grid; gap: var(--lg-space-s); }
 .settings-row { display: grid; grid-template-columns: minmax(0, 1fr) 4em; grid-template-areas: "label value" "control control"; align-items: center; gap: 2px var(--lg-space-s); }
 .settings-row > label, .settings-row > .settings-label { grid-area: label; }
-.settings-row > input[type=range], .settings-row > .lg-segmented { grid-area: control; }
+.settings-row > input[type=range], .settings-row > .lg-segmented, .settings-row > .lg-select { grid-area: control; }
 .settings-row > output { grid-area: value; }
 .settings-row > .lg-toggle { grid-area: value; justify-self: end; }
 .settings-actions { margin-top: var(--lg-space-m); }

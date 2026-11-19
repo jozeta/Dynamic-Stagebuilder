@@ -153,6 +153,13 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
       const relabel = paper && !o.labelManual && arrayCounts({ type: o.type, params: next }).paper !== arrayCounts(o).paper;
       edit(updateObject(present(), id, { params: next, ...(relabel ? { label: null } : {}) }));
     },
+    // Shooter's eye → Save view: the facing and look angle of a shooting position, one undo step.
+    setView({ id, rotation, pitch }) {
+      const o = present().objects.find((x) => x.id === id);
+      if (!o || o.type !== "shooting-position") return;
+      const r = ((Math.round(rotation) % 360) + 360) % 360;
+      edit(updateObject(present(), id, { rotation: r, params: cleanParams(o.type, { pitch: Math.round(pitch) }) }));
+    },
     delete({ ids = state.selection }) { edit(removeObjects(present(), ids)); state.selection = []; },
     duplicate({ ids = state.selection }) {
       const r = duplicateObjects(present(), ids);

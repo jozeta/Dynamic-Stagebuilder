@@ -8,7 +8,7 @@ test("the library groups: stage markings first, then every prop category in orde
   assert.deepEqual(LIBRARY_GROUPS.map((g) => g.id), ["markings", "paper", "steel", "moving", "wall", "structure", "obstacle"]);
   const listed = LIBRARY_GROUPS.flatMap((g) => g.items);
   for (const t of Object.keys(PROPS)) assert.ok(listed.includes(t), t);
-  assert.deepEqual(LIBRARY_GROUPS[0].items, ["fault-line", "shooting-area", "start"]);
+  assert.deepEqual(LIBRARY_GROUPS[0].items, ["fault-line", "shooting-area", "start", "shooting-position"]);
 });
 
 test("a hidden category hides all its props; a hidden prop hides only itself", () => {

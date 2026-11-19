@@ -26,6 +26,7 @@ import { exportFileName, stageToJson } from "./storage/files.js";
 import { createProjects } from "./ui/projects.js";
 import { makeCollapsible } from "./ui/panels.js";
 import { createHelp } from "./ui/help.js";
+import { libraryStage } from "./model/stage-library.js";
 import { loadHidden, saveHidden } from "./ui/prefs.js";
 import { createAutosave } from "./storage/autosave.js";
 
@@ -65,6 +66,7 @@ const updaters = [];
 function render(state) {
   const stage = state.history.present;
   view.sync(stage);
+  if (viewing) { const v = viewing; viewing = null; viewingFrom(v); }   // rebuilt nodes: keep the viewed marker hidden
   const key = `${stage.settings.environment}|${stage.bay.width}|${stage.bay.depth}`;
   if (key !== envKey) { envKey = key; lookShown = stage.settings.look; engine.setEnvironment(stage.settings.environment, stage.bay, stage.settings.look); }
   else if (stage.settings.look !== lookShown) { lookShown = stage.settings.look; engine.setLook(stage.settings.look, stage.bay); }
@@ -112,6 +114,7 @@ function snapshot() {
   if (!canvas.clientWidth || !canvas.clientHeight) return null;   // hidden (already in print layout): no picture
   const cam = engine.camera.position.clone();
   const target = rig.controls.target.clone();
+  const helperWas = engine.groups.helper.visible;
   engine.groups.helper.visible = false;
   rig.preset("iso", editor.stage());
   rig.frameAll(editor.stage());
@@ -123,7 +126,7 @@ function snapshot() {
   const url = canvas.toDataURL("image/jpeg", 0.92);    // much smaller than PNG, so it loads in time
   engine.renderer.setPixelRatio(ratio);
   engine.renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
-  engine.groups.helper.visible = true;
+  engine.groups.helper.visible = helperWas;
   engine.camera.position.copy(cam);
   rig.controls.target.copy(target);
   rig.controls.update();
@@ -152,6 +155,17 @@ window.addEventListener("beforeprint", () => {
   printedStage = editor.stage();
   renderPrint(document.getElementById("print"), printedStage, snapshot());
 });
+
+// While Shooter's eye looks from a shooting position, that position's own marker and the selection
+// helpers are hidden (they would sit right in front of the camera).
+let viewing = null;
+function viewingFrom(id) {
+  if (viewing === id) return;
+  viewing = id;
+  for (const node of engine.groups.stage.children) node.visible = !id || node.userData.id !== id;
+  engine.groups.helper.visible = !id;
+  engine.requestRender();
+}
 
 let picking = null;
 let briefing = null;
@@ -196,6 +210,8 @@ async function addProject(stage) {
   await store.put(projectRecord(stage, { now: Date.now() }));
   await openProject(stage.id);
 }
+// A library stage opens in the surroundings and light you're using now.
+const withView = (s) => { const cur = editor.stage().settings; return { ...s, settings: { ...s.settings, environment: cur.environment, look: cur.look } }; };
 const freshStage = () => {
   const s = createStage({ name: "New stage" });
   const cur = editor.stage().settings;
@@ -203,6 +219,7 @@ const freshStage = () => {
 };
 
 const projects = createProjects({
+  onOpenLibrary: (spec) => addProject(withView(libraryStage(spec))),
   panel: document.getElementById("projects"),
   hide: [document.getElementById("library-body")],
   onToggle: (open) => document.querySelector('[aria-label="Projects"].tool')?.setAttribute("aria-pressed", String(open)),
@@ -246,7 +263,7 @@ const library = createLibrary(document.getElementById("library-body"), { editor,
 updaters.push(
   createToolbar(document.getElementById("toolbar"), {
     editor, rig, status, onAbout: () => about.open(), onHelp: () => help.open(), onBriefing: () => briefing.open(), onPrint: () => printBrief(),
-    onProjects: () => projects.open(), onSettings: () => settings.open(),
+    onProjects: () => projects.open(), onSettings: () => settings.open(), onViewing: viewingFrom,
   }),
   library,
   createInspector(document.getElementById("inspector-body"), { editor }),
