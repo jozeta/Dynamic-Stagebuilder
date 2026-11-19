@@ -4,7 +4,7 @@ const SPEC = {
   hour: [6, 20], sun: [0, 2], ambient: [0, 2], softness: [0, 8], haze: [0, 1], exposure: [0.5, 1.6],
 };
 
-export const LOOK_DEFAULTS = Object.freeze({ hour: 16.5, sun: 1, ambient: 1, shadows: true, softness: 1.5, haze: 0.25, exposure: 0.92 });
+export const LOOK_DEFAULTS = Object.freeze({ hour: 18.25, sun: 1, ambient: 1, shadows: true, softness: 1, haze: 0.2, exposure: 1 });
 
 export function cleanLook(look) {
   const src = look && typeof look === "object" ? look : {};
@@ -31,7 +31,8 @@ export function sunFromHour(hour) {
   const a = ((h - NOON) / HALF_DAY) * (Math.PI / 2);                 // −90° morning … +90° evening
   const elevation = Math.max(2, MAX_ELEVATION * Math.cos(a));
   const e = (elevation * Math.PI) / 180;
-  const horiz = [-Math.sin(a), -0.6 * Math.cos(a)];
+  // The extra up-range lean keeps late-afternoon shadows falling diagonally across the stage.
+  const horiz = [-Math.sin(a), -Math.cos(a) - 0.4];
   const hl = Math.hypot(...horiz);
   const direction = [(horiz[0] / hl) * Math.cos(e), Math.sin(e), (horiz[1] / hl) * Math.cos(e)];
   return { elevation, direction, warmth: 1 - elevation / MAX_ELEVATION, strength: 0.3 + 0.7 * Math.sqrt(Math.sin(e)) };

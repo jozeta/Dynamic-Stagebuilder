@@ -47,6 +47,7 @@ const FILES = [
   "js/render/picking.js",
   "js/render/rotation.js",
   "js/render/stage-view.js",
+  "js/render/view-math.js",
   "js/storage/autosave.js",
   "js/storage/db.js",
   "js/storage/files.js",

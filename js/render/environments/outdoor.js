@@ -38,11 +38,29 @@ function dirt(g, s, r) {
 function paintSky(g, s, warmth) {
   const mix = (a, b, t) => `rgb(${a.map((v, i) => Math.round(v + (b[i] - v) * t)).join(",")})`;
   const grd = g.createLinearGradient(0, 0, 0, s);
-  grd.addColorStop(0, mix([127, 169, 214], [86, 112, 168], warmth));
-  grd.addColorStop(0.55, mix([185, 207, 224], [214, 170, 140], warmth));
-  grd.addColorStop(0.85, mix([236, 217, 184], [244, 176, 110], warmth));
-  grd.addColorStop(1, mix([243, 220, 176], [250, 190, 120], warmth));
+  grd.addColorStop(0, mix([138, 168, 200], [112, 128, 164], warmth));
+  grd.addColorStop(0.5, mix([196, 204, 206], [214, 182, 150], warmth));
+  grd.addColorStop(0.82, mix([232, 214, 182], [238, 186, 128], warmth));
+  grd.addColorStop(1, mix([236, 220, 190], [242, 200, 150], warmth));
   g.fillStyle = grd; g.fillRect(0, 0, s, s);
+}
+
+// A late-afternoon sky as an equirectangular image for reflections (IBL): blue overhead, warm
+// haze at the horizon, a bright sun glow low in the west, dusty ground below. Generated in code.
+function reflectionSky() {
+  const t = canvasTexture(512, (g, s) => {
+    const sky = g.createLinearGradient(0, 0, 0, s / 2);
+    sky.addColorStop(0, "#7f9cc2"); sky.addColorStop(0.75, "#d8c4a4"); sky.addColorStop(1, "#f2d2a0");
+    g.fillStyle = sky; g.fillRect(0, 0, s, s / 2);
+    const ground = g.createLinearGradient(0, s / 2, 0, s);
+    ground.addColorStop(0, "#b8946a"); ground.addColorStop(1, "#6e5a44");
+    g.fillStyle = ground; g.fillRect(0, s / 2, s, s / 2);
+    const sun = g.createRadialGradient(s * 0.75, s * 0.4, 0, s * 0.75, s * 0.4, s * 0.12);
+    sun.addColorStop(0, "rgba(255,236,200,1)"); sun.addColorStop(1, "rgba(255,210,150,0)");
+    g.fillStyle = sun; g.fillRect(0, 0, s, s);
+  }, [1, 1], { seed: 61 });
+  if (t) t.mapping = THREE.EquirectangularReflectionMapping;
+  return t;
 }
 
 // Tree prototypes: a bent, barked trunk with a few branches and a crown of leafy clusters.
@@ -251,12 +269,15 @@ export function outdoor(bay) {
     group.add(tree);
   }
 
-  const hemiLight = new THREE.HemisphereLight(0xf4efe6, 0x8c7a66, 1.1);
+  // Fill: a cool sky above and a warm dusty bounce below, low, so shadow sides stay readable and
+  // slightly blue rather than black.
+  const hemiLight = new THREE.HemisphereLight(0x9db4d0, 0xb8946a, 0.85);
   const sunLight = sun(bay, 0xffe0b8, 3.1, [-16, 15, 16]);
   const skyTex = canvasTexture(256, (g, s) => paintSky(g, s, 0.5), [1, 1]);
   return {
-    group, lights: [hemiLight, sunLight], hemiLight, sunLight, sunStrength: 4.0, hemiStrength: 1.1, warmth: 1,
-    hazeColor: 0xe6d6bb, background: skyTex ?? new THREE.Color(0xb9cfe0), fog: new THREE.Fog(0xe6d6bb, 55, 150), exposure: 1.05,
+    group, lights: [hemiLight, sunLight], hemiLight, sunLight, sunStrength: 5.4, hemiStrength: 0.95, warmth: 1,
+    reflectionSky: reflectionSky(), reflectionStrength: 0.35,
+    hazeColor: 0xd9c3a0, background: skyTex ?? new THREE.Color(0xb9cfe0), fog: new THREE.Fog(0xe6d6bb, 55, 150), exposure: 1.05,
     paintSky(warmth) {
       if (!skyTex) return;
       paintSky(skyTex.image.getContext("2d"), skyTex.image.width, warmth);

@@ -18,6 +18,7 @@ export function createEnvironment(name, bay) {
     dispose() {
       disposeGroup(env.group);
       if (env.background?.isTexture) env.background.dispose();
+      env.reflectionSky?.dispose();
       for (const l of env.lights) l.shadow?.map?.dispose();
     },
   };

@@ -14,7 +14,8 @@ export function createEngine(canvas) {
   renderer.toneMappingExposure = 1.05;
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(45, 1, 0.05, 1000);
+  const camera = new THREE.PerspectiveCamera(32, 1, 0.05, 1000);
+  const pmrem = new THREE.PMREMGenerator(renderer);
   camera.position.set(-14, 16, -10);
   camera.lookAt(0, 0, 15);
 
@@ -69,6 +70,11 @@ export function createEngine(canvas) {
     for (const l of env.lights) { groups.environment.add(l); if (l.target) groups.environment.add(l.target); }
     scene.background = env.background;
     scene.fog = env.fog;
+    // Image-based light from the environment's own sky (reflections and soft fill only; the sky
+    // texture is never shown as the backdrop).
+    scene.environment?.dispose();
+    scene.environment = env.reflectionSky ? pmrem.fromEquirectangular(env.reflectionSky).texture : null;
+    scene.environmentIntensity = env.reflectionStrength ?? 0;
     renderer.toneMappingExposure = env.exposure ?? 1.05;
     if (look) setLook(look, bay);
     requestRender();

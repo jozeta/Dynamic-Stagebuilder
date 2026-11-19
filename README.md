@@ -141,11 +141,11 @@ Stage settings are in the inspector when nothing is selected. They are saved wit
 | Object snap | Toolbar *Objects*: a wall's end jumps onto another wall's end within 35 cm | On |
 | Angle snap | Rotations snap to this step: off, 5°, 15°, 45° or 90° | 15° |
 | Surroundings | *Settings*: Outdoor (dirt range) or Technical (grey floor, grid); never moves the stage | Outdoor |
-| Time of day | *Settings*: 06:00–20:00; the sun's height, direction and colour follow it | 16:30 |
+| Time of day | *Settings*: 06:00–20:00; the sun's height, direction and colour follow it | 18:15 |
 | Sunlight, Ambient light | *Settings*: 0–200 % | 100 % |
-| Shadows, Shadow softness | *Settings*: on/off, 0 (sharp) – 8 | On, 1.5 |
-| Haze | *Settings*: 0 (clear) – 100 % (Outdoor only) | 25 % |
-| Exposure | *Settings*: 0.5–1.6 | 0.92 |
+| Shadows, Shadow softness | *Settings*: on/off, 0 (sharp) – 8 | On, 1 |
+| Haze | *Settings*: 0 (clear) – 100 % (Outdoor only) | 20 % |
+| Exposure | *Settings*: 0.5–1.6 | 1.00 |
 
 Prop settings (inspector, one prop selected): label (targets), rotation, and per prop: mount height
 for paper targets (0.1–2 m, default 0.7 m to the target's bottom), base height for steel, plate size
@@ -182,7 +182,8 @@ it in the inspector; Renumber keeps hand-set labels and warns about duplicates.
 
 **Look at the stage.** Drag the empty ground to orbit, right-drag (two fingers on an iPad) to pan,
 scroll or pinch to zoom. The buttons over the view jump to Isometric, Top, Front, Shooter's eye or
-frame everything.
+frame everything. *Isometric* is a high oblique "drone" overview (45° down, slightly turned, a
+long 32° lens) that fits the whole bay; *Shooter's eye* and *Front* use a natural 55° lens.
 
 **Change the light and surroundings.** *Settings* switches between Outdoor and Technical and sets
 the time of day, sunlight, ambient light, shadows, haze and exposure. Changes show as you drag the

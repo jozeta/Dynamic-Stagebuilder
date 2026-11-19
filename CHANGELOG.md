@@ -4,6 +4,13 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Look rework, step 1 (lighting and camera): a low golden sun (about 24° at the new default
+  18:15) with long diagonal shadows and crisp edges (4096 shadow map on computers, tuned bias),
+  a cool-sky / warm-ground fill light, image-based reflections from a generated late-afternoon
+  sky (not shown as the backdrop), a warmer hazy sky, ACES tone mapping. The default view is a
+  high oblique overview (45° down, 25° yaw, 32° lens) that frames the whole bay; the shooter's
+  eye and Front views use a natural 55° lens.
+
 - Library: each prop group (Paper, Steel, Walls, Structures, Obstacles and range furniture) is
   a collapsible section; the folded state is remembered per browser and a search opens groups
   with matches.

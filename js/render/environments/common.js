@@ -44,9 +44,10 @@ export function sun(bay, color, intensity, from) {
   const touch = typeof matchMedia !== "undefined" && matchMedia("(pointer: coarse)").matches;
   const size = touch ? 2048 : 4096;
   light.shadow.mapSize.set(size, size);
-  light.shadow.bias = -0.0004;
-  light.shadow.normalBias = 0.02;
-  light.shadow.radius = 3;      // soft shadow edges
+  // Tuned for a low sun: a little normal offset stops acne on the ground without peter-panning.
+  light.shadow.bias = -0.00025;
+  light.shadow.normalBias = 0.035;
+  light.shadow.radius = 1;      // crisp but not aliased
   return light;
 }
 
@@ -61,7 +62,8 @@ export function disposeGroup(group) {
 
 // Apply the look settings (time of day, sun, ambient, shadows, haze, exposure) to an environment
 // built by technical() or outdoor(). Only lights, fog and the sky change; the stage never does.
-const WHITE = new THREE.Color(0xfff6ea), SUNSET = new THREE.Color(0xff9a52);
+// Sun colours: warm golden at the default late afternoon (#FFD9A8 … #FFC98A), deeper toward sunset.
+const WHITE = new THREE.Color(0xfff1df), SUNSET = new THREE.Color(0xffb15e);
 
 export function applyLook(env, look, bay) {
   const s = sunFromHour(look.hour);

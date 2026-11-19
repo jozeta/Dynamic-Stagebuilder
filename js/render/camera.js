@@ -1,6 +1,6 @@
 // Camera navigation (orbit, pan, zoom; one finger rotates, two pan and zoom on touch) and presets.
-import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { obliqueView, VIEW } from "./view-math.js";
 
 export const PRESETS = ["iso", "top", "front", "shooter"];
 export const PRESET_LABELS = { iso: "Isometric", top: "Top", front: "Front", shooter: "Shooter's eye" };
@@ -15,6 +15,11 @@ export function createCameraRig(engine, domElement) {
   controls.minDistance = 0.5;
   controls.maxDistance = 250;
   controls.addEventListener("change", () => engine.requestRender());
+
+  // Overview presets use a long lens (drone / telephoto feel); the shooter's eye a natural one.
+  function lens(fov) {
+    if (camera.fov !== fov) { camera.fov = fov; camera.updateProjectionMatrix(); }
+  }
 
   function look(position, target) {
     camera.position.set(...position);
@@ -32,6 +37,7 @@ export function createCameraRig(engine, domElement) {
   function preset(name, stage) {
     const { depth } = stage.bay;
     const mid = [0, 0, depth / 2];
+    lens(name === "shooter" || name === "front" ? VIEW.eyeFov : VIEW.fov);
     const d = fitDistance(stage);
     switch (name) {
       case "top": look([0, d * 1.05, depth / 2 - 0.01], mid); break;
@@ -43,8 +49,8 @@ export function createCameraRig(engine, domElement) {
         break;
       }
       default: {
-        const v = new THREE.Vector3(-0.55, 0.62, -0.56).normalize().multiplyScalar(d * 0.95);
-        look([v.x, v.y, depth / 2 + v.z], mid);
+        const v = obliqueView(stage.bay, camera.aspect || 1.6);
+        look(v.position, v.target);
       }
     }
   }
@@ -52,6 +58,7 @@ export function createCameraRig(engine, domElement) {
   function frameAll(stage) {
     const pts = [...stage.objects.map((o) => o.position), ...stage.lines.flatMap((l) => l.points)];
     if (!pts.length) return preset("iso", stage);
+    lens(VIEW.fov);
     const xs = pts.map((p) => p[0]), zs = pts.map((p) => p[1]);
     const cx = (Math.min(...xs) + Math.max(...xs)) / 2, cz = (Math.min(...zs) + Math.max(...zs)) / 2;
     const span = Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...zs) - Math.min(...zs), 4);
