@@ -109,13 +109,20 @@ function updateHint(state) {
 // Print: an isometric snapshot of the stage (without selection helpers), then the browser's print
 // dialog, where "Save as PDF" makes the PDF.
 function snapshot() {
+  if (!canvas.clientWidth || !canvas.clientHeight) return null;   // hidden (already in print layout): no picture
   const cam = engine.camera.position.clone();
   const target = rig.controls.target.clone();
   engine.groups.helper.visible = false;
   rig.preset("iso", editor.stage());
   rig.frameAll(editor.stage());
+  // Render about 2000 px wide whatever the screen, so the printed view is sharp on A4.
+  const ratio = engine.renderer.getPixelRatio();
+  engine.renderer.setPixelRatio(Math.min(4, 2000 / canvas.clientWidth));
+  engine.renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
   engine.renderer.render(engine.scene, engine.camera);
-  const url = canvas.toDataURL("image/png");
+  const url = canvas.toDataURL("image/jpeg", 0.92);    // much smaller than PNG, so it loads in time
+  engine.renderer.setPixelRatio(ratio);
+  engine.renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
   engine.groups.helper.visible = true;
   engine.camera.position.copy(cam);
   rig.controls.target.copy(target);
@@ -123,10 +130,28 @@ function snapshot() {
   engine.requestRender();
   return url;
 }
-function printBrief() {
-  renderPrint(document.getElementById("print"), editor.stage(), snapshot());
-  window.print();
+// The brief is built, and its 3D image fully decoded, before the print dialog opens: a large image
+// that is still loading prints as a blank page 2. ⌘P / Ctrl+P (beforeprint) builds it too.
+let printReady = false;
+let printedStage = null;           // the stage the brief was last built from
+async function buildPrint() {
+  const root = document.getElementById("print");
+  printedStage = editor.stage();
+  renderPrint(root, printedStage, snapshot());
+  const img = root.querySelector(".print-3d img");
+  try { await img?.decode(); } catch { /* print without it rather than not at all */ }
 }
+async function printBrief() {
+  await buildPrint();
+  printReady = true;
+  window.print();
+  printReady = false;
+}
+window.addEventListener("beforeprint", () => {
+  if (printReady || printedStage === editor.stage()) return;      // already built for this stage
+  printedStage = editor.stage();
+  renderPrint(document.getElementById("print"), printedStage, snapshot());
+});
 
 let picking = null;
 let briefing = null;
