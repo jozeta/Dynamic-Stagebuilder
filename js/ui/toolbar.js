@@ -3,7 +3,7 @@ import { h, icon } from "./dom.js";
 import { canUndo, canRedo } from "../model/history.js";
 import { PRESETS, PRESET_LABELS } from "../render/camera.js";
 
-export function createToolbar(root, { editor, rig, status, onAbout, onBriefing, onPrint, onProjects, onSettings }) {
+export function createToolbar(root, { editor, rig, status, onAbout, onHelp, onBriefing, onPrint, onProjects, onSettings }) {
   // Camera presets live in a bar over the 3D view (#camera-slot); the rest in the toolbar.
   const btn = (name, label, onclick, extra = {}) =>
     h("button", { type: "button", class: "lg-btn lg-btn-ghost tool", "aria-label": label, onclick, ...extra }, [icon(name), h("span", { text: label.split(" (")[0] })]);
@@ -31,7 +31,7 @@ export function createToolbar(root, { editor, rig, status, onAbout, onBriefing, 
     h("div", { class: "toolgroup", role: "group", "aria-label": "Edit" }, [btn("folder", "Projects", onProjects, { "aria-pressed": "false" }), undoB, redoB, dupB, delB, numB]),
     h("div", { class: "toolgroup", role: "group", "aria-label": "Snapping" }, [gridB, magB]),
     h("div", { class: "toolgroup", role: "group", "aria-label": "Brief" }, [wsbB, printB]),
-    h("div", { class: "toolgroup end" }, [status, btn("sliders", "Settings", onSettings, { "aria-pressed": "false" }), btn("info", "About", onAbout)]),
+    h("div", { class: "toolgroup end" }, [status, btn("sliders", "Settings", onSettings, { "aria-pressed": "false" }), btn("help", "Help", onHelp), btn("info", "About", onAbout)]),
   );
 
   return function update(state) {

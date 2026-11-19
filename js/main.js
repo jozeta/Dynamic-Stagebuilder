@@ -25,6 +25,7 @@ import { projectRecord, sortProjects, nextProjectAfterDelete } from "./storage/p
 import { exportFileName, stageToJson } from "./storage/files.js";
 import { createProjects } from "./ui/projects.js";
 import { makeCollapsible } from "./ui/panels.js";
+import { createHelp } from "./ui/help.js";
 import { loadHidden, saveHidden } from "./ui/prefs.js";
 import { createAutosave } from "./storage/autosave.js";
 
@@ -214,11 +215,12 @@ const projects = createProjects({
   },
 });
 
+const help = createHelp();
 let hiddenProps = loadHidden();
 const library = createLibrary(document.getElementById("library-body"), { editor, hidden: hiddenProps });
 updaters.push(
   createToolbar(document.getElementById("toolbar"), {
-    editor, rig, status, onAbout: () => about.open(), onBriefing: () => briefing.open(), onPrint: () => printBrief(),
+    editor, rig, status, onAbout: () => about.open(), onHelp: () => help.open(), onBriefing: () => briefing.open(), onPrint: () => printBrief(),
     onProjects: () => projects.open(), onSettings: () => settings.open(),
   }),
   library,
