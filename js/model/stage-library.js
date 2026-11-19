@@ -6,6 +6,7 @@ import { createStage, addObject, addLine, setStart } from "./stage.js";
 import { assignLabels } from "./numbering.js";
 import { stageStats } from "./stats.js";
 import { targetsText } from "./briefing.js";
+import { planPositions } from "./planner.js";
 import { LIBRARY_STAGES } from "./stage-library-data.js";
 
 export const LIBRARY_CATEGORIES = Object.freeze([
@@ -26,6 +27,11 @@ export function libraryStage(spec) {
   for (const o of spec.objects) s = addObject(s, o.type, o.position, o.rotation ?? 0, o.params ?? {}).stage;
   for (const l of spec.lines || []) s = addLine(s, l.type, l.points, l.closed ?? l.type === "shooting-area").stage;
   if (spec.start) s = setStart(s, spec.start.position, spec.start.facing ?? 0);
+  // Suggested shooting positions (and the route between them), worked out from the layout.
+  for (const p of planPositions(s).positions) {
+    const r = addObject(s, "shooting-position", p.position, p.rotation, { stance: p.stance });
+    s = { ...r.stage, objects: r.stage.objects.map((o) => (o.id === r.id && p.via.length ? { ...o, via: p.via } : o)) };
+  }
   return assignLabels(s);
 }
 

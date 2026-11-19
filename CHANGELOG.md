@@ -4,6 +4,11 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Every stage in the library comes with suggested shooting positions and the walk between
+  them, worked out from its layout: each target is seen from a position inside the shooting
+  areas (walls block, ports and doorways don't; low ports mean kneeling), each position faces
+  its targets, and the walk goes round walls.
+
 - Shooting positions are light grey and see-through, with a detailed mannequin for each stance
   (head, body, arms holding a pistol in a firing grip, legs and feet) and a small chevron on the
   ring for the facing. The route line stops at each ring, has fewer, smaller arrows, and its grab

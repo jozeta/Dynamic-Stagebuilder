@@ -8957,7 +8957,7 @@ export const LIBRARY_STAGES = Object.freeze([
     "type": "popper",
     "position": [
      7.5,
-     10.5
+     11.5
     ],
     "rotation": -30,
     "params": {}
