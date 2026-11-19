@@ -6,6 +6,7 @@ import { canvasTexture, sun, disposeGroup } from "./common.js";
 import { buildGround } from "./ground.js";
 import { createClouds } from "./clouds.js";
 import { buildFoliage } from "./foliage.js";
+import { LOOK_DEFAULTS } from "../../model/look.js";
 
 // The sky: blue overhead fading to a warm horizon; warmer and deeper toward sunset.
 function paintSky(g, s, warmth) {
@@ -42,7 +43,7 @@ export function outdoor(bay, { onUpdate } = {}) {
   group.add(groundGroup);
 
   // Plants: trees beyond the banks, bushes and grass on them (Settings → Foliage, foliage.js).
-  let foliage = buildFoliage(bay, "mixed");
+  let foliage = buildFoliage(bay, LOOK_DEFAULTS.foliage);         // the default kind, so a default look builds it only once
   group.add(foliage);
 
   // Fill: a cool sky above and a warm dusty bounce below, low, so shadow sides stay readable and
@@ -59,7 +60,7 @@ export function outdoor(bay, { onUpdate } = {}) {
     hazeColor: 0xd9c3a0, background: skyTex ?? new THREE.Color(0xb9cfe0), fog: new THREE.Fog(0xe6d6bb, 55, 150), exposure: 1.05,
     ground: "sand",
     setGround(name) { this.ground = name; groundGroup.userData.setGround(name); },
-    foliage: "mixed",
+    foliage: LOOK_DEFAULTS.foliage,
     // Another kind of plants: the old ones are freed and the new ones built (seeded, so the same each time).
     setFoliage(kind) {
       if (kind === this.foliage) return;

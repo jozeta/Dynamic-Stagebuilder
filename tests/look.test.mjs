@@ -7,7 +7,7 @@ import { createStage } from "../js/model/stage.js";
 import { validateStage } from "../js/model/schema.js";
 
 test("defaults", () => {
-  assert.deepEqual({ ...LOOK_DEFAULTS }, { hour: 15.75, sun: 0.85, ambient: 1.05, shadows: true, softness: 4, shadowStrength: 0.55, haze: 0.15, exposure: 1, ground: "gravel", foliage: "mixed",
+  assert.deepEqual({ ...LOOK_DEFAULTS }, { hour: 15.75, sun: 0.85, ambient: 1.05, shadows: true, softness: 4, shadowStrength: 0.55, haze: 0.15, exposure: 1, ground: "gravel", foliage: "nordic",
     clouds: 0.45, cloudSpeed: 0.5, wind: 70, cloudShadow: 0.5, sunAuto: false, sunElevation: 31, sunAzimuth: 35, sunColor: 0.78,
     groundHue: null, groundIntensity: null, groundBrightness: null, walls: true, gridIntensity: null, gridColor: null });
   assert.ok(Object.isFrozen(LOOK_DEFAULTS));
@@ -58,7 +58,9 @@ test("old files read with the default look; a saved look round-trips", () => {
 
 test("Technical surroundings have their own light defaults; reset and switching use them", async () => {
   const { lookDefaults, TECHNICAL_LOOK } = await import("../js/model/look.js");
-  assert.deepEqual({ ...TECHNICAL_LOOK }, { hour: 16, sun: 1.15, ambient: 1.1, shadows: true, softness: 3, shadowStrength: 0.55, haze: 0.2, exposure: 1, ground: "sand", foliage: "mixed", clouds: 0.35, cloudSpeed: 1, wind: 60, cloudShadow: 0.5, sunAuto: true, sunElevation: 35, sunAzimuth: 20, sunColor: 0.8, groundHue: null, groundIntensity: null, groundBrightness: null, walls: true, gridIntensity: null, gridColor: null });
+  assert.deepEqual({ ...TECHNICAL_LOOK }, { hour: 16, sun: 0.85, ambient: 1.05, shadows: true, softness: 4, shadowStrength: 0.55, haze: 0.15, exposure: 1, ground: "sand", foliage: "mixed",
+    clouds: 0.45, cloudSpeed: 0.5, wind: 70, cloudShadow: 0.5, sunAuto: false, sunElevation: 31, sunAzimuth: 35, sunColor: 0.78,
+    groundHue: 220, groundIntensity: 0, groundBrightness: 1.1, walls: false, gridIntensity: 0.4, gridColor: null });
   assert.deepEqual(lookDefaults("technical"), TECHNICAL_LOOK);
   assert.deepEqual(lookDefaults("outdoor"), LOOK_DEFAULTS);
   const ed = createEditor();
@@ -111,7 +113,7 @@ test("the Outdoor sky has clouds by default; their amount, speed and wind are ch
 test("time of day can be turned off: then the sun's height, direction and colour are set by hand", async () => {
   const { sunFromLook, sunColorAt } = await import("../js/model/look.js");
   assert.equal(LOOK_DEFAULTS.sunAuto, false, "Outdoor: the sun is set by hand by default");
-  assert.equal(TECHNICAL_LOOK.sunAuto, true, "Technical: time of day on");
+  assert.equal(TECHNICAL_LOOK.sunAuto, false, "Technical: the sun set by hand too");
   const byClock = sunFromLook({ ...LOOK_DEFAULTS, sunAuto: true, hour: 12 });
   assert.deepEqual(byClock, sunFromHour(12), "with time of day on, the clock decides");
   const manual = sunFromLook({ ...LOOK_DEFAULTS, sunAuto: false, sunElevation: 30, sunAzimuth: 0, sunColor: 1 });

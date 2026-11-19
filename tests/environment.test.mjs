@@ -141,7 +141,7 @@ test("Outdoor foliage comes in kinds: trees, bushes and grass for each, bare ban
     else assert.ok(meshes > 20, `${kind}: ${meshes} meshes`);
   }
   assert.notEqual(shape.nordic, shape.desert, "the kinds differ");
-  assert.equal(cleanLook({ foliage: "jungle" }).foliage, "mixed", "unknown: the default");
+  assert.equal(cleanLook({ foliage: "jungle" }).foliage, "nordic", "unknown: the Outdoor default");
   assert.equal(cleanLook({ foliage: "nordic" }).foliage, "nordic");
 });
 
@@ -150,7 +150,7 @@ test("changing the foliage swaps the plants and never touches the stage", () => 
   const before = structuredClone(stage);
   const env = createEnvironment("outdoor", stage.bay);
   const names = () => env.group.children.map((c) => c.name).filter((n) => n.startsWith("foliage-"));
-  assert.deepEqual(names(), ["foliage-mixed"]);
+  assert.deepEqual(names(), ["foliage-nordic"], "the default kind, built once");
   applyLook(env, { ...LOOK_DEFAULTS, foliage: "desert" }, stage.bay);
   assert.deepEqual(names(), ["foliage-desert"], "one set of plants at a time");
   applyLook(env, { ...LOOK_DEFAULTS, foliage: "none" }, stage.bay);

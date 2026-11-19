@@ -4,6 +4,13 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+## 0.2.0 (2026-11-19)
+
+- New Technical defaults: the sun set by hand like Outdoor (31°, 35°, warm white; sunlight 85 %,
+  ambient 105 %, softness 4), the floor at 110 % brightness, the grid at 40 %, walls hidden.
+
+- Outdoor's default foliage is now Nordic (spruce, pine, birch).
+
 - With Play on, an activated target (with Animate on) waits at rest until its activator falls,
   then moves, and eases back to rest as the activator stands up again; a step pad or pull lever
   goes 1.5 s into each 7 s cycle.

@@ -4,8 +4,9 @@ A browser-based 3D stage builder for IPSC practical shooting. Lay out a stage at
 it from any angle, and print a Written Stage Briefing with a stage map for range officers and
 competitors.
 
-**Version:** 0.1.0 · **Status:** v1 feature-complete, not yet released (see the
-[v1 design](docs/superpowers/specs/2026-11-18-stage-builder-v1-design.md)). Started 2026-11-18.
+**Version:** 0.2.0 · **Try it:** [jozeta.github.io/Dynamic-Stagebuilder](https://jozeta.github.io/Dynamic-Stagebuilder/)
+(runs in the browser; nothing to install, nothing leaves your device) · Started 2026-11-18 (see the
+[v1 design](docs/superpowers/specs/2026-11-18-stage-builder-v1-design.md)).
 
 ## Who it's for
 
@@ -88,77 +89,70 @@ not supported: below 768 px wide the app asks you to use a larger screen. Englis
 
 ## What's new
 
-### Unreleased
+### 0.2.0 (2026-11-19)
 
-- **The shooter's run:** shooting positions drawn as a detailed see-through grey man with a
-  pistol; a posed shooter in the start box (from the briefing's start position, pistol
-  holstered); every library stage comes with suggested positions and the route between them.
-- **Shooter's eye:** walks the route faster and more smoothly, looking the way the shooter moves;
-  grey arrows in the lower left move the position you stand on; looking around saves the view, at
-  the start too; with a position selected it opens there; figures fade out up close; a walking
-  speed setting (slow walk to sprint).
-- The camera view is remembered per project across reloads.
+- **The shooter's run:** shooting positions with stances, shown as detailed see-through figures; a
+  posed shooter in the start box; a route on the ground with grab points; Shooter's eye walks it
+  (looking the way the shooter moves) or jumps between positions, with move arrows and a speed setting.
+- **Stage library:** 58 drills and IPSC/USPSA stages, each with suggested shooting positions worked out
+  from its sight lines.
+- **Props:** realistic cars, target arrays and hard cover, moving and reactive targets (swingers, drop
+  turners, clamshells, movers, Texas stars, plate racks, dueling trees), doors, ports, barricades;
+  activation links from poppers, plates, step pads and levers, which Play acts out.
+- **On stage panel and right-click menu:** every prop in a list with groups, hide and lock, multi-select,
+  copy and paste.
+- **Panels you arrange:** dock any panel on the left, right or under the view, as tabs or on its own;
+  everything about the view comes back after a reload.
+- **Surroundings:** Outdoor with drifting clouds, ground and foliage choices (Nordic, desert, savanna,
+  tropical…) and a sun set by hand or by the clock; Blueprint and Technical with their own ground and
+  grid colours; your own range from a plan.
+- **Briefing and print:** common wordings or free text, a redesigned two-page A4 brief.
 
-- Prop groups in the library fold open and closed (remembered; a search opens matching groups).
-- The look of a real club range: chunky pine frames, bold black and royal-blue mesh, a new
-  solid panel wall, targets with printed scoring zones, chunky yellow and white poppers, heavy
-  red fault-line timber, dense potted palms, steep dirt banks with shrubs and crisper light.
-
-- Environment settings (toolbar *Settings*): surroundings, time of day, sunlight, ambient light,
-  shadows, shadow softness, haze and exposure.
-- New props: ramp, platform, car, table, chair, pallets, sandbag wall, traffic cone and a mesh
-  doorway; barrels come in four colours.
-- More detail: worn steel drums, treaded tyres, board crates, detailed palms and trees, a gravel
-  ground with stones; IPSC targets in the rulebook proportions, standing lower on shorter sticks.
-
-- Walls snap end to end to nearby walls; Grid and Objects snapping toggles in the toolbar.
-- Hold Shift while dragging for slow, fine moves.
-- New Mesh wall with port and Potted plant; poppers and plates can be white or yellow.
-- A new outdoor look after a real dirt range: pine-framed square wire mesh, cardboard targets on
-  blue steel stands, earth banks with grass and trees, warm low sun and soft shadows.
-- The 3D stage editor: shooting bay, prop library (paper, steel, walls with real ports, obstacles),
-  fault lines, shooting areas and the start position; drag, rotate, duplicate, delete, undo/redo.
-- Automatic target numbers (T1, P1, NS1) and live round count, points and suggested stage type.
-- Technical and Outdoor surroundings, camera presets including the shooter's eye.
-- Written Stage Briefing editor and a two-page A4 brief with a top-down map (Save as PDF).
-- Projects saved in the browser with autosave, JSON export and import; works offline as an app.
-
-### 0.1.0
-
-- Project created; v1 design agreed. Older versions are listed in [CHANGELOG.md](CHANGELOG.md).
+Older versions are listed in [CHANGELOG.md](CHANGELOG.md).
 
 ## Screenshots
 
 <table>
   <tr>
-    <td><img src="docs/screenshots/editor-outdoor.png" alt="The editor with the Outdoor surroundings" width="400"><br>The editor: prop library, the stage on an outdoor dirt range at golden hour, stage statistics</td>
-    <td><img src="docs/screenshots/outdoor-close.png" alt="Close-up of joined mesh walls with a port" width="400"><br>Close up: walls joined end to end, a mesh wall with port, targets on stands, lattice shadows</td>
+    <td><img src="docs/screenshots/editor-outdoor.png" alt="The editor on the Outdoor range" width="400"><br>The editor: Props, the stage on an outdoor range with Nordic foliage, the Inspector and statistics</td>
+    <td><img src="docs/screenshots/outdoor-close.png" alt="A stage from the front" width="400"><br>A library stage from the front: mesh walls, a port, targets and the shooting positions</td>
   </tr>
   <tr>
-    <td><img src="docs/screenshots/editor-technical.png" alt="The same stage in the Technical surroundings with a wall selected" width="400"><br>The same stage in the Technical surroundings, with a wall selected and its rotate ring</td>
-    <td><img src="docs/screenshots/ipad-landscape.png" alt="The editor at iPad landscape width" width="400"><br>On an iPad (1024 px): the inspector moves under the 3D view</td>
+    <td><img src="docs/screenshots/shooters-eye.png" alt="Shooter's eye at a shooting position" width="400"><br>Shooter's eye at position 1, with the move arrows and the run controls</td>
+    <td><img src="docs/screenshots/on-stage-menu.png" alt="The On stage panel and the right-click menu" width="400"><br>The On stage panel (groups, hide, lock) and the right-click menu</td>
   </tr>
   <tr>
-    <td><img src="docs/screenshots/shooters-eye.png" alt="Shooter's eye view from the start position" width="400"><br>Shooter's eye: the view from the start position at 1.6 m</td>
-    <td><img src="docs/screenshots/briefing.png" alt="The Written Stage Briefing dialog" width="400"><br>The Written Stage Briefing; rounds and points are counted from the stage</td>
+    <td><img src="docs/screenshots/foliage-nordic.png" alt="Nordic foliage" width="400"><br>Foliage: Nordic spruces, pines and birches</td>
+    <td><img src="docs/screenshots/foliage-tropical.png" alt="Tropical foliage" width="400"><br>Foliage: coconut palms and lush bushes</td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/blueprint.png" alt="The Blueprint surroundings" width="400"><br>Blueprint: a worn drafting sheet, with paper and grid colours in Settings</td>
+    <td><img src="docs/screenshots/technical.png" alt="The Technical surroundings without walls" width="400"><br>Technical with a tinted floor running on to the horizon, walls hidden</td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/settings.png" alt="Settings, Environment tab" width="400"><br>Settings → Environment: surroundings, ground, foliage, sun, light, clouds</td>
+    <td><img src="docs/screenshots/settings-view.png" alt="Settings, View tab" width="400"><br>Settings → View: walking speed, and the colour and opacity of figures, marks and route</td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/projects.png" alt="The Projects tab with the stage library" width="400"><br>Projects and the stage library (58 stages)</td>
+    <td><img src="docs/screenshots/briefing.png" alt="The Written Stage Briefing" width="400"><br>The Written Stage Briefing; rounds and points are counted from the stage</td>
   </tr>
   <tr>
     <td><img src="docs/screenshots/print-page1.png" alt="Printed brief, page 1" width="400"><br>Printed brief, page 1: header, top-down map with scale bar, briefing</td>
     <td><img src="docs/screenshots/print-page2.png" alt="Printed brief, page 2" width="400"><br>Printed brief, page 2: the 3D view</td>
   </tr>
   <tr>
-    <td><img src="docs/screenshots/projects.png" alt="The Projects dialog" width="400"><br>Projects saved in this browser, with export hints</td>
-    <td><img src="docs/screenshots/settings.png" alt="The environment settings dialog" width="400"><br>Environment settings: surroundings, time of day, light, shadows, haze</td>
-  </tr>
-  <tr>
-    <td><img src="docs/screenshots/evening.png" alt="The stage at 19:30" width="400"><br>The same stage at 19:30: a low, warm sun and long shadows</td>
+    <td><img src="docs/screenshots/ipad-portrait.png" alt="The editor on an upright iPad" width="400"><br>On an upright iPad: the Inspector docks under the view</td>
     <td></td>
   </tr>
 </table>
 
 ## Installation
 
-No build step and no server-side code. Serve the folder and open it in a browser:
+**Use it online:** open [jozeta.github.io/Dynamic-Stagebuilder](https://jozeta.github.io/Dynamic-Stagebuilder/).
+Everything runs in your browser and your stages stay in it.
+
+**Run it yourself:** no build step and no server-side code. Serve the folder and open it in a browser:
 
 ```sh
 python3 -m http.server 8002      # then open http://localhost:8002/ (or: claude-update)
@@ -184,17 +178,17 @@ Stage settings are in the inspector when nothing is selected. They are saved wit
 | Angle snap | Rotations snap to this step: off, 5°, 15°, 45° or 90° | 15° |
 | Surroundings | *Settings*: Outdoor (dirt range), Technical (grey floor, grid) or Blueprint (drafting sheet); never moves the stage | Outdoor |
 | Ground | *Settings* (Outdoor): sand, light sand, dark sand, red dirt or gravel | Gravel |
-| Foliage | *Settings* (Outdoor): mixed broadleaf, Nordic, desert, savanna, tropical or bare banks | Mixed broadleaf |
-| Paper / Floor hue, intensity, brightness | *Settings* (Blueprint, Technical): 0–359°, 0–100 %, 40–160 % | Blueprint's blue paper (216°, 80 %), Technical's grey floor (no colour) |
-| Grid intensity, Grid colour | *Settings* (Blueprint, Technical): 0 % (hidden) – 100 %; seven swatches or your own colour | 100 %; pale blue (Blueprint), dark grey (Technical) |
-| Show walls | *Settings* (Technical): the backstop and side walls; the floor runs on to the horizon either way | On |
+| Foliage | *Settings* (Outdoor): mixed broadleaf, Nordic, desert, savanna, tropical or bare banks | Nordic |
+| Paper / Floor hue, intensity, brightness | *Settings* (Blueprint, Technical): 0–359°, 0–100 %, 40–160 % | Blueprint's blue paper (216°, 80 %); Technical's grey floor at 110 % brightness |
+| Grid intensity, Grid colour | *Settings* (Blueprint, Technical): 0 % (hidden) – 100 %; seven swatches or your own colour | Blueprint 100 %, pale blue; Technical 40 %, dark grey |
+| Show walls | *Settings* (Technical): the backstop and side walls; the floor runs on to the horizon either way | Off |
 | Cloud shadows | *Settings* (Outdoor): how dark the clouds' shadows on the ground are, 0–100 % | 50 % |
-| Time of day | *Settings*: on/off; on, 06:00–20:00 moves the sun (its height, direction and colour follow it) | Outdoor off (sun set by hand), Technical on at 16:00 |
-| Sun height, direction, colour | *Settings*, with Time of day off: 2–90°; 0–359° (0° = behind the shooter, 90° = to the shooter's left); dark orange → yellow → white | Outdoor 31°, 35°, warm white |
-| Sunlight | *Settings*: 0–200 % | Outdoor 85 %, Technical 115 % |
-| Ambient light | *Settings*: 0–200 % | Outdoor 105 %, Technical 110 % |
-| Shadows, Shadow softness | *Settings*: on/off, 0 (sharp) – 8 | On; Outdoor 4, Technical 3 |
-| Shadow strength | *Settings*: 0–100 %; lower makes shadows lighter | Outdoor 55 %, Technical 55 % (only the props' shadows) |
+| Time of day | *Settings*: on/off; on, 06:00–20:00 moves the sun (its height, direction and colour follow it) | Off (the sun set by hand) |
+| Sun height, direction, colour | *Settings*, with Time of day off: 2–90°; 0–359° (0° = behind the shooter, 90° = to the shooter's left); dark orange → yellow → white | 31°, 35°, warm white |
+| Sunlight | *Settings*: 0–200 % | 85 % |
+| Ambient light | *Settings*: 0–200 % | 105 % |
+| Shadows, Shadow softness | *Settings*: on/off, 0 (sharp) – 8 | On; 4 |
+| Shadow strength | *Settings*: 0–100 %; lower makes shadows lighter | 55 % (only the props' shadows) |
 | Haze | *Settings*: 0 (clear) – 100 % (Outdoor only) | Outdoor 15 % |
 | Exposure | *Settings*: 0.5–1.6 | 1.00 |
 | Clouds | *Settings → Environment* (Outdoor): 0 % (clear) – 100 % | 45 % |
