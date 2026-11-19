@@ -1,7 +1,7 @@
 // The prop library: search plus Paper, Steel, Walls and Obstacles. Tap an item to arm it, then tap
 // the ground; with a mouse, items can also be dragged onto the 3D view.
 import { h } from "./dom.js";
-import { PROPS, defaultParams, TARGET_SIZES, BARREL, TYRE, CAR, PALLET, paperSize } from "../model/props.js";
+import { PROPS, defaultParams, TARGET_SIZES, BARREL, TYRE, PALLET, paperSize } from "../model/props.js";
 import { icon } from "./dom.js";
 
 import { LIBRARY_GROUPS, isShown } from "../model/visibility.js";
@@ -24,7 +24,7 @@ function sizeText(type) {
     case "crate": return `${cm(p.size)} cm cube`;
     case "plant-palm": return "Decoration";
     case "ramp": case "platform": return `${p.length} × ${p.width} m, ${cm(p.height)} cm high`;
-    case "car": return `${CAR.length} × ${CAR.width} m`;
+    case "car": return "Saloon, hatchback, pickup or van";
     case "table": return `${p.length} m`;
     case "chair": return "Range chair";
     case "pallet": return `${PALLET.length} × ${PALLET.width} m`;

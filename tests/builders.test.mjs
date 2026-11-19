@@ -177,36 +177,54 @@ test("orange netting is the default mesh, and walls have corner gussets and feet
   assert.equal(gussets, 4);
 });
 
-test("the car has four treaded wheels with alloy rims, tinted glass and printed sides", () => {
-  for (const color of ["white", "red", "blue", "grey", "rust"]) {
-    const g = buildProp(obj("car", { color }));
-    let tread = 0, glass = 0, sides = 0, rims = 0;
+test("cars come as a saloon, hatchback, pickup and van, each at its real size", async () => {
+  const { CAR_MODELS } = await import("../js/model/props.js");
+  assert.deepEqual(Object.keys(CAR_MODELS), ["sedan", "hatchback", "pickup", "van"]);
+  assert.equal(defaultParams("car").model, "sedan");
+  for (const model of Object.keys(CAR_MODELS)) for (const color of ["white", "red", "blue", "grey", "rust"]) {
+    checkSize("car", { model, color });
+    const d = dimensionsOf(obj("car", { model, color }));
+    const m = CAR_MODELS[model];
+    assert.deepEqual([d.w, d.h, d.d], [m.length, m.height, m.width], model);
+  }
+  assert.ok(CAR_MODELS.van.height > CAR_MODELS.sedan.height && CAR_MODELS.pickup.length > CAR_MODELS.sedan.length);
+});
+
+test("a car body is one smooth lofted shell with real glass, treaded wheels on alloys", () => {
+  for (const model of ["sedan", "hatchback", "pickup", "van"]) {
+    const g = buildProp(obj("car", { model, color: "blue" }));
+    let tread = 0, rims = 0, body = null;
     g.traverse((c) => {
       const mats = Array.isArray(c.material) ? c.material : [c.material];
       if (mats.includes(getMaterial("tread"))) tread++;
-      if (mats.includes(getMaterial("glass"))) glass++;
-      if (mats.includes(getMaterial(`car-side-${color}`))) sides++;
       if (c.userData.rim) rims++;
+      if (c.userData.part === "body") body = c;
     });
-    assert.equal(tread, 4, `${color}: tyres`);
-    assert.equal(rims, 4, `${color}: rims`);
-    assert.ok(glass >= 2, `${color}: windscreen and rear window`);
-    assert.equal(sides, 1, `${color}: one body with printed sides`);
+    assert.equal(tread, 4, `${model}: tyres`);
+    assert.equal(rims, 4, `${model}: rims`);
+    assert.ok(body, `${model}: body`);
+    const mats = body.material;
+    const glassGroups = body.geometry.groups.filter((gr) => mats[gr.materialIndex] === getMaterial("glass") && gr.count > 0);
+    assert.ok(glassGroups.length === 1 && glassGroups[0].count >= 60, `${model}: windows are part of the shell`);
+    assert.ok(body.geometry.attributes.position.count > 1000, `${model}: a finely lofted body`);
+    assert.ok(body.geometry.attributes.uv, `${model}: mapped for the paint texture`);
   }
-  checkSize("car", { color: "rust" });
 });
 
 test("cars carry the small parts: wheel wells, wipers, mirrors, handles, aerial, exhaust, indicators", () => {
-  const g = buildProp(obj("car", { color: "blue" }));
-  const count = (tag) => { let n = 0; g.traverse((c) => { if (c.userData.part === tag) n++; }); return n; };
-  assert.equal(count("wheelwell"), 4);
-  assert.equal(count("wiper"), 2);
-  assert.equal(count("mirror"), 2);
-  assert.equal(count("handle"), 4);
-  assert.equal(count("aerial"), 1);
-  assert.equal(count("exhaust"), 1);
-  assert.equal(count("indicator"), 2);
-  checkSize("car", { color: "blue" });
+  for (const model of ["sedan", "hatchback", "pickup", "van"]) {
+    const g = buildProp(obj("car", { model, color: "blue" }));
+    const count = (tag) => { let n = 0; g.traverse((c) => { if (c.userData.part === tag) n++; }); return n; };
+    assert.equal(count("wheelwell"), 4, model);
+    assert.equal(count("wiper"), 2, model);
+    assert.equal(count("mirror"), 2, model);
+    assert.ok(count("handle") >= 4, model);
+    assert.equal(count("aerial"), 1, model);
+    assert.equal(count("exhaust"), 1, model);
+    assert.equal(count("indicator"), 2, model);
+    assert.equal(count("headlight"), 2, model);
+    assert.equal(count("taillight"), 2, model);
+  }
 });
 
 test("every target presentation is drawn at its real size, with one card per target and no-shoot", async () => {

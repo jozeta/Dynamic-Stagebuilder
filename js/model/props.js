@@ -21,7 +21,39 @@ export const TARGET_STICK = 0.03;  // wooden target stick section (m)
 export const STAND = Object.freeze({ w: 0.36, d: 0.26, h: 0.04 });   // blue steel target base
 export const PLATE_FOOT = 0.30;    // footprint of a plate stand (m)
 export const PLANT = Object.freeze({ diameter: 0.9, height: 1.5 });
-export const CAR = Object.freeze({ length: 4.4, height: 1.45, width: 1.8 });
+// Car models: overall size (m) and the side-profile curves the 3D body is lofted from. Curves are
+// [u, metres] with u from the rear (0) to the front (1): belt = top of the body side (bonnet, boot
+// and bed deck), roof = top of the cabin (equal to belt where there is none), half = half width,
+// sill = underside. wheels = axle x (m from the centre), screens = u ranges of windscreen and rear
+// glass, windows = u ranges of side glass, seams = u of door gaps, handles = x of door handles.
+export const CAR_MODELS = deepFreeze({
+  sedan: { name: "Saloon", length: 4.6, width: 1.8, height: 1.45, wheels: [-1.38, 1.36], tyre: 0.31, tyreWidth: 0.2, arch: 0.39, roofHalf: 0.66,
+    belt: [[0, 0.6], [0.025, 0.84], [0.1, 0.93], [0.3, 0.96], [0.7, 0.9], [0.9, 0.83], [0.975, 0.74], [1, 0.58]],
+    roof: [[0, 0.6], [0.025, 0.84], [0.1, 0.94], [0.17, 0.98], [0.3, 1.39], [0.38, 1.44], [0.55, 1.45], [0.6, 1.42], [0.74, 0.92], [0.9, 0.84], [0.975, 0.75], [1, 0.58]],
+    half: [[0, 0.74], [0.04, 0.85], [0.15, 0.9], [0.85, 0.9], [0.96, 0.84], [1, 0.72]],
+    sill: [[0, 0.34], [0.06, 0.25], [0.94, 0.25], [1, 0.32]],
+    screens: [[0.17, 0.3], [0.6, 0.74]], windows: [[0.3, 0.475], [0.49, 0.6]], seams: [0.285, 0.48, 0.665], handles: [0.0, -0.88], bed: 0 },
+  hatchback: { name: "Hatchback", length: 4.1, width: 1.75, height: 1.48, wheels: [-1.25, 1.27], tyre: 0.3, tyreWidth: 0.19, arch: 0.38, roofHalf: 0.64,
+    belt: [[0, 0.66], [0.03, 0.9], [0.1, 0.95], [0.65, 0.9], [0.88, 0.83], [0.97, 0.75], [1, 0.58]],
+    roof: [[0, 0.66], [0.03, 0.92], [0.06, 1.2], [0.12, 1.44], [0.5, 1.48], [0.6, 1.4], [0.74, 0.93], [0.88, 0.84], [0.97, 0.76], [1, 0.58]],
+    half: [[0, 0.74], [0.04, 0.84], [0.15, 0.875], [0.85, 0.875], [0.96, 0.82], [1, 0.7]],
+    sill: [[0, 0.34], [0.06, 0.25], [0.94, 0.25], [1, 0.32]],
+    screens: [[0.03, 0.12], [0.6, 0.74]], windows: [[0.13, 0.33], [0.35, 0.59]], seams: [0.317, 0.488, 0.683], handles: [0.1, -0.62], bed: 0 },
+  pickup: { name: "Pickup", length: 5.3, width: 1.9, height: 1.8, wheels: [-1.7, 1.6], tyre: 0.39, tyreWidth: 0.26, arch: 0.47, roofHalf: 0.76,
+    belt: [[0, 0.92], [0.02, 1.06], [0.08, 1.1], [0.7, 1.1], [0.88, 1.06], [0.97, 0.98], [1, 0.72]],
+    roof: [[0, 0.92], [0.02, 1.07], [0.08, 1.11], [0.4, 1.11], [0.42, 1.72], [0.45, 1.78], [0.61, 1.8], [0.7, 1.16], [0.88, 1.07], [0.97, 0.99], [1, 0.72]],
+    half: [[0, 0.88], [0.03, 0.94], [0.1, 0.95], [0.9, 0.95], [0.97, 0.9], [1, 0.8]],
+    sill: [[0, 0.5], [0.04, 0.42], [0.96, 0.42], [1, 0.5]],
+    screens: [[0.4, 0.44], [0.61, 0.7]], windows: [[0.45, 0.535], [0.55, 0.62]], seams: [0.41, 0.49, 0.62], handles: [0.0, -0.75], bed: 0.405 },
+  van: { name: "Van", length: 4.9, width: 1.95, height: 1.95, wheels: [-1.45, 1.55], tyre: 0.32, tyreWidth: 0.21, arch: 0.4, roofHalf: 0.88,
+    belt: [[0, 0.6], [0.015, 1.0], [0.05, 1.04], [0.78, 1.04], [0.9, 1.0], [0.97, 0.9], [1, 0.6]],
+    roof: [[0, 0.62], [0.012, 1.84], [0.04, 1.95], [0.75, 1.95], [0.86, 1.25], [0.92, 1.05], [0.97, 0.92], [1, 0.6]],
+    half: [[0, 0.9], [0.03, 0.975], [0.95, 0.975], [0.99, 0.9], [1, 0.85]],
+    sill: [[0, 0.36], [0.04, 0.3], [0.96, 0.3], [1, 0.34]],
+    screens: [[0, 0.013], [0.75, 0.86]], windows: [[0.64, 0.79]], seams: [0.44, 0.56, 0.725], handles: [0.42, -0.25], bed: 0 },
+});
+/** Kept for older code: the saloon's size. */
+export const CAR = Object.freeze({ length: CAR_MODELS.sedan.length, height: CAR_MODELS.sedan.height, width: CAR_MODELS.sedan.width });
 export const CHAIR = Object.freeze({ w: 0.46, h: 0.86, d: 0.5 });
 export const CONE = Object.freeze({ diameter: 0.36, height: 0.7 });
 export const PALLET = Object.freeze({ length: 1.2, height: 0.144, width: 0.8 });
@@ -126,7 +158,7 @@ const defs = [
     params: { size: { default: 0.6, min: 0.3, max: 1.2, step: 0.05 } } },
   { type: "plant-palm", name: "Potted plant", category: "obstacle", scoring: null, params: {} },
   { type: "car", name: "Car", category: "obstacle", scoring: null,
-    params: { color: { default: "white", options: ["white", "red", "blue", "grey", "rust"] } } },
+    params: { model: { default: "sedan", options: ["sedan", "hatchback", "pickup", "van"] }, color: { default: "white", options: ["white", "red", "blue", "grey", "rust"] } } },
   { type: "table", name: "Table", category: "obstacle", scoring: null, params: { length: { default: 1.8, min: 1, max: 2.4, step: 0.1 } } },
   { type: "chair", name: "Chair", category: "obstacle", scoring: null, params: {} },
   { type: "pallet", name: "Pallets", category: "obstacle", scoring: null, params: { count: { default: 1, min: 1, max: 6, step: 1 } } },
@@ -181,7 +213,7 @@ export function dimensionsOf(obj) {
     case "crate": [w, h, d] = [p.size, p.size, p.size]; break;
     case "plant-palm": [w, h, d] = [PLANT.diameter, PLANT.height, PLANT.diameter]; break;
     case "ramp": case "platform": [w, h, d] = [p.length, p.height, p.width]; break;
-    case "car": [w, h, d] = [CAR.length, CAR.height, CAR.width]; break;
+    case "car": { const m = CAR_MODELS[p.model] || CAR_MODELS.sedan; [w, h, d] = [m.length, m.height, m.width]; break; }
     case "table": [w, h, d] = [p.length, TABLE.height, TABLE.depth]; break;
     case "chair": [w, h, d] = [CHAIR.w, CHAIR.h, CHAIR.d]; break;
     case "pallet": [w, h, d] = [PALLET.length, PALLET.height * p.count, PALLET.width]; break;

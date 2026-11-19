@@ -3,7 +3,8 @@
 import { buildPaper } from "./paper.js";
 import { buildPopper, buildPlate } from "./steel.js";
 import { buildMeshWall, buildMeshPortWall, buildWoodWall, buildPortWall, buildDoorWall, buildSolidWall } from "./walls.js";
-import { buildRamp, buildPlatform, buildCar, buildTable, buildChair, buildPallet, buildSandbags, buildCone } from "./furniture.js";
+import { buildRamp, buildPlatform, buildTable, buildChair, buildPallet, buildSandbags, buildCone } from "./furniture.js";
+import { buildCar } from "./car.js";
 import { buildSwinger, buildDropTurner, buildClamshell, buildMover, buildTexasStar, buildPlateRack, buildDuelingTree } from "./moving.js";
 import { buildBarrel, buildTyre, buildCrate, buildPlant } from "./obstacles.js";
 
