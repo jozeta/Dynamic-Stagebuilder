@@ -33,8 +33,11 @@ npm run lint        # ESLint, including the unsafe-DOM rule
 - `js/model/`: pure stage data (props incl. CAR_MODELS and MOVING, arrays = paper target
   presentations and hard cover, scoring-rules incl. TARGET_ARRAY_RULES, stage, history, snap,
   objsnap, numbering, stats, schema, briefing, briefing-options, map, look, visibility = hidden
-  props, help-content)
-- `js/render/`: Three.js (engine, stage-view, builders/, environments/, camera, labels, picking, ground)
+  props, help-content, positions = shooting positions and the figure's parts, start-pose = the
+  posed man at the start, route = the run's route, walk motion and look, planner = suggested
+  positions from sight lines (library stages), camera-view = validated remembered view)
+- `js/render/`: Three.js (engine, stage-view, builders/, environments/, camera, labels, picking, ground,
+  figure-fade = figures fade as the camera comes close)
 - `js/ui/`: Låda Glass panels (toolbar, library, inspector, stats, settings with Light/Props tabs,
   projects in the left panel, panels = folding side panels, prefs = per-browser preferences, help,
   briefing, print, shortcuts, about, dom helpers)

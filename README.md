@@ -62,14 +62,20 @@ training, and want a clear briefing sheet without drawing the map by hand.
   anything on the stage.
 - **Environment settings:** time of day (the sun moves and warms toward evening), sunlight,
   ambient light, shadows and their softness, haze and exposure, saved with the stage.
-- **Cameras:** orbit, pan, zoom, Top, Isometric, Front and a shooter's-eye view from the start position.
+- **The shooter's run:** numbered shooting positions with a stance (standing, crouching,
+  kneeling, sitting, prone), facing and look angle, each shown as a detailed see-through grey man
+  holding a pistol; the shooter at the start is posed as the briefing's start position says
+  (hands up, arms hanging, seated…), pistol holstered. A route on the ground links them; Shooter's
+  eye walks it at a chosen speed, looking the way the shooter moves, or jumps between positions.
+- **Cameras:** orbit, pan, zoom, Top, Isometric, Front and Shooter's eye; the view is remembered
+  per project, so a reload opens where you left off. Figures fade out as the camera comes close.
 - **Projects** saved in the browser automatically, with JSON export and import, and a **stage
   library** of 58 ready-made drills and IPSC/USPSA stages (including 24 after the 2012 US IPSC
-  Nationals) to open and edit.
+  Nationals) to open and edit, each with suggested shooting positions worked out from its sight lines.
 - **Works offline** and can be installed as an app (PWA).
 
-Not in v1 (ideas for later): matches with several stages, a build sheet with coordinates, sight-line
-analysis, measuring tools, animated moving targets, more surroundings and props, model import, version history.
+Not in v1 (ideas for later): matches with several stages, a build sheet with coordinates, measuring
+tools, more surroundings and props, model import, version history.
 
 ## Devices
 
@@ -79,6 +85,15 @@ not supported: below 768 px wide the app asks you to use a larger screen. Englis
 ## What's new
 
 ### Unreleased
+
+- **The shooter's run:** shooting positions drawn as a detailed see-through grey man with a
+  pistol; a posed shooter in the start box (from the briefing's start position, pistol
+  holstered); every library stage comes with suggested positions and the route between them.
+- **Shooter's eye:** walks the route faster and more smoothly, looking the way the shooter moves;
+  grey arrows in the lower left move the position you stand on; looking around saves the view, at
+  the start too; with a position selected it opens there; figures fade out up close; a walking
+  speed setting (slow walk to sprint).
+- The camera view is remembered per project across reloads.
 
 - Prop groups in the library fold open and closed (remembered; a search opens matching groups).
 - The look of a real club range: chunky pine frames, bold black and royal-blue mesh, a new
@@ -177,6 +192,8 @@ Stage settings are in the inspector when nothing is selected. They are saved wit
 | Panel sizes | Drag a side panel's inner edge, or arrow keys on it; double-click resets (per browser) | 232 / 280 px |
 | My surroundings | *Settings*: your own plan-based surroundings, with plan position, turn and strength | None |
 | Default target style | *Settings*: Classic (octagon) or With head, for new paper targets | Classic |
+| Shooter's eye walking speed | *Settings*: slow walk 1.6, walk 2.4, quick move 3.4 or sprint 4.6 m/s, when Play is on (per browser) | Quick move |
+| Camera view | Remembered per project as you move the camera (per browser) | The Isometric overview |
 
 Prop settings (inspector, one prop selected): label (targets), rotation, and per prop: stand height
 for paper targets (0.1–2 m, default 0.7 m to the lowest card's bottom), presentation (target,
@@ -233,12 +250,22 @@ appears once something is animated) starts and stops all of them together.
 
 **Plan the shooter's run.** Pick *Shooting position* in Stage markings and tap each place the
 shooter shoots from; they are numbered 1, 2, 3…. In the inspector set the stance (standing,
-crouching, kneeling, sitting, prone), the facing and the look up/down angle. Click *Shooter's eye*:
-the arrows under the view buttons (or [ and ]) walk the camera from the start to each position,
-at that stance's eye height, and *Play run* walks the whole course, pausing at each position. A dashed line on the ground shows the route between them: click it to add a grab point, drag a
-grab point to reshape the route, click one to remove it. The walk follows the route over the
-ground, ramps and platforms; with *Pause* on, the camera jumps instead. At a position, look around
-and let go: that view is saved to the position.
+crouching, kneeling, sitting, prone), the facing and the look up/down angle; each position shows
+a grey man in that stance. The man in the start box takes the pose the briefing's *Start position*
+describes and has his pistol holstered unless the gun starts on a table or in a case; "facing up
+range" turns him round. Library stages come with suggested positions: each target is seen from
+one of them, from inside the shooting areas, round the walls.
+
+Click *Shooter's eye*: it opens at the selected shooting position, else at the start. The arrows
+under the view buttons (or [ and ]) step from the start to each position, at that stance's eye
+height, and *Play run* walks the whole course, pausing at each position. A dashed line on the
+ground shows the route between them: click it to add a grab point, drag a grab point to reshape
+the route, click one to remove it. With *Play* on, the camera walks the route over the ground,
+ramps and platforms, looking the way the shooter moves and turning to the position's view as it
+arrives (set the speed in *Settings*); with *Pause* on, it jumps. Standing at the start or a
+position, look around and let go: that view is saved. The grey arrows in the lower left move the
+position you stand on 25 cm forward, back, left or right (one undo step each). Figures fade out as
+the camera comes close, so you never look out from inside one.
 
 **Number targets.** Targets are numbered as you place them: T1… for paper, P1… for steel, NS1… for
 a lone no-shoot (an array with a target is one T label; its targets and no-shoots all count in the
