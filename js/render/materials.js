@@ -154,39 +154,6 @@ const cardboard = () => canvasTexture(256, (g, s, r) => {
   for (let i = 0; i < 2500; i++) { const v = r() > 0.5 ? 255 : 60; g.fillStyle = `rgba(${v},${v * 0.8},${v * 0.55},0.05)`; g.fillRect(r() * s, r() * s, 2, 2); }
 }, { seed: 7 });
 
-// A worn painted steel drum: paint, scratches showing bare metal, rust patches and drips, a
-// darker band where the rolling hoops scuff. Wraps once around the barrel (u) and bottom→top (v).
-function drumTexture(paint) {
-  return canvasTexture(512, (g, s, r) => {
-    g.fillStyle = paint; g.fillRect(0, 0, s, s);
-    for (let i = 0; i < 60; i++) {                          // mottled, faded paint
-      const x = r() * s, y = r() * s, rad = 10 + r() * 60;
-      const grd = g.createRadialGradient(x, y, 0, x, y, rad);
-      grd.addColorStop(0, `rgba(255,255,255,${0.03 + r() * 0.05})`); grd.addColorStop(1, "rgba(255,255,255,0)");
-      g.fillStyle = grd; g.fillRect(x - rad, y - rad, rad * 2, rad * 2);
-    }
-    for (let i = 0; i < 26; i++) {                          // rust patches
-      const x = r() * s, y = r() < 0.6 ? s * (0.82 + r() * 0.18) : r() * s, rad = 4 + r() * 22;
-      const grd = g.createRadialGradient(x, y, 0, x, y, rad);
-      grd.addColorStop(0, "rgba(122,62,28,0.75)"); grd.addColorStop(0.6, "rgba(150,82,40,0.35)"); grd.addColorStop(1, "rgba(150,82,40,0)");
-      g.fillStyle = grd; g.fillRect(x - rad, y - rad, rad * 2, rad * 2);
-    }
-    for (let i = 0; i < 18; i++) {                          // rust drips running down
-      const x = r() * s, y0 = s * (0.75 + r() * 0.2), len = 30 + r() * 120;
-      const grd = g.createLinearGradient(0, y0, 0, y0 - len);
-      grd.addColorStop(0, "rgba(120,60,26,0.5)"); grd.addColorStop(1, "rgba(120,60,26,0)");
-      g.fillStyle = grd; g.fillRect(x, y0 - len, 1.5 + r() * 2.5, len);
-    }
-    for (let i = 0; i < 220; i++) {                         // scratches to bare metal
-      const x = r() * s, y = r() * s, l = 4 + r() * 26, a = (r() - 0.5) * 0.8;
-      g.strokeStyle = `rgba(190,190,185,${0.25 + r() * 0.4})`; g.lineWidth = 0.6 + r();
-      g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(a) * l, y + Math.sin(a) * l); g.stroke();
-    }
-    for (const band of [0.33, 0.66]) {                      // scuffed rolling hoops
-      g.fillStyle = "rgba(40,30,24,0.35)"; g.fillRect(0, s * (1 - band) - 6, s, 12);
-    }
-  }, { seed: paint.length * 31 + paint.charCodeAt(1) });
-}
 
 // A painted steel drum's body: enamel with a soft vertical sheen, scuffs to bare metal (most on
 // the rolling hoops), dust toward the base. Wraps once round the drum (u), bottom → top (v).
@@ -327,8 +294,39 @@ function carSide(paint, rusty) {
   const [sx0, sy] = px([-1.72, 0.27]), [sx1] = px([1.72, 0.27]);
   g.beginPath(); g.moveTo(sx0, sy); g.lineTo(sx1, sy); g.stroke();
   g.fillStyle = "rgba(20,20,22,0.55)"; { const [x0, y0] = px([-2.1, 0.58]), [x1, y1] = px([2.1, 0.54]); g.fillRect(x0, y0, x1 - x0, Math.max(3, y1 - y0)); }
-  // Chrome door handles.
-  for (const x of [0.3, -0.85]) { const [hx, hy] = px([x, 0.8]); g.fillStyle = "#c8ccd0"; g.fillRect(hx - 14, hy - 3, 28, 6); g.fillStyle = "rgba(0,0,0,0.4)"; g.fillRect(hx - 14, hy + 3, 28, 2); }
+  // Handle recesses (the handles themselves are 3D).
+  for (const x of [0.3, -0.85]) { const [hx, hy] = px([x, 0.8]); g.fillStyle = "rgba(0,0,0,0.35)"; g.fillRect(hx - 16, hy - 5, 32, 10); }
+  // Wear: swirl marks and scratches, a few dents, rust at the arch lips and sills, mud splashed
+  // up from the wheels, dust settling on the upper panels.
+  for (let i = 0; i < (rusty ? 260 : 140); i++) {
+    const [x, y] = px([P.minX + r() * (P.maxX - P.minX), 0.25 + r() * 0.7]), l = 4 + r() * 30, a = (r() - 0.5) * 0.7;
+    g.strokeStyle = `rgba(${r() > 0.3 ? "220,220,215" : "40,40,40"},${0.12 + r() * 0.25})`; g.lineWidth = 0.6 + r() * 0.8;
+    g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(a) * l, y + Math.sin(a) * l); g.stroke();
+  }
+  for (let i = 0; i < 6; i++) {
+    const [x, y] = px([P.minX + 0.4 + r() * 3.6, 0.35 + r() * 0.5]), rad = 10 + r() * 22;
+    const grd = g.createRadialGradient(x - rad * 0.3, y - rad * 0.3, 0, x, y, rad);
+    grd.addColorStop(0, "rgba(255,255,255,0.10)"); grd.addColorStop(0.6, "rgba(0,0,0,0.14)"); grd.addColorStop(1, "rgba(0,0,0,0)");
+    g.fillStyle = grd; g.beginPath(); g.ellipse(x, y, rad * 1.4, rad, 0, 0, 7); g.fill();
+  }
+  for (const cx of [-1.35, 1.35]) {
+    for (let i = 0; i < (rusty ? 40 : 14); i++) {                       // rust bubbling at the arch lips
+      const a = Math.PI * (0.05 + r() * 0.9), rr = 0.4 + r() * 0.06;
+      const [x, y] = px([cx + Math.cos(a) * rr, 0.31 + Math.sin(a) * rr]), rad = 2 + r() * (rusty ? 12 : 6);
+      g.fillStyle = `rgba(118,62,28,${0.35 + r() * 0.4})`; g.beginPath(); g.arc(x, y, rad, 0, 7); g.fill();
+    }
+    for (let i = 0; i < 90; i++) {                                       // mud thrown up by the wheels
+      const a = Math.PI * (r() * 1.0), rr = 0.42 + r() * 0.35;
+      const [x, y] = px([cx + Math.cos(a) * rr * 1.2, 0.25 + Math.abs(Math.sin(a)) * rr * 0.6]);
+      g.fillStyle = `rgba(116,90,62,${0.25 + r() * 0.35})`; g.beginPath(); g.arc(x, y, 1 + r() * 3.5, 0, 7); g.fill();
+    }
+  }
+  const sill = g.createLinearGradient(0, H, 0, px([0, 0.6])[1]);        // road grime low on the doors
+  sill.addColorStop(0, "rgba(110,88,62,0.55)"); sill.addColorStop(1, "rgba(110,88,62,0)");
+  g.fillStyle = sill; g.fillRect(0, px([0, 0.6])[1], W, H);
+  const topDust = g.createLinearGradient(0, 0, 0, px([0, 0.95])[1]);   // dust on the shoulder line
+  topDust.addColorStop(0, "rgba(190,170,140,0.18)"); topDust.addColorStop(1, "rgba(190,170,140,0)");
+  g.fillStyle = topDust; g.fillRect(0, 0, W, px([0, 0.95])[1]);
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
   t.anisotropy = 8;
@@ -378,6 +376,47 @@ function rawSteel() {
     }
     for (let i = 0; i < 120; i++) { g.strokeStyle = `rgba(170,170,165,${0.15 + r() * 0.3})`; g.lineWidth = 0.7; const x = r() * s, y = r() * s; g.beginPath(); g.moveTo(x, y); g.lineTo(x + (r() - 0.5) * 30, y + (r() - 0.5) * 8); g.stroke(); }
   }, { seed: 67, repeat: 2 });
+}
+
+// The car's top surfaces (bonnet, roof, boot, bumpers): paint with dust settled on it, faded
+// clear-coat patches, swirl scratches, bird-dropping-free but grimy. Tiled over the swept surface.
+function carPaintWear(paint, rusty) {
+  return canvasTexture(512, (g, s, r) => {
+    g.fillStyle = paint; g.fillRect(0, 0, s, s);
+    for (let i = 0; i < 22; i++) {
+      const x = r() * s, y = r() * s, rad = 30 + r() * 110, grd = g.createRadialGradient(x, y, 0, x, y, rad);
+      grd.addColorStop(0, `rgba(${rusty ? "120,64,30" : "200,190,170"},${rusty ? 0.5 : 0.12})`); grd.addColorStop(1, "rgba(0,0,0,0)");
+      g.fillStyle = grd; g.fillRect(x - rad, y - rad, rad * 2, rad * 2);
+    }
+    for (let i = 0; i < 2600; i++) { g.fillStyle = `rgba(175,155,125,${0.06 + r() * 0.14})`; g.fillRect(r() * s, r() * s, 1 + r() * 2, 1 + r() * 2); }
+    for (let i = 0; i < 160; i++) {
+      const x = r() * s, y = r() * s, rad = 10 + r() * 40, a0 = r() * 6;
+      g.strokeStyle = `rgba(230,230,225,${0.05 + r() * 0.1})`; g.lineWidth = 0.6;
+      g.beginPath(); g.arc(x, y, rad, a0, a0 + 0.6 + r()); g.stroke();
+    }
+  }, { seed: paint.charCodeAt(2) * 3 + (rusty ? 9 : 0), repeat: 0.6 });
+}
+
+// A plain number plate with characters (fictional), grimy edges.
+function numberPlate() {
+  return canvasTexture(256, (g, s, r) => {
+    g.fillStyle = "#e9e5dc"; g.fillRect(0, 0, s, s);
+    g.fillStyle = "#1e4fa0"; g.fillRect(0, 0, s * 0.12, s);
+    g.fillStyle = "#1c1c1c"; g.font = `700 ${Math.round(s * 0.45)}px "Courier New", monospace`;
+    g.textAlign = "center"; g.textBaseline = "middle";
+    g.save(); g.scale(1, 4.2); g.fillText("IPS 2O3", s * 0.56, s * 0.5 / 4.2); g.restore();
+    g.strokeStyle = "rgba(90,80,60,0.5)"; g.lineWidth = 10; g.strokeRect(0, 0, s, s);
+    for (let i = 0; i < 300; i++) { g.fillStyle = `rgba(110,90,60,${0.05 + r() * 0.1})`; g.fillRect(r() * s, r() * s, 3, 3); }
+  }, { seed: 71 });
+}
+
+function grilleTexture() {
+  return canvasTexture(128, (g, s) => {
+    g.fillStyle = "#121212"; g.fillRect(0, 0, s, s);
+    g.strokeStyle = "#3a3a3a"; g.lineWidth = 3;
+    for (let x = 4; x < s; x += 12) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, s); g.stroke(); }
+    for (let y = 6; y < s; y += 20) { g.beginPath(); g.moveTo(0, y); g.lineTo(s, y); g.stroke(); }
+  }, { seed: 73, repeat: 1 });
 }
 
 // Tyre tread blocks around the circumference (u) across the tread width (v), plus a bump map.
@@ -465,9 +504,12 @@ function steelSheet() {
 }
 
 const std = (o) => new THREE.MeshStandardMaterial(o);
-const carPaint = (color, roughness, clearcoat) => new THREE.MeshPhysicalMaterial({ color, roughness, metalness: 0.55, clearcoat, clearcoatRoughness: 0.12 });
+const carPaint = (color, roughness, clearcoat) => new THREE.MeshPhysicalMaterial({
+  roughness: roughness + 0.12, metalness: 0.5, clearcoat: clearcoat * 0.6, clearcoatRoughness: 0.3,
+  ...(hasDom ? { map: carPaintWear(`#${color.toString(16).padStart(6, "0")}`, false) } : { color }),
+});
 const carSideMat = (paint, rusty) => new THREE.MeshPhysicalMaterial({
-  roughness: rusty ? 0.75 : 0.3, metalness: rusty ? 0.25 : 0.55, clearcoat: rusty ? 0.1 : 1, clearcoatRoughness: 0.12,
+  roughness: rusty ? 0.78 : 0.4, metalness: rusty ? 0.25 : 0.5, clearcoat: rusty ? 0.05 : 0.6, clearcoatRoughness: 0.3,
   ...(hasDom ? { map: carSide(paint, rusty) } : { color: paint }),
 });
 const drum = (paint, wear, roughness, clearcoat) => new THREE.MeshPhysicalMaterial({
@@ -534,8 +576,8 @@ const specs = {
   "car-red": () => carPaint(0x9e1e1b, 0.28, 1),
   "car-blue": () => carPaint(0x1f4386, 0.28, 1),
   "car-grey": () => carPaint(0x7a7f86, 0.3, 1),
-  "car-rust": () => new THREE.MeshPhysicalMaterial({ roughness: 0.75, metalness: 0.25, clearcoat: 0.1,
-    ...(hasDom ? { map: drumTexture("#7c5236") } : { color: 0x7c5236 }) }),
+  "car-rust": () => new THREE.MeshPhysicalMaterial({ roughness: 0.8, metalness: 0.25, clearcoat: 0.05,
+    ...(hasDom ? { map: carPaintWear("#7c5236", true) } : { color: 0x7c5236 }) }),
   "car-side-white": () => carSideMat("#e6e4dd", false),
   "car-side-red": () => carSideMat("#9e1e1b", false),
   "car-side-blue": () => carSideMat("#1f4386", false),
@@ -543,7 +585,12 @@ const specs = {
   "car-side-rust": () => carSideMat("#7c5236", true),
   alloy: () => std({ color: 0xb4b8bd, roughness: 0.3, metalness: 0.85 }),
   "plate-white": () => std({ color: 0xe8e4dc, roughness: 0.5 }),
-  glass: () => new THREE.MeshPhysicalMaterial({ color: 0x1c2630, roughness: 0.05, metalness: 0.2, clearcoat: 1, transparent: true, opacity: 0.88, side: THREE.DoubleSide }),
+  "number-plate": () => mapped(numberPlate, 0xe8e4dc, { roughness: 0.5 }),
+  "wheel-well": () => std({ color: 0x141414, roughness: 1, side: THREE.DoubleSide }),
+  "light-amber": () => std({ color: 0xd98a1e, roughness: 0.3, emissive: 0x2a1400 }),
+  grille: () => mapped(grilleTexture, 0x1c1c1c, { roughness: 0.6, metalness: 0.3 }),
+  exhaust: () => std({ color: 0x5a4a40, roughness: 0.7, metalness: 0.6 }),
+  glass: () => new THREE.MeshPhysicalMaterial({ color: 0x232c33, roughness: 0.18, metalness: 0.15, clearcoat: 0.7, clearcoatRoughness: 0.35, transparent: true, opacity: 0.9, side: THREE.DoubleSide }),
   chrome: () => std({ color: 0xc8cbd0, roughness: 0.25, metalness: 0.9 }),
   "plastic-dark": () => std({ color: 0x2a2c2f, roughness: 0.7 }),
   "light-red": () => std({ color: 0xb0201a, roughness: 0.3, emissive: 0x300000 }),

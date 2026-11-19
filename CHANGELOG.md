@@ -4,6 +4,12 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Cars more detailed and worn: dark wheel wells, wipers, door mirrors with glass, 3D door
+  handles, an aerial, an exhaust, orange indicators, fog lamps, framed lights, a mesh grille and
+  number plates; paint with dust, swirl scratches, faded clear coat, a few dents, mud thrown up
+  round the arches, rust starting at the arch lips (heavy on the rusty car) and grime low on
+  the doors; slightly dusty glass.
+
 - Cars rebuilt: one smooth body traced from a side profile with real wheel arches, rounded edges
   and leaning sides; printed sides with tinted windows, pillars, door seams and handles; tinted
   windscreen and rear window; treaded tyres on five-spoke alloys; lights, grille, bumpers,

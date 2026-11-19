@@ -135,18 +135,54 @@ export function buildCar(obj) {
 
   for (const [x, z] of [[1.35, 1], [-1.35, 1], [1.35, -1], [-1.35, -1]]) inner.add(wheel(x, z * (W / 2 - 0.16), z));
 
-  // Lights, grille, bumpers, plates and mirrors.
-  for (const z of [-0.6, 0.6]) {
-    inner.add(box(0.05, 0.1, 0.32, "light-white", 2.22, 0.62, z));
-    inner.add(box(0.05, 0.12, 0.3, "light-red", -2.24, 0.72, z));
-    const mirror = box(0.12, 0.08, 0.1, `car-${color}`, 0.92, 1.0, z > 0 ? W / 2 - 0.12 : -(W / 2 - 0.12));
-    inner.add(mirror);
+  const tag = (m, part) => { m.userData.part = part; return m; };
+  // Dark wheel wells inside the arches (so you can't see through the body).
+  for (const [x, z] of [[1.35, 1], [-1.35, 1], [1.35, -1], [-1.35, -1]]) {
+    const well = mesh(new THREE.CylinderGeometry(0.385, 0.385, 0.32, 24, 1, true, -Math.PI / 2, Math.PI), "wheel-well");
+    well.rotation.x = Math.PI / 2;
+    well.position.set(x, 0.31, z * (W / 2 - 0.2));
+    inner.add(tag(well, "wheelwell"));
   }
-  inner.add(box(0.05, 0.12, 0.62, "plastic-dark", 2.23, 0.55, 0));               // grille
-  inner.add(box(0.14, 0.14, W - 0.18, "plastic-dark", 2.2, 0.34, 0));             // front bumper
-  inner.add(box(0.14, 0.14, W - 0.18, "plastic-dark", -2.21, 0.36, 0));           // rear bumper
-  inner.add(box(0.02, 0.11, 0.48, "plate-white", 2.29, 0.36, 0));
-  inner.add(box(0.02, 0.11, 0.48, "plate-white", -2.3, 0.58, 0));
+  // Lights: framed headlights and tail lights, orange indicators, fog lamps.
+  for (const z of [-0.6, 0.6]) {
+    inner.add(box(0.05, 0.13, 0.36, "plastic-dark", 2.21, 0.62, z));
+    inner.add(box(0.05, 0.1, 0.3, "light-white", 2.225, 0.625, z));
+    inner.add(box(0.05, 0.14, 0.34, "plastic-dark", -2.23, 0.72, z));
+    inner.add(box(0.05, 0.11, 0.3, "light-red", -2.245, 0.72, z));
+    inner.add(box(0.05, 0.05, 0.08, "light-white", 2.23, 0.36, z * 0.75));                       // fog lamps
+  }
+  for (const z of [-1, 1]) inner.add(tag(box(0.04, 0.05, 0.08, "light-amber", 2.19, 0.62, z * 0.84), "indicator"));
+  inner.add(box(0.05, 0.12, 0.62, "grille", 2.23, 0.55, 0));                                       // grille
+  inner.add(box(0.14, 0.14, W - 0.18, "plastic-dark", 2.2, 0.34, 0));                              // bumpers
+  inner.add(box(0.14, 0.14, W - 0.18, "plastic-dark", -2.21, 0.36, 0));
+  inner.add(box(0.02, 0.11, 0.48, "number-plate", 2.29, 0.36, 0));
+  inner.add(box(0.02, 0.11, 0.48, "number-plate", -2.3, 0.58, 0));
+  // Door mirrors: an arm and a housing with a mirror face.
+  for (const z of [-1, 1]) {
+    const m = new THREE.Group();
+    m.add(box(0.06, 0.03, 0.08, "plastic-dark", 0, 0, 0));
+    m.add(box(0.08, 0.09, 0.13, `car-${color}`, -0.01, 0.03, z * 0.09));
+    m.add(box(0.005, 0.07, 0.11, "chrome", -0.055, 0.03, z * 0.09));
+    m.position.set(0.95, 0.97, z * (W / 2 - 0.14));
+    inner.add(tag(m, "mirror"));
+  }
+  // Door handles standing out from the doors.
+  for (const x of [0.3, -0.85]) for (const z of [-1, 1]) inner.add(tag(box(0.14, 0.03, 0.02, "chrome", x, 0.8, z * (W / 2 - 0.02)), "handle"));
+  // Wipers resting at the foot of the windscreen.
+  for (const z of [-0.35, 0.3]) {
+    const wiper = box(0.03, 0.015, 0.55, "plastic-dark", 1.0, 0.94, z);
+    wiper.rotation.y = 0.18;
+    inner.add(tag(wiper, "wiper"));
+  }
+  // Aerial on the roof and an exhaust pipe under the rear bumper.
+  const aerial = mesh(new THREE.CylinderGeometry(0.003, 0.006, 0.4, 6), "plastic-dark");
+  aerial.position.set(-0.7, 1.62, 0.3);
+  aerial.rotation.z = 0.35;
+  inner.add(tag(aerial, "aerial"));
+  const exhaust = mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.18, 12), "exhaust");
+  exhaust.rotation.z = Math.PI / 2;
+  exhaust.position.set(-2.22, 0.2, 0.5);
+  inner.add(tag(exhaust, "exhaust"));
   g.add(fitTo(inner, CAR.length, CAR.height, CAR.width));
   return g;
 }

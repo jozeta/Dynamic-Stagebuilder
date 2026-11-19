@@ -195,3 +195,16 @@ test("the car has four treaded wheels with alloy rims, tinted glass and printed 
   }
   checkSize("car", { color: "rust" });
 });
+
+test("cars carry the small parts: wheel wells, wipers, mirrors, handles, aerial, exhaust, indicators", () => {
+  const g = buildProp(obj("car", { color: "blue" }));
+  const count = (tag) => { let n = 0; g.traverse((c) => { if (c.userData.part === tag) n++; }); return n; };
+  assert.equal(count("wheelwell"), 4);
+  assert.equal(count("wiper"), 2);
+  assert.equal(count("mirror"), 2);
+  assert.equal(count("handle"), 4);
+  assert.equal(count("aerial"), 1);
+  assert.equal(count("exhaust"), 1);
+  assert.equal(count("indicator"), 2);
+  checkSize("car", { color: "blue" });
+});
