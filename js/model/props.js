@@ -30,6 +30,32 @@ export const TABLE = Object.freeze({ height: 0.75, depth: 0.75 });
 export const TYRE = Object.freeze({ diameter: 0.65, height: 0.22 });
 export const BARREL = Object.freeze({ diameter: 0.58, height: 0.88 });
 
+// Moving and reactive targets (metres). Texas star: 5 plates of 20 cm on arms 55 cm from a hub
+// 1.25 m up (10 with a second ring at 33 cm); plate rack plates 20 cm on a 30 cm pitch; dueling
+// tree with 15 cm paddles on 35 cm arms.
+export const MOVING = deepFreeze({
+  star: { hub: 1.25, arm: 0.55, inner: 0.33, plate: 0.2, base: 1.0, depth: 0.8 },
+  rack: { pitch: 0.3, plate: 0.2, centre: 1.0, depth: 0.6 },
+  tree: { post: 1.8, arm: 0.35, paddle: 0.15, base: 0.8, left: [1.0, 1.25, 1.5], right: [1.12, 1.37, 1.62] },
+  swinger: { frame: 0.9, pivot: 0.9, cardBottom: 1.05, depth: 0.6 },
+  turner: { frame: 0.8, post: 1.6, cardBottom: 0.6, depth: 0.6 },
+  clam: { cardBottom: 0.8, depth: 0.6 },
+  mover: { cardBottom: 0.7, depth: 0.4 },
+});
+
+/** The Texas star's plate centres [x, y] (one arm points straight up). */
+export function starPlates(plates) {
+  const s = MOVING.star, out = [];
+  for (let k = 0; k < 5; k++) {
+    const a = Math.PI / 2 + (k * 2 * Math.PI) / 5;
+    out.push([s.arm * Math.cos(a), s.hub + s.arm * Math.sin(a)]);
+    if (plates > 5) out.push([s.inner * Math.cos(a + 0.63), s.hub + s.inner * Math.sin(a + 0.63)]);
+  }
+  return out;
+}
+
+const CARNIVAL = "USPSA and club matches; not allowed in IPSC matches (IPSC Target Array Handbook, January 2019 Edition, 4.1).";
+
 // Paper targets: the stand height (how high the sticks hold the card's bottom edge) and the style.
 // presentation: the target, a no-shoot or a combination (model/arrays.js); hardCover: painted cover.
 const mount = {
@@ -61,6 +87,21 @@ const defs = [
     params: { size: { default: 0.2, min: 0.15, max: 0.3, step: 0.01 }, baseHeight: { default: 1.0, min: 0.2, max: 1.5, step: 0.05 }, ...paint("white") } },
   { type: "plate-square", name: "Square plate", category: "steel", scoring: "steel",
     params: { size: { default: 0.15, min: 0.15, max: 0.3, step: 0.01 }, baseHeight: { default: 1.0, min: 0.2, max: 1.5, step: 0.05 }, ...paint("white") } },
+  { type: "swinger", name: "Swinger", category: "moving", scoring: "paper", params: { style: mount.style },
+    note: "A paper target on a weighted arm that swings once activated (usually by a popper)." },
+  { type: "drop-turner", name: "Drop turner", category: "moving", scoring: "paper", params: { style: mount.style },
+    note: "Starts edge-on, drops, turns to face the shooter and turns away again once activated." },
+  { type: "clamshell", name: "Clamshell", category: "moving", scoring: "paper", params: { style: mount.style },
+    note: "A paper target behind a steel cover that drops away once activated." },
+  { type: "mover", name: "Mover on a track", category: "moving", scoring: "paper",
+    params: { style: mount.style, length: { default: 3, min: 1.5, max: 6, step: 0.5 } },
+    note: "A paper target that runs across on a track once activated." },
+  { type: "texas-star", name: "Texas star", category: "moving", scoring: "steel", plates: (p) => p.plates,
+    params: { plates: { default: 5, min: 5, max: 10, step: 5 }, ...paint("white") }, note: `A spinning star of steel plates. ${CARNIVAL}` },
+  { type: "plate-rack", name: "Plate rack", category: "moving", scoring: "steel", plates: (p) => p.plates,
+    params: { plates: { default: 6, min: 4, max: 8, step: 1 }, ...paint("white") }, note: `Falling plates in a row. ${CARNIVAL}` },
+  { type: "dueling-tree", name: "Dueling tree", category: "moving", scoring: "steel", plates: () => 6,
+    params: { ...paint("white") }, note: `Six paddles that swing over from one side of the post to the other. ${CARNIVAL}` },
   { type: "wall-mesh", name: "Mesh wall", category: "wall", scoring: null,
     params: { ...wallSize, ...meshLook } },
   { type: "wall-mesh-port", name: "Mesh wall with port", category: "wall", scoring: null,
@@ -146,6 +187,17 @@ export function dimensionsOf(obj) {
     case "pallet": [w, h, d] = [PALLET.length, PALLET.height * p.count, PALLET.width]; break;
     case "sandbags": [w, h, d] = [p.length, SANDBAG.height * p.rows, SANDBAG.depth]; break;
     case "cone": [w, h, d] = [CONE.diameter, CONE.height, CONE.diameter]; break;
+    case "texas-star": {
+      const s = MOVING.star, pts = starPlates(p.plates);
+      w = Math.max(s.base, 2 * Math.max(...pts.map(([x]) => Math.abs(x))) + s.plate);
+      [h, d] = [Math.max(...pts.map(([, y]) => y)) + s.plate / 2, s.depth]; break;
+    }
+    case "plate-rack": { const r = MOVING.rack; [w, h, d] = [p.plates * r.pitch + 0.1, r.centre + r.plate / 2, r.depth]; break; }
+    case "dueling-tree": { const t = MOVING.tree; [w, h, d] = [Math.max(t.base, 2 * (t.arm + t.paddle / 2)), t.post, t.base]; break; }
+    case "swinger": { const m = MOVING.swinger, c = paperSize({ type: obj.type, params: p }); [w, h, d] = [Math.max(m.frame, c.w), m.cardBottom + c.h, m.depth]; break; }
+    case "drop-turner": { const m = MOVING.turner, c = paperSize({ type: obj.type, params: p }); [w, h, d] = [Math.max(m.frame, c.w), Math.max(m.post, m.cardBottom + c.h), m.depth]; break; }
+    case "clamshell": { const m = MOVING.clam, c = paperSize({ type: obj.type, params: p }); [w, h, d] = [c.w + 0.1, m.cardBottom + c.h + 0.05, m.depth]; break; }
+    case "mover": { const m = MOVING.mover, c = paperSize({ type: obj.type, params: p }); [w, h, d] = [p.length, m.cardBottom + c.h, m.depth]; break; }
     default: throw new Error(`Unknown prop type: ${obj.type}`);
   }
   return { w: round(w), h: round(h), d: round(d) };

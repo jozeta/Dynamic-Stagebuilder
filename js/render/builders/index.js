@@ -4,6 +4,7 @@ import { buildPaper } from "./paper.js";
 import { buildPopper, buildPlate } from "./steel.js";
 import { buildMeshWall, buildMeshPortWall, buildWoodWall, buildPortWall, buildDoorWall, buildSolidWall } from "./walls.js";
 import { buildRamp, buildPlatform, buildCar, buildTable, buildChair, buildPallet, buildSandbags, buildCone } from "./furniture.js";
+import { buildSwinger, buildDropTurner, buildClamshell, buildMover, buildTexasStar, buildPlateRack, buildDuelingTree } from "./moving.js";
 import { buildBarrel, buildTyre, buildCrate, buildPlant } from "./obstacles.js";
 
 export { buildLine, buildStartMarker } from "./lines.js";
@@ -15,6 +16,8 @@ const BUILDERS = {
   barrel: buildBarrel, tyre: buildTyre, "tyre-stack": buildTyre, crate: buildCrate, "plant-palm": buildPlant, "wall-door": buildDoorWall, "wall-solid": buildSolidWall,
   ramp: buildRamp, platform: buildPlatform, car: buildCar, table: buildTable, chair: buildChair,
   pallet: buildPallet, sandbags: buildSandbags, cone: buildCone,
+  swinger: buildSwinger, "drop-turner": buildDropTurner, clamshell: buildClamshell, mover: buildMover,
+  "texas-star": buildTexasStar, "plate-rack": buildPlateRack, "dueling-tree": buildDuelingTree,
 };
 
 export function buildProp(obj) {

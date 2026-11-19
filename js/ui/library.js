@@ -4,7 +4,7 @@ import { h } from "./dom.js";
 import { PROPS, defaultParams, TARGET_SIZES, BARREL, TYRE, CAR, PALLET, paperSize } from "../model/props.js";
 import { icon } from "./dom.js";
 
-const CATEGORIES = [["paper", "Paper"], ["steel", "Steel"], ["wall", "Walls"], ["structure", "Structures"], ["obstacle", "Obstacles and range furniture"]];
+const CATEGORIES = [["paper", "Paper"], ["steel", "Steel"], ["moving", "Moving and reactive"], ["wall", "Walls"], ["structure", "Structures"], ["obstacle", "Obstacles and range furniture"]];
 const cm = (m) => `${Math.round(m * 100)}`;
 
 // The size people know each prop by: the target face, the plate, the wall panel.
@@ -29,6 +29,11 @@ function sizeText(type) {
     case "pallet": return `${PALLET.length} × ${PALLET.width} m`;
     case "sandbags": return `${p.length} m, ${p.rows} rows`;
     case "cone": return "70 cm";
+    case "swinger": case "drop-turner": case "clamshell": return "Paper, activated";
+    case "mover": return `Paper on a ${p.length} m track`;
+    case "texas-star": return `${p.plates} plates, not IPSC`;
+    case "plate-rack": return `${p.plates} plates, not IPSC`;
+    case "dueling-tree": return "6 paddles, not IPSC";
     case "wall-door": return `${p.length} × ${p.height} m, door ${cm(p.doorWidth)} cm`;
     default: return `${p.length} × ${p.height} m`;
   }

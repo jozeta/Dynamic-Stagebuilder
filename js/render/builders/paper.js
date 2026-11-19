@@ -52,6 +52,20 @@ function stand(g, x) {
   for (const sx of [-0.11, 0.11]) g.add(box(0.05, 0.09, 0.05, "stand-blue", x + sx, h + 0.045, 0));   // stick sockets
 }
 
+/** One cardboard card, origin at its bottom centre, the printed face toward −z at z = 0. */
+export function paperCard(obj, kind = "target") {
+  const mini = obj.type === "paper-mini";
+  const style = obj.params.style === "head" ? "head" : "classic";
+  const shape = STYLES[style], size = paperSize(obj);
+  const outline = shape.outline.map(([x, y]) => [x * (size.w / shape.grid.w), y * (size.h / shape.grid.h)]);
+  const geo = new THREE.ExtrudeGeometry(shapeOf(outline), { depth: CARD, bevelEnabled: false });
+  const card = new THREE.Mesh(geo, [getMaterial(`${kind === "noshoot" ? "noshoot" : "card"}-${style}-${mini ? "mini" : "ipsc"}`), getMaterial("card-edge")]);
+  card.castShadow = true;
+  card.receiveShadow = true;
+  card.userData.card = kind;
+  return card;
+}
+
 export function buildPaper(obj) {
   const mini = obj.type === "paper-mini";
   const style = obj.params.style === "head" ? "head" : "classic";

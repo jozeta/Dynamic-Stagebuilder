@@ -9,7 +9,7 @@ const PARAM_LABELS = {
   presentation: "Presentation", hardCover: "Hard cover", mountHeight: "Stand height (m)", style: "Target style", baseHeight: "Base height (m)", size: "Size (m)", length: "Length (m)",
   height: "Height (m)", mesh: "Mesh colour", frame: "Frame", portWidth: "Port width (m)",
   portHeight: "Port height (m)", portBottom: "Port bottom (m)", count: "Count", paint: "Paint", color: "Colour", width: "Width (m)", rows: "Rows",
-  doorWidth: "Door width (m)", doorHeight: "Door height (m)",
+  doorWidth: "Door width (m)", plates: "Plates", doorHeight: "Door height (m)",
 };
 const OPTION_LABELS = { classic: "Classic (octagon)", head: "With head", orange: "Orange", black: "Black", blue: "Blue", wood: "Wood", white: "White", yellow: "Yellow", red: "Red",
   green: "Green", grey: "Grey", rust: "Rusty",
@@ -57,7 +57,8 @@ export function createInspector(root, { editor }) {
         : numberInput(k, o.params[k], spec, set)));
     }
     // Rule problems with a paper target array (cited from the Target Array Handbook).
-    if (def.scoring === "paper") for (const text of arrayIssues(o)) nodes.push(h("p", { class: "lg-alert lg-alert-warn inspector-warning", role: "status", text }));
+    if (def.note) nodes.splice(1, 0, h("p", { class: "lg-muted hint-text", text: def.note }));
+    if (o.type.startsWith("paper-")) for (const text of arrayIssues(o)) nodes.push(h("p", { class: "lg-alert lg-alert-warn inspector-warning", role: "status", text }));
     return nodes;
   }
 

@@ -6,7 +6,8 @@ import { SCORING } from "../js/model/scoring-rules.js";
 
 const TYPES = ["paper-ipsc", "paper-mini", "popper", "mini-popper",
   "plate-round", "plate-square", "wall-mesh", "wall-mesh-port", "wall-wood", "wall-port", "barrel", "tyre", "tyre-stack", "crate", "plant-palm",
-  "wall-door", "wall-solid", "ramp", "platform", "car", "table", "chair", "pallet", "sandbags", "cone"];
+  "wall-door", "wall-solid", "ramp", "platform", "car", "table", "chair", "pallet", "sandbags", "cone",
+  "swinger", "drop-turner", "clamshell", "mover", "texas-star", "plate-rack", "dueling-tree"];
 
 const near = (a, b, tol = 0.005) => assert.ok(Math.abs(a - b) <= tol, `${a} ≈ ${b}`);
 const obj = (type, params = {}) => ({ type, params: { ...defaultParams(type), ...params } });
@@ -14,7 +15,7 @@ const obj = (type, params = {}) => ({ type, params: { ...defaultParams(type), ..
 test("every v1 prop type exists with a category", () => {
   for (const t of TYPES) {
     assert.ok(PROPS[t], t);
-    assert.ok(["paper", "steel", "wall", "structure", "obstacle"].includes(PROPS[t].category), t);
+    assert.ok(["paper", "steel", "moving", "wall", "structure", "obstacle"].includes(PROPS[t].category), t);
   }
   assert.equal(Object.keys(PROPS).length, TYPES.length);
 });
