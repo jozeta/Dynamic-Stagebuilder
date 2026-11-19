@@ -5,7 +5,8 @@ body { background: var(--lg-bg); overflow: hidden; }
 
 .app {
   display: grid; height: 100vh; height: 100dvh;
-  grid-template-columns: 232px minmax(0, 1fr) 280px;
+  --library-w: 232px; --inspector-w: 280px; --inspector-h: clamp(240px, 34dvh, 340px);
+  grid-template-columns: var(--library-w) minmax(0, 1fr) var(--inspector-w);
   grid-template-rows: auto minmax(0, 1fr);
   grid-template-areas: "toolbar toolbar toolbar" "library viewport inspector";
   gap: var(--lg-space-s); padding: var(--lg-space-s);
@@ -25,10 +26,30 @@ body { background: var(--lg-bg); overflow: hidden; }
 
 /* iPad portrait and small laptops: the inspector becomes a panel under the viewport. */
 @media (max-width: 1099px) {
-  .app { grid-template-columns: 200px minmax(0, 1fr);
-    grid-template-rows: auto minmax(0, 1fr) clamp(240px, 34dvh, 340px);
+  .app { --library-w: 200px; grid-template-columns: var(--library-w) minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) var(--inspector-h);
     grid-template-areas: "toolbar toolbar" "library viewport" "library inspector"; }
+  .inspector .panel-toggle svg { transform: rotate(90deg); }
 }
+
+/* Folded side panels: a narrow rail with the button to unfold it. */
+.app.library-collapsed { --library-w: 56px; }
+.app.inspector-collapsed { --inspector-w: 56px; --inspector-h: 60px; }
+.library, .inspector { position: relative; }
+.panel-toggle { position: absolute; top: 6px; right: 6px; z-index: 1; }
+.panel-collapsed > :not(.panel-toggle) { display: none !important; }
+.panel-collapsed { overflow: hidden; }
+.panel-collapsed .panel-toggle { right: 50%; transform: translateX(50%); }
+.library .panel-title, .inspector .panel-title, .side-head { padding-right: 44px; }
+.side-head .panel-title { padding-right: 0; }
+.settings-head { padding-right: 44px; }
+.lib-marking .lib-name { display: inline-flex; align-items: center; gap: 6px; }
+.lib-marking .lib-name svg { width: 16px; height: 16px; }
+.side-head { display: flex; align-items: center; justify-content: space-between; gap: var(--lg-space-s); margin-bottom: var(--lg-space-s); }
+.proj-actions { display: grid; gap: 4px; }
+.proj-actions .lg-btn { justify-content: flex-start; }
+.projects-panel .proj-row { display: grid; gap: 6px; }
+.projects-panel .proj-buttons { flex-wrap: wrap; }
 
 .small-screen { display: none; }
 @media (max-width: 767px) {

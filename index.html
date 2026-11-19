@@ -22,7 +22,10 @@
   <p class="small-screen">Dynamic-Stagebuilder needs a computer or an iPad.</p>
   <div class="app">
     <header class="toolbar lg-glass" id="toolbar" aria-label="Tools"></header>
-    <aside class="library lg-glass" id="library" aria-label="Prop library"></aside>
+    <aside class="library lg-glass" id="library" aria-label="Prop library">
+      <div id="library-body"></div>
+      <section id="projects" class="side-panel projects-panel" aria-label="Projects" hidden></section>
+    </aside>
     <main class="viewport-wrap">
       <canvas id="viewport" aria-label="3D stage view" tabindex="0"></canvas>
       <div class="lg-state lg-state-loading viewport-state" id="boot-state" role="status">

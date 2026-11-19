@@ -42,6 +42,8 @@ const PATHS = {
   grid: ["M4 4h16v16H4z", "M4 9.3h16M4 14.7h16M9.3 4v16M14.7 4v16"],
   magnet: ["M6 4v8a6 6 0 0 0 12 0V4", "M6 4h3v8a3 3 0 0 0 6 0V4h3", "M6 8h3M15 8h3"],
   x: ["M6 6l12 12M18 6 6 18"],
+  chevl: ["M15 5l-7 7 7 7"],
+  chevr: ["M9 5l7 7-7 7"],
 };
 
 export function icon(name) {

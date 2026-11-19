@@ -24,6 +24,7 @@ import { openStore, memoryStore } from "./storage/db.js";
 import { projectRecord, sortProjects, nextProjectAfterDelete } from "./storage/projects.js";
 import { exportFileName, stageToJson } from "./storage/files.js";
 import { createProjects } from "./ui/projects.js";
+import { makeCollapsible } from "./ui/panels.js";
 import { createAutosave } from "./storage/autosave.js";
 
 const canvas = document.getElementById("viewport");
@@ -175,6 +176,9 @@ const freshStage = () => {
 };
 
 const projects = createProjects({
+  panel: document.getElementById("projects"),
+  hide: [document.getElementById("library-body")],
+  onToggle: (open) => document.querySelector('[aria-label="Projects"].tool')?.setAttribute("aria-pressed", String(open)),
   store: { list: () => store.list() },
   currentId: () => editor.stage().id,
   onOpen: openProject,
@@ -214,11 +218,14 @@ updaters.push(
     editor, rig, status, onAbout: () => about.open(), onBriefing: () => briefing.open(), onPrint: () => printBrief(),
     onProjects: () => projects.open(), onSettings: () => settings.open(),
   }),
-  createLibrary(document.getElementById("library"), { editor }),
+  createLibrary(document.getElementById("library-body"), { editor }),
   createInspector(document.getElementById("inspector-body"), { editor }),
   createStats(document.getElementById("stats")),
 );
 attachShortcuts({ editor, rig });
+const appEl = document.querySelector(".app");
+makeCollapsible(document.getElementById("library"), { app: appEl, name: "library", label: "props" });
+makeCollapsible(document.getElementById("inspector"), { app: appEl, name: "inspector", label: "inspector" });
 briefing = createBriefing({ editor });
 settings = createSettings({
   editor,

@@ -60,7 +60,7 @@ const FILES = [
   "js/ui/inspector.js",
   "js/ui/library.js",
   "js/ui/print.js",
-  "js/ui/projects.js",
+  "js/ui/projects.js", "js/ui/panels.js",
   "js/ui/settings.js",
   "js/ui/shortcuts.js",
   "js/ui/stats.js",

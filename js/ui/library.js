@@ -50,6 +50,33 @@ export function createLibrary(root, { editor }) {
   const sections = [];
   const items = [];
   root.append(h("h2", { class: "lg-subtitle panel-title", text: "Props" }), h("div", { class: "lg-search" }, [icon("search"), search]));
+
+  // Stage markings first: fault lines, shooting areas and the start position are drawn on the ground.
+  const markings = [
+    ["line", "Fault line", "Tap points; Finish or Enter to end", { type: "beginDraw", lineType: "fault-line" }, (s) => s.mode?.draw === "fault-line"],
+    ["area", "Shooting area", "Tap the corners; Finish to close", { type: "beginDraw", lineType: "shooting-area" }, (s) => s.mode?.draw === "shooting-area"],
+    ["flag", "Start position", "Tap where the shooter starts", { type: "beginStart" }, (s) => s.mode === "start"],
+  ].map(([ic, name, hint, action, active]) => {
+    const el = h("button", { type: "button", class: "lib-item lib-marking", role: "listitem", "aria-pressed": "false", dataset: { marking: name },
+      onclick: () => editor.dispatch(active(editor.state) ? { type: "setMode", mode: "select" } : action) },
+    [h("span", { class: "lib-name" }, [icon(ic), name]), h("span", { class: "lib-size lg-muted", text: hint })]);
+    items.push({ el, text: `${name} stage markings`.toLowerCase(), marking: true });
+    return { el, active };
+  });
+  {
+    const list = h("div", { class: "lib-list", role: "list" }, markings.map((m) => m.el));
+    const sec = h("details", { class: "lib-section", open: !closed.has("markings"), dataset: { cat: "markings" } }, [
+      h("summary", { class: "lib-summary" }, [h("span", { class: "lg-label", text: "Stage markings" }), h("span", { class: "lib-count lg-muted", text: "3" })]),
+      list,
+    ]);
+    sec.addEventListener("toggle", () => {
+      if (search.value.trim()) return;
+      if (sec.open) closed.delete("markings"); else closed.add("markings");
+      saveClosed(closed);
+    });
+    sections.push(sec);
+    root.append(sec);
+  }
   for (const [cat, title] of CATEGORIES) {
     const list = h("div", { class: "lib-list", role: "list" });
     for (const def of Object.values(PROPS).filter((p) => p.category === cat)) {
@@ -93,6 +120,7 @@ export function createLibrary(root, { editor }) {
   }
 
   return function update(state) {
-    for (const it of items) it.el.setAttribute("aria-pressed", String(state.mode?.place === it.el.dataset.type));
+    for (const it of items) if (!it.marking) it.el.setAttribute("aria-pressed", String(state.mode?.place === it.el.dataset.type));
+    for (const m of markings) m.el.setAttribute("aria-pressed", String(m.active(state)));
   };
 }
