@@ -67,7 +67,7 @@ export function createLibrary(root, { editor }) {
       list,
     ]);
     sec.addEventListener("toggle", () => {
-      if (filtering) return;
+      if (search.value.trim()) return;      // folds caused by a search are not the user's choice
       if (sec.open) closed.delete(cat); else closed.add(cat);
       saveClosed(closed);
     });
@@ -77,17 +77,14 @@ export function createLibrary(root, { editor }) {
   const empty = h("p", { class: "lg-muted lib-empty", text: "No props match your search.", hidden: true });
   root.append(empty);
 
-  let filtering = false;
   function filter() {
     const q = search.value.trim().toLowerCase();
     let shown = 0;
     for (const it of items) { const ok = !q || it.text.includes(q); it.el.hidden = !ok; if (ok) shown++; }
-    filtering = true;
     for (const s of sections) {
       s.hidden = ![...s.querySelectorAll(".lib-item")].some((b) => !b.hidden);
       s.open = q ? !s.hidden : !closed.has(s.dataset.cat);     // a search opens groups with matches
     }
-    setTimeout(() => { filtering = false; });
     empty.hidden = shown > 0;
   }
 

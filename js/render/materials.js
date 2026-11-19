@@ -3,6 +3,7 @@
 // (tests) there is no canvas, so plain colours are used.
 import * as THREE from "three";
 import { OUTLINE, ZONES, GRID } from "./builders/target-shape.js";
+import { TARGET_SIZES } from "../model/props.js";
 
 const cache = new Map();
 const hasDom = typeof document !== "undefined";
@@ -189,14 +190,12 @@ const mapped = (tex, fallback, extra = {}) => std({ roughness: 0.85, ...(hasDom 
 
 const specs = {
   "target-tan": () => mapped(cardboard, 0xcfa06a, { roughness: 0.95 }),
-  "card-ipsc": () => std({ roughness: 0.95, ...(hasDom ? { map: cardTexture({ base: "#d0a16a", line: "#8a5d33", fibres: 0.05 }, { w: 0.46, h: 0.58 }) } : { color: 0xd0a16a }) }),
-  "card-mini": () => std({ roughness: 0.95, ...(hasDom ? { map: cardTexture({ base: "#d0a16a", line: "#8a5d33", fibres: 0.05 }, { w: 0.31, h: 0.39 }) } : { color: 0xd0a16a }) }),
-  "noshoot-ipsc": () => std({ roughness: 0.95, ...(hasDom ? { map: cardTexture({ base: "#f2efe6", line: "#9a958a", fibres: 0.03 }, { w: 0.46, h: 0.58 }) } : { color: 0xf2efe6 }) }),
-  "noshoot-mini": () => std({ roughness: 0.95, ...(hasDom ? { map: cardTexture({ base: "#f2efe6", line: "#9a958a", fibres: 0.03 }, { w: 0.31, h: 0.39 }) } : { color: 0xf2efe6 }) }),
+  "card-ipsc": () => std({ roughness: 0.95, ...(hasDom ? { map: cardTexture({ base: "#d0a16a", line: "#8a5d33", fibres: 0.05 }, TARGET_SIZES.ipsc) } : { color: 0xd0a16a }) }),
+  "card-mini": () => std({ roughness: 0.95, ...(hasDom ? { map: cardTexture({ base: "#d0a16a", line: "#8a5d33", fibres: 0.05 }, TARGET_SIZES.mini) } : { color: 0xd0a16a }) }),
+  "noshoot-ipsc": () => std({ roughness: 0.95, ...(hasDom ? { map: cardTexture({ base: "#f2efe6", line: "#9a958a", fibres: 0.03 }, TARGET_SIZES.ipsc) } : { color: 0xf2efe6 }) }),
+  "noshoot-mini": () => std({ roughness: 0.95, ...(hasDom ? { map: cardTexture({ base: "#f2efe6", line: "#9a958a", fibres: 0.03 }, TARGET_SIZES.mini) } : { color: 0xf2efe6 }) }),
   "panel-grey": () => mapped(steelSheet, 0xc9ced2, { roughness: 0.55, metalness: 0.12 }),
   "card-edge": () => std({ color: 0x8b6a45, roughness: 1 }),
-  "noshoot-white": () => std({ color: 0xf3f1ea, roughness: 0.95 }),
-  "zone-line": () => new THREE.LineBasicMaterial({ color: 0x9c7a50, transparent: true, opacity: 0.7 }),
   "steel-white": () => std({ color: 0xeeece4, roughness: 0.55, metalness: 0.15 }),
   "steel-yellow": () => std({ color: 0xf2c81e, roughness: 0.45, metalness: 0.1 }),
   "steel-dark": () => std({ color: 0x3a3d42, roughness: 0.6, metalness: 0.5 }),

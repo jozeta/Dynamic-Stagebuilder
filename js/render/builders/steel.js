@@ -29,7 +29,7 @@ export function buildPopper(obj) {
   if (bh > 0) g.add(box(POST, bh, POST, "steel-dark", 0, bh / 2, 0));
   g.add(box(s.w, BASE, s.d, "steel-dark", 0, bh + BASE / 2, 0));
   // Hinge bracket the popper falls back on.
-  g.add(box(s.w * 0.55, 0.05, 0.05, "steel-dark", 0, bh + BASE + 0.025, PLATE * 2));
+  g.add(box(s.w * 0.55, 0.05, 0.05, "steel-dark", 0, bh + BASE + 0.025, 0.055));
   g.add(box(s.w * 0.3, 0.12, 0.03, "steel-dark", 0, bh + BASE + 0.06, s.d * 0.3));
   // A chunky popper with rounded (bevelled) edges, like painted steel seen on the range.
   const BEVEL = 0.01, THICK = 0.016;
@@ -38,6 +38,7 @@ export function buildPopper(obj) {
   geo.translate(0, BEVEL, -THICK / 2);
   const body = new THREE.Mesh(geo, getMaterial(`steel-${obj.params.paint || "yellow"}`));
   body.castShadow = true;
+  body.receiveShadow = true;
   body.position.y = bh + BASE;
   g.add(body);
   return g;
