@@ -115,4 +115,4 @@ versioned with the app.
   README's version and "What's new".
 - The README stays detailed: what it is, installation, configuration and settings, how-tos, and
   screenshots in a grid with a caption under each.
-- There is no GitHub remote yet. Don't push or create repos unless asked.
+- Public repo: github.com/jozeta/Dynamic-Stagebuilder, served by GitHub Pages from `main` at https://jozeta.github.io/Dynamic-Stagebuilder/ (every push to `main` publishes). Push only when asked, with the version bump.
