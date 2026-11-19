@@ -43,6 +43,16 @@ body { background: var(--lg-bg); overflow: hidden; }
 .library .panel-title, .inspector .panel-title, .side-head { padding-right: 44px; }
 .side-head .panel-title { padding-right: 0; }
 .settings-head { padding-right: 44px; }
+.settings-tabs { display: flex; margin-bottom: var(--lg-space-m); }
+.settings-tabs .lg-tab { flex: 1; }
+.vis-group { border: 1px solid var(--lg-border); border-radius: var(--lg-radius-control); padding: 6px 10px 8px; margin: 0 0 var(--lg-space-s); min-width: 0; }
+.vis-head { display: flex; align-items: center; justify-content: space-between; gap: var(--lg-space-s); width: 100%; padding: 0; float: left; min-height: 36px; }
+.vis-name { font-weight: 600; color: var(--lg-text); }
+.vis-items { clear: both; display: grid; gap: 0; }
+.vis-item { display: flex; align-items: center; gap: 8px; min-height: 36px; color: var(--lg-text); cursor: pointer; }
+.vis-item input { width: 18px; height: 18px; accent-color: var(--lg-accent); }
+.vis-item:has(input:disabled) { color: var(--lg-muted); cursor: default; }
+@media (pointer: coarse) { .vis-item, .vis-head { min-height: 44px; } }
 .lib-marking .lib-name { display: inline-flex; align-items: center; gap: 6px; }
 .lib-marking .lib-name svg { width: 16px; height: 16px; }
 .side-head { display: flex; align-items: center; justify-content: space-between; gap: var(--lg-space-s); margin-bottom: var(--lg-space-s); }
@@ -77,6 +87,7 @@ body { background: var(--lg-bg); overflow: hidden; }
 .lib-item { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; width: 100%; min-height: 40px;
   padding: 6px 10px; border-radius: var(--lg-radius-control); border: 1px solid var(--lg-border);
   background: var(--lg-surface); color: var(--lg-text); font: inherit; text-align: left; cursor: grab; }
+.lib-item[hidden] { display: none; }
 .lib-item:hover { border-color: color-mix(in srgb, var(--lg-accent) 55%, var(--lg-border)); }
 .lib-item:focus-visible { outline: 2px solid var(--lg-accent); outline-offset: 1px; }
 .lib-name { font-size: var(--lg-fs-body); }

@@ -25,6 +25,7 @@ import { projectRecord, sortProjects, nextProjectAfterDelete } from "./storage/p
 import { exportFileName, stageToJson } from "./storage/files.js";
 import { createProjects } from "./ui/projects.js";
 import { makeCollapsible } from "./ui/panels.js";
+import { loadHidden, saveHidden } from "./ui/prefs.js";
 import { createAutosave } from "./storage/autosave.js";
 
 const canvas = document.getElementById("viewport");
@@ -213,12 +214,14 @@ const projects = createProjects({
   },
 });
 
+let hiddenProps = loadHidden();
+const library = createLibrary(document.getElementById("library-body"), { editor, hidden: hiddenProps });
 updaters.push(
   createToolbar(document.getElementById("toolbar"), {
     editor, rig, status, onAbout: () => about.open(), onBriefing: () => briefing.open(), onPrint: () => printBrief(),
     onProjects: () => projects.open(), onSettings: () => settings.open(),
   }),
-  createLibrary(document.getElementById("library-body"), { editor }),
+  library,
   createInspector(document.getElementById("inspector-body"), { editor }),
   createStats(document.getElementById("stats")),
 );
@@ -232,6 +235,8 @@ settings = createSettings({
   panel: document.getElementById("settings-panel"),
   hide: [document.getElementById("inspector-body"), document.getElementById("stats")],
   onToggle: (open) => document.querySelector('[aria-label="Settings"].tool')?.setAttribute("aria-pressed", String(open)),
+  getHidden: () => hiddenProps,
+  onHidden: (next) => { hiddenProps = next; saveHidden(next); library.setHidden(next); },
 });
 
 render(editor.state);

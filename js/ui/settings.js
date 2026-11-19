@@ -2,7 +2,10 @@
 // haze and exposure. It opens in the right-hand panel in place of the inspector (toolbar
 // *Settings* toggles it, *Done* or Escape closes it), so the 3D view stays visible and live.
 // Sliders apply while dragging; settings are saved with the stage but aren't undo steps.
+// The Props tab hides library groups and single props (a per-browser preference).
 import { h } from "./dom.js";
+import { LIBRARY_GROUPS, MARKINGS, isShown, setShown } from "../model/visibility.js";
+import { PROPS } from "../model/props.js";
 import { ENVIRONMENT_NAMES, ENVIRONMENT_LABELS } from "../render/environments/index.js";
 
 const SLIDERS = [
@@ -15,18 +18,64 @@ const SLIDERS = [
   ["exposure", "Exposure", 0.5, 1.6, 0.05, (v) => v.toFixed(2)],
 ];
 
-export function createSettings({ editor, panel, hide = [], onToggle = () => {} }) {
+export function createSettings({ editor, panel, hide = [], onToggle = () => {}, getHidden = () => ({ categories: [], props: [] }), onHidden = () => {} }) {
   const d = (a) => editor.dispatch(a);
   const body = h("div", { class: "settings-body" });
+  const lookPane = h("div", { id: "settings-look", role: "tabpanel", "aria-labelledby": "settings-tab-look" }, [
+    body,
+    h("div", { class: "lg-row settings-actions" }, [
+      h("button", { type: "button", class: "lg-btn", onclick: () => { d({ type: "setLook", reset: true }); fill(); }, text: "Reset light to defaults" }),
+    ]),
+  ]);
+  const propsPane = h("div", { id: "settings-props", role: "tabpanel", "aria-labelledby": "settings-tab-props", hidden: true });
+  const tabButtons = [["look", "Light and view"], ["props", "Props"]].map(([id, label]) =>
+    h("button", { type: "button", class: "lg-tab", role: "tab", id: `settings-tab-${id}`, "aria-controls": `settings-${id}`, "aria-selected": String(id === "look"),
+      onclick: () => selectTab(id), text: label }));
+  const tabs = h("div", { class: "lg-tabs settings-tabs", role: "tablist", "aria-label": "Settings" }, tabButtons);
+  tabs.addEventListener("keydown", (e) => {
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    const next = tabButtons[(tabButtons.indexOf(document.activeElement) + 1) % 2];
+    next.focus(); next.click();
+  });
+  function selectTab(id) {
+    for (const b of tabButtons) b.setAttribute("aria-selected", String(b.id === `settings-tab-${id}`));
+    lookPane.hidden = id !== "look";
+    propsPane.hidden = id !== "props";
+    if (id === "props") fillProps();
+  }
+
+  // Props tab: a switch per group, a checkbox per prop. Hidden props stay on stages that use them.
+  const names = { ...Object.fromEntries(MARKINGS.map((m) => [m.id, m.name])), ...Object.fromEntries(Object.values(PROPS).map((p) => [p.type, p.name])) };
+  function fillProps() {
+    const hidden = getHidden();
+    const set = (kind, id, shown) => { onHidden(setShown(getHidden(), kind, id, shown)); fillProps(); };
+    propsPane.replaceChildren(
+      h("p", { class: "lg-muted hint-text", text: "Choose what the props panel lists. Hiding a prop doesn't remove it from stages." }),
+      ...LIBRARY_GROUPS.map((g) => {
+        const groupOn = isShown(hidden, g.id);
+        const sw = h("input", { type: "checkbox", class: "lg-toggle", id: `vis-${g.id}`, onchange: (e) => set("category", g.id, e.target.checked) });
+        sw.checked = groupOn;
+        return h("fieldset", { class: "vis-group" }, [
+          h("legend", { class: "vis-head" }, [h("label", { for: `vis-${g.id}`, class: "vis-name", text: g.name }), sw]),
+          h("div", { class: "vis-items" }, g.items.map((id) => {
+            const box = h("input", { type: "checkbox", id: `vis-item-${id}`, disabled: !groupOn, onchange: (e) => set("prop", id, e.target.checked) });
+            box.checked = !hidden.props.includes(id);
+            return h("label", { class: "vis-item", for: `vis-item-${id}` }, [box, h("span", { text: names[id] || id })]);
+          })),
+        ]);
+      }),
+      h("div", { class: "lg-row settings-actions" }, [h("button", { type: "button", class: "lg-btn", text: "Show everything",
+        onclick: () => { onHidden({ categories: [], props: [] }); fillProps(); } })]),
+    );
+  }
   panel.append(
     h("div", { class: "settings-head" }, [
       h("h2", { class: "lg-subtitle panel-title", id: "settings-title", text: "Settings" }),
       h("button", { type: "button", class: "lg-btn lg-btn-primary", onclick: () => close(), text: "Done" }),
     ]),
-    body,
-    h("div", { class: "lg-row settings-actions" }, [
-      h("button", { type: "button", class: "lg-btn", onclick: () => { d({ type: "setLook", reset: true }); fill(); }, text: "Reset light to defaults" }),
-    ]),
+    tabs,
+    lookPane,
+    propsPane,
   );
   panel.setAttribute("aria-labelledby", "settings-title");
   panel.hidden = true;

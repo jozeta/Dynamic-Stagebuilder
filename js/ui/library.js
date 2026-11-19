@@ -4,7 +4,8 @@ import { h } from "./dom.js";
 import { PROPS, defaultParams, TARGET_SIZES, BARREL, TYRE, CAR, PALLET, paperSize } from "../model/props.js";
 import { icon } from "./dom.js";
 
-const CATEGORIES = [["paper", "Paper"], ["steel", "Steel"], ["moving", "Moving and reactive"], ["wall", "Walls"], ["structure", "Structures"], ["obstacle", "Obstacles and range furniture"]];
+import { LIBRARY_GROUPS, isShown } from "../model/visibility.js";
+const CATEGORIES = LIBRARY_GROUPS.filter((g) => g.id !== "markings").map((g) => [g.id, g.name]);
 const cm = (m) => `${Math.round(m * 100)}`;
 
 // The size people know each prop by: the target face, the plate, the wall panel.
@@ -44,7 +45,8 @@ const FOLD_KEY = "dsb:library-closed";
 function loadClosed() { try { return new Set(JSON.parse(localStorage.getItem(FOLD_KEY) || "[]")); } catch { return new Set(); } }
 function saveClosed(set) { try { localStorage.setItem(FOLD_KEY, JSON.stringify([...set])); } catch { /* private mode */ } }
 
-export function createLibrary(root, { editor }) {
+export function createLibrary(root, { editor, hidden: initialHidden = { categories: [], props: [] } }) {
+  let hidden = initialHidden;
   const closed = loadClosed();
   const search = h("input", { type: "search", placeholder: "Search props", "aria-label": "Search props", oninput: () => filter() });
   const sections = [];
@@ -57,10 +59,10 @@ export function createLibrary(root, { editor }) {
     ["area", "Shooting area", "Tap the corners; Finish to close", { type: "beginDraw", lineType: "shooting-area" }, (s) => s.mode?.draw === "shooting-area"],
     ["flag", "Start position", "Tap where the shooter starts", { type: "beginStart" }, (s) => s.mode === "start"],
   ].map(([ic, name, hint, action, active]) => {
-    const el = h("button", { type: "button", class: "lib-item lib-marking", role: "listitem", "aria-pressed": "false", dataset: { marking: name },
+    const el = h("button", { type: "button", class: "lib-item lib-marking", role: "listitem", "aria-pressed": "false", dataset: { marking: name, type: action.lineType || "start" },
       onclick: () => editor.dispatch(active(editor.state) ? { type: "setMode", mode: "select" } : action) },
     [h("span", { class: "lib-name" }, [icon(ic), name]), h("span", { class: "lib-size lg-muted", text: hint })]);
-    items.push({ el, text: `${name} stage markings`.toLowerCase(), marking: true });
+    items.push({ el, text: `${name} stage markings`.toLowerCase(), marking: true, group: "markings", id: action.lineType || "start" });
     return { el, active };
   });
   {
@@ -89,7 +91,7 @@ export function createLibrary(root, { editor }) {
         },
         ondragstart: (e) => { e.dataTransfer.setData("application/x-stage-prop", def.type); e.dataTransfer.effectAllowed = "copy"; },
       }, [h("span", { class: "lib-name", text: def.name }), h("span", { class: "lib-size lg-muted", text: sizeText(def.type) })]);
-      items.push({ el: item, text: `${def.name} ${title}`.toLowerCase() });
+      items.push({ el: item, text: `${def.name} ${title}`.toLowerCase(), group: cat, id: def.type });
       list.append(item);
     }
     // A native <details>: the heading toggles the group with mouse, touch and keyboard.
@@ -111,16 +113,22 @@ export function createLibrary(root, { editor }) {
   function filter() {
     const q = search.value.trim().toLowerCase();
     let shown = 0;
-    for (const it of items) { const ok = !q || it.text.includes(q); it.el.hidden = !ok; if (ok) shown++; }
+    for (const it of items) { const ok = isShown(hidden, it.group, it.id) && (!q || it.text.includes(q)); it.el.hidden = !ok; if (ok) shown++; }
     for (const s of sections) {
       s.hidden = ![...s.querySelectorAll(".lib-item")].some((b) => !b.hidden);
       s.open = q ? !s.hidden : !closed.has(s.dataset.cat);     // a search opens groups with matches
     }
+    for (const s of sections) { const c = s.querySelector(".lib-count"); if (c) c.textContent = String([...s.querySelectorAll(".lib-item")].filter((b) => !b.hidden).length); }
+    empty.textContent = q ? "No props match your search." : "Every prop is hidden. Show them again in Settings → Props.";
     empty.hidden = shown > 0;
   }
 
-  return function update(state) {
+  filter();
+  function update(state) {
     for (const it of items) if (!it.marking) it.el.setAttribute("aria-pressed", String(state.mode?.place === it.el.dataset.type));
     for (const m of markings) m.el.setAttribute("aria-pressed", String(m.active(state)));
-  };
+  }
+  // Settings → Props: show or hide groups and single items.
+  update.setHidden = (h2) => { hidden = h2; filter(); };
+  return update;
 }
