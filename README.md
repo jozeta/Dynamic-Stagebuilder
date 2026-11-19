@@ -179,8 +179,8 @@ Stage settings are in the inspector when nothing is selected. They are saved wit
 | Surroundings | *Settings*: Outdoor (dirt range), Technical (grey floor, grid) or Blueprint (drafting sheet); never moves the stage | Outdoor |
 | Ground | *Settings* (Outdoor): sand, light sand, dark sand, red dirt or gravel | Gravel |
 | Foliage | *Settings* (Outdoor): mixed broadleaf, Nordic, desert, savanna, tropical or bare banks | Nordic |
-| Paper / Floor hue, intensity, brightness | *Settings* (Blueprint, Technical): 0–359°, 0–100 %, 40–160 % | Blueprint's blue paper (216°, 80 %); Technical's grey floor at 110 % brightness |
-| Grid intensity, Grid colour | *Settings* (Blueprint, Technical): 0 % (hidden) – 100 %; seven swatches or your own colour | Blueprint 100 %, pale blue; Technical 40 %, dark grey |
+| Paper / Floor hue, intensity, brightness | *Settings* (Blueprint, Technical): 0–359°, 0–100 %, 40–160 % | Blueprint 220°, 54 %, 40 % (deep blue); Technical's grey floor at 110 % brightness |
+| Grid intensity, Grid colour | *Settings* (Blueprint, Technical): 0 % (hidden) – 100 %; seven swatches or your own colour | Blueprint 14 %, white; Technical 40 %, dark grey |
 | Show walls | *Settings* (Technical): the backstop and side walls; the floor runs on to the horizon either way | Off |
 | Cloud shadows | *Settings* (Outdoor): how dark the clouds' shadows on the ground are, 0–100 % | 50 % |
 | Time of day | *Settings*: on/off; on, 06:00–20:00 moves the sun (its height, direction and colour follow it) | Off (the sun set by hand) |

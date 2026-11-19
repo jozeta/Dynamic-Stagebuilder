@@ -4,6 +4,9 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- New Blueprint defaults: the sun set by hand like Outdoor and Technical, a deep blue paper
+  (220°, 54 % intensity, 40 % brightness) and a faint white grid (14 %).
+
 ## 0.2.0 (2026-11-19)
 
 - New Technical defaults: the sun set by hand like Outdoor (31°, 35°, warm white; sunlight 85 %,

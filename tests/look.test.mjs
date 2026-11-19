@@ -74,10 +74,12 @@ test("Technical surroundings have their own light defaults; reset and switching 
   assert.deepEqual(ed.stage().settings.look, { ...TECHNICAL_LOOK });
 });
 
-test("Blueprint has its own light defaults: 11:00, ambient 115 %, softness 4, shadows 70 %, no haze, exposure 1.05", async () => {
+test("Blueprint has its own defaults: the sun by hand, a deep blue paper (220°, 54 %, 40 %) and a faint white grid", async () => {
   const { lookDefaults, BLUEPRINT_LOOK } = await import("../js/model/look.js");
   assert.deepEqual(lookDefaults("blueprint"), BLUEPRINT_LOOK);
-  assert.deepEqual({ ...BLUEPRINT_LOOK }, { hour: 11, sun: 1, ambient: 1.15, shadows: true, softness: 4, shadowStrength: 0.7, haze: 0, exposure: 1.05, ground: "sand", foliage: "mixed", clouds: 0.35, cloudSpeed: 1, wind: 60, cloudShadow: 0.5, sunAuto: true, sunElevation: 35, sunAzimuth: 20, sunColor: 0.8, groundHue: null, groundIntensity: null, groundBrightness: null, walls: true, gridIntensity: null, gridColor: null });
+  assert.deepEqual({ ...BLUEPRINT_LOOK }, { hour: 11, sun: 0.85, ambient: 1.05, shadows: true, softness: 4, shadowStrength: 0.55, haze: 0.15, exposure: 1, ground: "sand", foliage: "mixed",
+    clouds: 0.45, cloudSpeed: 0.5, wind: 70, cloudShadow: 0.5, sunAuto: false, sunElevation: 31, sunAzimuth: 35, sunColor: 0.78,
+    groundHue: 220, groundIntensity: 0.54, groundBrightness: 0.4, walls: true, gridIntensity: 0.14, gridColor: "#ffffff" });
   const { ENVIRONMENTS } = await import("../js/model/schema.js");
   assert.ok(ENVIRONMENTS.includes("blueprint"));
 });
