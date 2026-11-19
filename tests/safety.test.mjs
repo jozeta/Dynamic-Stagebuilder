@@ -91,3 +91,27 @@ test("sight lines from a position: which targets it sees, and where it sees each
   assert.deepEqual(r.hidden, [hidden.id]);
   assert.equal(r.seen[0].aim.length, 3, "a point [x, z, y] on the target to draw the line to");
 });
+
+test("safety rings round a target: steel 7 m (red) and 8 m (yellow), paper 3 m (yellow); none for props", async () => {
+  const { safetyRings } = await import("../js/model/safety.js");
+  const steel = safetyRings({ type: "popper" });
+  assert.deepEqual(steel.map((r) => [r.radius, r.level, r.rule]), [[7, "bad", "2.1.3"], [8, "warn", "2.1.3"]]);
+  assert.ok(steel.every((r) => r.label && r.text.length > 20));
+  assert.deepEqual(safetyRings({ type: "paper-ipsc" }).map((r) => [r.radius, r.level, r.rule]), [[3, "warn", "10.4.2"]]);
+  assert.deepEqual(safetyRings({ type: "barrel" }), []);
+});
+
+test("the safety-ring switch is a saved flag on the target, undoable, and kept by the stage file", async () => {
+  const { createEditor } = await import("../js/editor.js");
+  const { validateStage } = await import("../js/model/schema.js");
+  const ed = createEditor();
+  ed.dispatch({ type: "place", propType: "popper", position: [0, 12] });
+  const id = ed.stage().objects[0].id;
+  ed.dispatch({ type: "setSafetyRings", ids: [id], on: true });
+  assert.equal(ed.stage().objects[0].safetyRings, true);
+  const r = validateStage(JSON.parse(JSON.stringify(ed.stage())));
+  assert.equal(r.ok, true, r.errors?.join());
+  assert.equal(r.stage.objects[0].safetyRings, true);
+  ed.dispatch({ type: "undo" });
+  assert.equal(ed.stage().objects[0].safetyRings, undefined);
+});

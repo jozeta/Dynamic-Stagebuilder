@@ -103,3 +103,25 @@ export function sightFrom(stage, point, eye) {
   }
   return { seen, hidden };
 }
+
+/**
+ * The rulebook distances to draw round a target (IPSC CCR January 2024, Handgun): steel gets 7 m
+ * (red: no one closer while it is shot, rule 2.1.3; a shot from closer is a disqualification, rule
+ * 10.4.7) and 8 m (yellow: the nearest a fault line limiting the approach may be, rule 2.1.3). Paper
+ * has no minimum distance; its 3 m ring (yellow) marks rule 10.4.2: a shot striking the ground within
+ * 3 m of the shooter is a disqualification, except when shooting at a paper target closer than 3 m.
+ */
+export function safetyRings(obj) {
+  const kind = getProp(obj.type).scoring;
+  if (kind === "steel") return [
+    { radius: SAFETY.steelMin, level: "bad", rule: SAFETY.distanceRule, label: `${SAFETY.steelMin} m`,
+      text: `Minimum distance: nobody within ${SAFETY.steelMin} m while steel is shot (rule ${SAFETY.distanceRule}); a shot from closer is a disqualification (rule 10.4.7).` },
+    { radius: SAFETY.faultLineMin, level: "warn", rule: SAFETY.distanceRule, label: `${SAFETY.faultLineMin} m`,
+      text: `A fault line limiting the approach to steel must be at least ${SAFETY.faultLineMin} m away (rule ${SAFETY.distanceRule}).` },
+  ];
+  if (kind === "paper") return [
+    { radius: 3, level: "warn", rule: "10.4.2", label: "3 m",
+      text: "No minimum distance for paper. Inside 3 m, a shot that strikes the ground near the shooter is not a disqualification (rule 10.4.2)." },
+  ];
+  return [];
+}

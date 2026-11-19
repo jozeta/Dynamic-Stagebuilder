@@ -23,7 +23,7 @@ const without = (o, key) => { const c = { ...o }; delete c[key]; return c; };
 
 /** Lock or unlock, hide or show objects: key "locked" or "hidden". */
 export function setFlag(stage, ids, key, on) {
-  if (key !== "locked" && key !== "hidden") throw new Error(`Unknown flag: ${key}`);
+  if (!["locked", "hidden", "safetyRings"].includes(key)) throw new Error(`Unknown flag: ${key}`);
   return mapObjects(stage, ids, (o) => (on ? { ...o, [key]: true } : without(o, key)));
 }
 

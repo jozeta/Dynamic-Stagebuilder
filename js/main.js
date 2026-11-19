@@ -49,7 +49,7 @@ import { revealOnSelect } from "./model/layout.js";
 import { activationLinks } from "./model/activation.js";
 import { isHidden } from "./model/layers.js";
 import { measureText } from "./model/measure.js";
-import { sightFrom } from "./model/safety.js";
+import { sightFrom, safetyRings } from "./model/safety.js";
 import { eyeHeight } from "./model/positions.js";
 import { createContextMenu } from "./ui/context-menu.js";
 import { createLayers } from "./ui/layers.js";
@@ -87,7 +87,76 @@ let lookShown = null;
 const highlight = new THREE.Group();
 const preview = new THREE.Group();
 const measuring = new THREE.Group();
-engine.groups.helper.add(highlight, preview, measuring);
+const rings = new THREE.Group();                 // safety distances round the targets that ask for them
+engine.groups.helper.add(highlight, preview, measuring, rings);
+const RING_COLOR = { bad: 0xd9483b, warn: 0xf0b93a };
+let ringsFor = null;
+
+// A line from a safety warning to the props it is about, in the warning's colour, drawn over the
+// page (an SVG that takes no clicks). Followed every frame while shown, so it stays on the target
+// as the camera moves.
+const pointer = (() => {
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(NS, "svg");
+  svg.classList.add("check-pointer");
+  svg.setAttribute("aria-hidden", "true");
+  document.body.append(svg);
+  let want = null, frame = 0;
+  const at = (id) => {
+    const s = editor.stage();
+    const o = s.objects.find((x) => x.id === id);
+    if (o) return [o.position[0], 0.9, o.position[1]];
+    const l = s.lines.find((x) => x.id === id);
+    if (!l) return null;
+    const m = l.points.reduce((a, p) => [a[0] + p[0] / l.points.length, a[1] + p[1] / l.points.length], [0, 0]);
+    return [m[0], 0.05, m[1]];
+  };
+  function draw() {
+    frame = 0;
+    svg.replaceChildren();
+    const item = want && document.querySelector(`#stats [data-check-key="${CSS.escape(want.key)}"]`);
+    if (!item || item.closest("[hidden], .lg-dock-folded, .lg-dock-inactive")) { if (want) frame = requestAnimationFrame(draw); return; }
+    const colour = want.level === "bad" ? "#d9483b" : "#f0b93a";          // the warning's colour, as the rings
+    const box = item.getBoundingClientRect(), cv = engine.renderer.domElement.getBoundingClientRect();
+    for (const id of want.ids) {
+      const p = at(id);
+      if (!p) continue;
+      const v = new THREE.Vector3(...p).project(engine.camera);
+      if (v.z > 1) continue;                                           // behind the camera
+      const x = cv.left + ((v.x + 1) / 2) * cv.width, y = cv.top + ((1 - v.y) / 2) * cv.height;
+      const sx = x < box.left ? box.left : box.right, sy = box.top + box.height / 2;
+      const el = (tag, attrs) => { const e = document.createElementNS(NS, tag); for (const [k, val] of Object.entries(attrs)) e.setAttribute(k, String(val)); return e; };
+      const seg = { x1: sx, y1: sy, x2: x, y2: y, "stroke-linecap": "round" };
+      // A dark edge under the coloured line keeps it readable on light and dark ground.
+      svg.append(el("line", { ...seg, stroke: "rgba(0,0,0,0.55)", "stroke-width": 5 }), el("line", { ...seg, stroke: colour, "stroke-width": 2.5 }),
+        el("circle", { cx: x, cy: y, r: 9, fill: "none", stroke: "rgba(0,0,0,0.55)", "stroke-width": 5 }), el("circle", { cx: x, cy: y, r: 9, fill: "none", stroke: colour, "stroke-width": 2.5 }),
+        el("circle", { cx: sx, cy: sy, r: 3.5, fill: colour }));
+    }
+    frame = requestAnimationFrame(draw);
+  }
+  return { set(p) { want = p; if (!frame) frame = requestAnimationFrame(draw); if (!p) { cancelAnimationFrame(frame); frame = 0; svg.replaceChildren(); } } };
+})();
+// Rebuilt when the stage changes: a flat ring and a distance label (on the shooter's side) for each
+// rulebook distance of every target with Show safety distances on (and not hidden).
+function drawRings(stage) {
+  if (stage === ringsFor) return;
+  ringsFor = stage;
+  for (const c of [...rings.children]) { rings.remove(c); c.geometry?.dispose(); c.material?.map?.dispose(); c.material?.dispose(); }
+  for (const o of stage.objects) {
+    if (!o.safetyRings || isHidden(stage, o)) continue;
+    for (const r of safetyRings(o)) {
+      const ring = new THREE.Mesh(new THREE.RingGeometry(r.radius - 0.05, r.radius + 0.05, 128),
+        new THREE.MeshBasicMaterial({ color: RING_COLOR[r.level], transparent: true, opacity: 0.9, depthWrite: false }));
+      ring.rotation.x = -Math.PI / 2;
+      ring.position.set(o.position[0], 0.025, o.position[1]);
+      ring.renderOrder = 4;
+      const label = createLabel(r.label);
+      label.scale.multiplyScalar(2);
+      label.position.set(o.position[0], 0.35, o.position[1] - r.radius);
+      rings.add(ring, label);
+    }
+  }
+}
 const ACCENT = 0x5a93c4;
 
 const hint = document.getElementById("hint");
@@ -155,6 +224,8 @@ function render(state) {
     line.renderOrder = 5;
     highlight.add(line);
   }
+
+  drawRings(stage);
 
   // Sight lines from a selected shooting position: thin green lines from its eye to each target seen.
   const pos = state.selection.length === 1 && !state.drag ? stage.objects.find((o) => o.id === state.selection[0] && o.type === "shooting-position") : null;
@@ -461,7 +532,7 @@ updaters.push(
   library,
   layers.update,
   createInspector(document.getElementById("inspector-body"), { editor }),
-  createStats(document.getElementById("stats"), { onShow: (ids) => editor.dispatch({ type: "select", ids }) }),
+  createStats(document.getElementById("stats"), { onShow: (ids) => editor.dispatch({ type: "select", ids }), onPoint: (p) => pointer.set(p) }),
 );
 attachShortcuts({ editor, rig });
 // Play / pause for animated props, in the bar over the 3D view (shown when any prop is animated).

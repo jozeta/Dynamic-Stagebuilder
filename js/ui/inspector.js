@@ -6,7 +6,7 @@ import { labelPrefix } from "../model/numbering.js";
 import { PRESENTATIONS, HARD_COVERS, arrayIssues } from "../model/arrays.js";
 import { canBeActivated, isActivator, activatorsFor, activatorOf, activationLinks, describe } from "../model/activation.js";
 import { isLocked } from "../model/layers.js";
-import { sightFrom } from "../model/safety.js";
+import { sightFrom, safetyRings } from "../model/safety.js";
 import { eyeHeight } from "../model/positions.js";
 
 const PARAM_LABELS = {
@@ -90,6 +90,17 @@ export function createInspector(root, { editor }) {
         onchange: (e) => d(k === "locked" ? { type: "setLocked", ids: [o.id], locked: e.target.checked } : { type: "setHidden", ids: [o.id], hidden: e.target.checked }) });
       sw.checked = o[k] === true;
       nodes.push(h("div", { class: "lg-field inspector-switch", title: hint }, [h("label", { for: id, text: label }), sw]));
+    }
+    // Safety distances from the rulebook, drawn as rings on the ground round the target.
+    const ringSpec = safetyRings(o);
+    if (ringSpec.length) {
+      const id = `f${++uid}`;
+      const sw = h("input", { type: "checkbox", class: "lg-toggle", id, dataset: { field: "safetyRings" },
+        onchange: (e) => d({ type: "setSafetyRings", ids: [o.id], on: e.target.checked }) });
+      sw.checked = o.safetyRings === true;
+      nodes.push(h("div", { class: "lg-field inspector-switch", title: "Rings on the ground at the rulebook's distances" }, [h("label", { for: id, text: "Show safety distances" }), sw]));
+      if (o.safetyRings) nodes.push(h("ul", { class: "ring-legend" }, ringSpec.map((r) =>
+        h("li", { class: `ring-${r.level}` }, [h("strong", { text: r.label }), h("span", { text: ` ${r.text}` })]))));
     }
     if (o.group && stage.groups?.some((g) => g.id === o.group && (g.locked || g.hidden))) {
       nodes.push(h("p", { class: "lg-muted hint-text", text: "Its group is locked or hidden (On stage panel)." }));

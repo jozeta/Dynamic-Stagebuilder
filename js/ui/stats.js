@@ -6,12 +6,18 @@ import { SCORING } from "../model/scoring-rules.js";
 import { stageChecks, SAFETY } from "../model/safety.js";
 import { runEstimate } from "../model/estimate.js";
 
-export function createStats(root, { onShow = () => {} } = {}) {
+export function createStats(root, { onShow = () => {}, onPoint = () => {} } = {}) {
+  // Pointing at a warning (hover, keyboard focus, or a tap that pins it) asks for a line to its props.
+  let pinned = null, hovered = null;
+  const point = () => onPoint(pinned || hovered);
   let checked = null, checks = [];
   return function update(state) {
     const stage = state.history.present;
     // Safety checks: worked out again when the stage changes, not on every frame of a drag.
-    if (stage !== checked && !state.drag) { checks = stageChecks(stage); checked = stage; }
+    if (stage !== checked && !state.drag) {
+      checks = stageChecks(stage); checked = stage;
+      if (pinned && !checks.some((c) => c.text === pinned.key)) { pinned = null; point(); }      // fixed: nothing to point at
+    }
     const s = stageStats(stage);
     const dups = duplicateLabels(stage);
     const typeText = s.suggestedType ? `${s.suggestedType}${SCORING.typeByRoundsOnly ? "" : " (suggested from round count)"}` : "–";
@@ -28,7 +34,15 @@ export function createStats(root, { onShow = () => {} } = {}) {
     const safety = h("section", { class: "safety", "aria-labelledby": "safety-title" }, [
       h("h3", { class: "lg-label", id: "safety-title", text: `Safety checks${checks.length ? ` (${checks.length})` : ""}` }),
       checks.length
-        ? h("ul", { class: "safety-list" }, checks.map((c) => h("li", { class: `lg-alert lg-alert-${c.level === "bad" ? "bad" : "warn"} safety-item` }, [
+        ? h("ul", { class: "safety-list" }, checks.map((c) => h("li", {
+          class: `lg-alert lg-alert-${c.level === "bad" ? "bad" : "warn"} safety-item${pinned?.key === c.text ? " is-pinned" : ""}`,
+          dataset: { checkKey: c.text }, tabindex: "0", "aria-label": `${c.text} Press to point at it.`,
+          onpointerenter: () => { hovered = { key: c.text, ids: c.ids, level: c.level }; point(); },
+          onpointerleave: () => { hovered = null; point(); },
+          onfocus: () => { hovered = { key: c.text, ids: c.ids, level: c.level }; point(); },
+          onblur: () => { hovered = null; point(); },
+          onclick: (e) => { if (e.target.closest("button")) return; pinned = pinned?.key === c.text ? null : { key: c.text, ids: c.ids, level: c.level }; point(); root.querySelectorAll(".safety-item").forEach((el) => el.classList.toggle("is-pinned", el.dataset.checkKey === pinned?.key)); },
+        }, [
           h("span", { text: c.text }),
           h("button", { type: "button", class: "lg-btn lg-btn-ghost safety-show", onclick: () => onShow(c.ids), text: "Show" }),
         ])))

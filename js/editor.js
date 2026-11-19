@@ -235,6 +235,11 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
     },
     // The props-on-stage list and the right-click menu.
     setLocked({ ids = state.selection, locked }) { if (objIds(ids).length) edit(setFlag(present(), objIds(ids), "locked", locked)); },
+    // Show the rulebook's safety distances round these targets (saved with the stage).
+    setSafetyRings({ ids = state.selection, on }) {
+      const targets = objIds(ids).filter((id) => ["paper", "steel"].includes(getProp(present().objects.find((o) => o.id === id).type).scoring));
+      if (targets.length) edit(setFlag(present(), targets, "safetyRings", on));
+    },
     setHidden({ ids = state.selection, hidden }) { if (objIds(ids).length) edit(setFlag(present(), objIds(ids), "hidden", hidden)); },
     group({ ids = state.selection, name }) {
       const go = objIds(ids);

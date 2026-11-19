@@ -312,7 +312,10 @@ rules 2.1.2 and 2.1.3 (Combined Competition Rules, January 2024, Handgun): steel
 anywhere a shooter may stand (the shooting areas, positions and the start), a fault line closer than
 8 m to steel, a target that can only be shot with the muzzle past 90° from down range (red), or that
 can also be seen from places down range of it (amber), and a target nobody can see from where they
-may stand. *Show* selects the props concerned. It's a designer's aid, not a range approval: it
+may stand. *Show* selects the props concerned; hover over a warning (tap it on an iPad to pin it) and a line in
+its colour points from it to the target. To see the distances themselves, select a paper or steel
+target and switch on *Show safety distances*: rings on the ground at 7 m (red) and 8 m (yellow) round
+steel, and 3 m (yellow) round paper, each explained in the inspector. It's a designer's aid, not a range approval: it
 doesn't know your berms, ricochet angles or stage-specific muzzle angles.
 
 **See what a position sees.** Select a shooting position: green sight lines run from its eye (at its

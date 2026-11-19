@@ -96,7 +96,7 @@ export function validateStage(json) {
     if (o.activatedBy !== undefined) activatedBy = str(o.activatedBy, `${path}.activatedBy`, 64);
     // The props-on-stage list: locked, hidden and a group (checked against stage.groups below).
     const flags = {};
-    for (const k of ["locked", "hidden"]) {
+    for (const k of ["locked", "hidden", "safetyRings"]) {
       if (o[k] === undefined) continue;
       if (typeof o[k] !== "boolean") err(`${path}.${k}`, "must be true or false");
       else if (o[k]) flags[k] = true;
