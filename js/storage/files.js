@@ -1,6 +1,7 @@
 // Stage JSON files. Imported files are untrusted: size-checked, parsed safely, validated by the
 // schema, and always given a new id so an import can never overwrite an existing project.
 import { validateStage } from "../model/schema.js";
+import { onFloor } from "../model/bay.js";
 
 export function exportFileName(stage) {
   const slug = String(stage.name || "").normalize("NFKD").toLowerCase()
@@ -17,7 +18,7 @@ export function parseStageFile(text, { maxBytes = 5_000_000 } = {}) {
   try { json = JSON.parse(text); } catch { return { ok: false, error: "This is not a stage file (it isn't valid JSON)." }; }
   const r = validateStage(json);
   if (!r.ok) return { ok: false, error: `The stage file has problems: ${r.errors.slice(0, 3).join("; ")}${r.errors.length > 3 ? "; …" : ""}` };
-  return { ok: true, stage: { ...r.stage, id: crypto.randomUUID() } };
+  return { ok: true, stage: onFloor({ ...r.stage, id: crypto.randomUUID() }) };          // props on the bay's floor
 }
 
 // Match files: the match's name and all its stages, in order, in one file.

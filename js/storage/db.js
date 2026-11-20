@@ -13,7 +13,7 @@ const done = (req) => new Promise((resolve, reject) => {
   req.onerror = () => reject(req.error);
 });
 
-export async function openStore() {
+export async function openStore({ beforeClose = async () => {}, reload = () => globalThis.location?.reload?.() } = {}) {
   if (!("indexedDB" in globalThis)) throw new Error("This browser has no IndexedDB.");
   const open = indexedDB.open(DB, 3);
   open.onupgradeneeded = () => {
@@ -28,7 +28,8 @@ export async function openStore() {
   let rejectBlocked = () => {};
   const db = await new Promise((resolve, reject) => { rejectBlocked = reject; done(open).then(resolve, reject); });
   // A newer copy opened elsewhere asks to upgrade: let it (this tab reloads to use it).
-  db.onversionchange = () => { db.close(); globalThis.location?.reload?.(); };
+  // The pending save is written first, so nothing is lost.
+  db.onversionchange = async () => { try { await beforeClose(); } catch { /* save what we can */ } db.close(); reload(); };
   try { await navigator.storage?.persist?.(); } catch { /* optional */ }
   const tx = (mode, store = STORE) => db.transaction(store, mode).objectStore(store);
   return {

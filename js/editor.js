@@ -8,7 +8,7 @@ import { assignLabels, renumber, setLabel } from "./model/numbering.js";
 import { fitStand, arrayCounts, arrayExtent } from "./model/arrays.js";
 import { takeBuildingPieces, putBackPieces } from "./model/surroundings.js";
 import { snapPoint, snapAngle, clampToBay } from "./model/snap.js";
-import { isRect, insideBay } from "./model/bay.js";
+import { isRect, insideBay, isDrawn, onFloor, recentredRows } from "./model/bay.js";
 import { getProp } from "./model/props.js";
 import { snapToObjects, SNAP_RADIUS } from "./model/objsnap.js";
 import { cleanLook, lookDefaults, lookAfterSwitch } from "./model/look.js";
@@ -186,8 +186,9 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
       const next = mirrorStage(present(), ids, locked);
       if (next !== present()) edit({ ...next, objects: next.objects.map((o) => ({ ...o, position: clampToBay(o.position, next.bay) })) });
     },
-    align({ ids = state.selection, edge }) { const next = alignObjects(present(), unlocked(objIds(ids)), edge); if (next !== present()) edit(next); },
-    distribute({ ids = state.selection, axis }) { const next = distributeObjects(present(), unlocked(objIds(ids)), axis); if (next !== present()) edit(next); },
+    // Lined up or spread, props stay on the floor (a shaped bay's cut-away or raised parts are off it).
+    align({ ids = state.selection, edge }) { const next = alignObjects(present(), unlocked(objIds(ids)), edge); if (next !== present()) edit(onFloor(next)); },
+    distribute({ ids = state.selection, axis }) { const next = distributeObjects(present(), unlocked(objIds(ids)), axis); if (next !== present()) edit(onFloor(next)); },
     setRotation({ id, value }) { edit(updateObject(present(), id, { rotation: snapAngle(Number(value) || 0, present().settings.angleSnap) })); },
     setParams({ id, params }) {
       const o = present().objects.find((x) => x.id === id);
@@ -335,7 +336,9 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
     // the start move onto the floor if they would be off it.
     setBay({ width, depth, ...rest }) {
       const shape = Object.fromEntries(Object.entries(rest).filter(([k]) => k !== "type"));      // the action's own type isn't a bay field
-      const keep = Object.keys(shape).length ? shape : present().bay;
+      let keep = Object.keys(shape).length ? shape : present().bay;
+      // A drawn bay resized here keeps its drawing centred under the props.
+      if (!Object.keys(shape).length && isDrawn(keep)) keep = { ...keep, rows: recentredRows(keep.rows, keep.width, Math.round(clampNum(Number(width) || 1, 1, 200)), Math.round(clampNum(Number(depth) || 1, 1, 200))) };
       let s = setBay(present(), clampNum(Number(width) || 1, 1, 200), clampNum(Number(depth) || 1, 1, 200), { ...keep, ...shape });
       const bay = s.bay;
       s = { ...s,
@@ -354,7 +357,7 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
     },
     load({ stage }) {
       state.matchFields = null;
-      state.history = createHistory(assignLabels(stage));
+      state.history = createHistory(assignLabels(onFloor(stage)));
       state.selection = [];
       state.mode = "select";
       state.drag = null;

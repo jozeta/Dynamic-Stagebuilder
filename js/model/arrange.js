@@ -1,5 +1,7 @@
 // Arranging props: mirror left to right, align, and spread evenly. Pure: no DOM, no Three.js.
 // Positions are [x, z]: x across the bay (centred, + is the shooter's left), z down range.
+import { mirrorBay } from "./bay.js";
+
 const r3 = (v) => Math.round(v * 1000) / 1000 + 0;          // + 0 turns −0 into 0
 const norm = (deg) => ((Math.round(deg) % 360) + 360) % 360;
 const SWAP = { left: "right", right: "left" };
@@ -39,7 +41,8 @@ export function mirrorStage(stage, ids, skip = new Set()) {
   const lines = stage.lines.map((l) => (takes(l.id) ? { ...l, points: l.points.map(([x, z]) => [fx(x), z]) } : l));
   // The start box mirrors with the whole stage; its saved Shooter's eye view no longer fits.
   const start = all && stage.start ? { position: [fx(stage.start.position[0]), stage.start.position[1]], facing: norm(-stage.start.facing) } : stage.start;
-  return { ...stage, objects, lines, start };
+  // The whole stage: its bay's shape flips too (a notch, an L, a dogleg, a drawing).
+  return { ...stage, objects, lines, start, ...(all ? { bay: mirrorBay(stage.bay) } : {}) };
 }
 
 const EDGES = {

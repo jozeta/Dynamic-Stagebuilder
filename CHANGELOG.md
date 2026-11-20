@@ -4,6 +4,17 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Fix: *Mirror the stage* mirrors the bay's shape too (notch side, L, dogleg, a drawing), so props
+  stay on the floor.
+- Fix: the drawing window no longer closes on a click outside it; *Cancel* or Escape ask before
+  discarding a changed drawing.
+- Fix: resizing a drawn bay in the Stage panel keeps the drawing centred under the props.
+- Fix: lining props up or spreading them keeps them on the floor of a shaped bay.
+- Fix: stages opened, imported or shared with props on a cut-away or raised part put them back on
+  the floor.
+- Fix: when another tab upgrades the app, the pending save is written before this tab reloads.
+- Fix: Technical builds no walls round a drawn bay (they were buried in its raised ground).
+
 - Rules: checked against the IPSC Handgun Competition Rules, January 2026 Edition. Every rule and
   value the app uses (course round limits 1.2.1.1–1.2.1.3, 5 points for A hits and steel, Comstock
   9.2.1, no-shoot penalties 9.4.2, minimum distances 2.1.3, 10.4.2 and 10.4.7) is unchanged; the app

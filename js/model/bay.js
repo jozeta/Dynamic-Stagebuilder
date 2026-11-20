@@ -227,3 +227,29 @@ export function outsideDistance(p, bay) {
   const { dist } = nearestOnEdges(p, open);
   return r2(inside(p, open) ? -dist : dist);
 }
+
+// Left/right versions of the one-sided shapes (the others are symmetric).
+const MIRROR_SHAPE = { l: "l-reverse", "l-reverse": "l", dogleg: "dogleg-reverse", "dogleg-reverse": "dogleg" };
+/** The bay mirrored left to right (with Mirror the stage). */
+export function mirrorBay(bay) {
+  if (isDrawn(bay)) return { ...bay, rows: bay.rows.map((r) => r.split("").reverse().join("")) };
+  if (bay.shape === "notch") return { ...bay, notchSide: bay.notchSide === "left" ? "right" : "left" };
+  if (MIRROR_SHAPE[bay.shape]) return { ...bay, shape: MIRROR_SHAPE[bay.shape] };
+  return bay;
+}
+
+/** A drawing's rows at a new width, kept centred across (as the props are), and a new depth. */
+export function recentredRows(rows, w0, w, d) {
+  const off = Math.floor((w - w0) / 2);
+  return Array.from({ length: d }, (_, r) => Array.from({ length: w }, (_, c) => (rows[r]?.[c - off] === "1" ? "1" : "0")).join(""));
+}
+
+/** The stage with its props, lines and start on the bay's floor (shaped and drawn bays). */
+export function onFloor(stage) {
+  if (isRect(stage.bay)) return stage;
+  const fix = (p) => (insideBay(p, stage.bay) ? p : nearestInBay(p, stage.bay));
+  return { ...stage,
+    objects: stage.objects.map((o) => { const p = fix(o.position); return p === o.position ? o : { ...o, position: p }; }),
+    lines: stage.lines.map((l) => ({ ...l, points: l.points.map(fix) })),
+    start: stage.start && { ...stage.start, position: fix(stage.start.position) } };
+}

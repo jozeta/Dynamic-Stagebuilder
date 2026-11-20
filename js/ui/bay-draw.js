@@ -3,20 +3,17 @@
 // are whole metres; the drawing keeps what fits when they change. Name it and save it to My shapes.
 // Names are shown with textContent; the drawing is a canvas.
 import { h, icon } from "./dom.js";
-import { drawnBay, floodFill } from "../model/bay.js";
+import { drawnBay, floodFill, recentredRows } from "../model/bay.js";
 
 const MAX = 200;
 export const NEW_SIZE = Object.freeze({ width: 35, depth: 35 });           // a new drawing: 35 × 35 m
 const blank = (w, d) => Array.from({ length: d }, () => "0".repeat(w));
 // Resize the grid: keep the cells that still fit (anchored at the front, centred across).
-function resized(rows, w0, w, d) {
-  const off = Math.floor((w - w0) / 2);
-  return Array.from({ length: d }, (_, r) => Array.from({ length: w }, (_, c) => (rows[r]?.[c - off] === "1" ? "1" : "0")).join(""));
-}
+const resized = recentredRows;
 
 export function createBayDrawer({ onSave, onDelete = null }) {
   let w = NEW_SIZE.width, d = NEW_SIZE.depth, rows = blank(w, d), tool = "1", mode = "pencil", brush = 1, editing = null;
-  const name = h("input", { class: "lg-input", maxlength: "60", placeholder: "For example: Bay 3 with the pit", "aria-label": "Shape name" });
+  const name = h("input", { class: "lg-input", maxlength: "60", oninput: () => { dirty = true; }, placeholder: "For example: Bay 3 with the pit", "aria-label": "Shape name" });
   const num = (label, onchange) => {
     const input = h("input", { class: "lg-input", type: "number", inputmode: "numeric", min: "2", max: String(MAX), step: "1", onchange });
     return [input, h("label", { class: "lg-field" }, [h("span", { text: label }), input])];
@@ -34,6 +31,15 @@ export function createBayDrawer({ onSave, onDelete = null }) {
   const modes = [modeBtn("pencil", "Pencil", "line"), modeBtn("bucket", "Paint bucket", "bucket")];
   const brushSel = h("select", { class: "lg-select", "aria-label": "Pencil size", onchange: (e) => { brush = Number(e.target.value); } },
     [[1, "1 m"], [2, "2 m"], [3, "3 m"], [5, "5 m"]].map(([v, t]) => h("option", { value: String(v), text: `Pencil ${t}` })));
+  let dirty = false, confirming = false;
+  const cancelBtn = h("button", { type: "button", class: "lg-btn", onclick: () => { if (dirty && !confirming) askDiscard(); else dialog.close(); }, text: "Cancel" });
+  function askDiscard() {
+    confirming = true;
+    cancelBtn.textContent = "Discard the drawing";
+    cancelBtn.classList.add("lg-btn-danger");
+    msg.textContent = "Discard this drawing? Press Discard the drawing to close without saving, or Save shape to keep it.";
+    cancelBtn.focus();
+  }
   const del = h("button", { type: "button", class: "lg-btn lg-btn-danger is-gone", onclick: async () => { if (editing && onDelete) { await onDelete(editing); dialog.close(); } }, text: "Delete from My shapes" });
   const dialog = h("dialog", { class: "lg-modal bay-draw", "aria-labelledby": "bay-draw-title" }, [
     h("section", { class: "lg-modal-body bay-draw-body" }, [
@@ -46,7 +52,7 @@ export function createBayDrawer({ onSave, onDelete = null }) {
         h("div", { class: "lg-stack bay-draw-tools" }, tools),
         h("span", { class: "lg-label", text: "Tool" }),
         h("div", { class: "lg-stack bay-draw-tools" }, [...modes, brushSel,
-          h("button", { type: "button", class: "lg-btn", onclick: () => { rows = blank(w, d); draw(); }, text: "Clear the drawing" })]),
+          h("button", { type: "button", class: "lg-btn", onclick: () => { rows = blank(w, d); dirty = true; draw(); }, text: "Clear the drawing" })]),
         msg,
       ]),
       h("div", { class: "bay-draw-sheet" }, [
@@ -54,10 +60,12 @@ export function createBayDrawer({ onSave, onDelete = null }) {
       ]),
     ]),
     h("div", { class: "lg-modal-actions" }, [del,
-      h("button", { type: "button", class: "lg-btn", onclick: () => dialog.close(), text: "Cancel" }),
+      cancelBtn,
       h("button", { type: "button", class: "lg-btn lg-btn-primary", onclick: () => save() }, [icon("check"), "Save shape"])]),
   ]);
-  dialog.addEventListener("click", (e) => { if (e.target === dialog) dialog.close(); });
+  // A changed drawing is never thrown away by accident: no closing on a click outside, and Cancel
+  // or Escape ask first.
+  dialog.addEventListener("cancel", (e) => { if (dirty && !confirming) { e.preventDefault(); askDiscard(); } });
   globalThis.addEventListener?.("resize", () => { if (dialog.open) draw(); });
   document.body.append(dialog);
 
@@ -71,7 +79,7 @@ export function createBayDrawer({ onSave, onDelete = null }) {
   function resize() {
     const nw = Math.min(MAX, Math.max(2, Math.round(Number(wIn.value) || w))), nd = Math.min(MAX, Math.max(2, Math.round(Number(dIn.value) || d)));
     wIn.value = String(nw); dIn.value = String(nd);
-    rows = resized(rows, w, nw, nd); w = nw; d = nd;
+    rows = resized(rows, w, nw, nd); w = nw; d = nd; dirty = true;
     draw();
   }
   let cell = 10;
@@ -102,7 +110,7 @@ export function createBayDrawer({ onSave, onDelete = null }) {
     for (let r = r0 - k; r < r0 - k + brush; r++) {
       if (r < 0 || r >= d) continue;
       const cells = rows[r].split("");
-      for (let c = c0 - k; c < c0 - k + brush; c++) if (c >= 0 && c < w && cells[c] !== tool) { cells[c] = tool; changed = true; }
+      for (let c = c0 - k; c < c0 - k + brush; c++) if (c >= 0 && c < w && cells[c] !== tool) { cells[c] = tool; changed = true; dirty = true; }
       rows[r] = cells.join("");
     }
     return changed;
@@ -113,7 +121,7 @@ export function createBayDrawer({ onSave, onDelete = null }) {
     e.preventDefault();
     if (mode === "bucket") {
       const [px, py] = at(e), next = floodFill(rows, Math.floor(px / cell), d - 1 - Math.floor(py / cell), tool);
-      if (next !== rows) { rows = next; draw(); }
+      if (next !== rows) { rows = next; dirty = true; draw(); }
       return;
     }
     canvas.setPointerCapture(e.pointerId); last = at(e); if (paint(...last)) draw();
@@ -146,6 +154,8 @@ export function createBayDrawer({ onSave, onDelete = null }) {
       name.value = shape?.name ?? "";
       wIn.value = String(w); dIn.value = String(d);
       msg.textContent = "";
+      dirty = false; confirming = false;
+      cancelBtn.textContent = "Cancel"; cancelBtn.classList.remove("lg-btn-danger");
       del.classList.toggle("is-gone", !(id && onDelete));
       setTool("1");
       setMode("pencil");

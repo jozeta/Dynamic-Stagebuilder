@@ -4,7 +4,7 @@
 import * as THREE from "three";
 import { canvasTexture, ground, sun, reliefMesh } from "./common.js";
 import { hsvToRgb } from "../../model/look.js";
-import { bayOutline, isRect, isFrontEdge } from "../../model/bay.js";
+import { bayOutline, isRect, isFrontEdge, isDrawn } from "../../model/bay.js";
 
 const FLOOR = 900;                 // metres a side: well past the fog, so it reads as endless
 const BG = 0xb7bcc2;
@@ -53,8 +53,8 @@ export function technical(bay) {
     wall(bay.width + 1, 4, 0.5, 0, bay.depth + 1.25);                    // backstop
     wall(0.5, 2.5, bay.depth + 2, -bay.width / 2 - 1.25, bay.depth / 2);  // sides
     wall(0.5, 2.5, bay.depth + 2, bay.width / 2 + 1.25, bay.depth / 2);
-  } else {
-    // A tapered or notched bay: a wall 1.25 m outside each edge but the open front; the ones
+  } else if (!isDrawn(bay)) {
+    // A tapered or notched bay (a drawn bay has none: its raised ground is the boundary): a wall 1.25 m outside each edge but the open front; the ones
     // across the back (facing up range) are backstop height.
     const o = bayOutline(bay);
     for (let i = 0; i < o.length; i++) {

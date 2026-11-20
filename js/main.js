@@ -633,7 +633,7 @@ async function openSharedLink() {
 
 // Open the last project, else the newest, else save the example stage as the first project.
 (async () => {
-  try { store = await openStore(); } catch (err) { console.warn(err); store = memoryStore(); }
+  try { store = await openStore({ beforeClose: () => autosave?.flush() }); } catch (err) { console.warn(err); store = memoryStore(); }
   mine = createSurroundings({ store: store.surroundings, onChange: () => { surroundingsVersion++; render(editor.state); } });
   try { await mine.load(); surroundingsVersion++; } catch (err) { console.warn(err); }
   autosave = createAutosave({ store, getStage: () => editor.stage(), onStatus: onSaveStatus });
