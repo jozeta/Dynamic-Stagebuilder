@@ -4,7 +4,7 @@ A browser-based 3D stage builder for IPSC practical shooting. Lay out a stage at
 it from any angle, and print a Written Stage Briefing with a stage map for range officers and
 competitors.
 
-**Version:** 0.7.0 · **Try it:** [jozeta.github.io/Dynamic-Stagebuilder](https://jozeta.github.io/Dynamic-Stagebuilder/)
+**Version:** 0.8.0 · **Try it:** [jozeta.github.io/Dynamic-Stagebuilder](https://jozeta.github.io/Dynamic-Stagebuilder/)
 (runs in the browser; nothing to install, nothing leaves your device) · Started 2026-11-18 (see the
 [v1 design](docs/superpowers/specs/2026-11-18-stage-builder-v1-design.md)).
 
@@ -45,6 +45,9 @@ training, and want a clear briefing sheet without drawing the map by hand.
   - obstacles and range furniture: 200 l steel drum (black, blue, red, green), tyre, tyre stack,
     shipping crate, potted plant, car (saloon, hatchback, pickup or van, in five colours), table,
     chair, pallets, sandbag wall, traffic cone
+  - furniture: bed (single or double), sofa (armchair, 2 or 3 seats, L, U or corner, in fabric or
+    leather), office desk with a swivel chair, dining table with 2–8 chairs, coffee table (rectangular
+    or round), each in several wood finishes and colours
 - **Editing by eye:** tap or drag props in, drag them on the ground, rotate them, all with grid and
   angle snapping; multi-select, duplicate, delete, undo and redo.
 - **Snapping:** walls snap end to end onto nearby walls, so a run of walls joins up cleanly; other
@@ -59,16 +62,21 @@ training, and want a clear briefing sheet without drawing the map by hand.
   as a PDF from the print dialog.
 - **Help** guide with a drawing for every main task, and side panels you can dock left, right or
   under the view, fold away and resize (remembered).
-- **Your own surroundings** from a blueprint or site plan, measured with one known length, plus
-  building pieces (walls, pillars, columns, berms, containers, fences, barriers), saved as templates.
+- **Your own surroundings** from a blueprint or site plan, measured with one known length. Draw
+  its walls, doors and windows over the plan (snapping, Force 90°, a Move tool with arrow-key
+  nudging), set their heights or cut them at a height, and pick a realistic wall surface and door
+  leaf; they are built in 3D. Add building pieces (walls, pillars, columns, earth berms you can
+  draw, containers, fences, barriers) and save it all as a template.
 - **Activation links** from poppers, plates, step pads and pull levers to the moving targets they
   start, listed in the briefing.
 - **Animated moving targets** (swingers, drop turners, clamshells, movers, Texas stars, plate racks,
   dueling trees, poppers) with a per-prop switch and one Play / Pause button.
-- **Three surroundings,** Outdoor (a dirt range with earth banks, bushes and trees, stones, and a
-  choice of sand, light sand, dark sand, red dirt or gravel), Technical (grey floor, grid) and
-  Blueprint (an endless, worn blue drafting sheet with grid, title block, comments, arrows and stamps). Switching never moves
-  anything on the stage.
+- **Four surroundings,** Outdoor (a dirt range with earth banks, bushes and trees, stones, a
+  choice of sand, light sand, dark sand, red dirt or gravel, and an optional ground grid), Technical
+  (grey floor, grid), Blueprint (an endless, worn blue drafting sheet with grid, title block,
+  comments, arrows and stamps) and Industrial (a worn indoor factory hall, with a roof you can hide).
+  Switching never moves anything on the stage; a warning asks first if your surroundings settings
+  would be lost.
 - **Environment settings:** time of day (the sun moves and warms toward evening), sunlight,
   ambient light, shadows and their softness, haze, exposure and drifting clouds (amount, speed,
   wind), saved with the stage.
@@ -96,12 +104,19 @@ not supported: below 768 px wide the app asks you to use a larger screen. Englis
 
 ## What's new
 
-### 0.7.0 (2026-11-19)
+### 0.8.0 (2026-11-20)
 
-- **Draw your own bay shape:** *Bay shape → Draw a new shape…* opens a 1 m grid (35 × 35 m to
-  start). Black is raised ground, white is floor; draw with the pencil or fill with the paint bucket.
-  Beside and behind the drawing is raised too. Raised ground slopes down to a flat floor and gets
-  grass, bushes and stones in Outdoor. Name it and save it to *My shapes*; the stage keeps a copy.
+- **Furniture:** a bed, sofas (1–3 seats, L, U and corner), an office desk with chair, a dining
+  table with 2–8 chairs and a coffee table, at real size in wood, fabric and leather.
+- **Draw walls, doors and windows on a plan:** in a near full-screen window, with gentle snapping,
+  *Force 90°*, a *Move* tool, colours while drawing, realistic wall surfaces, door leaves and
+  window frames, heights and a cut; *Walls, doors and windows* makes them see-through.
+- **Industrial surroundings:** an indoor factory hall, worn and realistic, with a 14 m roof you can
+  hide and walls that cut away when you look in from outside.
+- **Realistic, worn props:** bricks, containers, chain-link fence, barriers, steel targets; an earth
+  berm that blends with the ground, with plants and a drawn outline.
+- **Outdoor ground grid**, a warning before switching surroundings, rules checked against the
+  January 2026 IPSC Handgun Rules, and fixes.
 
 Older versions are listed in [CHANGELOG.md](CHANGELOG.md).
 

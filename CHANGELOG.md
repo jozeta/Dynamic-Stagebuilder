@@ -4,6 +4,8 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+## 0.8.0 (2026-11-20)
+
 - New *Furniture* props, at real size with wood, fabric and leather textures:
   - **Bed:** single (90 × 200 cm) or double (160 × 200 cm); four wood finishes, five bedding colours.
   - **Sofa:** armchair, 2 or 3 seats, L-shape (chaise left or right), U-shape or corner sofa; four
