@@ -104,6 +104,7 @@ export function applyLook(env, look, bay) {
   if (env.setWalls && look.walls !== undefined && look.walls !== env.walls) env.setWalls(look.walls !== false);
   if (env.setGroundTone) env.setGroundTone(groundTone(look, env.toneName || "technical"));
   if (env.setGrid) env.setGrid(gridTone(look, env.toneName || "technical"));
+  if (env.setRoof) env.setRoof(look.roof !== false);
   if (env.setOutdoorGrid) env.setOutdoorGrid({ shown: look.outdoorGrid === true, opacity: look.outdoorGridOpacity ?? 0.35 });
   return env;
 }

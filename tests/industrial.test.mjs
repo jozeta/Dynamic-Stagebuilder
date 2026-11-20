@@ -64,3 +64,26 @@ test("the roof structure, lamps and baffles hide when the camera is above the ro
   assert.equal(overhead.visible, true);
   env.dispose();
 });
+
+test("a higher roof that can be hidden, and walls between an outside camera and the stage hide", () => {
+  const bay = { width: 20, depth: 30 };
+  const env = createEnvironment("industrial", bay);
+  const roof = env.group.getObjectByName("hall-roof");
+  roof.updateMatrixWorld(true);
+  let low = Infinity;
+  roof.traverse((o) => { if (o.isMesh) { o.geometry.computeBoundingBox(); low = Math.min(low, o.geometry.boundingBox.clone().applyMatrix4(o.matrixWorld).min.y); } });
+  assert.ok(low > 12, `the roof structure is high: ${low}`);
+  applyLook(env, { ...lookDefaults("industrial"), roof: false }, bay);
+  assert.equal(roof.visible, false, "Show roof off");
+  assert.equal(env.group.getObjectByName("hall-lamps").visible, false);
+  assert.equal(env.group.getObjectByName("hall-baffles").visible, false, "the baffles too");
+  applyLook(env, { ...lookDefaults("industrial"), roof: true }, bay);
+  assert.equal(roof.visible, true);
+  const side = (n) => env.group.getObjectByName(`hall-side-${n}`);
+  env.beforeRender({ position: { x: 60, y: 20, z: 10 } });      // outside, beyond the + x wall
+  assert.equal(side("left").visible, false, "the wall in the way hides");
+  assert.equal(side("right").visible, true);
+  env.beforeRender({ position: { x: 0, y: 1.6, z: 2 } });       // inside: every wall
+  assert.ok(["left", "right", "back"].every((n) => side(n).visible));
+  env.dispose();
+});

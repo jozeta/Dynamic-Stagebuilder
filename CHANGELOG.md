@@ -4,6 +4,11 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Industrial: the hall is higher (14 m walls), so the camera has room to move, and *Show roof and
+  baffles* (Settings) hides the roof, trusses, lamps, light shafts and overhead baffles. Seen from
+  outside the hall, a wall between the camera and the stage hides, like a cut-away drawing; from
+  inside every wall is there.
+
 - Plan drawing: walls snap onto other walls readily but to a wall's end only when very close, so a
   wall can stop near an end without being pulled onto it. *Move* picks a wall's, door's or window's
   end; the arrow keys nudge it 1 cm (Shift: 10 cm), and ends that meet move together.

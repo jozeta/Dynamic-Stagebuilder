@@ -259,6 +259,12 @@ export function createSettings({ editor, panel, docked = false, hide = [], onTog
     const foliageSel = h("select", { class: "lg-select", id: "set-foliage", onchange: (e) => d({ type: "setLook", patch: { foliage: e.target.value } }) },
       FOLIAGE.map((f) => h("option", { value: f.id, text: f.name })));
     foliageSel.value = look.foliage || "mixed";
+    // Industrial: the roof (with its trusses and lamps) on or off, for flying the camera about.
+    function roofRow(lk) {
+      const on = h("input", { type: "checkbox", class: "lg-toggle", id: "set-roof", onchange: (e) => d({ type: "setLook", patch: { roof: e.target.checked } }) });
+      on.checked = lk.roof !== false;
+      return h("div", { class: "settings-row" }, [h("label", { for: "set-roof", text: "Show roof and baffles" }), on]);
+    }
     // Outdoor: a 1 m grid on the ground, on or off, and how see-through it is.
     function outdoorGridRows(lk) {
       const on = h("input", { type: "checkbox", class: "lg-toggle", id: "set-outdoorGrid", onchange: (e) => { d({ type: "setLook", patch: { outdoorGrid: e.target.checked } }); fill(); } });
@@ -316,6 +322,7 @@ export function createSettings({ editor, panel, docked = false, hide = [], onTog
       st.environment === "outdoor" ? h("div", { class: "settings-row" }, [h("label", { for: "set-ground", text: "Ground" }), groundSel]) : null,
       st.environment === "outdoor" ? h("div", { class: "settings-row" }, [h("label", { for: "set-foliage", text: "Foliage" }), foliageSel]) : null,
       ...(st.environment === "outdoor" ? outdoorGridRows(look) : []),
+      ...(st.environment === "industrial" ? [roofRow(look)] : []),
       ...toneRows,
       ...myRows,
       h("div", { class: "settings-row" }, [h("label", { for: "set-sun-auto", text: "Time of day" }), clock]),

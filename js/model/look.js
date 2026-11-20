@@ -16,7 +16,7 @@ const SUN = { sunAuto: true, sunElevation: 35, sunAzimuth: 20, sunColor: 0.8 };
 // the Technical walls can be hidden (then its floor runs on to the horizon).
 const TONE = { groundHue: null, groundIntensity: null, groundBrightness: null, walls: true, gridIntensity: null, gridColor: null };
 // Outdoor: a 1 m grid on the ground, off by default, with its own opacity.
-const OUTDOOR_GRID = { outdoorGrid: false, outdoorGridOpacity: 0.35 };
+const OUTDOOR_GRID = { outdoorGrid: false, outdoorGridOpacity: 0.35, roof: true };       // roof: Industrial's Show roof
 /** Each surroundings' own grid: Blueprint's pale ink lines, Technical's dark tile seams (intensity 1 = as drawn). */
 export const GRID_DEFAULTS = Object.freeze({
   blueprint: Object.freeze({ intensity: 1, color: "#e2eeff" }),

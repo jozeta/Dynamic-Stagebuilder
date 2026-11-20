@@ -12,7 +12,7 @@ import * as THREE from "three";
 import { canvasTexture, reliefMesh } from "./common.js";
 
 const MARGIN = { side: 9, back: 6, front: 10 };       // metres from the bay to the hall's walls
-const WALL_H = 10, BLOCK_H = 2.6, WIN = [6.6, 8.2];   // the high window band, from … to (m)
+const WALL_H = 14, BLOCK_H = 2.6, WIN = [9.6, 11.6];  // a high hall (room to fly the camera); the window band, from … to (m)
 const SPACING = 6;                                     // columns, trusses and baffles every 6 m
 
 const tex = (size, draw, repeat, seed) => canvasTexture(size, draw, repeat, { seed });
@@ -154,26 +154,30 @@ export function industrial(bay) {
   }, [1, 1], 413);
   const winMat = new THREE.MeshStandardMaterial({ color: 0xffffff, map: winTex, emissive: 0xc9d2d0, emissiveMap: winTex, emissiveIntensity: 0.35, roughness: 0.5, transparent: true, opacity: 0.92 });
   const mullion = new THREE.MeshStandardMaterial({ color: 0x4b5054, roughness: 0.6, metalness: 0.5 });
-  const wall = (len, x, z, rotY) => {
+  // Each wall in its own group: one between the camera (outside) and the stage hides (beforeRender).
+  const sides = {};
+  const wall = (len, x, z, rotY, name) => {
+    const side = new THREE.Group(); side.name = `hall-side-${name}`; walls.add(side); sides[name] = side;
+    const winSide = new THREE.Group(); windows.add(winSide); side.userData.windows = winSide;
     const lower = box(len, BLOCK_H, 0.3, new THREE.MeshStandardMaterial({ color: 0xffffff, map: tex(512, blocks, [len, BLOCK_H], 403), roughness: 0.95 }), x, BLOCK_H / 2, z, rotY);
     const cladMat = new THREE.MeshStandardMaterial({ color: 0xffffff, map: tex(512, cladding, [len / 3, 1], 404), roughness: 0.65, metalness: 0.35 });
     const midH = WIN[0] - BLOCK_H, topH = WALL_H - WIN[1];
-    walls.add(lower, box(len, midH, 0.12, cladMat, x, BLOCK_H + midH / 2, z, rotY), box(len, topH, 0.12, cladMat, x, WIN[1] + topH / 2, z, rotY));
+    side.add(lower, box(len, midH, 0.12, cladMat, x, BLOCK_H + midH / 2, z, rotY), box(len, topH, 0.12, cladMat, x, WIN[1] + topH / 2, z, rotY));
     // The window band: translucent panels between mullions every 1.5 m.
-    windows.add(box(len, WIN[1] - WIN[0], 0.05, winMat, x, (WIN[0] + WIN[1]) / 2, z, rotY));
+    winSide.add(box(len, WIN[1] - WIN[0], 0.05, winMat, x, (WIN[0] + WIN[1]) / 2, z, rotY));
     const dir = [Math.cos(rotY), -Math.sin(rotY)];
-    for (let k = -len / 2; k <= len / 2 + 1e-6; k += 1.5) windows.add(box(0.08, WIN[1] - WIN[0], 0.1, mullion, x + dir[0] * k, (WIN[0] + WIN[1]) / 2, z + dir[1] * k, rotY));
+    for (let k = -len / 2; k <= len / 2 + 1e-6; k += 1.5) winSide.add(box(0.08, WIN[1] - WIN[0], 0.1, mullion, x + dir[0] * k, (WIN[0] + WIN[1]) / 2, z + dir[1] * k, rotY));
   };
-  wall(W, cx, z1, 0);
-  wall(D, x0, cz, Math.PI / 2);
-  wall(D, x1, cz, Math.PI / 2);
+  wall(W, cx, z1, 0, "back");
+  wall(D, x0, cz, Math.PI / 2, "right");             // − x: the shooter's right
+  wall(D, x1, cz, Math.PI / 2, "left");
   const door = box(6, 5, 0.1, new THREE.MeshStandardMaterial({ color: 0xffffff, map: tex(256, (g, s, r) => {
     g.fillStyle = "#858a8e"; g.fillRect(0, 0, s, s);
     for (let y = 0; y < s; y += s / 24) { g.fillStyle = "rgba(0,0,0,0.22)"; g.fillRect(0, y, s, 2); g.fillStyle = "rgba(255,255,255,0.08)"; g.fillRect(0, y + 2, s, 2); }
     for (let i = 0; i < 40; i++) { g.fillStyle = `rgba(110,64,32,${r() * 0.3})`; g.fillRect(r() * s, s * (0.7 + r() * 0.3), 2 + r() * 8, 2 + r() * 10); }
     g.fillStyle = "#c9a227"; for (let i = 0; i < 8; i++) { g.save(); g.translate(i * s / 8, s - 14); g.fillRect(0, 0, s / 16, 14); g.restore(); }    // a worn yellow kick strip
   }, [1, 1], 405), roughness: 0.6, metalness: 0.4 }), x1 - 0.2, 2.5, cz + D * 0.25, Math.PI / 2);
-  walls.add(door);
+  sides.left.add(door);
 
   // Steel I-beam columns along the side walls: worn grey paint, a yellow-and-black hazard band at the foot.
   const columns = new THREE.Group(); columns.name = "hall-columns"; group.add(columns);
@@ -242,7 +246,7 @@ export function industrial(bay) {
     const b = box(bay.width + 4, 1.4, 0.06, ply, 0, 5.2, z);
     b.rotation.x = -0.6;                                    // leaning toward the shooters: a shot rising off the line hits it
     baffles.add(b, box(bay.width + 4, 0.1, 0.1, steel, 0, 5.9, z - 0.35));
-    for (const x of [-bay.width / 2 - 1.5, bay.width / 2 + 1.5]) baffles.add(box(0.04, WALL_H - 0.3 - 5.9, 0.04, steel, x, (WALL_H - 0.3 + 5.9) / 2, z - 0.35));
+    for (const x of [-bay.width / 2 - 1.5, bay.width / 2 + 1.5]) lamps.add(box(0.04, WALL_H - 0.3 - 5.9, 0.04, steel, x, (WALL_H - 0.3 + 5.9) / 2, z - 0.35));
   }
 
   // Backstop: black rubber blocks across the back wall, a sand trap at its foot.
@@ -295,7 +299,15 @@ export function industrial(bay) {
   sunLight.shadow.mapSize.set(touch ? 2048 : 4096, touch ? 2048 : 4096);
   sunLight.shadow.bias = -0.0003; sunLight.shadow.normalBias = 0.03;
   return {
-    beforeRender(camera) { overhead.visible = camera.position.y < WALL_H + 0.8; },
+    beforeRender(camera) {
+      const c = camera.position;
+      overhead.visible = c.y < WALL_H + 0.8;
+      // Seen from outside, a wall between the camera and the stage hides (like a cut-away drawing).
+      const show = { back: c.z <= z1, right: c.x >= x0, left: c.x <= x1 };
+      for (const [n, g] of Object.entries(sides)) { g.visible = show[n]; g.userData.windows.visible = show[n]; }
+    },
+    // Show roof (look.roof): the roof, its trusses, lamps, light shafts and the overhead baffles.
+    setRoof(shown) { for (const o of [roof, lamps, glow, shafts, baffles]) o.visible = shown; },
     group, lights: [hemiLight, sunLight], hemiLight, sunLight, sunStrength: 2.6, hemiStrength: 1.25, warmth: 0,
     // Overhead lamps instead of the sun: this direction, whatever the time of day.
     indoor: { direction: [0.18, 1, -0.12], color: 0xfff1dc },
