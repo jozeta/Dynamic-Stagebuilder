@@ -19,6 +19,17 @@ const PARAM_LABELS = {
 const OPTION_LABELS = { classic: "Classic (octagon)", head: "With head", orange: "Orange", black: "Black", blue: "Blue", wood: "Wood", white: "White", yellow: "Yellow", red: "Red",
   green: "Green", grey: "Grey", auto: "Same as the ground", sand: "Sand", "light-sand": "Light sand", "dark-sand": "Dark sand", "red-dirt": "Red dirt", gravel: "Gravel", mixed: "Grass and bushes", grass: "Grass only", rust: "Rusty", concrete: "Concrete", brick: "Brick", metal: "Metal", "20ft": "20 ft", "40ft": "40 ft", left: "Left", right: "Right", away: "Away from the shooter", toward: "Toward the shooter", closed: "Closed", open: "Open", none: "Nothing", pistol: "Pistol", "pistol-mags": "Pistol and magazines", case: "Gun case (closed)", standing: "Standing", crouching: "Crouching", kneeling: "Kneeling", sitting: "Sitting", prone: "Prone", sedan: "Saloon", hatchback: "Hatchback", pickup: "Pickup", van: "Van",
   ...Object.fromEntries([...PRESENTATIONS, ...HARD_COVERS].map((p) => [p.id, p.name])) };
+// Furniture options, named by parameter (a sofa's "2" is two seats, a dining set's "2" two chairs).
+const FURNITURE_LABELS = {
+  "size:single": "Single (90 × 200 cm)", "size:double": "Double (160 × 200 cm)", "size:small": "Small (120 × 60 cm)", "size:medium": "Medium (140 × 70 cm)", "size:large": "Large (160 × 80 cm)",
+  "shape:1": "Armchair (1 seat)", "shape:2": "2 seats", "shape:3": "3 seats", "shape:l-left": "L-shape, chaise left", "shape:l-right": "L-shape, chaise right", "shape:u": "U-shape", "shape:corner": "Corner sofa",
+  "shape:rect": "Rectangular (120 × 60 cm)", "shape:round": "Round (Ø 80 cm)",
+  "seats:2": "2 chairs (80 × 80 cm)", "seats:4": "4 chairs (140 × 90 cm)", "seats:6": "6 chairs (180 × 90 cm)", "seats:8": "8 chairs (240 × 100 cm)",
+  "finish:oak": "Oak", "finish:walnut": "Walnut", "finish:white": "White lacquer", "finish:black": "Black lacquer", "finish:glass": "Glass and steel",
+  "cover:grey-fabric": "Grey fabric", "cover:beige-fabric": "Beige fabric", "cover:blue-fabric": "Blue fabric", "cover:green-fabric": "Green fabric", "cover:black-leather": "Black leather", "cover:brown-leather": "Brown leather",
+  "bedding:beige": "Beige",
+};
+const FURNITURE_PARAMS = { size: "Size", shape: "Shape", seats: "Seats", finish: "Wood finish", cover: "Cover", bedding: "Bedding", chair: "Chair colour" };
 const GRID_OPTIONS = [[0, "Off"], [0.1, "0.1 m"], [0.25, "0.25 m"], [0.5, "0.5 m"], [1, "1 m"]];
 const ANGLE_OPTIONS = [[0, "Off"], [5, "5°"], [15, "15°"], [45, "45°"], [90, "90°"]];
 let uid = 0;
@@ -62,7 +73,8 @@ export function createInspector(root, { editor, shapes = { list: () => [], draw:
     ])));
     for (const [k, spec] of Object.entries(def.params)) {
       if (o.type === "berm" && o.outline && (k === "length" || k === "depth")) continue;      // a drawn berm's size is its drawing
-      const label = o.type === "berm" && k === "depth" ? "Depth, front to back (m)" : PARAM_LABELS[k] || k;
+      const furniture = getProp(o.type)?.category === "furniture";
+      const label = o.type === "berm" && k === "depth" ? "Depth, front to back (m)" : (furniture && FURNITURE_PARAMS[k]) || PARAM_LABELS[k] || k;
       const set = (v) => d({ type: "setParams", id: o.id, params: { [k]: v } });
       if (spec.bool) {
         // A switch (true/false), e.g. Animate: the label sits beside it.
@@ -73,7 +85,7 @@ export function createInspector(root, { editor, shapes = { list: () => [], draw:
         continue;
       }
       nodes.push(field(label, spec.options
-        ? select(k, o.params[k], spec.options.map((v) => [v, OPTION_LABELS[v] || v]), set)
+        ? select(k, o.params[k], spec.options.map((v) => [v, (furniture && FURNITURE_LABELS[`${k}:${v}`]) || OPTION_LABELS[v] || v]), set)
         : numberInput(k, o.params[k], spec, set)));
     }
     // Activation: what starts a moving target, and what an activator starts.

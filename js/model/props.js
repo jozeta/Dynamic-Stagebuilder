@@ -58,6 +58,18 @@ export const CAR_MODELS = deepFreeze({
 /** Kept for older code: the saloon's size. */
 export const CAR = Object.freeze({ length: CAR_MODELS.sedan.length, height: CAR_MODELS.sedan.height, width: CAR_MODELS.sedan.width });
 export const CHAIR = Object.freeze({ w: 0.46, h: 0.86, d: 0.5 });
+// Home and office furniture (metres). A bed: mattress, a 5 cm frame round it, a headboard at the
+// back (+ z). A sofa: seats 62 cm wide, 20 cm arms, 90 cm deep, 85 cm high; L, U and corner shapes
+// reach back. A desk with its swivel chair in front (− z). A dining table with chairs along its long
+// sides. A low coffee table.
+export const FURNITURE = Object.freeze({
+  bed: Object.freeze({ single: 0.9, double: 1.6, length: 2, frame: 0.05, headboard: 0.08, height: 1, mattressTop: 0.5 }),
+  sofa: Object.freeze({ seat: 0.62, arm: 0.2, depth: 0.9, height: 0.85, seatH: 0.44,
+    shapes: Object.freeze({ "1": [1.02, 0.9], "2": [1.64, 0.9], "3": [2.26, 0.9], "l-left": [2.6, 1.6], "l-right": [2.6, 1.6], u: [3.2, 2], corner: [2.4, 2.4] }) }),
+  desk: Object.freeze({ sizes: Object.freeze({ small: [1.2, 0.6], medium: [1.4, 0.7], large: [1.6, 0.8] }), height: 0.75, chairH: 1.1, chairReach: 0.55 }),
+  dining: Object.freeze({ tables: Object.freeze({ "2": [0.8, 0.8], "4": [1.4, 0.9], "6": [1.8, 0.9], "8": [2.4, 1] }), height: 0.75, chairH: 0.9, chairReach: 0.45 }),
+  coffee: Object.freeze({ rect: [1.2, 0.6], round: [0.8, 0.8], height: 0.42 }),
+});
 export const CONE = Object.freeze({ diameter: 0.36, height: 0.7 });
 export const PALLET = Object.freeze({ length: 1.2, height: 0.144, width: 0.8 });
 export const SANDBAG = Object.freeze({ height: 0.13, depth: 0.4 });
@@ -223,6 +235,16 @@ const defs = [
     params: { model: { default: "sedan", options: ["sedan", "hatchback", "pickup", "van"] }, color: { default: "white", options: ["white", "red", "blue", "grey", "rust"] } } },
   { type: "table", name: "Table", category: "obstacle", scoring: null, params: { items: { default: "none", options: ["none", "pistol", "pistol-mags", "case"] }, length: { default: 1.8, min: 1, max: 2.4, step: 0.1 } } },
   { type: "chair", name: "Chair", category: "obstacle", scoring: null, params: {} },
+  { type: "bed", name: "Bed", category: "furniture", scoring: null,
+    params: { size: { default: "double", options: ["single", "double"] }, finish: { default: "oak", options: ["oak", "walnut", "white", "black"] }, bedding: { default: "white", options: ["white", "grey", "blue", "beige", "green"] } } },
+  { type: "sofa", name: "Sofa", category: "furniture", scoring: null,
+    params: { shape: { default: "3", options: ["1", "2", "3", "l-left", "l-right", "u", "corner"] }, cover: { default: "grey-fabric", options: ["grey-fabric", "beige-fabric", "blue-fabric", "green-fabric", "black-leather", "brown-leather"] } } },
+  { type: "office-desk", name: "Office desk and chair", category: "furniture", scoring: null,
+    params: { size: { default: "medium", options: ["small", "medium", "large"] }, finish: { default: "oak", options: ["oak", "walnut", "white", "black"] }, chair: { default: "black", options: ["black", "grey", "blue"] } } },
+  { type: "dining-set", name: "Dining table and chairs", category: "furniture", scoring: null,
+    params: { seats: { default: "4", options: ["2", "4", "6", "8"] }, finish: { default: "oak", options: ["oak", "walnut", "white", "black"] } } },
+  { type: "coffee-table", name: "Coffee table", category: "furniture", scoring: null,
+    params: { shape: { default: "rect", options: ["rect", "round"] }, finish: { default: "walnut", options: ["oak", "walnut", "white", "glass"] } } },
   { type: "pallet", name: "Pallets", category: "obstacle", scoring: null, params: { count: { default: 1, min: 1, max: 6, step: 1 } } },
   { type: "sandbags", name: "Sandbag wall", category: "obstacle", scoring: null,
     params: { length: { default: 1.2, min: 0.6, max: 3, step: 0.1 }, rows: { default: 2, min: 1, max: 5, step: 1 } } },
@@ -278,6 +300,11 @@ export function dimensionsOf(obj) {
     case "car": { const m = CAR_MODELS[p.model] || CAR_MODELS.sedan; [w, h, d] = [m.length, m.height, m.width]; break; }
     case "table": [w, h, d] = [p.length, TABLE.height + (TABLE_ITEMS[p.items] ?? 0), TABLE.depth]; break;
     case "chair": [w, h, d] = [CHAIR.w, CHAIR.h, CHAIR.d]; break;
+    case "bed": { const B = FURNITURE.bed; [w, h, d] = [B[p.size] + 2 * B.frame, B.height, B.length + B.frame + B.headboard]; break; }
+    case "sofa": { const [sw, sd] = FURNITURE.sofa.shapes[p.shape]; [w, h, d] = [sw, FURNITURE.sofa.height, sd]; break; }
+    case "office-desk": { const D = FURNITURE.desk, [dw, dd] = D.sizes[p.size]; [w, h, d] = [dw, D.chairH, dd + D.chairReach]; break; }
+    case "dining-set": { const D = FURNITURE.dining, [tw, td] = D.tables[p.seats]; [w, h, d] = [tw, D.chairH, td + 2 * D.chairReach]; break; }
+    case "coffee-table": { const C = FURNITURE.coffee, [cw, cd] = C[p.shape]; [w, h, d] = [cw, C.height, cd]; break; }
     case "pallet": [w, h, d] = [PALLET.length, PALLET.height * p.count, PALLET.width]; break;
     case "sandbags": [w, h, d] = [p.length, SANDBAG.height * p.rows, SANDBAG.depth]; break;
     case "cone": [w, h, d] = [CONE.diameter, CONE.height, CONE.diameter]; break;

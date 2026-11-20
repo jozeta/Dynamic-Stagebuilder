@@ -27,6 +27,11 @@ function sizeText(type) {
     case "car": return "Saloon, hatchback, pickup or van";
     case "table": return `${p.length} m`;
     case "chair": return "Range chair";
+    case "bed": return p.size === "single" ? "Single, 90 × 200 cm" : "Double, 160 × 200 cm";
+    case "sofa": return { "1": "Armchair", "2": "2 seats", "3": "3 seats", "l-left": "L-shaped, chaise on the left", "l-right": "L-shaped, chaise on the right", u: "U-shaped", corner: "Corner sofa" }[p.shape];
+    case "office-desk": return "Desk with a swivel chair";
+    case "dining-set": return `Table with ${p.seats} chairs`;
+    case "coffee-table": return p.shape === "round" ? "Round, Ø 80 cm" : "120 × 60 cm";
     case "pallet": return `${PALLET.length} × ${PALLET.width} m`;
     case "sandbags": return `${p.length} m, ${p.rows} rows`;
     case "cone": return "70 cm";
