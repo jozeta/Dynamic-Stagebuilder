@@ -9,7 +9,7 @@ import { validateStage } from "../js/model/schema.js";
 test("defaults", () => {
   assert.deepEqual({ ...LOOK_DEFAULTS }, { hour: 15.75, sun: 0.85, ambient: 1.05, shadows: true, softness: 4, shadowStrength: 0.55, haze: 0.15, exposure: 1, ground: "gravel", foliage: "nordic",
     clouds: 0.45, cloudSpeed: 0.5, wind: 70, cloudShadow: 0.5, sunAuto: false, sunElevation: 31, sunAzimuth: 35, sunColor: 0.78,
-    groundHue: null, groundIntensity: null, groundBrightness: null, walls: true, gridIntensity: null, gridColor: null });
+    groundHue: null, groundIntensity: null, groundBrightness: null, walls: true, gridIntensity: null, gridColor: null, outdoorGrid: false, outdoorGridOpacity: 0.35 });
   assert.ok(Object.isFrozen(LOOK_DEFAULTS));
 });
 
@@ -60,7 +60,7 @@ test("Technical surroundings have their own light defaults; reset and switching 
   const { lookDefaults, TECHNICAL_LOOK } = await import("../js/model/look.js");
   assert.deepEqual({ ...TECHNICAL_LOOK }, { hour: 16, sun: 0.85, ambient: 1.05, shadows: true, softness: 4, shadowStrength: 0.55, haze: 0.15, exposure: 1, ground: "sand", foliage: "mixed",
     clouds: 0.45, cloudSpeed: 0.5, wind: 70, cloudShadow: 0.5, sunAuto: false, sunElevation: 31, sunAzimuth: 35, sunColor: 0.78,
-    groundHue: 220, groundIntensity: 0, groundBrightness: 1.1, walls: false, gridIntensity: 0.4, gridColor: null });
+    groundHue: 220, groundIntensity: 0, groundBrightness: 1.1, walls: false, gridIntensity: 0.4, gridColor: null, outdoorGrid: false, outdoorGridOpacity: 0.35 });
   assert.deepEqual(lookDefaults("technical"), TECHNICAL_LOOK);
   assert.deepEqual(lookDefaults("outdoor"), LOOK_DEFAULTS);
   const ed = createEditor();
@@ -79,7 +79,7 @@ test("Blueprint has its own defaults: the sun by hand, a deep blue paper (220°,
   assert.deepEqual(lookDefaults("blueprint"), BLUEPRINT_LOOK);
   assert.deepEqual({ ...BLUEPRINT_LOOK }, { hour: 11, sun: 0.85, ambient: 1.05, shadows: true, softness: 4, shadowStrength: 0.55, haze: 0.15, exposure: 1, ground: "sand", foliage: "mixed",
     clouds: 0.45, cloudSpeed: 0.5, wind: 70, cloudShadow: 0.5, sunAuto: false, sunElevation: 31, sunAzimuth: 35, sunColor: 0.78,
-    groundHue: 220, groundIntensity: 0.54, groundBrightness: 0.4, walls: true, gridIntensity: 0.14, gridColor: "#ffffff" });
+    groundHue: 220, groundIntensity: 0.54, groundBrightness: 0.4, walls: true, gridIntensity: 0.14, gridColor: "#ffffff", outdoorGrid: false, outdoorGridOpacity: 0.35 });
   const { ENVIRONMENTS } = await import("../js/model/schema.js");
   assert.ok(ENVIRONMENTS.includes("blueprint"));
 });

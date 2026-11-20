@@ -4,7 +4,7 @@ const SPEC = {
   hour: [6, 20], sun: [0, 2], ambient: [0, 2], softness: [0, 8], shadowStrength: [0, 1], haze: [0, 1], exposure: [0.5, 1.6],
   clouds: [0, 1], cloudSpeed: [0, 3], wind: [0, 359], cloudShadow: [0, 1],
   sunElevation: [2, 90], sunAzimuth: [0, 359], sunColor: [0, 1],
-  groundHue: [0, 359], groundIntensity: [0, 1], groundBrightness: [0.4, 1.6], gridIntensity: [0, 1],
+  groundHue: [0, 359], groundIntensity: [0, 1], groundBrightness: [0.4, 1.6], gridIntensity: [0, 1], outdoorGridOpacity: [0, 1],
 };
 // Clouds (Outdoor only): how much of the sky they cover, how fast they drift (1 = about 8 m/s) and
 // the wind they drift with (degrees, 0 = down range, 90 = toward +x). They move only with Play on.
@@ -15,6 +15,8 @@ const SUN = { sunAuto: true, sunElevation: 35, sunAzimuth: 20, sunColor: 0.8 };
 // The Blueprint paper and the Technical floor can take a colour (null: the surroundings' own), and
 // the Technical walls can be hidden (then its floor runs on to the horizon).
 const TONE = { groundHue: null, groundIntensity: null, groundBrightness: null, walls: true, gridIntensity: null, gridColor: null };
+// Outdoor: a 1 m grid on the ground, off by default, with its own opacity.
+const OUTDOOR_GRID = { outdoorGrid: false, outdoorGridOpacity: 0.35 };
 /** Each surroundings' own grid: Blueprint's pale ink lines, Technical's dark tile seams (intensity 1 = as drawn). */
 export const GRID_DEFAULTS = Object.freeze({
   blueprint: Object.freeze({ intensity: 1, color: "#e2eeff" }),
@@ -61,16 +63,16 @@ const FOLIAGE_IDS = FOLIAGE.map((f) => f.id);
 
 // Outdoor (the user's chosen look): the sun set by hand, high and warm white, 75 % cloud.
 export const LOOK_DEFAULTS = Object.freeze({ hour: 15.75, sun: 0.85, ambient: 1.05, shadows: true, softness: 4, shadowStrength: 0.55, haze: 0.15, exposure: 1, ground: "gravel", foliage: "nordic",
-  clouds: 0.45, cloudSpeed: 0.5, wind: 70, cloudShadow: 0.5, sunAuto: false, sunElevation: 31, sunAzimuth: 35, sunColor: 0.78, ...TONE });
+  clouds: 0.45, cloudSpeed: 0.5, wind: 70, cloudShadow: 0.5, sunAuto: false, sunElevation: 31, sunAzimuth: 35, sunColor: 0.78, ...TONE, ...OUTDOOR_GRID });
 // The Technical surroundings: brighter afternoon light with softer, lighter shadows.
 export const TECHNICAL_LOOK = Object.freeze({ hour: 16, sun: 0.85, ambient: 1.05, shadows: true, softness: 4, shadowStrength: 0.55, haze: 0.15, exposure: 1, ground: "sand", foliage: "mixed",
   clouds: 0.45, cloudSpeed: 0.5, wind: 70, cloudShadow: 0.5, sunAuto: false, sunElevation: 31, sunAzimuth: 35, sunColor: 0.78,
-  groundHue: 220, groundIntensity: 0, groundBrightness: 1.1, walls: false, gridIntensity: 0.4, gridColor: null });
+  groundHue: 220, groundIntensity: 0, groundBrightness: 1.1, walls: false, gridIntensity: 0.4, gridColor: null, ...OUTDOOR_GRID });
 
 // Blueprint: late-morning light with soft shadows; no haze.
 export const BLUEPRINT_LOOK = Object.freeze({ hour: 11, sun: 0.85, ambient: 1.05, shadows: true, softness: 4, shadowStrength: 0.55, haze: 0.15, exposure: 1, ground: "sand", foliage: "mixed",
   clouds: 0.45, cloudSpeed: 0.5, wind: 70, cloudShadow: 0.5, sunAuto: false, sunElevation: 31, sunAzimuth: 35, sunColor: 0.78,
-  groundHue: 220, groundIntensity: 0.54, groundBrightness: 0.4, walls: true, gridIntensity: 0.14, gridColor: "#ffffff" });
+  groundHue: 220, groundIntensity: 0.54, groundBrightness: 0.4, walls: true, gridIntensity: 0.14, gridColor: "#ffffff", ...OUTDOOR_GRID });
 
 /** The light defaults for a surroundings name ("outdoor", "technical" or "blueprint"). */
 export const lookDefaults = (environment) => (environment === "technical" || String(environment).startsWith("custom:") ? TECHNICAL_LOOK

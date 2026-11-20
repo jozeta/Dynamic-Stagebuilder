@@ -256,6 +256,18 @@ export function createSettings({ editor, panel, docked = false, hide = [], onTog
     const foliageSel = h("select", { class: "lg-select", id: "set-foliage", onchange: (e) => d({ type: "setLook", patch: { foliage: e.target.value } }) },
       FOLIAGE.map((f) => h("option", { value: f.id, text: f.name })));
     foliageSel.value = look.foliage || "mixed";
+    // Outdoor: a 1 m grid on the ground, on or off, and how see-through it is.
+    function outdoorGridRows(lk) {
+      const on = h("input", { type: "checkbox", class: "lg-toggle", id: "set-outdoorGrid", onchange: (e) => { d({ type: "setLook", patch: { outdoorGrid: e.target.checked } }); fill(); } });
+      on.checked = lk.outdoorGrid === true;
+      const op = lk.outdoorGridOpacity ?? 0.35;
+      const out = h("output", { for: "set-outdoorGridOpacity", class: "lg-mono settings-value", text: `${Math.round(op * 100)} %` });
+      const slider = h("input", { type: "range", class: "lg-slider", id: "set-outdoorGridOpacity", min: 0.05, max: 1, step: 0.05, value: String(op), disabled: !on.checked,
+        oninput: (e) => { const v = Number(e.target.value); out.textContent = `${Math.round(v * 100)} %`; d({ type: "setLook", patch: { outdoorGridOpacity: v } }); } });
+      return [h("div", { class: "settings-row" }, [h("label", { for: "set-outdoorGrid", text: "Grid on the ground" }), on]),
+        h("div", { class: "settings-row" }, [h("label", { for: "set-outdoorGridOpacity", text: "Grid opacity" }), slider, out]),
+        h("p", { class: "lg-muted hint-text", text: "1 m squares, a stronger line every 5 m." })];
+    }
     // Blueprint and Technical: the ground's colour; Technical: its walls.
     const toneRows = [];
     if (st.environment === "blueprint" || st.environment === "technical") {
@@ -300,6 +312,7 @@ export function createSettings({ editor, panel, docked = false, hide = [], onTog
       h("div", { class: "settings-row" }, [h("span", { class: "settings-label", text: "Surroundings" }), env]),
       st.environment === "outdoor" ? h("div", { class: "settings-row" }, [h("label", { for: "set-ground", text: "Ground" }), groundSel]) : null,
       st.environment === "outdoor" ? h("div", { class: "settings-row" }, [h("label", { for: "set-foliage", text: "Foliage" }), foliageSel]) : null,
+      ...(st.environment === "outdoor" ? outdoorGridRows(look) : []),
       ...toneRows,
       ...myRows,
       h("div", { class: "settings-row" }, [h("label", { for: "set-sun-auto", text: "Time of day" }), clock]),

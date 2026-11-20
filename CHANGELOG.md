@@ -4,6 +4,9 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Outdoor ground grid: *Settings → Grid on the ground* draws 1 m squares (a stronger line every
+  5 m) lying on the ground, with *Grid opacity* to set how see-through it is. Off by default.
+
 - Fix: *Mirror the stage* mirrors the bay's shape too (notch side, L, dogleg, a drawing), so props
   stay on the floor.
 - Fix: the drawing window no longer closes on a click outside it; *Cancel* or Escape ask before
