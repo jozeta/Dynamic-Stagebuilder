@@ -4,6 +4,7 @@
 // Templates come from browser storage, so cleanTemplate() checks everything before use.
 import { PROPS } from "./props.js";
 import { addObject } from "./stage.js";
+import { cleanDrawing } from "./plan-draw.js";
 
 export const CUSTOM_PREFIX = "custom:";
 const ID = /^[A-Za-z0-9-]{1,64}$/;
@@ -60,7 +61,9 @@ export function cleanTemplate(t) {
     }
   }
   const pieces = (Array.isArray(t.pieces) ? t.pieces.slice(0, LIMITS.pieces) : []).map(cleanPiece).filter(Boolean);
-  return { id: t.id, name, plan, pieces };
+  // Walls, doors and windows drawn on the plan (model/plan-draw.js), with their heights and cut.
+  const drawing = plan && t.drawing ? cleanDrawing(t.drawing) : null;
+  return { id: t.id, name, plan, pieces, ...(drawing ? { drawing } : {}) };
 }
 
 /** Save to the template: the stage without its building pieces, and the pieces (plain copies). */
@@ -75,4 +78,21 @@ export function putBackPieces(stage, pieces) {
   let s = stage;
   for (const p of pieces) s = addObject(s, p.type, p.position, p.rotation, p.params).stage;
   return s;
+}
+
+/** Are My surroundings (and New from a plan) offered with these surroundings? Not on Outdoor or Blueprint. */
+export const offersPlans = (environment) => !["outdoor", "blueprint"].includes(environment);
+
+/**
+ * A point on the plan image (pixels: x right, y down) on the ground ([x, z] metres), placed as the
+ * plan image is laid (render/environments/custom.js): centred at the plan's x/z, its top toward
+ * down range, turned by plan.rotation.
+ */
+export function planToWorld(plan, [u, v]) {
+  const { w, d } = planSize(plan);
+  const lx = (u / plan.width - 0.5) * w, ly = (0.5 - v / plan.height) * d;
+  const t = Math.PI - (plan.rotation * Math.PI) / 180;
+  const X = lx * Math.cos(t) - ly * Math.sin(t), Y = lx * Math.sin(t) + ly * Math.cos(t);
+  const r = (n) => Math.round(n * 1e6) / 1e6 + 0;
+  return [r(plan.x + X), r(plan.z - Y)];
 }

@@ -48,9 +48,20 @@ body { background: var(--lg-bg); overflow: hidden; }
 .proj-actions .lg-btn { justify-content: flex-start; }
 .projects-panel .proj-row { display: grid; gap: 6px; }
 .projects-panel .proj-buttons { flex-wrap: wrap; }
-.plan-modal { width: min(960px, calc(100vw - 32px)); }
-.plan-canvas { display: block; width: auto; height: auto; max-width: 100%; max-height: 52dvh; margin: 0 auto; border: 1px solid var(--lg-border); border-radius: var(--lg-radius-control); cursor: crosshair; background: #fff; }
-.plan-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--lg-space-m); }
+/* The plan window: nearly the whole screen, tools beside the plan, the plan scaled to fit its box. */
+.plan-modal { width: calc(100vw - 32px); max-width: none; height: calc(100dvh - 32px); max-height: none; }
+.plan-modal[open] { display: flex; flex-direction: column; }
+.plan-body { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(260px, 320px) 1fr; gap: var(--lg-space-l, 20px); overflow: hidden; }
+.plan-sidebar { overflow: auto; display: flex; flex-direction: column; gap: var(--lg-space-m); padding-right: 4px; }
+.plan-box { min-width: 0; min-height: 0; display: grid; place-items: center; overflow: hidden; background: color-mix(in srgb, var(--lg-text) 6%, transparent); border-radius: var(--lg-radius-control); }
+.plan-canvas { display: block; border: 1px solid var(--lg-border); background: #fff; cursor: crosshair; touch-action: none; }
+.plan-tools { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.plan-tool[aria-pressed="true"] { outline: 2px solid var(--lg-accent); outline-offset: 1px; }
+.plan-row { flex-wrap: wrap; gap: 6px; }
+.plan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--lg-space-s); }
+.plan-checks { display: flex; flex-wrap: wrap; gap: var(--lg-space-m); }
+.plan-check { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; }
+@media (max-width: 900px) { .plan-body { grid-template-columns: 1fr; grid-template-rows: auto 1fr; } .plan-sidebar { max-height: 38dvh; } }
 .mine-actions { flex-wrap: wrap; }
 .stage-library { display: grid; gap: var(--lg-space-s); margin-top: var(--lg-space-l); padding-top: var(--lg-space-m); border-top: 1px solid var(--lg-border); }
 .stage-library-title { margin: 0; }
@@ -388,3 +399,4 @@ body { background: var(--lg-bg); overflow: hidden; }
 @media (max-width: 900px) { .bay-draw-body { grid-template-columns: 1fr; grid-template-rows: auto 1fr; } .bay-draw-side { max-height: 40vh; } }
 .vis-item.is-taken { opacity: 0.6; }
 .bay-draw-canvas.is-bucket { cursor: cell; }
+.plan-modal [hidden] { display: none !important; }

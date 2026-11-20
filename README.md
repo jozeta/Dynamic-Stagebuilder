@@ -248,9 +248,16 @@ its *Surface* (sand, light sand, dark sand, red dirt or gravel) and *Plants* (gr
 only or none). *Draw the outline…* opens the drawing window (up to 10 × 10 m): the black squares
 become the berm at its height, with a slope at their edges; *Back to a plain berm* goes back.
 
-**Use your own range.** In *Settings → Surroundings*, choose *New from a plan…* and pick an image of
-your range's blueprint or site plan. Click both ends of something whose real length you know (a
-wall, a bay line) and type that length; the plan is scaled to match and laid on the ground. Use the
+**Use your own range.** In *Settings → Surroundings* (with Technical, Industrial or your own
+surroundings), choose *New from a plan…* and pick an image of your range's blueprint or site plan.
+Click both ends of something whose real length you know (a wall, a bay line) and type that length;
+the plan is scaled to match. *Next: draw walls* lets you trace the building on the plan: *Wall*
+(click corner to corner, double-click or *Finish wall* to stop), *Door* and *Window* (click both
+ends on a wall, or across a gap between two walls) and *Erase*; ends snap together and doors and
+windows are set into their walls. Set the heights of walls, doors and windows (sill and top), the
+wall thickness, and *Cut at* a height for walls, doors, windows or any mix, to see over them. *Save*
+lays the plan on the ground with the walls built on it; *Edit the plan: walls, doors, windows…* in
+Settings goes back to it. Use the
 sliders to move, turn and fade it until it lines up. Then rebuild what's really there with the
 *Buildings and surroundings* props (walls, pillars, columns, berms, containers, fences, barriers) and
 press *Save pieces to these surroundings*. The template then shows up under *My surroundings* for

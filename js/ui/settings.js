@@ -5,7 +5,7 @@
 // The View tab: Shooter's eye walking speed, and how the figures, position marks and route are
 // drawn (shown, colour, see-through). The Props tab hides library groups and single props. Both
 // are per-browser preferences.
-import { h } from "./dom.js";
+import { h, icon } from "./dom.js";
 import { WALK_SPEEDS } from "../model/route.js";
 import { RUN_PARTS, RUN_COLORS } from "../model/run-look.js";
 import { LIBRARY_GROUPS, MARKINGS, isShown, setShown } from "../model/visibility.js";
@@ -15,7 +15,7 @@ import { GROUNDS, FOLIAGE, groundTone, gridTone } from "../model/look.js";
 // Grid colours offered as swatches (any colour can be picked as well).
 const GRID_COLORS = [["#e2eeff", "Pale blue (Blueprint)"], ["#ffffff", "White"], ["#c8ccd2", "Light grey"], ["#55585c", "Dark grey (Technical)"],
   ["#1a1c20", "Black"], ["#ffd23f", "Yellow"], ["#e0453a", "Red"]];
-import { customId, customEnv, BUILDING_TYPES } from "../model/surroundings.js";
+import { customId, customEnv, BUILDING_TYPES, offersPlans } from "../model/surroundings.js";
 import { ENVIRONMENT_NAMES, ENVIRONMENT_LABELS } from "../render/environments/index.js";
 
 const SLIDERS = [
@@ -182,7 +182,7 @@ export function createSettings({ editor, panel, docked = false, hide = [], onTog
     }
     // Your own surroundings: pick one, make one from a plan, line up the plan, keep the building pieces.
     const myRows = [];
-    if (mine) {
+    if (mine && offersPlans(st.environment)) {          // not with Outdoor or Blueprint
       const curId = customId(st.environment);
       const pick = h("select", { class: "lg-select", id: "set-mine", onchange: (e) => { if (e.target.value) d({ type: "setEnvironment", name: e.target.value }); fill(); } }, [
         h("option", { value: "", text: mine.list().length ? "Choose…" : "None yet" }),
@@ -215,6 +215,9 @@ export function createSettings({ editor, panel, docked = false, hide = [], onTog
             plan("z", "Plan down range", -100, 150, 0.1, (v) => `${v.toFixed(1)} m`),
             plan("rotation", "Plan turn", -180, 180, 1, (v) => `${Math.round(v)}°`),
             plan("opacity", "Plan strength", 0.1, 1, 0.05, (v) => `${Math.round(v * 100)} %`),
+            h("div", { class: "lg-row settings-actions" }, [h("button", { type: "button", class: "lg-btn", disabled: !mine.hasImage(t.id),
+              title: mine.hasImage(t.id) ? null : "The plan image isn't in this browser", onclick: async () => { await mine.editPlan(t.id); fill(); } }, [icon("ruler"), "Edit the plan: walls, doors, windows…"])]),
+            t.drawing ? h("p", { class: "lg-muted hint-text", text: `Drawn on the plan: ${t.drawing.walls.length} walls, ${t.drawing.doors.length} doors, ${t.drawing.windows.length} windows.` }) : null,
             h("p", { class: "lg-muted hint-text", text: `Scale: 1 pixel = ${(t.plan.metresPerPixel * 100).toFixed(2)} cm.` }));
         }
         // Deleting asks once more on the same button (no pop-up).

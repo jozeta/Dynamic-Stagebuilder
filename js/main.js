@@ -581,6 +581,8 @@ const mineApi = {
   list: () => mine?.list() ?? [],
   get: (id) => mine?.get(id) ?? null,
   newFromPlan: () => mine?.newFromPlan() ?? Promise.resolve(null),
+  editPlan: async (id) => { const ok = await mine?.editPlan(id); if (ok) { surroundingsVersion++; render(editor.state); } return ok; },     // rebuild the drawn walls
+  hasImage: (id) => mine?.hasImage(id) ?? false,
   update: (id, patch) => mine?.update(id, patch),
   remove: (id) => mine?.remove(id),
   // Save: the building pieces leave the stage (one undo step) and join the template.
