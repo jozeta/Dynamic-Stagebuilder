@@ -17,9 +17,9 @@ const BRIGHT = { wall: "#1e6bff", door: "#ff3fa4", window: "#16b84e" };
 export function createPlanEditor({ onFile }) {
   let image = null, step = 1, points = [], mpp = null, drawing = emptyDrawing(), history = [], tool = "wall", chain = null, start = null, cursor = null, resolve = null, editing = false;
   let fit = 1;                                     // screen pixels per image pixel
-  let planAlpha = 1, colourful = false;            // how strongly the plan shows while drawing; bright colours
+  let planAlpha = 1, colourful = true;             // how strongly the plan shows while drawing; bright colours
   let anchor = null;                               // the end picked with Move, nudged with the arrow keys
-  let square = false;                              // Force 90°: every line level or upright
+  let square = true;                               // Force 90°: every line level or upright
 
   const canvas = h("canvas", { class: "plan-canvas", role: "img", "aria-label": "The plan", tabindex: "0" });
   const box = h("div", { class: "plan-box" }, [canvas]);
@@ -92,13 +92,13 @@ export function createPlanEditor({ onFile }) {
   const alphaOut = h("output", { for: "plan-alpha", class: "lg-mono settings-value", text: "100 %" });
   const alphaIn = h("input", { type: "range", class: "lg-slider", id: "plan-alpha", min: "0.1", max: "1", step: "0.05", value: "1",
     oninput: (e) => { planAlpha = Number(e.target.value); alphaOut.textContent = `${Math.round(planAlpha * 100)} %`; draw(); } });
-  const colourIn = h("input", { type: "checkbox", id: "plan-colour", onchange: (e) => { colourful = e.target.checked; draw(); } });
+  const colourIn = h("input", { type: "checkbox", id: "plan-colour", checked: true, onchange: (e) => { colourful = e.target.checked; draw(); } });
   const view = h("div", { class: "lg-stack" }, [
     h("span", { class: "lg-label", text: "View" }),
     h("div", { class: "settings-row" }, [h("label", { for: "plan-alpha", text: "Plan image" }), alphaIn, alphaOut]),
     h("label", { class: "plan-check", for: "plan-colour" }, [colourIn, h("span", { text: "Colour the drawing: walls blue, doors pink, windows green" })]),
   ]);
-  const squareIn = h("input", { type: "checkbox", id: "plan-square", onchange: (e) => { square = e.target.checked; draw(); } });
+  const squareIn = h("input", { type: "checkbox", id: "plan-square", checked: true, onchange: (e) => { square = e.target.checked; draw(); } });
   const snapIn = h("input", { type: "checkbox", id: "plan-snap", checked: true, onchange: (e) => { snapOn = e.target.checked; draw(); } });
   const step2 = h("div", { class: "lg-stack plan-side" }, [
     h("p", { class: "lg-muted hint-text", text: "Wall: click point to point, double-click (or Finish wall) to stop. Door and window: click both ends on a wall, or across a gap between two walls. Ends close to each other snap together." }),
