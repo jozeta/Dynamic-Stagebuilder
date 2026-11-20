@@ -49,19 +49,7 @@ export function buildColumn(obj) {
   return g;
 }
 
-// An earth bank: a trapezoid in section (flat top a third of the base), extruded along its length.
-export function buildBerm(obj) {
-  const { length, height, depth } = obj.params;
-  const g = group(obj.id);
-  const s = new THREE.Shape();
-  const top = depth / 6;
-  s.moveTo(-depth / 2, 0); s.lineTo(depth / 2, 0); s.lineTo(top, height); s.lineTo(-top, height); s.closePath();
-  const geo = new THREE.ExtrudeGeometry(s, { depth: length, bevelEnabled: false });
-  geo.translate(0, 0, -length / 2);
-  geo.rotateY(Math.PI / 2);
-  g.add(mesh(geo, "bld-earth"));
-  return g;
-}
+// (The earth berm is built in builders/berm.js.)
 
 // ---------------------------------------------------------------- shipping container
 
