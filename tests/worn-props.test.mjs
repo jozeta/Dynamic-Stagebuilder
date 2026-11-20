@@ -165,5 +165,5 @@ test("the chain-link fence reads from a distance: a faint grey veil behind the w
   const g = buildProp({ id: "f", type: "fence", params: defaultParams("fence") });
   const veil = g.children.find((c) => c.userData.part === "veil");
   assert.ok(veil, "a veil");
-  assert.ok(veil.material.transparent && veil.material.opacity > 0.1 && veil.material.opacity < 0.4);
+  assert.ok(veil.material.transparent && veil.material.opacity > 0.05 && veil.material.opacity < 0.3, "faint");
 });
