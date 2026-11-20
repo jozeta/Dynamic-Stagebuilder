@@ -248,8 +248,7 @@ its *Surface* (sand, light sand, dark sand, red dirt or gravel) and *Plants* (gr
 only or none). *Draw the outline…* opens the drawing window (up to 10 × 10 m): the black squares
 become the berm at its height, with a slope at their edges; *Back to a plain berm* goes back.
 
-**Use your own range.** In *Settings → Surroundings* (with Technical, Industrial or your own
-surroundings), choose *New from a plan…* and pick an image of your range's blueprint or site plan.
+**Use your own range.** In *Settings → Surroundings* (with Technical or your own surroundings), choose *New from a plan…* and pick an image of your range's blueprint or site plan.
 Click both ends of something whose real length you know (a wall, a bay line) and type that length;
 the plan is scaled to match. *Next: draw walls* lets you trace the building on the plan: *Wall*
 (click corner to corner, double-click or *Finish wall* to stop), *Door* and *Window* (click both

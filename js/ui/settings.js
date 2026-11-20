@@ -182,7 +182,7 @@ export function createSettings({ editor, panel, docked = false, hide = [], onTog
     }
     // Your own surroundings: pick one, make one from a plan, line up the plan, keep the building pieces.
     const myRows = [];
-    if (mine && offersPlans(st.environment)) {          // not with Outdoor or Blueprint
+    if (mine && offersPlans(st.environment)) {          // not with Outdoor, Blueprint or Industrial
       const curId = customId(st.environment);
       const pick = h("select", { class: "lg-select", id: "set-mine", onchange: (e) => { if (e.target.value) d({ type: "setEnvironment", name: e.target.value }); fill(); } }, [
         h("option", { value: "", text: mine.list().length ? "Choose…" : "None yet" }),

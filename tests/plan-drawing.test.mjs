@@ -4,11 +4,11 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { offersPlans } from "../js/model/surroundings.js";
 
-test("My surroundings and New from a plan are offered with Technical, Industrial and your own, not Outdoor or Blueprint", () => {
+test("My surroundings and New from a plan are offered with Technical and your own, not Outdoor, Blueprint or Industrial", () => {
   assert.equal(offersPlans("outdoor"), false);
   assert.equal(offersPlans("blueprint"), false);
   assert.equal(offersPlans("technical"), true);
-  assert.equal(offersPlans("industrial"), true);
+  assert.equal(offersPlans("industrial"), false);
   assert.equal(offersPlans("custom:abc"), true);
 });
 

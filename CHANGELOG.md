@@ -4,8 +4,8 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
-- Surroundings from a plan: *My surroundings* and *New from a plan…* are offered with Technical,
-  Industrial and your own surroundings (not Outdoor or Blueprint). The plan window is now nearly
+- Surroundings from a plan: *My surroundings* and *New from a plan…* are offered with Technical and
+  your own surroundings (not Outdoor, Blueprint or Industrial). The plan window is now nearly
   full screen with the plan scaled to fit (no scrollbars). After the scale, *Next: draw walls*: draw
   walls point to point, then doors and windows on them; ends snap together, walls straighten when
   nearly level or upright, doors and windows are set into their wall (or fill a gap between two

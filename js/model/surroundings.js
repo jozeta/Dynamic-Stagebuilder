@@ -80,8 +80,8 @@ export function putBackPieces(stage, pieces) {
   return s;
 }
 
-/** Are My surroundings (and New from a plan) offered with these surroundings? Not on Outdoor or Blueprint. */
-export const offersPlans = (environment) => !["outdoor", "blueprint"].includes(environment);
+/** Are My surroundings (and New from a plan) offered with these surroundings? Not on Outdoor, Blueprint or Industrial. */
+export const offersPlans = (environment) => !["outdoor", "blueprint", "industrial"].includes(environment);
 
 /**
  * A point on the plan image (pixels: x right, y down) on the ground ([x, z] metres), placed as the
