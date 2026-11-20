@@ -4,7 +4,7 @@
 // (from an image file) or to edit a saved plan. The image is a canvas; names are text only.
 import { h, icon } from "./dom.js";
 import { scaleFromReference } from "../model/surroundings.js";
-import { emptyDrawing, addWall, addOpening, eraseAt, snapPoint, cleanDrawing, HEIGHT_LIMITS } from "../model/plan-draw.js";
+import { emptyDrawing, addWall, addOpening, eraseAt, snapPoint, cleanDrawing, HEIGHT_LIMITS, nearestAnchor, moveAnchor, WALL_SURFACES, DOOR_LEAVES } from "../model/plan-draw.js";
 
 const SNAP_M = 0.4, SNAP_PX = 10;               // snap within 40 cm, and never less than 10 screen pixels
 const COLORS = { wall: "#111418", door: "#b5651d", window: "#1f7ae0", preview: "#e0402f", snap: "#e0402f" };
@@ -16,8 +16,9 @@ export function createPlanEditor({ onFile }) {
   let image = null, step = 1, points = [], mpp = null, drawing = emptyDrawing(), history = [], tool = "wall", chain = null, start = null, cursor = null, resolve = null, editing = false;
   let fit = 1;                                     // screen pixels per image pixel
   let planAlpha = 1, colourful = false;            // how strongly the plan shows while drawing; bright colours
+  let anchor = null;                               // the end picked with Move, nudged with the arrow keys
 
-  const canvas = h("canvas", { class: "plan-canvas", role: "img", "aria-label": "The plan" });
+  const canvas = h("canvas", { class: "plan-canvas", role: "img", "aria-label": "The plan", tabindex: "0" });
   const box = h("div", { class: "plan-box" }, [canvas]);
   const file = h("input", { type: "file", accept: "image/png,image/jpeg,image/webp", class: "lg-input" });
   const nameIn = h("input", { class: "lg-input", id: "plan-name", maxlength: "60", value: "My range" });
@@ -38,7 +39,7 @@ export function createPlanEditor({ onFile }) {
 
   // Step 2: the tools, heights and cut.
   const toolBtn = (id, label, ic) => h("button", { type: "button", class: "lg-btn plan-tool", "aria-pressed": "false", dataset: { tool: id }, onclick: () => setTool(id) }, [icon(ic), label]);
-  const tools = [toolBtn("wall", "Wall", "line"), toolBtn("door", "Door", "frame"), toolBtn("window", "Window", "grid"), toolBtn("erase", "Erase", "trash")];
+  const tools = [toolBtn("wall", "Wall", "line"), toolBtn("door", "Door", "frame"), toolBtn("window", "Window", "grid"), toolBtn("move", "Move", "ruler"), toolBtn("erase", "Erase", "trash")];
   const num = (key, label, [lo, hi], get, set) => {
     const id = `plan-h-${key}`;
     const input = h("input", { class: "lg-input", id, type: "number", inputmode: "decimal", min: String(lo), max: String(hi), step: "0.05", value: String(get()),
@@ -56,7 +57,19 @@ export function createPlanEditor({ onFile }) {
       return h("label", { class: "plan-check", for: id }, [cb, h("span", { text: label })]);
     };
     const setH = (k) => (v) => { drawing = { ...drawing, heights: { ...drawing.heights, [k]: v } }; };
+    const pick = (key, label, options, names) => {
+      const id = `plan-style-${key}`;
+      const sel = h("select", { class: "lg-select", id, onchange: (e) => { drawing = { ...drawing, style: { ...drawing.style, [key]: e.target.value } }; } },
+        options.map((v) => h("option", { value: v, text: names[v] })));
+      sel.value = drawing.style?.[key] ?? options[0];
+      return h("div", { class: "lg-field" }, [h("label", { for: id, text: label }), sel]);
+    };
     heights.replaceChildren(
+      h("span", { class: "lg-label", text: "In 3D" }),
+      h("div", { class: "plan-grid" }, [
+        pick("wall", "Walls", WALL_SURFACES, { concrete: "Cast concrete", block: "Concrete block", brick: "Brick", plaster: "Rendered plaster", wood: "Timber boards", metal: "Corrugated steel" }),
+        pick("leaf", "Door leaf", DOOR_LEAVES, { none: "None (an opening)", closed: "Closed", open: "Standing open" }),
+      ]),
       h("span", { class: "lg-label", text: "Heights" }),
       h("div", { class: "plan-grid" }, [
         num("wall", "Walls (m)", HEIGHT_LIMITS.wall, () => H().wall, setH("wall")),
@@ -116,7 +129,7 @@ export function createPlanEditor({ onFile }) {
     if (n === 2) { const m = validate(); if (m) mpp = m; setTool(tool); fillHeights(); }     // the measured scale snaps the drawing
     draw();
   }
-  function setTool(id) { tool = id; chain = start = null; for (const b of tools) b.setAttribute("aria-pressed", String(b.dataset.tool === id)); draw(); }
+  function setTool(id) { tool = id; chain = start = null; if (id !== "move") anchor = null; for (const b of tools) b.setAttribute("aria-pressed", String(b.dataset.tool === id)); draw(); }
   const push = () => { history.push(drawing); if (history.length > 200) history.shift(); };
   function undo() { if (chain) { endChain(); return; } if (history.length) { drawing = history.pop(); draw(); } }
   function endChain() { chain = null; start = null; draw(); }
@@ -156,9 +169,11 @@ export function createPlanEditor({ onFile }) {
     for (const o of drawing.windows) { seg(o, "#ffffff", wallW * 1.1); seg(o, C.window, colourful ? wallW : 3 / fit); dot(o.a, C.window); dot(o.b, C.window); }
     const from = chain ?? start;
     if (from && cursor) seg({ a: from, b: snapPoint(drawing, cursor, tolPx()) }, COLORS.preview, 2 / fit, [5, 4]);
-    if (cursor && tool !== "erase") { const s = snapPoint(drawing, cursor, tolPx()); if (s[0] !== cursor[0] || s[1] !== cursor[1]) { g.strokeStyle = COLORS.snap; g.lineWidth = 2 / fit; g.beginPath(); g.arc(s[0], s[1], 7 / fit, 0, 7); g.stroke(); } }
+    if (anchor) { g.strokeStyle = "#ff9f1c"; g.lineWidth = 3 / fit; g.beginPath(); g.arc(anchor[0], anchor[1], 9 / fit, 0, 7); g.stroke(); g.fillStyle = "#ff9f1c"; g.beginPath(); g.arc(anchor[0], anchor[1], 3 / fit, 0, 7); g.fill(); }
+    if (cursor && tool !== "erase" && tool !== "move") { const s = snapPoint(drawing, cursor, tolPx()); if (s[0] !== cursor[0] || s[1] !== cursor[1]) { g.strokeStyle = COLORS.snap; g.lineWidth = 2 / fit; g.beginPath(); g.arc(s[0], s[1], 7 / fit, 0, 7); g.stroke(); } }
     hint.textContent = { wall: chain ? "Click the next corner; double-click or Finish wall to stop." : "Click where the wall starts.", door: start ? "Click the door's other side." : "Click one side of the door, on a wall or across a gap.",
-      window: start ? "Click the window's other end." : "Click one end of the window, on a wall.", erase: "Click a wall, door or window to remove it." }[tool];
+      window: start ? "Click the window's other end." : "Click one end of the window, on a wall.", erase: "Click a wall, door or window to remove it.",
+      move: anchor ? "Arrow keys move the end 1 cm (Shift: 10 cm). Click another end to pick it." : "Click the end of a wall, door or window to pick it." }[tool];
   }
 
   function validate() {
@@ -182,6 +197,7 @@ export function createPlanEditor({ onFile }) {
     const p = at(e);
     if (step === 1) { points = points.length >= 2 ? [p] : [...points, p]; draw(); return; }
     const tol = tolPx();
+    if (tool === "move") { anchor = nearestAnchor(drawing, p, tol); draw(); canvas.focus(); return; }
     if (tool === "erase") { const next = eraseAt(drawing, p, tol); if (next !== drawing) { push(); drawing = next; } draw(); return; }
     if (tool === "wall") {
       if (!chain) { chain = snapPoint(drawing, p, tol); draw(); return; }
@@ -199,6 +215,18 @@ export function createPlanEditor({ onFile }) {
   canvas.addEventListener("dblclick", () => { if (tool === "wall") endChain(); });
   dialog.addEventListener("keydown", (e) => {
     if (step !== 2) return;
+    // Nudging the picked end: 1 cm a press, 10 cm with Shift.
+    const dirs = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
+    if (tool === "move" && anchor && dirs[e.key] && !["INPUT", "SELECT"].includes(e.target.tagName)) {
+      e.preventDefault();
+      const stepPx = (e.shiftKey ? 0.1 : 0.01) / (mpp || 0.01);
+      const delta = dirs[e.key].map((v) => v * stepPx);
+      if (!e.repeat) push();
+      drawing = moveAnchor(drawing, anchor, delta);
+      anchor = [Math.round((anchor[0] + delta[0]) * 10) / 10 + 0, Math.round((anchor[1] + delta[1]) * 10) / 10 + 0];
+      draw();
+      return;
+    }
     if (e.key === "Enter") { e.preventDefault(); endChain(); }
     if (e.key === "Escape" && (chain || start)) { e.preventDefault(); e.stopPropagation(); endChain(); }
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z") { e.preventDefault(); undo(); }

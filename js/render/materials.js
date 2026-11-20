@@ -4,7 +4,7 @@
 import * as THREE from "three";
 import { STYLES } from "./builders/target-shape.js";
 import { PAPER_SIZES, CAR_MODELS } from "../model/props.js";
-import { brickwork, castConcrete, claddingBoards, steelCladding, barrierConcrete, containerSide, containerDoors, chainLinkMesh, galvanised, targetPaint, standSteel } from "./weathered.js";
+import { brickwork, castConcrete, claddingBoards, steelCladding, barrierConcrete, containerSide, containerDoors, chainLinkMesh, galvanised, targetPaint, standSteel, blockwork, plasterRender, doorLeaf, frameTimber, windowAlu } from "./weathered.js";
 
 const cache = new Map();
 const hasDom = typeof document !== "undefined";
@@ -510,6 +510,15 @@ const specs = {
   "bld-wood": () => worn(claddingBoards, 0x8a7a64, { roughness: 0.95, bumpScale: 1.5, vertexColors: true }),
   "bld-metal": () => worn(steelCladding, 0x8d949a, { roughness: 0.6, metalness: 0.45, bumpScale: 2.5, vertexColors: true }),
   "bld-earth": () => std({ color: 0x8a6a4a, roughness: 1 }),
+  // Walls, doors and windows drawn on a plan (your own surroundings).
+  "bld-block": () => worn(blockwork, 0xb2b3ae, { roughness: 0.93, bumpScale: 1.6, vertexColors: true }),
+  "bld-plaster": () => worn(plasterRender, 0xd8d3c7, { roughness: 0.96, bumpScale: 1, vertexColors: true }),
+  "door-leaf": () => worn(doorLeaf, 0x56685a, { roughness: 0.6, bumpScale: 1.2 }),
+  "door-frame": () => worn(frameTimber, 0xd9d5ca, { roughness: 0.7 }),
+  "door-handle": () => std({ color: 0x9a9c9e, roughness: 0.3, metalness: 0.85 }),
+  "window-frame": () => worn(windowAlu, 0xe3e4e0, { roughness: 0.45, metalness: 0.3 }),
+  "window-glass": () => std({ color: 0x9fb8c2, roughness: 0.05, metalness: 0.6, transparent: true, opacity: 0.32, depthWrite: false, side: THREE.DoubleSide }),
+  "window-ledge": () => worn(castConcrete, 0xb4b2ac, { roughness: 0.9, bumpScale: 1, vertexColors: true }),
   "barrier-concrete": () => worn(barrierConcrete, 0xb0ada5, { roughness: 0.95, bumpScale: 1.4 }),
   "fence-veil": () => std({ color: 0xaeb4b7, roughness: 0.7, metalness: 0.3, side: THREE.DoubleSide, transparent: true, opacity: 0.09, depthWrite: false }),
   "fence-mesh": () => std({ color: 0xffffff, roughness: 0.55, metalness: 0.55, side: THREE.DoubleSide, alphaTest: 0.02, alphaToCoverage: true,   // far off, the averaged wire shows as partial cover (see-through grey), not solid

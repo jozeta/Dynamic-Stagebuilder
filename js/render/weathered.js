@@ -508,3 +508,79 @@ export function standSteel() {
     speckle(c, r, 2500, w, h, "110,94,72", 0.05, 0.22, 1.8);                   // dust
   }, { seed: 67, repeat: [2, 2], bump: true });
 }
+
+// ---------------------------------------------------------------- walls drawn on a plan
+
+/** Painted concrete block (400 × 200 mm units), scuffed and grimy: a 1.2 m tile, 3 blocks × 6 courses. */
+export function blockwork() {
+  const S = 768, bw = S / 3, bh = S / 6;
+  return paintSet(S, S, ({ c, b }, w, h, r) => {
+    c.fillStyle = "#8f908b"; c.fillRect(0, 0, w, h);                         // mortar joints
+    b.fillStyle = "#606060"; b.fillRect(0, 0, w, h);
+    for (let row = 0; row < 6; row++) for (let i = -1; i < 4; i++) {
+      const x = i * bw + (row % 2 ? bw / 2 : 0), y = row * bh, v = (r() - 0.5) * 16;
+      c.fillStyle = `rgb(${178 + v},${179 + v},${174 + v})`; c.fillRect(x + 4, y + 4, bw - 8, bh - 8);
+      b.fillStyle = "#b4b4b4"; b.fillRect(x + 4, y + 4, bw - 8, bh - 8);
+      speckle(c, r, 160, bw - 8, bh - 8, "120,120,114", 0.1, 0.3, 1.4);         // the block's open texture through the paint
+    }
+    speckle(c, r, 3000, w, h, "96,96,92", 0.05, 0.22, 1.5);
+    for (let i = 0; i < 14; i++) blot(c, r() * w, r() * h, 20 + r() * 70, "120,112,100", 0.08 + r() * 0.1);   // stains
+    for (let i = 0; i < 8; i++) { c.fillStyle = `rgba(70,70,70,${0.1 + r() * 0.15})`; c.fillRect(r() * w, r() * h, 20 + r() * 60, 2 + r() * 3); }   // scuffs
+  }, { seed: 131, repeat: [1 / 1.2, 1 / 1.2], bump: true });
+}
+
+/** Rendered (stuccoed) wall, off-white, with trowel marks, hairline cracks and damp at the foot: a 2.4 m tile. */
+export function plasterRender() {
+  const S = 1024;
+  return paintSet(S, S, ({ c, b }, w, h, r) => {
+    c.fillStyle = "#d8d3c7"; c.fillRect(0, 0, w, h);
+    b.fillStyle = "#808080"; b.fillRect(0, 0, w, h);
+    for (let i = 0; i < 260; i++) { const x = r() * w, y = r() * h, rad = 20 + r() * 90; blot(c, x, y, rad, r() < 0.5 ? "236,232,222" : "196,190,178", 0.12); blot(b, x, y, rad, r() < 0.5 ? "150,150,150" : "110,110,110", 0.25); }
+    speckle(c, r, 9000, w, h, "150,144,132", 0.05, 0.2, 1.4);
+    c.strokeStyle = "rgba(110,104,94,0.45)"; c.lineWidth = 1;
+    for (let i = 0; i < 5; i++) { let x = r() * w, y = r() * h, a = r() * 6.28; c.beginPath(); c.moveTo(x, y); for (let k = 0; k < 16; k++) { a += (r() - 0.5) * 0.9; x += Math.cos(a) * 14; y += Math.sin(a) * 14; c.lineTo(x, y); } c.stroke(); }
+    for (let i = 0; i < 10; i++) streak(c, r() * w, r() * h * 0.5, 80 + r() * 300, 4 + r() * 10, "120,112,98", 0.12);
+    const grd = c.createLinearGradient(0, h * 0.82, 0, h); grd.addColorStop(0, "rgba(120,110,92,0)"); grd.addColorStop(1, "rgba(120,110,92,0.35)"); c.fillStyle = grd; c.fillRect(0, 0, w, h);   // damp at the foot of each tile row
+  }, { seed: 133, repeat: [1 / 2.4, 1 / 2.4], bump: true });
+}
+
+/** A painted four-panel door leaf (one image over the whole face): worn paint at the edges, a kick plate, scuffs. */
+export function doorLeaf() {
+  const W = 360, H = 820;
+  return paintSet(W, H, ({ c, b }, w, h, r) => {
+    c.fillStyle = "#56685a"; c.fillRect(0, 0, w, h);                        // a dull green paint
+    b.fillStyle = "#909090"; b.fillRect(0, 0, w, h);
+    const m = w * 0.13, gap = w * 0.1;
+    for (const [x, y, pw, ph] of [[m, h * 0.08, (w - 2 * m - gap) / 2, h * 0.38], [m + (w - 2 * m - gap) / 2 + gap, h * 0.08, (w - 2 * m - gap) / 2, h * 0.38],
+      [m, h * 0.54, (w - 2 * m - gap) / 2, h * 0.3], [m + (w - 2 * m - gap) / 2 + gap, h * 0.54, (w - 2 * m - gap) / 2, h * 0.3]]) {
+      c.fillStyle = "rgba(0,0,0,0.18)"; c.fillRect(x, y, pw, ph);                  // the panel's recess
+      c.fillStyle = "#5d705f"; c.fillRect(x + 6, y + 6, pw - 12, ph - 12);
+      c.fillStyle = "rgba(255,255,255,0.1)"; c.fillRect(x, y, pw, 3);
+      b.fillStyle = "#606060"; b.fillRect(x, y, pw, ph); b.fillStyle = "#808080"; b.fillRect(x + 6, y + 6, pw - 12, ph - 12);
+    }
+    c.fillStyle = "#8c8f8f"; c.fillRect(w * 0.06, h * 0.9, w * 0.88, h * 0.08);  // a steel kick plate, scratched
+    for (let i = 0; i < 40; i++) { c.strokeStyle = `rgba(60,60,60,${0.2 + r() * 0.3})`; c.lineWidth = 1; c.beginPath(); const x = w * 0.06 + r() * w * 0.88, y = h * (0.9 + r() * 0.08); c.moveTo(x, y); c.lineTo(x + 6 + r() * 20, y + (r() - 0.5) * 4); c.stroke(); }
+    for (let i = 0; i < 30; i++) { const x = r() < 0.5 ? r() * 10 : w - r() * 10; c.fillStyle = `rgba(150,120,80,${0.3 + r() * 0.3})`; c.fillRect(x, r() * h, 3 + r() * 6, 4 + r() * 14); }   // paint worn to the wood at the edges
+    for (let i = 0; i < 18; i++) blot(c, w * (0.6 + r() * 0.35), h * (0.4 + r() * 0.2), 10 + r() * 24, "40,38,34", 0.12);   // hand grime by the handle
+    speckle(c, r, 1800, w, h, "40,48,40", 0.05, 0.18, 1.3);
+  }, { seed: 135, bump: true });
+}
+
+/** Painted timber for door frames and architraves: off-white, chipped, dirty. */
+export function frameTimber() {
+  return paintSet(256, 256, ({ c }, w, h, r) => {
+    c.fillStyle = "#d9d5ca"; c.fillRect(0, 0, w, h);
+    for (let y = 0; y < h; y += 3) { c.fillStyle = `rgba(150,140,120,${0.05 + r() * 0.06})`; c.fillRect(0, y, w, 1); }
+    for (let i = 0; i < 20; i++) { c.fillStyle = `rgba(130,98,60,${0.4 + r() * 0.3})`; c.fillRect(r() * w, r() * h, 2 + r() * 6, 2 + r() * 4); }
+    for (let i = 0; i < 12; i++) blot(c, r() * w, r() * h, 10 + r() * 30, "90,84,72", 0.12);
+  }, { seed: 137, repeat: [2, 1] });
+}
+
+/** Powder-coated aluminium window frames: off-white, weathered, dust in the corners. */
+export function windowAlu() {
+  return paintSet(128, 128, ({ c }, w, h, r) => {
+    c.fillStyle = "#e3e4e0"; c.fillRect(0, 0, w, h);
+    for (let i = 0; i < 16; i++) blot(c, r() * w, r() * h, 6 + r() * 20, "120,118,108", 0.14);
+    speckle(c, r, 400, w, h, "90,90,86", 0.05, 0.2, 1);
+  }, { seed: 139, repeat: [3, 3] });
+}

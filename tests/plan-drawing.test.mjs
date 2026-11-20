@@ -26,6 +26,8 @@ test("walls snap to each other's ends and onto walls, and straighten when nearly
   assert.deepEqual(d.walls[1].b, [600, 500], "nearly upright: straightened");
   d = addWall(d, [350, 130], [350, 400], TOL);
   assert.deepEqual(d.walls[2].a, [350, 100], "a T onto the first wall");
+  d = addWall(d, [575, 115], [575, 300], TOL);
+  assert.deepEqual(d.walls[3].a, [575, 100], "near an end but not at it: onto the line, not pulled to the end");
   assert.equal(addWall(d, [10, 10], [20, 12], TOL), d, "too short: nothing added");
 });
 
@@ -55,6 +57,10 @@ test("the 3D parts: walls round the openings, a lintel over the door, sill and h
   const kinds = (k) => parts.filter((p) => p.kind === k);
   assert.equal(kinds("wall").length, 3, "three solid stretches");
   assert.equal(kinds("lintel").length, 1);
+  assert.equal(kinds("frame").length, 3, "a door frame: two jambs and a head");
+  assert.equal(kinds("leaf").length, 0, "no door leaf unless chosen");
+  assert.ok(kinds("wframe").length >= 5, "a window frame: two stiles, two rails, a mullion");
+  assert.equal(kinds("ledge").length, 1, "a window ledge");
   assert.deepEqual([kinds("sill").length, kinds("head").length, kinds("glass").length], [1, 1, 1]);
   const lintel = kinds("lintel")[0];
   assert.deepEqual([lintel.y0, lintel.y1], [d.heights.door, d.heights.wall]);
@@ -114,4 +120,34 @@ test("a template keeps its drawing, and your own surroundings build its walls, d
   const wall = built.children.find((c) => c.userData.kind === "wall");
   wall.geometry.computeBoundingBox();
   assert.ok(Math.abs(wall.geometry.boundingBox.max.y - wall.geometry.boundingBox.min.y - 2.4) < 1e-6, "the wall height");
+});
+
+test("a door can have its leaf, closed or standing open", async () => {
+  const { emptyDrawing, addWall, addOpening, layout } = await D();
+  let d = addWall(emptyDrawing(), [0, 0], [1000, 0], TOL);
+  d = addOpening(d, "door", [200, 0], [300, 0], TOL);
+  const closed = layout({ ...d, style: { ...d.style, leaf: "closed" } }, 0.01).filter((p) => p.kind === "leaf");
+  assert.equal(closed.length, 1);
+  assert.equal(closed[0].open, 0);
+  const open = layout({ ...d, style: { ...d.style, leaf: "open" } }, 0.01).find((p) => p.kind === "leaf");
+  assert.equal(open.open, 90);
+});
+
+test("wall ends and opening ends can be picked and nudged; joined ends move together", async () => {
+  const { emptyDrawing, addWall, addOpening, nearestAnchor, moveAnchor } = await D();
+  let d = addWall(emptyDrawing(), [100, 100], [600, 100], TOL);
+  d = addWall(d, [600, 100], [600, 500], TOL);
+  d = addOpening(d, "window", [300, 100], [400, 100], TOL);
+  assert.deepEqual(nearestAnchor(d, [605, 104], TOL), [600, 100]);
+  assert.equal(nearestAnchor(d, [450, 300], TOL), null);
+  const m = moveAnchor(d, [600, 100], [3, -2]);
+  assert.deepEqual([m.walls[0].b, m.walls[1].a], [[603, 98], [603, 98]], "both walls' shared corner");
+  assert.deepEqual(moveAnchor(d, [300, 100], [-1, 0]).windows[0].a, [299, 100]);
+});
+
+test("the wall surface and door leaf are kept with the drawing", async () => {
+  const { cleanDrawing, WALL_SURFACES } = await D();
+  assert.deepEqual(WALL_SURFACES, ["concrete", "block", "brick", "plaster", "wood", "metal"]);
+  assert.deepEqual(cleanDrawing({ style: { wall: "brick", leaf: "open" } }).style, { wall: "brick", leaf: "open" });
+  assert.deepEqual(cleanDrawing({ style: { wall: "glass", leaf: 3 } }).style, { wall: "concrete", leaf: "none" });
 });

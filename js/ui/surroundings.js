@@ -21,6 +21,13 @@ async function fileToCanvas(file) {
   bmp.close?.();
   return c;
 }
+function bitmapToCanvas(bmp) {
+  const c = document.createElement("canvas");
+  c.width = bmp.width; c.height = bmp.height;
+  c.getContext("2d").drawImage(bmp, 0, 0);
+  bmp.close?.();
+  return c;
+}
 const canvasToBlob = (c) => new Promise((res) => c.toBlob((b) => res(b), "image/jpeg", 0.9));
 
 // A template without its stored image, for the settings panel.
@@ -34,7 +41,9 @@ export function createSurroundings({ store, onChange = () => {} }) {
       const t = cleanTemplate(r);
       if (!t) continue;
       let image = null;
-      if (r.image instanceof Blob) { try { image = await createImageBitmap(r.image); } catch { image = null; } }
+      // Redrawn on a canvas: WebGL can't flip an ImageBitmap the way three.js flips a canvas, so
+      // a bitmap would lie on the ground upside down (its text mirrored).
+      if (r.image instanceof Blob) { try { image = bitmapToCanvas(await createImageBitmap(r.image)); } catch { image = null; } }
       records.set(t.id, { ...t, imageBlob: r.image instanceof Blob ? r.image : null });
       setTemplate(t, image);
     }

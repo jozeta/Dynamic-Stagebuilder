@@ -4,6 +4,16 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Plan drawing: walls snap onto other walls readily but to a wall's end only when very close, so a
+  wall can stop near an end without being pulled onto it. *Move* picks a wall's, door's or window's
+  end; the arrow keys nudge it 1 cm (Shift: 10 cm), and ends that meet move together.
+- The drawn walls look real: *Walls* picks cast concrete, concrete block, brick, rendered plaster,
+  timber boards or corrugated steel, textured at true scale and continuous from wall to wall, with
+  grime at the foot (they were drawn black). Doors get a painted timber frame and, if chosen
+  (*Door leaf*: none, closed or standing open), a four-panel door with a kick plate and lever
+  handles; windows an aluminium frame with a centre mullion, glass and a concrete ledge.
+- Fix: a saved plan lay on the ground upside down (its text mirrored) after a reload.
+
 - Earth berm blends into the ground: a new *Surface* choice, *Same as the ground* (the default),
   follows the Outdoor ground; the berm's texture now continues the ground's pattern unbroken, and its
   foot takes the floor's tone, turning to the bank earth up the slope. A drawn berm no longer shows

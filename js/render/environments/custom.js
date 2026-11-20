@@ -7,6 +7,7 @@ import { canvasTexture, ground, sun } from "./common.js";
 import { planSize, planToWorld } from "../../model/surroundings.js";
 import { layout } from "../../model/plan-draw.js";
 import { getMaterial } from "../materials.js";
+import { worldUV, grime } from "../builders/wear.js";
 import { buildProp } from "../builders/index.js";
 
 const templates = new Map();     // id → { template, image (canvas or ImageBitmap) | null }
@@ -16,34 +17,57 @@ export function setTemplate(template, image = templates.get(template.id)?.image 
 export function removeTemplate(id) { templates.delete(id); }
 export const getTemplate = (id) => templates.get(id) ?? null;
 
-// Materials for the drawn building: painted block walls, dark timber door frames, glass.
-let drawMats = null;
-const drawMaterials = () => (drawMats ??= {
-  wall: getMaterial("bld-concrete"),
-  lintel: getMaterial("bld-concrete"), sill: getMaterial("bld-concrete"), head: getMaterial("bld-concrete"),
-  jamb: new THREE.MeshStandardMaterial({ color: 0x5b4632, roughness: 0.8 }),
-  glass: new THREE.MeshStandardMaterial({ color: 0x9fc3d6, roughness: 0.08, metalness: 0.1, transparent: true, opacity: 0.35, depthWrite: false }),
-});
+// The drawn building: walls in the chosen surface (textures in metres, continuous from piece to piece,
+// with grime toward the foot), painted timber door frames and leaves with a handle, aluminium window
+// frames with glass and a concrete ledge.
+const SURFACE = { concrete: "bld-concrete", block: "bld-block", brick: "bld-brick", plaster: "bld-plaster", wood: "bld-wood", metal: "bld-metal" };
+const KIND_MAT = { frame: "door-frame", leaf: "door-leaf", wframe: "window-frame", glass: "window-glass", ledge: "window-ledge" };
+const THICK = { frame: (t) => t + 0.03, leaf: () => 0.045, wframe: () => 0.08, glass: () => 0.012, ledge: (t) => t + 0.1 };
 function buildDrawing(drawing, plan) {
   const g = new THREE.Group();
   g.name = "plan-built";
-  const mats = drawMaterials();
+  const wallMat = SURFACE[drawing.style?.wall] || SURFACE.concrete;
+  const toPx = (m) => [m[0] / plan.metresPerPixel, m[1] / plan.metresPerPixel];
   for (const p of layout(drawing, plan.metresPerPixel)) {
-    // The part's ends on the ground (plan pixels → world), a box between them.
-    const toPx = (m) => [m[0] / plan.metresPerPixel, m[1] / plan.metresPerPixel];
     const A = planToWorld(plan, toPx(p.a)), B = planToWorld(plan, toPx(p.b));
-    const len = Math.hypot(B[0] - A[0], B[1] - A[1]);
-    const thick = p.kind === "glass" ? 0.02 : p.kind === "jamb" ? p.thickness * 1.2 : p.thickness;
-    const extra = p.kind === "wall" ? thick : 0;              // walls overlap at corners so they meet
-    const mesh = new THREE.Mesh(new THREE.BoxGeometry(len + extra, p.y1 - p.y0, thick), mats[p.kind] || mats.wall);
-    mesh.position.set((A[0] + B[0]) / 2, (p.y0 + p.y1) / 2, (A[1] + B[1]) / 2);
-    mesh.rotation.y = -Math.atan2(B[1] - A[1], B[0] - A[0]);
+    const len = Math.hypot(B[0] - A[0], B[1] - A[1]), h = p.y1 - p.y0;
+    const solid = !KIND_MAT[p.kind];                       // wall, lintel, sill, head: the wall's surface
+    const t = solid ? p.thickness : THICK[p.kind](p.thickness);
+    const extra = p.kind === "wall" ? t : 0;              // walls overlap at corners so they meet
+    const angle = -Math.atan2(B[1] - A[1], B[0] - A[0]);
+    if (p.kind === "leaf") { g.add(doorLeafNode(A, B, p, angle)); continue; }
+    const geo = new THREE.BoxGeometry(len + extra, h, t, solid ? Math.max(1, Math.ceil(len / 0.5)) : 1, solid ? Math.max(2, Math.ceil(h / 0.25)) : 1, 1);
+    // Placed in the world in the geometry itself, so the texture (in metres) runs on across pieces.
+    geo.applyMatrix4(new THREE.Matrix4().compose(new THREE.Vector3((A[0] + B[0]) / 2, p.y0 + h / 2, (A[1] + B[1]) / 2), new THREE.Quaternion().setFromEuler(new THREE.Euler(0, angle, 0)), new THREE.Vector3(1, 1, 1)));
+    const matName = solid ? wallMat : KIND_MAT[p.kind];
+    if (solid || p.kind === "ledge") { worldUV(geo); grime(geo, { height: drawing.heights.wall, seed: 31 }); }
+    const mesh = new THREE.Mesh(geo, getMaterial(matName));
     mesh.castShadow = p.kind !== "glass";
     mesh.receiveShadow = true;
     mesh.userData.kind = p.kind;
     g.add(mesh);
   }
   return g;
+}
+// A door leaf hung at A (its hinge side), shut or swung open 90°, with a lever handle on both faces.
+function doorLeafNode(A, B, p, angle) {
+  const len = Math.hypot(B[0] - A[0], B[1] - A[1]), h = p.y1 - p.y0;
+  const hinge = new THREE.Group();
+  hinge.position.set(A[0], p.y0, A[1]);
+  hinge.rotation.y = angle + (p.open ? -Math.PI / 2 * (p.open / 90) : 0);
+  const leaf = new THREE.Mesh(new THREE.BoxGeometry(len, h, 0.045), getMaterial("door-leaf"));
+  leaf.position.set(len / 2, h / 2, 0);
+  leaf.castShadow = true; leaf.receiveShadow = true;
+  hinge.add(leaf);
+  for (const side of [-1, 1]) {
+    const lever = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.02, 0.02), getMaterial("door-handle"));
+    lever.position.set(len - 0.12, 1.05, side * 0.05);
+    const rose = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.012, 16), getMaterial("door-handle"));
+    rose.rotation.x = Math.PI / 2; rose.position.set(len - 0.07, 1.05, side * 0.03);
+    hinge.add(lever, rose);
+  }
+  hinge.userData.kind = "leaf";
+  return hinge;
 }
 
 export function custom(bay, { templateId } = {}) {
