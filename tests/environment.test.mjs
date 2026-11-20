@@ -8,8 +8,8 @@ import { everyPropStage } from "./fixtures.mjs";
 
 const snapshot = (group) => group.children.map((c) => ({ id: c.userData.id, p: c.position.toArray(), r: c.rotation.toArray(), n: c.children.length }));
 
-test("three surroundings exist", () => {
-  assert.deepEqual(ENVIRONMENT_NAMES, ["technical", "outdoor", "blueprint"]);
+test("four surroundings exist", () => {
+  assert.deepEqual(ENVIRONMENT_NAMES, ["technical", "outdoor", "blueprint", "industrial"]);
 });
 
 test("Blueprint: an endless blue drafting ground with no bay floor or walls, fading into the distance", async () => {
@@ -72,7 +72,8 @@ test("the look moves the sun with the hour and switches shadows, never touching 
     applyLook(env, { ...LOOK_DEFAULTS, sunAuto: true, hour: 13 }, stage.bay);
     const noonY = env.sunLight.position.y;
     applyLook(env, { ...LOOK_DEFAULTS, sunAuto: true, hour: 19, shadows: false, haze: 0 }, stage.bay);
-    assert.ok(env.sunLight.position.y < noonY, name);
+    if (name === "industrial") assert.ok(Math.abs(env.sunLight.position.y - noonY) < 1e-6, "indoors: the lamps don't move");
+    else assert.ok(env.sunLight.position.y < noonY, name);
     assert.equal(env.sunLight.castShadow, false);
     assert.equal(env.fog, name === "outdoor" ? null : env.baseFog, "no haze: Blueprint and Technical keep their distance fade");
     env.dispose();

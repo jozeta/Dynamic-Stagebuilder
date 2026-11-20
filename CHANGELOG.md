@@ -4,6 +4,15 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- New surroundings, *Industrial*: an indoor range in an old factory hall, all of it worn. Polished
+  concrete floor with saw-cut joints, cracks, oil stains, tyre marks and faded yellow walkway lines;
+  grimy concrete block walls with dirty corrugated cladding above and a roller door; steel I-beam
+  columns; roof trusses with skylights and high-bay lamps; a black rubber backstop. It is lit from
+  the lamps overhead, so the time of day only sets how bright it is. The front is left open so the
+  overviews from behind the shooters see in.
+- Fix: after a reload, an open Settings panel showed the example stage's surroundings instead of
+  the opened project's.
+
 - Earth berm: a real mound now, with sloping sides and ends and lumpy dug-earth faces, on the
   Outdoor ground's own photo-scanned surface; *Surface* picks sand, light sand, dark sand, red dirt
   or gravel, and *Plants* grass and bushes, grass only or none. *Draw the outline…* opens the

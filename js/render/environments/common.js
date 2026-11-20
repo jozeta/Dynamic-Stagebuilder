@@ -72,18 +72,20 @@ export function applyLook(env, look, bay) {
   const centre = new THREE.Vector3(0, 0, bay.depth / 2);
   // Below about 8° the shadow map smears across the ground, so the light that casts shadows stays
   // at least that high; the colour and strength still follow the real sun.
-  const dir = new THREE.Vector3(...s.direction);
+  // Indoors the light comes from the hall's lamps: a fixed direction and colour, its strength from the look.
+  const dir = new THREE.Vector3(...(env.indoor ? env.indoor.direction : s.direction)).normalize();
   const minY = Math.sin((8 * Math.PI) / 180);
   if (dir.y < minY) { const h = Math.hypot(dir.x, dir.z) || 1; dir.set((dir.x / h) * Math.cos(Math.asin(minY)), minY, (dir.z / h) * Math.cos(Math.asin(minY))); }
   sunLight.position.copy(centre).addScaledVector(dir, 70);
   sunLight.target.position.copy(centre);
-  if (s.color) sunLight.color.setRGB(...s.color, THREE.SRGBColorSpace);      // chosen by hand
+  if (env.indoor) sunLight.color.set(env.indoor.color);
+  else if (s.color) sunLight.color.setRGB(...s.color, THREE.SRGBColorSpace);      // chosen by hand
   else sunLight.color.copy(WHITE).lerp(SUNSET, Math.pow(s.warmth, 1.6) * env.warmth);
-  sunLight.intensity = env.sunStrength * look.sun * s.strength;
+  sunLight.intensity = env.sunStrength * look.sun * (env.indoor ? 1 : s.strength);
   sunLight.castShadow = look.shadows;
   sunLight.shadow.radius = look.softness;
   sunLight.shadow.intensity = look.shadowStrength ?? 1;     // 1 = full shadows, lower = lighter
-  hemi.intensity = env.hemiStrength * look.ambient * (0.7 + 0.3 * s.strength);
+  hemi.intensity = env.hemiStrength * look.ambient * (env.indoor ? 1 : 0.7 + 0.3 * s.strength);
   // Haze: atmospheric (exponential-squared) fog that thickens with distance, tuned so it is
   // visible across a stage seen from 30–80 m: light at 20 %, thick at 100 %. One fog object is
   // kept and only its density changes, so dragging the slider doesn't rebuild every shader.

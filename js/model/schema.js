@@ -9,7 +9,7 @@ import { canBeActivated, isActivator } from "./activation.js";
 import { cleanLook } from "./look.js";
 
 export const SCHEMA_VERSION = 1;
-export const ENVIRONMENTS = ["technical", "outdoor", "blueprint"];
+export const ENVIRONMENTS = ["technical", "outdoor", "blueprint", "industrial"];
 const LIMITS = { objects: 2000, lines: 500, points: 500, id: 64, label: 12, name: 120, text: 4000, bay: [1, 200] };
 const BRIEFING_TEXT = ["matchName", "designer", "stageType", "startSignal", "startPosition", "gunCondition",
   "procedure", "stopTime", "notes", "scoring"];

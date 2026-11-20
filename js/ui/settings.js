@@ -331,5 +331,7 @@ export function createSettings({ editor, panel, docked = false, hide = [], onTog
     /** Shown by the dock (its tab clicked): fill it and count as open, without toggling. */
     ensureOpen() { if (isOpen) return; fill(); show(true); },
     get isOpen() { return isOpen; },
+    /** Another stage was opened: fill the open panel again from it. */
+    refresh() { if (isOpen) fill(); },
   };
 }

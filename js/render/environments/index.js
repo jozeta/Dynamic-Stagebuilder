@@ -4,13 +4,14 @@ import { technical } from "./technical.js";
 import { outdoor } from "./outdoor.js";
 import { blueprint } from "./blueprint.js";
 import { custom } from "./custom.js";
+import { industrial } from "./industrial.js";
 export { setTemplate, removeTemplate, getTemplate } from "./custom.js";
 import { disposeGroup } from "./common.js";
 export { applyLook } from "./common.js";
 
-const FACTORIES = { technical, outdoor, blueprint };
+const FACTORIES = { technical, outdoor, blueprint, industrial };
 export const ENVIRONMENT_NAMES = Object.keys(FACTORIES);
-export const ENVIRONMENT_LABELS = { technical: "Technical", outdoor: "Outdoor", blueprint: "Blueprint" };
+export const ENVIRONMENT_LABELS = { technical: "Technical", outdoor: "Outdoor", blueprint: "Blueprint", industrial: "Industrial" };
 
 export function createEnvironment(name, bay, options = {}) {
   // Your own surroundings: "custom:<id>" (an unknown id still gives a plain floor).

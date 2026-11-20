@@ -363,6 +363,7 @@ async function openProject(id) {
   const r = rec ? validateStage(rec.stage) : { ok: false };
   if (!r.ok) { setStatus("That project could not be read", "lg-bad"); return false; }
   editor.dispatch({ type: "load", stage: r.stage });
+  settings?.refresh();                       // an open Settings panel shows this stage's surroundings
   autosave.markSaved(editor.stage(), rec.exportedAt ?? null);
   remember(id);
   setStatus("Saved", "lg-ok");

@@ -74,9 +74,12 @@ export const BLUEPRINT_LOOK = Object.freeze({ hour: 11, sun: 0.85, ambient: 1.05
   clouds: 0.45, cloudSpeed: 0.5, wind: 70, cloudShadow: 0.5, sunAuto: false, sunElevation: 31, sunAzimuth: 35, sunColor: 0.78,
   groundHue: 220, groundIntensity: 0.54, groundBrightness: 0.4, walls: true, gridIntensity: 0.14, gridColor: "#ffffff", ...OUTDOOR_GRID });
 
-/** The light defaults for a surroundings name ("outdoor", "technical" or "blueprint"). */
+// Industrial (indoors): lit by the hall's lamps, a little dust in the air, softer shadows.
+export const INDUSTRIAL_LOOK = Object.freeze({ ...TECHNICAL_LOOK, sun: 0.9, ambient: 1, softness: 5, shadowStrength: 0.5, haze: 0.06, exposure: 1.05, walls: true, gridIntensity: null });
+
+/** The light defaults for a surroundings name ("outdoor", "technical", "blueprint" or "industrial"). */
 export const lookDefaults = (environment) => (environment === "technical" || String(environment).startsWith("custom:") ? TECHNICAL_LOOK
-  : environment === "blueprint" ? BLUEPRINT_LOOK : LOOK_DEFAULTS);
+  : environment === "blueprint" ? BLUEPRINT_LOOK : environment === "industrial" ? INDUSTRIAL_LOOK : LOOK_DEFAULTS);
 const sameLook = (a, b) => Object.keys(b).every((k) => a?.[k] === b[k]);
 /** The look to use after switching surroundings: an untouched look follows to the new defaults. */
 export function lookAfterSwitch(look, from, to) {
