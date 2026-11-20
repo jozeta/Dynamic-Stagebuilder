@@ -68,7 +68,7 @@ test("Technical surroundings have their own light defaults; reset and switching 
   assert.deepEqual(ed.stage().settings.look, { ...TECHNICAL_LOOK }, "an untouched look follows the surroundings");
   ed.dispatch({ type: "setLook", patch: { hour: 9 } });
   ed.dispatch({ type: "setEnvironment", name: "outdoor" });
-  assert.equal(ed.stage().settings.look.hour, 9, "a look you changed is kept");
+  assert.deepEqual(ed.stage().settings.look, { ...LOOK_DEFAULTS }, "switching gives the new surroundings their own settings (the app warns first)");
   ed.dispatch({ type: "setEnvironment", name: "technical" });
   ed.dispatch({ type: "setLook", reset: true });
   assert.deepEqual(ed.stage().settings.look, { ...TECHNICAL_LOOK });
@@ -171,4 +171,11 @@ test("Blueprint and Technical grids have their own intensity and colour", async 
   const c = cleanLook({ gridIntensity: 5, gridColor: "#ABCDEF" });
   assert.equal(c.gridIntensity, 1); assert.equal(c.gridColor, "#abcdef");
   assert.equal(cleanLook({ gridColor: "blue" }).gridColor, null, "not a colour: the surroundings' own");
+});
+
+test("switching surroundings warns only when settings of your own would be lost", async () => {
+  const { switchLosesSettings, lookDefaults } = await import("../js/model/look.js");
+  assert.equal(switchLosesSettings(lookDefaults("outdoor"), "outdoor"), false, "untouched: nothing to lose");
+  assert.equal(switchLosesSettings({ ...lookDefaults("outdoor"), ground: "red-dirt" }, "outdoor"), true);
+  assert.equal(switchLosesSettings({ ...lookDefaults("industrial"), roof: false }, "industrial"), true);
 });

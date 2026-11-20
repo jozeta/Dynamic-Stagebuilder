@@ -81,10 +81,12 @@ export const INDUSTRIAL_LOOK = Object.freeze({ ...TECHNICAL_LOOK, sun: 0.9, ambi
 export const lookDefaults = (environment) => (environment === "technical" || String(environment).startsWith("custom:") ? TECHNICAL_LOOK
   : environment === "blueprint" ? BLUEPRINT_LOOK : environment === "industrial" ? INDUSTRIAL_LOOK : LOOK_DEFAULTS);
 const sameLook = (a, b) => Object.keys(b).every((k) => a?.[k] === b[k]);
-/** The look to use after switching surroundings: an untouched look follows to the new defaults. */
+/** The look after switching surroundings: the new surroundings' own settings (yours are not carried over). */
 export function lookAfterSwitch(look, from, to) {
-  return sameLook(look, lookDefaults(from)) ? { ...lookDefaults(to) } : look;
+  return { ...lookDefaults(to) };
 }
+/** Would switching away lose settings you changed? (Then the app asks first.) */
+export const switchLosesSettings = (look, from) => !sameLook(look, lookDefaults(from));
 
 export function cleanLook(look) {
   const src = look && typeof look === "object" ? look : {};

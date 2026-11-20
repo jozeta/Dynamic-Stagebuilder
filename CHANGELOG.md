@@ -4,6 +4,10 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Switching surroundings gives the new ones their own light and surroundings settings. If you have
+  changed any (sun, shadows, ground, foliage, grid…), a warning says they will be lost, with *Cancel*
+  to keep everything as it is and *Switch anyway*.
+
 - Industrial: the hall is higher (14 m walls), so the camera has room to move, and *Show roof and
   baffles* (Settings) hides the roof, trusses, lamps, light shafts and overhead baffles. Seen from
   outside the hall, a wall between the camera and the stage hides, like a cut-away drawing; from

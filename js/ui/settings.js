@@ -10,7 +10,7 @@ import { WALK_SPEEDS } from "../model/route.js";
 import { RUN_PARTS, RUN_COLORS } from "../model/run-look.js";
 import { LIBRARY_GROUPS, MARKINGS, isShown, setShown } from "../model/visibility.js";
 import { PROPS } from "../model/props.js";
-import { GROUNDS, FOLIAGE, groundTone, gridTone } from "../model/look.js";
+import { GROUNDS, FOLIAGE, groundTone, gridTone, switchLosesSettings } from "../model/look.js";
 
 // Grid colours offered as swatches (any colour can be picked as well).
 const GRID_COLORS = [["#e2eeff", "Pale blue (Blueprint)"], ["#ffffff", "White"], ["#c8ccd2", "Light grey"], ["#55585c", "Dark grey (Technical)"],
@@ -170,13 +170,38 @@ export function createSettings({ editor, panel, docked = false, hide = [], onTog
   function close() { show(false); }
   panel.addEventListener("keydown", (e) => { if (e.key === "Escape") { e.stopPropagation(); close(); } });
 
+  // Switching surroundings gives the new ones their own light and surroundings settings: when you
+  // have changed any, ask first (Cancel keeps everything as it is).
+  const lost = h("p", { class: "lg-muted" });
+  let pending = null;
+  const ask = h("dialog", { class: "lg-modal", "aria-labelledby": "switch-title" }, [
+    h("section", { class: "lg-modal-body lg-stack" }, [
+      h("h2", { class: "lg-subtitle", id: "switch-title", text: "Switch surroundings?" }),
+      lost,
+    ]),
+    h("div", { class: "lg-modal-actions" }, [
+      h("button", { type: "button", class: "lg-btn", autofocus: true, onclick: () => ask.close(), text: "Cancel" }),
+      h("button", { type: "button", class: "lg-btn lg-btn-primary", onclick: () => { const n = pending; pending = null; ask.close(); if (n) d({ type: "setEnvironment", name: n }); fill(); }, text: "Switch anyway" }),
+    ]),
+  ]);
+  ask.addEventListener("close", () => { pending = null; fill(); });          // Cancel or Escape: the old choice stays
+  document.body.append(ask);
+  function switchTo(name) {
+    const st = editor.stage().settings;
+    if (name === st.environment) return;
+    if (!switchLosesSettings(st.look, st.environment)) { d({ type: "setEnvironment", name }); fill(); return; }
+    pending = name;
+    lost.textContent = "The light and surroundings settings you changed here (sun, shadows, ground, foliage, grid and the rest) will be lost: the new surroundings start with their own. The stage itself doesn't change.";
+    ask.showModal();
+  }
+
   function fill() {
     const st = editor.stage().settings;
     const look = st.look;
     const env = h("div", { class: "lg-segmented", role: "radiogroup", "aria-label": "Surroundings" });
     for (const name of ENVIRONMENT_NAMES) {
       const id = `set-env-${name}`;
-      const input = h("input", { type: "radio", name: "set-env", id, value: name, onchange: () => { d({ type: "setEnvironment", name }); fill(); } });
+      const input = h("input", { type: "radio", name: "set-env", id, value: name, onchange: () => switchTo(name) });
       input.checked = st.environment === name;
       env.append(input, h("label", { for: id, text: ENVIRONMENT_LABELS[name] }));
     }
@@ -184,7 +209,7 @@ export function createSettings({ editor, panel, docked = false, hide = [], onTog
     const myRows = [];
     if (mine && offersPlans(st.environment)) {          // not with Outdoor, Blueprint or Industrial
       const curId = customId(st.environment);
-      const pick = h("select", { class: "lg-select", id: "set-mine", onchange: (e) => { if (e.target.value) d({ type: "setEnvironment", name: e.target.value }); fill(); } }, [
+      const pick = h("select", { class: "lg-select", id: "set-mine", onchange: (e) => { if (e.target.value) switchTo(e.target.value); else fill(); } }, [
         h("option", { value: "", text: mine.list().length ? "Choose…" : "None yet" }),
         ...mine.list().map((t) => h("option", { value: customEnv(t.id), text: t.name })),
       ]);
