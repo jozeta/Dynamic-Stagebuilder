@@ -12,7 +12,7 @@ const near = (a, b, tol, msg) => assert.ok(Math.abs(a - b) <= tol, `${msg}: ${a.
 function checkSize(type, params) {
   const o = obj(type, params);
   const g = buildProp(o);
-  const s = size(g);
+  const s = size(g.getObjectByName("berm-earth") ?? g);           // a berm's grass and bushes may stand above and beyond its earth
   const d = dimensionsOf(o);
   near(s.x, d.w, 0.01, `${type} width`);
   near(s.y, d.h, 0.01, `${type} height`);

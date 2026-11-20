@@ -4,6 +4,12 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Earth berm: a real mound now, with sloping sides and ends and lumpy dug-earth faces, on the
+  Outdoor ground's own photo-scanned surface; *Surface* picks sand, light sand, dark sand, red dirt
+  or gravel, and *Plants* grass and bushes, grass only or none. *Draw the outline…* opens the
+  drawing window (up to 10 × 10 m): black squares become the berm at its *Height*, with a slope at
+  their edges; *Back to a plain berm* undoes it.
+
 - Outdoor ground grid: *Settings → Grid on the ground* draws 1 m squares (a stronger line every
   5 m) lying on the ground, with *Grid opacity* to set how see-through it is. Off by default.
 

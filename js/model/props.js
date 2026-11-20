@@ -4,6 +4,7 @@
 // Target outlines: IPSC Target ≈ 46 × 58 cm and Mini Target ≈ 2/3 of that (Appendix B2/B3 drawings);
 // IPSC Popper 85 cm tall with a 30 cm head, Mini Popper 2/3 of that (Appendix C2); plates 15–30 cm
 // (Appendix C3a). The appendix drawings are images, so these are the commonly published sizes.
+import { bermSize } from "./berm.js";
 
 import { PAPER_SIZES, TARGET_STYLES, PRESENTATIONS, HARD_COVERS, paperSize, arrayExtent } from "./arrays.js";
 import { STANCES, positionSize } from "./positions.js";
@@ -182,7 +183,9 @@ const defs = [
   { type: "column", name: "Round column", category: "building", scoring: null,
     params: { diameter: { default: 0.4, min: 0.15, max: 1.5, step: 0.05 }, height: { default: 3, min: 0.5, max: 8, step: 0.1 }, ...MATERIAL } },
   { type: "berm", name: "Earth berm", category: "building", scoring: null,
-    params: { length: { default: 10, min: 2, max: 60, step: 0.5 }, height: { default: 2.5, min: 0.5, max: 8, step: 0.1 }, depth: { default: 5, min: 1, max: 16, step: 0.5 } } },
+    params: { length: { default: 10, min: 2, max: 60, step: 0.5 }, height: { default: 2.5, min: 0.5, max: 8, step: 0.1 }, depth: { default: 5, min: 1, max: 16, step: 0.5 },
+      ground: { default: "sand", options: ["sand", "light-sand", "dark-sand", "red-dirt", "gravel"] }, plants: { default: "mixed", options: ["mixed", "grass", "none"] } },
+    note: "An earth bank on the ground's own surface, with grass and bushes. Draw the outline… gives it any shape up to 10 × 10 m." },
   { type: "container", name: "Shipping container", category: "building", scoring: null,
     params: { size: { default: "20ft", options: ["20ft", "40ft"] }, color: { default: "blue", options: ["blue", "red", "green", "grey", "rust"] } } },
   { type: "fence", name: "Chain-link fence", category: "building", scoring: null,
@@ -300,7 +303,7 @@ export function dimensionsOf(obj) {
     case "step-box": [w, h, d] = [0.6, 0.2, 0.3]; break;
     case "pillar": [w, h, d] = [p.size, p.height, p.size]; break;
     case "column": [w, h, d] = [p.diameter, p.height, p.diameter]; break;
-    case "berm": [w, h, d] = [p.length, p.height, p.depth]; break;
+    case "berm": { const [bl, bd] = bermSize(obj); [w, h, d] = [bl, p.height, bd]; break; }
     case "container": { const c = CONTAINERS[p.size] || CONTAINERS["20ft"]; [w, h, d] = [c.length, c.height, c.width]; break; }
     case "fence": [w, h, d] = [p.length, p.height, 0.5]; break;
     case "barrier": [w, h, d] = [p.length, BARRIER.height, BARRIER.base]; break;

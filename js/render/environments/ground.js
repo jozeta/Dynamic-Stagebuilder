@@ -340,3 +340,44 @@ export function grassCards(bay, { count = 7000, tones: toneList = ["#c9c08a", "#
   mesh.receiveShadow = true;
   return mesh;
 }
+
+// The Outdoor ground's surface on other things (the earth berm): the same photo-scanned earth,
+// graded per ground (sand, gravel…), with its normal and AO/roughness maps. UVs are in metres /
+// PHOTO_TILE, so it is at the same scale as the ground. One material per ground, shared.
+const earthMats = new Map();
+let earthNotify = null;
+/** Ask for a new frame when the photo maps arrive (set by the engine). */
+export function onEarthLoaded(fn) { earthNotify = fn; }
+export const EARTH_TILE = PHOTO_TILE;
+export function earthMaterial(ground = "sand") {
+  if (earthMats.has(ground)) return earthMats.get(ground);
+  const pal = GROUND_PALETTE[ground] || GROUND_PALETTE.sand;
+  const maps = bakeGroundMaps();
+  for (const t of Object.values(maps)) t.repeat?.set(PHOTO_TILE / TILE, PHOTO_TILE / TILE);    // UVs are in photo tiles
+  const mat = new THREE.MeshStandardMaterial({ color: maps.map ? 0xffffff : pal.earth, roughness: 1, normalScale: new THREE.Vector2(0.9, 0.9), aoMapIntensity: 0.8, ...maps, vertexColors: true });
+  mat.name = `berm-earth-${ground}`;
+  const control = { ground, regrade: null };
+  loadPhotoMaps(mat, PHOTO_TILE, PHOTO_TILE, () => earthNotify?.(), control);
+  earthMats.set(ground, mat);
+  return mat;
+}
+
+/** Grass tufts at spots [[x, y, z], …] (the same blades as on the Outdoor banks). */
+let grassMat = null;
+export function grassAt(spots, { seed = 5, scale = 1, tones: toneList = ["#c9c08a", "#a9ab68", "#8f9a58", "#bcae72", "#7f8a4a"] } = {}) {
+  const r = rng(seed);
+  if (!grassMat) { const map = bladeTexture(); grassMat = new THREE.MeshStandardMaterial({ color: map ? 0xffffff : 0x8e9a56, map, alphaTest: 0.5, side: THREE.DoubleSide, roughness: 0.95 }); }
+  const mesh = new THREE.InstancedMesh(crossedQuads(), grassMat, Math.max(1, spots.length));
+  const tones = toneList.map((h) => new THREE.Color(h));
+  const m = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3(), p = new THREE.Vector3(), e = new THREE.Euler();
+  spots.forEach(([x, y, z], i) => {
+    const k = (0.6 + r() * 0.9) * scale;
+    e.set((r() - 0.5) * 0.25, r() * 6.28, (r() - 0.5) * 0.25);
+    m.compose(p.set(x, y - 0.02, z), q.setFromEuler(e), sc.set(k, k * (0.7 + r() * 0.6), k));
+    mesh.setMatrixAt(i, m);
+    mesh.setColorAt(i, tones[(r() * tones.length) | 0]);
+  });
+  mesh.count = spots.length;
+  mesh.receiveShadow = true;
+  return mesh;
+}

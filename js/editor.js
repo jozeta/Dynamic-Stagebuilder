@@ -15,6 +15,7 @@ import { cleanLook, lookDefaults, lookAfterSwitch } from "./model/look.js";
 import { stepFrom } from "./model/positions.js";
 import { snapMeasure } from "./model/measure.js";
 import { mirrorStage, alignObjects, distributeObjects } from "./model/arrange.js";
+import { cleanOutline } from "./model/berm.js";
 import { canBeActivated, isActivator } from "./model/activation.js";
 import { isLocked, isHidden, setFlag, pruneGroups, groupObjects, ungroup, moveToGroup, updateGroup, copyObjects, pasteObjects } from "./model/layers.js";
 
@@ -245,6 +246,13 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
     },
     // The props-on-stage list and the right-click menu.
     setLocked({ ids = state.selection, locked }) { if (objIds(ids).length) edit(setFlag(present(), objIds(ids), "locked", locked)); },
+    // A berm's drawn outline (null: back to a plain berm).
+    setOutline({ id, outline }) {
+      const o = present().objects.find((x) => x.id === id && x.type === "berm");
+      if (!o) return;
+      const c = outline ? cleanOutline(outline) : null;
+      edit({ ...present(), objects: present().objects.map((x) => { if (x !== o) return x; const rest = { ...x }; delete rest.outline; return c ? { ...rest, outline: c } : rest; }) });
+    },
     // Show the rulebook's safety distances round these targets (saved with the stage).
     setSafetyRings({ ids = state.selection, on }) {
       const targets = objIds(ids).filter((id) => ["paper", "steel"].includes(getProp(present().objects.find((o) => o.id === id).type).scoring));

@@ -541,6 +541,27 @@ const KINDS = {
 };
 
 /** The plants for one kind (see FOLIAGE_KINDS), as a Group to add to the Outdoor scene. */
+// Bushes at spots [[x, y, z], …] (the mixed broadleaf kind's), for props such as the earth berm.
+// The materials are made once and shared.
+let shared = null;
+export function bushesAt(spots, seed = 9) {
+  if (!spots.length) return null;
+  shared ??= materials();
+  const r = rng(seed);
+  const geo = bushGeometry(rng(53), { cards: 30, w: 1, h: 0.7 });
+  const inst = new THREE.InstancedMesh(geo, shared.leafyBush, spots.length);
+  const mm = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3(), p = new THREE.Vector3(), c = new THREE.Color();
+  spots.forEach(([x, y, z], i) => {
+    const s = 0.5 + r() * 0.7;
+    q.setFromEuler(new THREE.Euler(0, r() * 6.28, 0));
+    mm.compose(p.set(x, y - 0.08, z), q, sc.set(s, s * (0.8 + r() * 0.4), s));
+    inst.setMatrixAt(i, mm);
+    inst.setColorAt(i, c.setHSL(0.25 + (r() - 0.5) * 0.04, 0.32, 0.72 + (r() - 0.5) * 0.12));
+  });
+  inst.receiveShadow = true;
+  return inst;
+}
+
 export function buildFoliage(bay, kind = "mixed") {
   const spec = KINDS[kind] || KINDS.mixed;
   const group = new THREE.Group();

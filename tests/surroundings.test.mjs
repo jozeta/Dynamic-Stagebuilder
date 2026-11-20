@@ -52,7 +52,8 @@ for (const t of ["building-wall", "pillar", "column", "berm", "container", "fenc
   test(`${t} is drawn at its real size`, () => {
     for (const extra of [{}, t === "building-wall" ? { material: "brick", length: 12, height: 4 } : t === "container" ? { size: "40ft", color: "rust" } : {}]) {
       const o = { id: "b", type: t, position: [0, 0], rotation: 0, params: { ...defaultParams(t), ...extra } };
-      const b = new Box3().setFromObject(buildProp(o));
+      const built = buildProp(o);
+      const b = new Box3().setFromObject(built.getObjectByName("berm-earth") ?? built);     // a berm's plants may stand above its earth
       const s = b.getSize(new Vector3()), d = dimensionsOf(o);
       near(s.x, d.w, 0.01, `${t} width`); near(s.y, d.h, 0.01, `${t} height`); near(s.z, d.d, 0.01, `${t} depth`);
       near(b.min.y, 0, 0.002, `${t} on the ground`);

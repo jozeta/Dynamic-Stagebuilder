@@ -6,7 +6,8 @@ import { buildMeshWall, buildMeshPortWall, buildWoodWall, buildPortWall, buildDo
 import { buildStepPad, buildPullLever, buildStartMarks, buildBobber, buildTwister, buildWobblePlatform, buildBalanceRope, buildStepBox } from "./nationals.js";
 import { buildRamp, buildPlatform, buildTable, buildChair, buildPallet, buildSandbags, buildCone } from "./furniture.js";
 import { buildCar } from "./car.js";
-import { buildBuildingWall, buildPillar, buildColumn, buildBerm, buildContainer, buildFence, buildBarrier } from "./building.js";
+import { buildBuildingWall, buildPillar, buildColumn, buildContainer, buildFence, buildBarrier } from "./building.js";
+import { buildBerm } from "./berm.js";
 import { buildShootingPosition } from "./position.js";
 import { buildSwinger, buildDropTurner, buildClamshell, buildMover, buildTexasStar, buildPlateRack, buildDuelingTree } from "./moving.js";
 import { buildBarrel, buildTyre, buildCrate, buildPlant } from "./obstacles.js";

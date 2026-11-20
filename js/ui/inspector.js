@@ -14,10 +14,10 @@ const PARAM_LABELS = {
   presentation: "Presentation", hardCover: "Hard cover", mountHeight: "Stand height (m)", style: "Target style", baseHeight: "Base height (m)", size: "Size (m)", length: "Length (m)",
   height: "Height (m)", mesh: "Mesh colour", frame: "Frame", portWidth: "Port width (m)",
   portHeight: "Port height (m)", portBottom: "Port bottom (m)", count: "Count", paint: "Paint", color: "Colour", width: "Width (m)", rows: "Rows",
-  doorWidth: "Door width (m)", plates: "Plates", model: "Model", stance: "Stance", pads: "Pads", stack: "Drums high", items: "On the table", targets: "Targets on the carrier", shutter: "Shutter", panelHeight: "Panel height (m)", gap: "Gap underneath (m)", open: "Open (°)", hinge: "Hinge side", swing: "Opens", animate: "Animate (moves when Play is on)", thickness: "Thickness (m)", material: "Material", diameter: "Diameter (m)", depth: "Base depth (m)", pitch: "Look up/down (°)", doorHeight: "Door height (m)",
+  doorWidth: "Door width (m)", ground: "Surface", plants: "Plants", plates: "Plates", model: "Model", stance: "Stance", pads: "Pads", stack: "Drums high", items: "On the table", targets: "Targets on the carrier", shutter: "Shutter", panelHeight: "Panel height (m)", gap: "Gap underneath (m)", open: "Open (°)", hinge: "Hinge side", swing: "Opens", animate: "Animate (moves when Play is on)", thickness: "Thickness (m)", material: "Material", diameter: "Diameter (m)", depth: "Base depth (m)", pitch: "Look up/down (°)", doorHeight: "Door height (m)",
 };
 const OPTION_LABELS = { classic: "Classic (octagon)", head: "With head", orange: "Orange", black: "Black", blue: "Blue", wood: "Wood", white: "White", yellow: "Yellow", red: "Red",
-  green: "Green", grey: "Grey", rust: "Rusty", concrete: "Concrete", brick: "Brick", metal: "Metal", "20ft": "20 ft", "40ft": "40 ft", left: "Left", right: "Right", away: "Away from the shooter", toward: "Toward the shooter", closed: "Closed", open: "Open", none: "Nothing", pistol: "Pistol", "pistol-mags": "Pistol and magazines", case: "Gun case (closed)", standing: "Standing", crouching: "Crouching", kneeling: "Kneeling", sitting: "Sitting", prone: "Prone", sedan: "Saloon", hatchback: "Hatchback", pickup: "Pickup", van: "Van",
+  green: "Green", grey: "Grey", sand: "Sand", "light-sand": "Light sand", "dark-sand": "Dark sand", "red-dirt": "Red dirt", gravel: "Gravel", mixed: "Grass and bushes", grass: "Grass only", rust: "Rusty", concrete: "Concrete", brick: "Brick", metal: "Metal", "20ft": "20 ft", "40ft": "40 ft", left: "Left", right: "Right", away: "Away from the shooter", toward: "Toward the shooter", closed: "Closed", open: "Open", none: "Nothing", pistol: "Pistol", "pistol-mags": "Pistol and magazines", case: "Gun case (closed)", standing: "Standing", crouching: "Crouching", kneeling: "Kneeling", sitting: "Sitting", prone: "Prone", sedan: "Saloon", hatchback: "Hatchback", pickup: "Pickup", van: "Van",
   ...Object.fromEntries([...PRESENTATIONS, ...HARD_COVERS].map((p) => [p.id, p.name])) };
 const GRID_OPTIONS = [[0, "Off"], [0.1, "0.1 m"], [0.25, "0.25 m"], [0.5, "0.5 m"], [1, "1 m"]];
 const ANGLE_OPTIONS = [[0, "Off"], [5, "5°"], [15, "15°"], [45, "45°"], [90, "90°"]];
@@ -38,7 +38,7 @@ const select = (key, value, options, onchange) => {
   return s;
 };
 
-export function createInspector(root, { editor, shapes = { list: () => [], draw: () => {} } }) {
+export function createInspector(root, { editor, shapes = { list: () => [], draw: () => {} }, berms = { draw: () => {} } }) {
   const d = (action) => editor.dispatch(action);
   let lastKey = "";
 
@@ -91,6 +91,14 @@ export function createInspector(root, { editor, shapes = { list: () => [], draw:
         onchange: (e) => d(k === "locked" ? { type: "setLocked", ids: [o.id], locked: e.target.checked } : { type: "setHidden", ids: [o.id], hidden: e.target.checked }) });
       sw.checked = o[k] === true;
       nodes.push(h("div", { class: "lg-field inspector-switch", title: hint }, [h("label", { for: id, text: label }), sw]));
+    }
+    // An earth berm: its outline can be drawn (squares, up to 10 × 10 m) instead of length × depth.
+    if (o.type === "berm") {
+      nodes.push(h("div", { class: "lg-row berm-outline" }, [
+        h("button", { type: "button", class: "lg-btn", onclick: () => berms.draw(o) }, [icon("ruler"), o.outline ? "Edit the outline…" : "Draw the outline…"]),
+        o.outline ? h("button", { type: "button", class: "lg-btn", onclick: () => d({ type: "setOutline", id: o.id, outline: null }), text: "Back to a plain berm" }) : null,
+      ].filter(Boolean)));
+      if (o.outline) nodes.push(h("p", { class: "lg-muted hint-text", text: `Drawn outline, ${o.outline.width} × ${o.outline.depth} m: length and depth above don't apply; height does.` }));
     }
     // Safety distances from the rulebook, drawn as rings on the ground round the target.
     const ringSpec = safetyRings(o);

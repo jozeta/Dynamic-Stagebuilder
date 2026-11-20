@@ -11,6 +11,7 @@ import { demoStage } from "./demo.js";
 import { createToolbar } from "./ui/toolbar.js";
 import { createLibrary } from "./ui/library.js";
 import { createBayDrawer } from "./ui/bay-draw.js";
+import { onEarthLoaded } from "./render/environments/ground.js";
 import { MAX_SHAPES } from "./model/bay.js";
 import { createInspector } from "./ui/inspector.js";
 import { createStats } from "./ui/stats.js";
@@ -427,6 +428,14 @@ const myShapes = (() => {
   return { list: () => list, get version() { return version; }, draw: (opts) => drawer.open(opts) };
 })();
 
+// A berm's drawn outline: the same drawing window, up to 10 × 10 m, saved on that berm.
+const bermDrawer = (() => {
+  let target = null;
+  const drawer = createBayDrawer({ kind: "berm", onSave: async (outline) => { if (target) editor.dispatch({ type: "setOutline", id: target, outline }); } });
+  return { draw(o) { target = o.id; drawer.open(o.outline ? { shape: o.outline } : {}); } };
+})();
+onEarthLoaded(() => engine.requestRender());           // a berm's ground textures arrived
+
 let dock = null;                   // the side panels' dock (Låda Glass), set up below
 const projects = createProjects({
   onOpenLibrary: (spec) => addProject(withView(libraryStage(spec))),
@@ -517,7 +526,7 @@ updaters.push(
   }),
   library,
   layers.update,
-  createInspector(document.getElementById("inspector-body"), { editor, shapes: myShapes }),
+  createInspector(document.getElementById("inspector-body"), { editor, shapes: myShapes, berms: bermDrawer }),
   createStats(document.getElementById("stats")),
 );
 attachShortcuts({ editor, rig });

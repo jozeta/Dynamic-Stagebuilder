@@ -2,6 +2,7 @@
 // fresh stage from known keys only, so unknown and "__proto__" keys never get through, and it
 // rejects the whole stage on any error: nothing is ever applied halfway.
 import { cleanBay } from "./bay.js";
+import { cleanOutline } from "./berm.js";
 import { PROPS, TARGET_STYLES } from "./props.js";
 import { MAX_GROUPS } from "./layers.js";
 import { canBeActivated, isActivator } from "./activation.js";
@@ -102,6 +103,8 @@ export function validateStage(json) {
       else if (o[k]) flags[k] = true;
     }
     if (o.group !== undefined) flags.group = str(o.group, `${path}.group`, 64);
+    // A berm's drawn outline (squares, at most 10 × 10 m).
+    if (o.outline !== undefined && o.type === "berm") { const c = cleanOutline(o.outline); if (c) flags.outline = c; else err(`${path}.outline`, "is not an outline"); }
     return {
       ...flags,
       ...(activatedBy ? { activatedBy } : {}),
