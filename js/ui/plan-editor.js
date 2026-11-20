@@ -4,7 +4,7 @@
 // (from an image file) or to edit a saved plan. The image is a canvas; names are text only.
 import { h, icon } from "./dom.js";
 import { scaleFromReference } from "../model/surroundings.js";
-import { emptyDrawing, addWall, addOpening, eraseAt, snapPoint, cleanDrawing, HEIGHT_LIMITS, nearestAnchor, moveAnchor, WALL_SURFACES, DOOR_LEAVES } from "../model/plan-draw.js";
+import { emptyDrawing, addWall, addOpening, eraseAt, snapPoint, cleanDrawing, HEIGHT_LIMITS, nearestAnchor, moveAnchor, WALL_SURFACES, DOOR_LEAVES, ortho } from "../model/plan-draw.js";
 
 const SNAP_M = 0.4, SNAP_PX = 10;               // snap within 40 cm, and never less than 10 screen pixels
 const COLORS = { wall: "#111418", door: "#b5651d", window: "#1f7ae0", preview: "#e0402f", snap: "#e0402f" };
@@ -17,6 +17,7 @@ export function createPlanEditor({ onFile }) {
   let fit = 1;                                     // screen pixels per image pixel
   let planAlpha = 1, colourful = false;            // how strongly the plan shows while drawing; bright colours
   let anchor = null;                               // the end picked with Move, nudged with the arrow keys
+  let square = false;                              // Force 90°: every line level or upright
 
   const canvas = h("canvas", { class: "plan-canvas", role: "img", "aria-label": "The plan", tabindex: "0" });
   const box = h("div", { class: "plan-box" }, [canvas]);
@@ -95,9 +96,11 @@ export function createPlanEditor({ onFile }) {
     h("div", { class: "settings-row" }, [h("label", { for: "plan-alpha", text: "Plan image" }), alphaIn, alphaOut]),
     h("label", { class: "plan-check", for: "plan-colour" }, [colourIn, h("span", { text: "Colour the drawing: walls blue, doors pink, windows green" })]),
   ]);
+  const squareIn = h("input", { type: "checkbox", id: "plan-square", onchange: (e) => { square = e.target.checked; draw(); } });
   const step2 = h("div", { class: "lg-stack plan-side" }, [
     h("p", { class: "lg-muted hint-text", text: "Wall: click point to point, double-click (or Finish wall) to stop. Door and window: click both ends on a wall, or across a gap between two walls. Ends close to each other snap together." }),
     h("div", { class: "plan-tools" }, tools),
+    h("label", { class: "plan-check", for: "plan-square" }, [squareIn, h("span", { text: "Force 90°: walls, doors and windows level or upright" })]),
     h("div", { class: "lg-row plan-row" }, [
       h("button", { type: "button", class: "lg-btn", onclick: () => endChain(), text: "Finish wall" }),
       h("button", { type: "button", class: "lg-btn", onclick: () => undo() }, [icon("undo"), "Undo"]),
@@ -168,7 +171,7 @@ export function createPlanEditor({ onFile }) {
     for (const o of drawing.doors) { seg(o, "#ffffff", wallW * 1.1); seg(o, C.door, colourful ? wallW : 4 / fit, colourful ? [] : [6, 4]); dot(o.a, C.door); dot(o.b, C.door); }
     for (const o of drawing.windows) { seg(o, "#ffffff", wallW * 1.1); seg(o, C.window, colourful ? wallW : 3 / fit); dot(o.a, C.window); dot(o.b, C.window); }
     const from = chain ?? start;
-    if (from && cursor) seg({ a: from, b: snapPoint(drawing, cursor, tolPx()) }, COLORS.preview, 2 / fit, [5, 4]);
+    if (from && cursor) seg({ a: from, b: square ? ortho(from, snapPoint(drawing, ortho(from, cursor), tolPx())) : snapPoint(drawing, cursor, tolPx()) }, COLORS.preview, 2 / fit, [5, 4]);
     if (anchor) { g.strokeStyle = "#ff9f1c"; g.lineWidth = 3 / fit; g.beginPath(); g.arc(anchor[0], anchor[1], 9 / fit, 0, 7); g.stroke(); g.fillStyle = "#ff9f1c"; g.beginPath(); g.arc(anchor[0], anchor[1], 3 / fit, 0, 7); g.fill(); }
     if (cursor && tool !== "erase" && tool !== "move") { const s = snapPoint(drawing, cursor, tolPx()); if (s[0] !== cursor[0] || s[1] !== cursor[1]) { g.strokeStyle = COLORS.snap; g.lineWidth = 2 / fit; g.beginPath(); g.arc(s[0], s[1], 7 / fit, 0, 7); g.stroke(); } }
     hint.textContent = { wall: chain ? "Click the next corner; double-click or Finish wall to stop." : "Click where the wall starts.", door: start ? "Click the door's other side." : "Click one side of the door, on a wall or across a gap.",
@@ -201,13 +204,13 @@ export function createPlanEditor({ onFile }) {
     if (tool === "erase") { const next = eraseAt(drawing, p, tol); if (next !== drawing) { push(); drawing = next; } draw(); return; }
     if (tool === "wall") {
       if (!chain) { chain = snapPoint(drawing, p, tol); draw(); return; }
-      const next = addWall(drawing, chain, p, tol);
+      const next = addWall(drawing, chain, p, tol, { ortho: square });
       if (next !== drawing) { push(); drawing = next; chain = drawing.walls.at(-1).b; }
       draw();
       return;
     }
     if (!start) { start = p; draw(); return; }
-    const next = addOpening(drawing, tool, start, p, tol);
+    const next = addOpening(drawing, tool, start, p, tol, { ortho: square });
     if (next !== drawing) { push(); drawing = next; }
     start = null;
     draw();

@@ -151,3 +151,13 @@ test("the wall surface and door leaf are kept with the drawing", async () => {
   assert.deepEqual(cleanDrawing({ style: { wall: "brick", leaf: "open" } }).style, { wall: "brick", leaf: "open" });
   assert.deepEqual(cleanDrawing({ style: { wall: "glass", leaf: 3 } }).style, { wall: "concrete", leaf: "none" });
 });
+
+test("Force 90°: walls, and doors or windows in a gap, run level or upright", async () => {
+  const { emptyDrawing, addWall, addOpening } = await D();
+  let d = addWall(emptyDrawing(), [100, 100], [500, 300], TOL, { ortho: true });
+  assert.deepEqual(d.walls[0], { a: [100, 100], b: [500, 100] }, "more across than down: level");
+  d = addWall(d, [500, 100], [560, 600], TOL, { ortho: true });
+  assert.deepEqual(d.walls[1].b, [500, 600], "more down than across: upright");
+  const gap = addOpening(emptyDrawing(), "door", [100, 100], [190, 130], TOL, { ortho: true });
+  assert.deepEqual(gap.doors[0], { a: [100, 100], b: [190, 100] });
+});

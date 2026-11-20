@@ -40,11 +40,15 @@ export function snapPoint(d, p, tol) {
   return best ? round(best) : [...p];
 }
 
-/** Add a wall from a to b (snapped, straightened). Returns the same drawing when too short. */
-export function addWall(d, a, b, tol) {
+// Force 90°: b moved to run level or upright from a, whichever it is nearer.
+export const ortho = (a, b) => (Math.abs(b[0] - a[0]) >= Math.abs(b[1] - a[1]) ? [b[0], a[1]] : [a[0], b[1]]);
+
+/** Add a wall from a to b (snapped, straightened; with ortho, always level or upright). Returns the same drawing when too short. */
+export function addWall(d, a, b, tol, { ortho: square = false } = {}) {
   if (d.walls.length >= MAX.items) return d;
   const A = snapPoint(d, a, tol);
-  let B = snapPoint(d, b, tol);
+  let B = snapPoint(d, square ? ortho(A, b) : b, tol);
+  if (square) B = round(ortho(A, B));
   const snappedEnd = ends(d).some((e) => e[0] === B[0] && e[1] === B[1]);
   if (!snappedEnd) {
     const ang = Math.atan2(B[1] - A[1], B[0] - A[0]);
@@ -61,8 +65,9 @@ export function addWall(d, a, b, tol) {
  * Add a door or window from a to b. Set into the wall it lies on (projected onto it, an end near
  * the wall's end goes to that end); or, between two walls' ends, filling the gap; else as drawn.
  */
-export function addOpening(d, kind, a, b, tol) {
+export function addOpening(d, kind, a, b, tol, { ortho: square = false } = {}) {
   const key = kind === "window" ? "windows" : "doors";
+  if (square) b = ortho(a, b);
   if (d[key].length >= MAX.items) return d;
   // On a wall: both ends near the same wall's line.
   let host = null, hd = Infinity;

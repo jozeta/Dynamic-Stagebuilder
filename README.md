@@ -253,7 +253,7 @@ Click both ends of something whose real length you know (a wall, a bay line) and
 the plan is scaled to match. *Next: draw walls* lets you trace the building on the plan: *Wall*
 (click corner to corner, double-click or *Finish wall* to stop), *Door* and *Window* (click both
 ends on a wall, or across a gap between two walls), *Move* (pick an end, then nudge it with the
-arrow keys, 1 cm a press or 10 cm with Shift) and *Erase*. Walls snap onto other walls and to an end
+arrow keys, 1 cm a press or 10 cm with Shift) and *Erase*; *Force 90°* keeps every line level or upright. Walls snap onto other walls and to an end
 only when very close; doors and windows are set into their walls. *Plan image* fades the plan and
 *Colour the drawing* shows walls blue, doors pink and windows green. *In 3D* sets the walls'
 surface (cast concrete, concrete block, brick, rendered plaster, timber boards or corrugated steel)

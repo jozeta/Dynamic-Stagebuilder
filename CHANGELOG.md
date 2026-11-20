@@ -4,6 +4,9 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Plan drawing: *Force 90°* keeps every wall (and a door or window drawn across a gap) level or
+  upright, whichever it is nearer.
+
 - Switching surroundings gives the new ones their own light and surroundings settings. If you have
   changed any (sun, shadows, ground, foliage, grid…), a warning says they will be lost, with *Cancel*
   to keep everything as it is and *Switch anyway*.
