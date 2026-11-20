@@ -31,6 +31,7 @@ export function createEngine(canvas) {
   function frame() {
     pending = false;
     for (const fn of renderHooks) fn();
+    env?.beforeRender?.(camera);              // surroundings that change with the view (a roof seen from above)
     renderer.render(scene, camera);
   }
   function requestRender() {

@@ -4,6 +4,15 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Industrial looks more real: sealed concrete with a slight sheen, a worn walking lane and pools of
+  lamp light; lighter cladding with sheet joints and rust runs, and a band of ribbed, dusty
+  polycarbonate windows high on the walls; a pale insulated roof on purlins; glowing lamps with soft
+  halos and faint light shafts under the skylights; overhead plywood-faced safety baffles across the
+  range; rubber blocks that read as blocks, a steel cap and a sand trap; hazard-striped column bases;
+  and the clutter of a working hall along the walls (pallets, drums, a pallet rack with boxes, an
+  electrical cabinet, a fire extinguisher). Seen from above the roof, the structure overhead hides
+  so the overviews look straight in.
+
 - Surroundings from a plan: *My surroundings* and *New from a plan…* are offered with Technical and
   your own surroundings (not Outdoor, Blueprint or Industrial). The plan window is now nearly
   full screen with the plan scaled to fit (no scrollbars). After the scale, *Next: draw walls*: draw
