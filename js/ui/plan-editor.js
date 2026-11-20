@@ -6,7 +6,9 @@ import { h, icon } from "./dom.js";
 import { scaleFromReference } from "../model/surroundings.js";
 import { emptyDrawing, addWall, addOpening, eraseAt, snapPoint, cleanDrawing, HEIGHT_LIMITS, nearestAnchor, moveAnchor, WALL_SURFACES, DOOR_LEAVES, ortho } from "../model/plan-draw.js";
 
-const SNAP_M = 0.4, SNAP_PX = 10;               // snap within 40 cm, and never less than 10 screen pixels
+// Walls snap within 15 cm (ends within about 8 cm), never less than 6 screen pixels; doors and windows
+// find their wall, and Move and Erase their target, within 40 cm.
+const SNAP_M = 0.15, SNAP_PX = 6, REACH_M = 0.4, REACH_PX = 10;
 const COLORS = { wall: "#111418", door: "#b5651d", window: "#1f7ae0", preview: "#e0402f", snap: "#e0402f" };
 // "Colour the drawing": walls blue, doors pink, windows green, so they stand out from the plan's own
 // lines (in this window only; the 3D walls keep their materials).
@@ -97,10 +99,12 @@ export function createPlanEditor({ onFile }) {
     h("label", { class: "plan-check", for: "plan-colour" }, [colourIn, h("span", { text: "Colour the drawing: walls blue, doors pink, windows green" })]),
   ]);
   const squareIn = h("input", { type: "checkbox", id: "plan-square", onchange: (e) => { square = e.target.checked; draw(); } });
+  const snapIn = h("input", { type: "checkbox", id: "plan-snap", checked: true, onchange: (e) => { snapOn = e.target.checked; draw(); } });
   const step2 = h("div", { class: "lg-stack plan-side" }, [
     h("p", { class: "lg-muted hint-text", text: "Wall: click point to point, double-click (or Finish wall) to stop. Door and window: click both ends on a wall, or across a gap between two walls. Ends close to each other snap together." }),
     h("div", { class: "plan-tools" }, tools),
     h("label", { class: "plan-check", for: "plan-square" }, [squareIn, h("span", { text: "Force 90°: walls, doors and windows level or upright" })]),
+    h("label", { class: "plan-check", for: "plan-snap" }, [snapIn, h("span", { text: "Snap walls to walls (within 15 cm)" })]),
     h("div", { class: "lg-row plan-row" }, [
       h("button", { type: "button", class: "lg-btn", onclick: () => endChain(), text: "Finish wall" }),
       h("button", { type: "button", class: "lg-btn", onclick: () => undo() }, [icon("undo"), "Undo"]),
@@ -136,7 +140,9 @@ export function createPlanEditor({ onFile }) {
   const push = () => { history.push(drawing); if (history.length > 200) history.shift(); };
   function undo() { if (chain) { endChain(); return; } if (history.length) { drawing = history.pop(); draw(); } }
   function endChain() { chain = null; start = null; draw(); }
-  const tolPx = () => Math.max((mpp ? SNAP_M / mpp : 20), SNAP_PX / fit);
+  let snapOn = true;
+  const tolPx = () => (snapOn ? Math.max((mpp ? SNAP_M / mpp : 10), SNAP_PX / fit) : 0.5);
+  const reachPx = () => Math.max((mpp ? REACH_M / mpp : 20), REACH_PX / fit);
 
   // Draw the plan scaled to fit the box, and on it the drawing (or the scale points).
   function draw() {
@@ -199,9 +205,9 @@ export function createPlanEditor({ onFile }) {
     if (!image) return;
     const p = at(e);
     if (step === 1) { points = points.length >= 2 ? [p] : [...points, p]; draw(); return; }
-    const tol = tolPx();
-    if (tool === "move") { anchor = nearestAnchor(drawing, p, tol); draw(); canvas.focus(); return; }
-    if (tool === "erase") { const next = eraseAt(drawing, p, tol); if (next !== drawing) { push(); drawing = next; } draw(); return; }
+    const tol = tolPx(), reach = reachPx();
+    if (tool === "move") { anchor = nearestAnchor(drawing, p, reach); draw(); canvas.focus(); return; }
+    if (tool === "erase") { const next = eraseAt(drawing, p, reach); if (next !== drawing) { push(); drawing = next; } draw(); return; }
     if (tool === "wall") {
       if (!chain) { chain = snapPoint(drawing, p, tol); draw(); return; }
       const next = addWall(drawing, chain, p, tol, { ortho: square });
@@ -210,7 +216,7 @@ export function createPlanEditor({ onFile }) {
       return;
     }
     if (!start) { start = p; draw(); return; }
-    const next = addOpening(drawing, tool, start, p, tol, { ortho: square });
+    const next = addOpening(drawing, tool, start, p, reach, { ortho: square });
     if (next !== drawing) { push(); drawing = next; }
     start = null;
     draw();

@@ -4,6 +4,10 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Plan drawing: snapping is gentler. Walls snap onto another wall within 15 cm (was 40 cm) and to its
+  end within about 8 cm; doors and windows still find their wall within 40 cm. *Snap walls to walls*
+  turns wall snapping off for points placed exactly where you click.
+
 - Your own surroundings: under *Plan strength*, *Walls, doors and windows* makes the walls drawn on
   the plan see-through (10–100 %), saved with the surroundings.
 

@@ -21,7 +21,7 @@ test("walls snap to each other's ends and onto walls, and straighten when nearly
   let d = emptyDrawing();
   d = addWall(d, [100, 100], [600, 108], TOL);
   assert.deepEqual(d.walls[0], { a: [100, 100], b: [600, 100] }, "nearly level: straightened");
-  d = addWall(d, [620, 90], [610, 500], TOL);
+  d = addWall(d, [615, 95], [610, 500], TOL);
   assert.deepEqual(d.walls[1].a, [600, 100], "starts on the first wall's end");
   assert.deepEqual(d.walls[1].b, [600, 500], "nearly upright: straightened");
   d = addWall(d, [350, 130], [350, 400], TOL);

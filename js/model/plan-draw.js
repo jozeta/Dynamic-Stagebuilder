@@ -19,7 +19,7 @@ export function emptyDrawing() {
   return { walls: [], doors: [], windows: [], heights: { wall: 2.4, door: 2.1, sill: 0.9, head: 2.1, thickness: 0.2 },
     cut: { on: false, height: 1.2, walls: true, doors: true, windows: true }, style: { wall: "concrete", leaf: "none" } };
 }
-const END_SNAP = 0.3;                              // ends snap from a third of the way: walls near an end stay on the line
+const END_SNAP = 0.55;                             // ends snap from about half the way: walls near an end stay on the line
 
 // The nearest point on segment a–b to p, and where along it (0…1).
 function onSegment(p, a, b) {
