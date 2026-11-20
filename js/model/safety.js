@@ -1,17 +1,18 @@
 // Safety distances and sight lines. Pure: no DOM, no Three.js.
 //
-// Source: IPSC Combined Competition Rules – 6 Disciplines, January 2024 Edition (Handgun [H]),
-// https://www.ipsc.org/wp-content/uploads/2024/02/IPSC-Combined-Competition-Rules-6-Disciplines-Jan-2024-Edition-Final-31-Jan-2024.pdf
-// - Rule 2.1.3 [H]: competitors keep a minimum distance of 7 m from metal targets while they are
+// Source: IPSC Handgun Competition Rules, January 2026 Edition (www.ipsc.org, Rules). Checked
+// 2026-11-20: every rule and value below reads the same as in the January 2024 Combined Competition
+// Rules this file cited before.
+// - Rule 2.1.3: competitors keep a minimum distance of 7 m from metal targets while they are
 //   shot; fault lines that limit the approach to metal targets are at least 8 m from them.
-// - Rule 10.4.7 [H]: a shot fired at a metal target from less than 7 m is a disqualification.
-// - Rule 10.4.2 [H]: a shot striking the ground within 3 m of the competitor is a disqualification,
+// - Rule 10.4.7: a shot fired at a metal target from less than 7 m is a disqualification.
+// - Rule 10.4.2: a shot striking the ground within 3 m of the competitor is a disqualification,
 //   except when shooting at a paper target closer than 3 m.
 import { getProp } from "./props.js";
 import { blockers, canSee, aimPoints } from "./planner.js";
 
 export const SAFETY = Object.freeze({
-  edition: "IPSC Combined Competition Rules, January 2024 Edition (Handgun)",
+  edition: "IPSC Handgun Competition Rules, January 2026 Edition",
   steelMin: 7, faultLineMin: 8, distanceRule: "2.1.3",
 });
 
@@ -31,7 +32,7 @@ export function sightFrom(stage, point, eye) {
 }
 
 /**
- * The rulebook distances to draw round a target (IPSC CCR January 2024, Handgun): steel gets 7 m
+ * The rulebook distances to draw round a target (IPSC Handgun Rules, January 2026): steel gets 7 m
  * (red: no one closer while it is shot, rule 2.1.3; a shot from closer is a disqualification, rule
  * 10.4.7) and 8 m (yellow: the nearest a fault line limiting the approach may be, rule 2.1.3). Paper
  * has no minimum distance; its 3 m ring (yellow) marks rule 10.4.2: a shot striking the ground within

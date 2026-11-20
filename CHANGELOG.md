@@ -4,6 +4,11 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Rules: checked against the IPSC Handgun Competition Rules, January 2026 Edition. Every rule and
+  value the app uses (course round limits 1.2.1.1–1.2.1.3, 5 points for A hits and steel, Comstock
+  9.2.1, no-shoot penalties 9.4.2, minimum distances 2.1.3, 10.4.2 and 10.4.7) is unchanged; the app
+  now cites the 2026 edition. Target arrays still follow the separate Target Array Book.
+
 ## 0.7.0 (2026-11-19)
 
 - Draw your own bay shape: *Bay shape → Draw a new shape…* opens a white sheet with a 1 m grid (down

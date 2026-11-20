@@ -17,7 +17,7 @@ training, and want a clear briefing sheet without drawing the map by hand.
 
 - **Shooting bay** at real scale: width × depth in metres (default 20 × 30 m), 1 m grid; a
   rectangle or tapered, L, T, U, dogleg or with a corner cut away.
-- **Safety distances** from the IPSC rules (January 2024): rings round a target at 7 and 8 m for
+- **Safety distances** from the IPSC Handgun Rules (January 2026): rings round a target at 7 and 8 m for
   steel, 3 m for paper.
 - **Sight lines** from a shooting position, a **run-time estimate**, a printed **setup sheet**, and
   **share links** that carry the stage itself.
@@ -209,7 +209,7 @@ plates (white/yellow), plates on a Texas star (5 or 10) or plate rack (4–8), m
 (1.5–6 m), car model (saloon, hatchback, pickup, van) and colour, barrel colour, ramp and platform length, width and height, table
 length, pallets in a stack (1–6), sandbag wall length and rows, tyres in a stack (1–6), crate size.
 
-Scoring follows the IPSC Combined Competition Rules, January 2024 edition (Handgun): 2 hits per
+Scoring follows the IPSC Handgun Competition Rules, January 2026 edition: 2 hits per
 paper target and 1 per steel target (Comstock), 5 points per A-zone or steel hit, and Short ≤ 12,
 Medium ≤ 24, Long ≤ 32 rounds. The rules also limit hits per shooting position, so the stage type
 is a suggestion from the round count.
@@ -303,8 +303,8 @@ right* flips the selection about its centre; with nothing selected, *Mirror the 
 prop, line and the start about the centre line (doors swap hinge sides). Locked props stay put.
 
 **Show safety distances.** Select a paper or steel target and switch on *Show safety distances*:
-rings on the ground round it at the IPSC rulebook's distances (Combined Competition Rules, January
-2024, Handgun), each explained in the inspector and saved with the stage. Steel: 7 m in red (nobody
+rings on the ground round it at the IPSC rulebook's distances (Handgun Competition Rules, January
+2026), each explained in the inspector and saved with the stage. Steel: 7 m in red (nobody
 closer while it is shot, rule 2.1.3; a shot from closer is a disqualification, rule 10.4.7) and 8 m in
 yellow (the nearest a fault line limiting the approach may be, rule 2.1.3). Paper: 3 m in yellow (rule
 10.4.2; IPSC sets no minimum distance for paper). A designer's aid, not a range approval.

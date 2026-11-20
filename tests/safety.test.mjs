@@ -1,4 +1,4 @@
-// Safety distances (IPSC CCR January 2024) and sight lines from a shooting position.
+// Safety distances (IPSC Handgun Rules, January 2026) and sight lines from a shooting position.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { SAFETY } from "../js/model/safety.js";
@@ -42,7 +42,7 @@ test("the safety-ring switch is a saved flag on the target, undoable, and kept b
 });
 
 test("the rules are cited with their edition", () => {
-  assert.match(SAFETY.edition, /January 2024/);
+  assert.match(SAFETY.edition, /Handgun Competition Rules, January 2026/);
   assert.equal(SAFETY.steelMin, 7);
   assert.equal(SAFETY.faultLineMin, 8);
 });
@@ -60,4 +60,12 @@ test("no library stage puts steel closer than 7 m to where a shooter may stand (
       assert.ok(d >= 7 - 1e-6, `${spec.id} ${o.label}: ${d.toFixed(2)} m`);
     }
   }
+});
+
+test("the scoring constants cite the 2026 Handgun rules (values unchanged from 2024)", async () => {
+  const { SCORING } = await import("../js/model/scoring-rules.js");
+  assert.match(SCORING.edition, /Handgun Competition Rules, January 2026/);
+  assert.deepEqual(SCORING.courseLimits, { Short: 12, Medium: 24, Long: 32 });
+  assert.equal(SCORING.pointsPerPaperHit, 5);
+  assert.equal(SCORING.pointsPerSteelHit, 5);
 });

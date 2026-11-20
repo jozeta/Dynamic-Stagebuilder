@@ -1,7 +1,8 @@
 // Scoring constants for the round count, maximum points and suggested course type.
 //
-// Source: IPSC Combined Competition Rules – 6 Disciplines, January 2024 Edition (Handgun, [HT]),
-// https://www.ipsc.org/wp-content/uploads/2024/02/IPSC-Combined-Competition-Rules-6-Disciplines-Jan-2024-Edition-Final-31-Jan-2024.pdf
+// Source: IPSC Handgun Competition Rules, January 2026 Edition (www.ipsc.org, Rules). Checked
+// 2026-11-20: every rule and value below reads the same as in the January 2024 Combined Competition
+// Rules this file cited before.
 // - Rule 1.2.1.1–1.2.1.3: Short ≤ 12 rounds, Medium ≤ 24, Long ≤ 32 (Handgun). Course types ALSO limit
 //   scoring hits per location or view (≤ 9) and, for Medium/Long, forbid shooting all targets from one
 //   place, so the app only *suggests* a type from the round count (typeByRoundsOnly: false).
@@ -14,7 +15,7 @@
 const courseLimits = Object.freeze({ Short: 12, Medium: 24, Long: 32 });
 
 export const SCORING = Object.freeze({
-  edition: "IPSC Combined Competition Rules, January 2024 Edition (Handgun)",
+  edition: "IPSC Handgun Competition Rules, January 2026 Edition",
   hitsPerPaper: 2,
   hitsPerSteel: 1,
   pointsPerPaperHit: 5,
@@ -23,7 +24,8 @@ export const SCORING = Object.freeze({
   typeByRoundsOnly: false,
 });
 
-// Target arrays. Source: IPSC Target Array Handbook, January 2019 Edition,
+// Target arrays. Source: IPSC Target Array Handbook, January 2019 Edition (the 2026 Handgun Rules,
+// section 1.3, still refer to "the separate Target Array Book"),
 // https://www.ipsc.org/wp-content/uploads/2019/10/Target-Arrays-2019.pdf
 // - 1.2: hard cover is painted on the lower portion, a diagonal portion or the sides only.
 // - 1.5: the top of an IPSC Target or No-shoot must never exceed 1.8 m, a Mini Target 1.6 m.
