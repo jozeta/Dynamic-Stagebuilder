@@ -4,6 +4,21 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Worn, real-scale building pieces and steel. Brick pillars, columns and walls now show bricks in
+  horizontal courses at real size (215 × 65 mm in 10 mm joints, running bond) on every face, with
+  colour variation, chipped arrises, salt bloom, grime streaks and recessed mortar; concrete has
+  form seams, tie holes, bug holes, rain streaks and cracks; boards and steel cladding are
+  weathered; all of them get dirtier toward the ground. Shipping containers are modelled like ISO
+  boxes: trapezoidal corrugated sides with a few dents, two doors with pressings, four locking
+  bars with cam keepers and handles, hinges, corner castings with their holes, rails and forklift
+  pockets (20 ft), faded paint with re-painted patches, rust runs and patches, scrapes, road dirt
+  and a made-up stencilled number (every colour kept). The chain-link fence has galvanised round
+  posts with caps, a top rail, a woven 50 mm diamond mesh that sags a little between posts, and
+  some white rust. Concrete barriers have a true Jersey profile, slots through the foot, lifting
+  pockets, chipped top edges, rust runs and tyre scuffs at the base. Steel targets show re-painted
+  old hits, fresh lead splash in the middle, chipped rusty edges and dust, with the paint colour
+  still clear; stands and frames are worn, rusty, lead-spattered steel.
+
 ## 0.7.0 (2026-11-19)
 
 - Draw your own bay shape: *Bay shape → Draw a new shape…* opens a white sheet with a 1 m grid (down

@@ -31,7 +31,7 @@ const FILES = [
   "js/render/builders/lines.js",
   "js/render/builders/obstacles.js",
   "js/render/builders/paper.js", "js/render/builders/moving.js", "js/render/builders/car.js", "js/render/builders/nationals.js", "js/render/builders/building.js", "js/model/surroundings.js", "js/model/animation.js", "js/model/layout.js", "js/render/animate.js", "js/render/builders/position.js", "js/model/positions.js", "js/model/route.js", "js/model/planner.js", "js/model/camera-view.js", "js/model/start-pose.js", "js/model/activation.js", "js/model/run-look.js", "js/model/layers.js", "js/model/measure.js", "js/model/match.js", "js/model/arrange.js", "js/model/safety.js", "js/model/setup.js", "js/model/estimate.js", "js/model/bay.js", "js/ui/matches.js", "js/storage/share.js", "js/ui/bay-draw.js", "js/ui/context-menu.js", "js/ui/layers.js", "js/render/environments/clouds.js", "js/render/environments/foliage.js", "js/render/figure-fade.js", "js/render/builders/route.js",
-  "js/render/builders/parts.js",
+  "js/render/builders/parts.js", "js/render/builders/wear.js", "js/render/weathered.js",
   "js/render/builders/steel.js",
   "js/render/builders/target-shape.js",
   "js/render/builders/walls.js",

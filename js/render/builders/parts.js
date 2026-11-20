@@ -1,6 +1,7 @@
 // Small helpers shared by the prop builders. All sizes in metres; y = 0 is the ground.
 import * as THREE from "three";
 import { getMaterial } from "../materials.js";
+import { worldUV } from "./wear.js";
 
 /** A box mesh with its min corner logic expressed as centre (x, y, z) and size (w, h, d). */
 export function box(w, h, d, material, x = 0, y = h / 2, z = 0) {
@@ -8,6 +9,13 @@ export function box(w, h, d, material, x = 0, y = h / 2, z = 0) {
   m.position.set(x, y, z);
   m.castShadow = true;
   m.receiveShadow = true;
+  return m;
+}
+
+/** A box like box(), its texture mapped in metres from the prop's origin (so worn steel keeps its scale). */
+export function worldBox(w, h, d, material, x = 0, y = h / 2, z = 0) {
+  const m = box(w, h, d, material, x, y, z);
+  worldUV(m.geometry, { offset: [x, y, z] });
   return m;
 }
 

@@ -3,7 +3,10 @@
 // wobble platform, a balance rope on a frame and a step box.
 import * as THREE from "three";
 import { ACTIVATORS, paperSize, TARGET_STICK } from "../../model/props.js";
-import { box, group, mesh } from "./parts.js";
+import { box as plainBox, worldBox, group, mesh } from "./parts.js";
+
+// Worn stand steel is mapped in metres, so a long post is not one stretched texture.
+const box = (w, h, d, m, ...at) => (m === "steel-dark" ? worldBox : plainBox)(w, h, d, m, ...at);
 import { paperCard } from "./paper.js";
 
 export function buildStepPad(obj) {

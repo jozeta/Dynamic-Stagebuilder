@@ -2,7 +2,11 @@
 import * as THREE from "three";
 import { TARGET_SIZES, PLATE_FOOT } from "../../model/props.js";
 import { getMaterial } from "../materials.js";
-import { box, group } from "./parts.js";
+import { box as plainBox, worldBox, group } from "./parts.js";
+import { steelFaceUV } from "./wear.js";
+
+// Worn stand steel is mapped in metres, so a long post is not one stretched texture.
+const box = (w, h, d, m, ...at) => (m === "steel-dark" ? worldBox : plainBox)(w, h, d, m, ...at);
 
 const PLATE = 0.012;   // steel thickness
 const BASE = 0.02;     // popper base plate thickness
@@ -36,6 +40,7 @@ export function buildPopper(obj) {
   const geo = new THREE.ExtrudeGeometry(popperShape(s.w - 2 * BEVEL, s.h - BASE - 2 * BEVEL),
     { depth: THICK, bevelEnabled: true, bevelThickness: BEVEL, bevelSize: BEVEL, bevelSegments: 3, curveSegments: 28 });
   geo.translate(0, BEVEL, -THICK / 2);
+  steelFaceUV(geo);                                // the face shows the worn paint once, edges the chipped border
   const body = new THREE.Mesh(geo, getMaterial(`steel-${obj.params.paint || "yellow"}`));
   body.castShadow = true;
   body.receiveShadow = true;
@@ -56,10 +61,10 @@ export function buildPlate(obj) {
   const paint = getMaterial(`steel-${obj.params.paint || "white"}`);
   let plate;
   if (obj.type === "plate-round") {
-    plate = new THREE.Mesh(new THREE.CylinderGeometry(size / 2, size / 2, PLATE, 32), paint);
+    plate = new THREE.Mesh(steelFaceUV(new THREE.CylinderGeometry(size / 2, size / 2, PLATE, 32), { axis: "y", round: true, flipV: true }), paint);
     plate.rotation.x = Math.PI / 2;
   } else {
-    plate = new THREE.Mesh(new THREE.BoxGeometry(size, size, PLATE), paint);
+    plate = new THREE.Mesh(steelFaceUV(new THREE.BoxGeometry(size, size, PLATE)), paint);
   }
   plate.position.set(0, bh + size / 2, -POST / 2 - PLATE / 2);
   plate.castShadow = true;
