@@ -126,6 +126,28 @@ body { background: var(--lg-bg); overflow: hidden; }
 .camera-bar { position: absolute; top: var(--lg-space-s); left: var(--lg-space-s); display: flex; flex-wrap: wrap; gap: 2px;
   padding: 2px; border-radius: var(--lg-radius-control); max-width: calc(100% - 2 * var(--lg-space-s)); box-sizing: border-box; }
 .camera-bar .lg-btn { font-size: var(--lg-fs-small); color: var(--lg-text); }
+/* The view pad (top right): faint arrows over the view, firmer under the pointer or while held. */
+.camera-pad { position: absolute; top: var(--lg-space-s); right: max(var(--lg-space-s), env(safe-area-inset-right)); display: flex; gap: var(--lg-space-s);
+  align-items: center; user-select: none; -webkit-user-select: none; touch-action: none; }
+.pad-cross { display: grid; grid-template-columns: repeat(3, 44px); grid-template-rows: repeat(3, 44px); }
+.pad-n { grid-area: 1 / 2; } .pad-w { grid-area: 2 / 1; } .pad-e { grid-area: 2 / 3; } .pad-s { grid-area: 3 / 2; }
+.pad-cross .pad-label { grid-area: 2 / 2; align-self: center; justify-self: center; }
+.pad-column { display: flex; flex-direction: column; align-items: center; }
+/* The view buttons wrap rather than run under the pad; in a narrow view the pad moves to the bottom right. */
+.viewport-wrap { container: view / inline-size; }
+.camera-bar { max-width: calc(100% - 236px - 3 * var(--lg-space-s)); }
+@container view (max-width: 560px) {
+  .camera-bar { max-width: calc(100% - 2 * var(--lg-space-s)); }
+  .camera-pad { top: auto; bottom: max(var(--lg-space-s), env(safe-area-inset-bottom)); }
+}
+.pad-btn { width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; cursor: pointer; display: grid; place-items: center;
+  background: color-mix(in srgb, var(--lg-bg) 35%, transparent); color: var(--lg-text); opacity: 0.55; transition: opacity 0.15s, background 0.15s; }
+.pad-btn:hover, .pad-btn:focus-visible, .pad-btn.is-held { opacity: 1; background: color-mix(in srgb, var(--lg-bg) 70%, transparent); }
+.pad-btn:focus-visible { outline: 2px solid var(--lg-accent); outline-offset: 1px; }
+.pad-arrow { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round;
+  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.45)); }
+.pad-label { font-size: 10px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--lg-text); opacity: 0.6; line-height: 1;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.5); padding: 2px 0; pointer-events: none; }
 /* A firmer backing so the view buttons stay readable over bright ground. */
 .camera-bar { background: color-mix(in srgb, var(--lg-bg) 78%, transparent); }
 .inspector-switch { display: flex; align-items: center; justify-content: space-between; gap: var(--lg-space-s); }

@@ -1,5 +1,6 @@
 // Camera navigation (orbit, pan, zoom; one finger rotates, two pan and zoom on touch) and presets.
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { moveView } from "../model/camera-move.js";
 import { obliqueView, stageArea, VIEW } from "./view-math.js";
 import { viewFromPosition, anglesFromView } from "../model/positions.js";
 
@@ -146,5 +147,10 @@ export function createCameraRig(engine, domElement) {
   const getView = () => ({ position: camera.position.toArray(), target: controls.target.toArray(), fov: camera.fov });
   const setView = (v) => { stopWalk(); lens(v.fov); look(v.position, v.target); };
 
-  return { controls, preset, frameAll, viewFrom, currentAngles, walkTo, stopWalk, jumpTo: (v) => { stopWalk(); lens(VIEW.eyeFov); lookFrom(v); }, startView, positionView, getView, setView, setPace: (p) => { pace = p; }, dispose: () => controls.dispose() };
+  // The view pad: pan, tilt, rise or dolly by `amount` (degrees or metres). Tilt stays a little below
+  // level, where the orbit controls allow it, so the camera never jumps on the next drag.
+  const maxPitch = -(Math.PI / 2 - controls.maxPolarAngle) * 180 / Math.PI - 0.2;
+  const move = (m, amount) => { stopWalk(); const v = moveView(getView(), m, amount, { maxPitch }); look(v.position, v.target); };
+
+  return { controls, move, preset, frameAll, viewFrom, currentAngles, walkTo, stopWalk, jumpTo: (v) => { stopWalk(); lens(VIEW.eyeFov); lookFrom(v); }, startView, positionView, getView, setView, setPace: (p) => { pace = p; }, dispose: () => controls.dispose() };
 }

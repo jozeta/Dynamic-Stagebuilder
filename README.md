@@ -85,7 +85,8 @@ training, and want a clear briefing sheet without drawing the map by hand.
   holding a pistol; the shooter at the start is posed as the briefing's start position says
   (hands up, arms hanging, seated…), pistol holstered. A route on the ground links them; Shooter's
   eye walks it at a chosen speed, looking the way the shooter moves, or jumps between positions.
-- **Cameras:** orbit, pan, zoom, Top, Isometric, Front and Shooter's eye; the view is remembered
+- **Cameras:** orbit, pan, zoom, Top, Isometric, Front and Shooter's eye, and a view pad of
+  arrow buttons (look round, move forward or back, up or down); the view is remembered
   per project, so a reload opens where you left off. Figures fade out as the camera comes close.
 - **Matches** of one or more stages, numbered in order, with the match name in every briefing and
   one print for the whole match.
@@ -376,6 +377,10 @@ it in the inspector; Renumber keeps hand-set labels and warns about duplicates.
 scroll or pinch to zoom. The buttons over the view jump to Isometric, Top, Front, Shooter's eye or
 frame everything. *Isometric* is a high oblique "drone" overview (45° down, slightly turned, a
 long 32° lens) that fits the whole bay; *Shooter's eye* and *Front* use a natural 55° lens.
+The faint arrows in the top-right corner of the view (bottom right when the view is narrow) steer
+the camera: *Look* pans left or right and tilts up or down, *Move* goes forward or back along the
+ground, *Height* raises or lowers it. Press and hold to keep moving; it moves faster the higher the
+camera is.
 
 **Change the light and surroundings.** *Settings* opens in the right-hand panel (the 3D view stays
 live; *Done* or Escape returns to the inspector). It switches between Outdoor and Technical and sets

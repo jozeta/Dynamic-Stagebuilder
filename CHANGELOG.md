@@ -4,6 +4,11 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- View pad: faint arrow buttons in the top-right corner of the 3D view steer the camera. *Look*
+  pans left or right and tilts up or down, *Move* goes forward or back along the ground, *Height*
+  raises or lowers it. Press and hold to keep moving (faster the higher the camera is). In a narrow
+  view the pad sits at the bottom right.
+
 ## 0.8.0 (2026-11-20)
 
 - New *Furniture* props, at real size with wood, fabric and leather textures:
