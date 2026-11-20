@@ -42,6 +42,8 @@ npm run lint        # ESLint, including the unsafe-DOM rule
   projects in the left panel, layers = the On stage list, context-menu = the right-click menu; the side
   panels dock with Låda Glass's `LadaGlass.dock` (main.js), prefs = per-browser preferences, help,
   briefing, print, shortcuts, about, dom helpers)
+- `js/render/builders/berm.js`: the earth berm (height field from `model/berm.js`, the ground's photo surface, plants);
+  `environments/industrial.js`: the indoor factory hall
 - `js/render/builders/car.js`: cars lofted from the CAR_MODELS profile curves (glass is a material
   group of the body); `moving.js`: swinger, drop turner, clamshell, mover, Texas star, plate rack,
   dueling tree

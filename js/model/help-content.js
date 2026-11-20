@@ -59,7 +59,7 @@ export const HELP_TOPICS = Object.freeze([
       "The buttons over the view jump to Isometric (a high overview of the whole stage), Top, Front and Shooter's eye. Frame all fits everything on screen."],
     tips: ["Keys 1–4 pick the views, F frames everything.", "The printed 3D view uses the view you see when you print."] },
   { id: "settings", title: "Light and surroundings", icon: "sliders", art: "sun",
-    text: ["Settings opens in the right-hand panel, so you can watch the stage while you change it. Choose Outdoor (a dirt range at golden hour) or Technical (a plain bay), the time of day, sunlight, ambient light, shadows, haze and exposure.",
+    text: ["Settings opens in the right-hand panel, so you can watch the stage while you change it. Choose Outdoor (a dirt range at golden hour; Grid on the ground adds 1 m squares), Technical (a plain bay), Blueprint or Industrial (an indoor factory hall lit from overhead), the time of day, sunlight, ambient light, shadows, haze and exposure.",
       "Each surroundings has its own defaults, and Reset light to defaults goes back to them. Light settings are saved with the stage but are not undo steps."],
     tips: ["Lower Shadow strength for lighter shadows.", "The Props tab hides what you don't need in the props panel."] },
   { id: "briefing", title: "Briefing and printing", icon: "print", art: "page",

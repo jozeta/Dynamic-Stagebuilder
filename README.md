@@ -172,9 +172,10 @@ Stage settings are in the inspector when nothing is selected. They are saved wit
 | Grid snap | Positions snap to this grid: off, 0.1, 0.25, 0.5 or 1 m (toolbar *Grid* turns it on/off) | 0.25 m |
 | Object snap | Toolbar *Objects*: a wall's end jumps onto another wall's end within 35 cm | On |
 | Angle snap | Rotations snap to this step: off, 5°, 15°, 45° or 90° | 15° |
-| Surroundings | *Settings*: Outdoor (dirt range), Technical (grey floor, grid) or Blueprint (drafting sheet); never moves the stage | Outdoor |
+| Surroundings | *Settings*: Outdoor (dirt range), Technical (grey floor, grid), Blueprint (drafting sheet) or Industrial (an indoor factory hall, lit from overhead); never moves the stage | Outdoor |
 | Ground | *Settings* (Outdoor): sand, light sand, dark sand, red dirt or gravel | Gravel |
 | Foliage | *Settings* (Outdoor): mixed broadleaf, Nordic, desert, savanna, tropical or bare banks | Nordic |
+| Grid on the ground | *Settings* (Outdoor): 1 m squares on the ground, a stronger line every 5 m; *Grid opacity* 5–100 % | Off, 35 % |
 | Paper / Floor hue, intensity, brightness | *Settings* (Blueprint, Technical): 0–359°, 0–100 %, 40–160 % | Blueprint 220°, 54 %, 40 % (deep blue); Technical's grey floor at 110 % brightness |
 | Grid intensity, Grid colour | *Settings* (Blueprint, Technical): 0 % (hidden) – 100 %; seven swatches or your own colour | Blueprint 14 %, white; Technical 40 %, dark grey |
 | Show walls | *Settings* (Technical): the backstop and side walls; the floor runs on to the horizon either way | Off |
@@ -240,6 +241,12 @@ plate rack, dueling tree) are in their own group.
 **Draw fault lines and shooting areas.** Choose *Fault line* or *Shooting area* at the top of the props panel, tap
 the points on the ground, then double-click, press Enter or tap *Finish*. Escape or *Cancel* stops.
 *Start position* then a tap sets where the shooter starts (the shooter's-eye camera stands there).
+
+**Build an earth berm.** *Earth berm* (Buildings and surroundings) is a mound with sloping sides and
+ends, on the Outdoor ground's own surface. In the inspector set its length, height and base depth,
+its *Surface* (sand, light sand, dark sand, red dirt or gravel) and *Plants* (grass and bushes, grass
+only or none). *Draw the outline…* opens the drawing window (up to 10 × 10 m): the black squares
+become the berm at its height, with a slope at their edges; *Back to a plain berm* goes back.
 
 **Use your own range.** In *Settings → Surroundings*, choose *New from a plan…* and pick an image of
 your range's blueprint or site plan. Click both ends of something whose real length you know (a
