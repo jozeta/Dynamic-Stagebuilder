@@ -3,14 +3,18 @@
 import * as THREE from "three";
 import { MOVING, starPlates, paperSize, TARGET_STICK } from "../../model/props.js";
 import { getMaterial } from "../materials.js";
-import { box, group } from "./parts.js";
+import { box as plainBox, worldBox, group } from "./parts.js";
+import { steelFaceUV } from "./wear.js";
 import { paperCard } from "./paper.js";
+
+// Worn stand steel is mapped in metres, so a long post is not one stretched texture.
+const box = (w, h, d, m, ...at) => (m === "steel-dark" ? worldBox : plainBox)(w, h, d, m, ...at);
 
 const FRAME = 0.05;    // square steel tube
 const PLATE = 0.012;
 
 function disc(d, mat, x, y, z) {
-  const m = new THREE.Mesh(new THREE.CylinderGeometry(d / 2, d / 2, PLATE, 32), getMaterial(mat));
+  const m = new THREE.Mesh(steelFaceUV(new THREE.CylinderGeometry(d / 2, d / 2, PLATE, 32), { axis: "y", round: true, flipV: true }), getMaterial(mat));
   m.rotation.x = Math.PI / 2;
   m.position.set(x, y, z);
   m.castShadow = true;
@@ -72,6 +76,7 @@ export function buildClamshell(obj) {
   const hinge = new THREE.Group();
   hinge.position.set(0, m.cardBottom, -0.03);
   const cover = box(c.w + 0.02, c.h * 0.5, 0.01, "steel-white", 0, c.h * 0.25, 0);
+  steelFaceUV(cover.geometry);
   hinge.add(cover);
   hinge.rotation.x = -0.7;
   hinge.userData.anim = { kind: "clam", rest: -0.7 };
@@ -157,6 +162,7 @@ export function buildDuelingTree(obj) {
     pivot.userData.anim = { kind: "flip", side, delay: (k++) * 0.6, period: 6 * 0.6 + 2 };
     pivot.add(box(t.arm, 0.02, 0.02, "steel-dark", side * t.arm / 2, 0, -0.035));
     const paddle = box(t.paddle, t.paddle, PLATE, paint, side * t.arm, -t.paddle / 2 - 0.01, -0.045);
+    steelFaceUV(paddle.geometry);
     paddle.userData.part = "plate";
     pivot.add(paddle);
     g.add(pivot);

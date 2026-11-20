@@ -4,6 +4,7 @@
 import * as THREE from "three";
 import { STYLES } from "./builders/target-shape.js";
 import { PAPER_SIZES, CAR_MODELS } from "../model/props.js";
+import { brickwork, castConcrete, claddingBoards, steelCladding, barrierConcrete, containerSide, containerDoors, chainLinkMesh, galvanised, targetPaint, standSteel } from "./weathered.js";
 
 const cache = new Map();
 const hasDom = typeof document !== "undefined";
@@ -333,49 +334,6 @@ function carSide(paint, rusty, model) {
   return t;     // the body's UVs are already (u, height / car height)
 }
 
-// Painted steel targets in use: patchy re-paint layers, bullet splash (grey lead smears with
-// radiating splatter, most toward the middle), chipped paint showing dark steel with rust round it.
-function steelPaint(paint) {
-  return canvasTexture(512, (g, s, r) => {
-    g.fillStyle = paint; g.fillRect(0, 0, s, s);
-    for (let i = 0; i < 18; i++) {                                // uneven re-paint coats
-      const x = r() * s, y = r() * s, rad = 40 + r() * 120, grd = g.createRadialGradient(x, y, 0, x, y, rad);
-      grd.addColorStop(0, `rgba(${r() > 0.5 ? "255,255,255" : "0,0,0"},0.06)`); grd.addColorStop(1, "rgba(0,0,0,0)");
-      g.fillStyle = grd; g.fillRect(x - rad, y - rad, rad * 2, rad * 2);
-    }
-    for (let i = 0; i < 45; i++) {                                // bullet splash
-      const cx = s * 0.5 + (r() - 0.5) * s * (r() < 0.7 ? 0.5 : 0.95), cy = s * 0.5 + (r() - 0.5) * s * (r() < 0.7 ? 0.5 : 0.95);
-      const rad = 3 + r() * 7;
-      g.fillStyle = `rgba(120,122,126,${0.55 + r() * 0.35})`;
-      g.beginPath(); g.arc(cx, cy, rad, 0, 7); g.fill();
-      g.strokeStyle = `rgba(110,112,116,${0.3 + r() * 0.3})`; g.lineWidth = 1 + r();
-      for (let k = 0, n = 6 + (r() * 8 | 0); k < n; k++) {
-        const a = r() * 6.28, l = rad * (1.5 + r() * 3);
-        g.beginPath(); g.moveTo(cx + Math.cos(a) * rad, cy + Math.sin(a) * rad); g.lineTo(cx + Math.cos(a) * l, cy + Math.sin(a) * l); g.stroke();
-      }
-      g.fillStyle = "rgba(60,62,66,0.5)"; g.beginPath(); g.arc(cx, cy, rad * 0.4, 0, 7); g.fill();
-    }
-    for (let i = 0; i < 30; i++) {                                // chips to bare steel, rust round them
-      const x = r() * s, y = r() * s, w = 3 + r() * 14, hgt = 2 + r() * 8;
-      g.fillStyle = "rgba(118,66,32,0.5)"; g.fillRect(x - 2, y - 2, w + 4, hgt + 4);
-      g.fillStyle = "#4a4c50"; g.fillRect(x, y, w, hgt);
-    }
-  }, { seed: paint.charCodeAt(1) * 13 + 5, repeat: 2.5 });
-}
-
-// Raw steel for bases, posts and hinges: dark mill scale with rust blooms and scratches.
-function rawSteel() {
-  return canvasTexture(256, (g, s, r) => {
-    g.fillStyle = "#3b3c3f"; g.fillRect(0, 0, s, s);
-    for (let i = 0; i < 50; i++) {
-      const x = r() * s, y = r() * s, rad = 6 + r() * 30, grd = g.createRadialGradient(x, y, 0, x, y, rad);
-      grd.addColorStop(0, "rgba(128,66,30,0.7)"); grd.addColorStop(0.7, "rgba(150,82,38,0.3)"); grd.addColorStop(1, "rgba(150,82,38,0)");
-      g.fillStyle = grd; g.fillRect(x - rad, y - rad, rad * 2, rad * 2);
-    }
-    for (let i = 0; i < 120; i++) { g.strokeStyle = `rgba(170,170,165,${0.15 + r() * 0.3})`; g.lineWidth = 0.7; const x = r() * s, y = r() * s; g.beginPath(); g.moveTo(x, y); g.lineTo(x + (r() - 0.5) * 30, y + (r() - 0.5) * 8); g.stroke(); }
-  }, { seed: 67, repeat: 2 });
-}
-
 // The car's top surfaces (bonnet, roof, boot, bumpers): paint with dust settled on it, faded
 // clear-coat patches, swirl scratches, bird-dropping-free but grimy. Tiled over the swept surface.
 function carPaintWear(paint, rusty) {
@@ -501,42 +459,6 @@ function steelSheet() {
   }, { seed: 43 });
 }
 
-// Building surfaces: board-formed concrete, brick courses, corrugated steel, chain link.
-function concreteTex() {
-  return canvasTexture(512, (g, s, r) => {
-    g.fillStyle = "#b8b6b0"; g.fillRect(0, 0, s, s);
-    for (let i = 0; i < 3000; i++) { const v = 150 + r() * 70; g.fillStyle = `rgba(${v},${v},${v - 4},0.25)`; g.fillRect(r() * s, r() * s, 1 + r() * 3, 1 + r() * 3); }
-    g.strokeStyle = "rgba(70,70,70,0.25)"; g.lineWidth = 2;
-    for (let y = 0; y <= s; y += s / 4) { g.beginPath(); g.moveTo(0, y); g.lineTo(s, y); g.stroke(); }
-    for (let i = 0; i < 10; i++) { g.fillStyle = "rgba(90,85,80,0.12)"; g.beginPath(); g.ellipse(r() * s, r() * s, 30 + r() * 60, 8 + r() * 20, 0, 0, 7); g.fill(); }
-  }, { seed: 91, repeat: 0.5 });
-}
-function brickTex() {
-  return canvasTexture(512, (g, s, r) => {
-    g.fillStyle = "#c8c2b6"; g.fillRect(0, 0, s, s);
-    const bh = s / 8, bw = s / 4;
-    for (let row = 0; row < 8; row++) for (let i = -1; i < 5; i++) {
-      const x = i * bw + (row % 2 ? bw / 2 : 0), t = 0.8 + r() * 0.35;
-      g.fillStyle = `rgb(${Math.round(150 * t)},${Math.round(72 * t)},${Math.round(52 * t)})`;
-      g.fillRect(x + 3, row * bh + 3, bw - 6, bh - 6);
-    }
-  }, { seed: 92, repeat: 1 });
-}
-function corrugated(paint) {
-  return canvasTexture(256, (g, s, r) => {
-    g.fillStyle = paint; g.fillRect(0, 0, s, s);
-    for (let x = 0; x < s; x += 16) { const grd = g.createLinearGradient(x, 0, x + 16, 0); grd.addColorStop(0, "rgba(0,0,0,0.25)"); grd.addColorStop(0.5, "rgba(255,255,255,0.12)"); grd.addColorStop(1, "rgba(0,0,0,0.25)"); g.fillStyle = grd; g.fillRect(x, 0, 16, s); }
-    for (let i = 0; i < 300; i++) { g.fillStyle = `rgba(120,70,40,${r() * 0.15})`; g.fillRect(r() * s, r() * s, 2 + r() * 6, 1 + r() * 4); }
-  }, { seed: paint.length * 7, repeat: 1 });
-}
-function chainLink() {
-  return canvasTexture(128, (g, s) => {
-    g.clearRect(0, 0, s, s);
-    g.strokeStyle = "#c4c9cc"; g.lineWidth = 3;
-    g.beginPath(); g.moveTo(0, s / 2); g.lineTo(s / 2, 0); g.lineTo(s, s / 2); g.lineTo(s / 2, s); g.closePath(); g.stroke();
-  }, { seed: 93, repeat: 8, alpha: true });
-}
-
 const std = (o) => new THREE.MeshStandardMaterial(o);
 const carPaint = (color, roughness, clearcoat) => new THREE.MeshPhysicalMaterial({
   roughness: roughness + 0.12, metalness: 0.5, clearcoat: clearcoat * 0.6, clearcoatRoughness: 0.3,
@@ -556,6 +478,11 @@ const drumLidMat = (paint, label, roughness) => new THREE.MeshPhysicalMaterial({
   ...(hasDom ? { map: drumLid(paint, label) } : { color: paint }),
 });
 const mapped = (tex, fallback, extra = {}) => std({ roughness: 0.85, ...(hasDom ? { map: tex() } : { color: fallback }), ...extra });
+// A material from a weathered texture set ({ map, bumpMap? }); in Node just the colour.
+const worn = (set, fallback, { bumpScale = 1, ...extra } = {}) => std({ roughness: 0.85, ...extra,
+  ...(hasDom ? (({ map, bumpMap }) => ({ map, ...(bumpMap ? { bumpMap, bumpScale } : {}) }))(set()) : { color: fallback }) });
+// ISO container paint: the sides (and rails, posts, roof) and the doors, faded, rusty and dirty.
+const CONTAINER_PAINTS = { blue: "#2c5384", red: "#9a3226", green: "#3f5f3a", grey: "#8a8f93", rust: "#7c4a2e" };
 
 const specs = {
   "target-tan": () => mapped(cardboard, 0xcfa06a, { roughness: 0.95 }),
@@ -576,25 +503,25 @@ const specs = {
   "position-ghost": () => new THREE.MeshStandardMaterial({ color: 0xd8dbe0, transparent: true, opacity: 0.5, roughness: 0.6, depthWrite: false, side: THREE.DoubleSide }),
   "position-ghost-depth": () => new THREE.MeshBasicMaterial({ colorWrite: false, transparent: true, depthWrite: true, side: THREE.DoubleSide }),
   // Building pieces.
-  "bld-concrete": () => mapped(concreteTex, 0xb4b2ac, { roughness: 0.95 }),
-  "bld-brick": () => mapped(brickTex, 0x9a4b34, { roughness: 0.9 }),
-  "bld-wood": () => mapped(roughBoards, 0xb08a5a, { roughness: 0.9 }),
-  "bld-metal": () => mapped(() => corrugated("#8d949a"), 0x8d949a, { roughness: 0.55, metalness: 0.5 }),
+  // Weathered building pieces: textures in metres (builders/wear.js worldUV), dirt and staining in
+  // the vertex colours, recessed joints and pits in the bump map.
+  "bld-concrete": () => worn(castConcrete, 0xb4b2ac, { roughness: 0.95, bumpScale: 1.2, vertexColors: true }),
+  "bld-brick": () => worn(brickwork, 0x9a4b34, { roughness: 0.92, bumpScale: 2.2, vertexColors: true }),
+  "bld-wood": () => worn(claddingBoards, 0x8a7a64, { roughness: 0.95, bumpScale: 1.5, vertexColors: true }),
+  "bld-metal": () => worn(steelCladding, 0x8d949a, { roughness: 0.6, metalness: 0.45, bumpScale: 2.5, vertexColors: true }),
   "bld-earth": () => std({ color: 0x8a6a4a, roughness: 1 }),
-  "container-blue": () => mapped(() => corrugated("#2f5a8a"), 0x2f5a8a, { roughness: 0.6, metalness: 0.4 }),
-  "container-red": () => mapped(() => corrugated("#8e2f25"), 0x8e2f25, { roughness: 0.6, metalness: 0.4 }),
-  "container-green": () => mapped(() => corrugated("#3f5f3a"), 0x3f5f3a, { roughness: 0.6, metalness: 0.4 }),
-  "container-grey": () => mapped(() => corrugated("#8a8f93"), 0x8a8f93, { roughness: 0.6, metalness: 0.4 }),
-  "container-rust": () => mapped(() => corrugated("#7c4a2e"), 0x7c4a2e, { roughness: 0.75, metalness: 0.3 }),
-  "fence-mesh": () => std({ color: 0xffffff, roughness: 0.6, metalness: 0.5, side: THREE.DoubleSide, alphaTest: 0.3, alphaToCoverage: true,
-    ...(hasDom ? { map: chainLink() } : { color: 0x9aa0a4, transparent: true, opacity: 0.4 }) }),
+  "barrier-concrete": () => worn(barrierConcrete, 0xb0ada5, { roughness: 0.95, bumpScale: 1.4 }),
+  "fence-mesh": () => std({ color: 0xffffff, roughness: 0.55, metalness: 0.55, side: THREE.DoubleSide, alphaTest: 0.35, alphaToCoverage: true,
+    ...(hasDom ? { map: chainLinkMesh().map } : { color: 0x9aa0a4, transparent: true, opacity: 0.4 }) }),
+  "galv-steel": () => worn(galvanised, 0xa3a9ac, { roughness: 0.5, metalness: 0.65 }),
+  "hole-dark": () => std({ color: 0x0b0b0c, roughness: 1, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }),
   "line-white": () => std({ color: 0xf2f2ee, roughness: 0.7 }),
   "activator-red": () => std({ color: 0xb3261e, roughness: 0.6, metalness: 0.3 }),
   rope: () => std({ color: 0xb79a6a, roughness: 1 }),
   "hard-cover": () => std({ color: 0x141414, roughness: 0.95, side: THREE.DoubleSide }),
-  "steel-white": () => mapped(() => steelPaint("#e2ded4"), 0xe2ded4, { roughness: 0.7, metalness: 0.1 }),
-  "steel-yellow": () => mapped(() => steelPaint("#dcb52a"), 0xdcb52a, { roughness: 0.65, metalness: 0.1 }),
-  "steel-dark": () => mapped(rawSteel, 0x3b3c3f, { roughness: 0.7, metalness: 0.55 }),
+  "steel-white": () => worn(() => targetPaint("#e2ded4"), 0xe2ded4, { roughness: 0.7, metalness: 0.1, bumpScale: 1.2 }),
+  "steel-yellow": () => worn(() => targetPaint("#dcb52a"), 0xdcb52a, { roughness: 0.65, metalness: 0.1, bumpScale: 1.2 }),
+  "steel-dark": () => worn(standSteel, 0x3b3c3f, { roughness: 0.72, metalness: 0.5, bumpScale: 1 }),
   "stand-foot": () => std({ color: 0x3e2a1c, roughness: 0.7, metalness: 0.15 }),            // dark brown painted feet
   "stick-wood": () => mapped(pine, 0xd8b47e),
   // Alpha-to-coverage keeps the thin wires visible (and smooth) at a distance, where plain alpha
@@ -659,6 +586,12 @@ const specs = {
   pot: () => std({ color: 0x1c1d1f, roughness: 0.6 }),
 };
 
+for (const [color, paint] of Object.entries(CONTAINER_PAINTS)) {
+  const heavy = color === "rust", look = { roughness: heavy ? 0.8 : 0.62, metalness: heavy ? 0.25 : 0.35 };
+  specs[`container-${color}`] = () => worn(() => containerSide(paint, heavy), parseInt(paint.slice(1), 16), look);
+  specs[`container-door-${color}`] = () => worn(() => containerDoors(paint, heavy), parseInt(paint.slice(1), 16), look);
+}
+
 // One painted body per car model and colour.
 for (const model of Object.keys(CAR_MODELS)) for (const [color, paint] of Object.entries(CAR_PAINTS)) {
   specs[`car-body-${model}-${color}`] = () => carBodyMat(paint, color === "rust", model);
@@ -667,7 +600,9 @@ for (const model of Object.keys(CAR_MODELS)) for (const [color, paint] of Object
 export function getMaterial(name) {
   if (!cache.has(name)) {
     if (!specs[name]) throw new Error(`Unknown material: ${name}`);
-    cache.set(name, specs[name]());
+    const m = specs[name]();
+    if (!m.name) m.name = name;
+    cache.set(name, m);
   }
   return cache.get(name);
 }
