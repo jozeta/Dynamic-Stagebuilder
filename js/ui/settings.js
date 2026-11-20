@@ -240,6 +240,7 @@ export function createSettings({ editor, panel, docked = false, hide = [], onTog
             plan("z", "Plan down range", -100, 150, 0.1, (v) => `${v.toFixed(1)} m`),
             plan("rotation", "Plan turn", -180, 180, 1, (v) => `${Math.round(v)}°`),
             plan("opacity", "Plan strength", 0.1, 1, 0.05, (v) => `${Math.round(v * 100)} %`),
+            ...(t.drawing ? [plan("wallOpacity", "Walls, doors and windows", 0.1, 1, 0.05, (v) => `${Math.round(v * 100)} %`)] : []),
             h("div", { class: "lg-row settings-actions" }, [h("button", { type: "button", class: "lg-btn", disabled: !mine.hasImage(t.id),
               title: mine.hasImage(t.id) ? null : "The plan image isn't in this browser", onclick: async () => { await mine.editPlan(t.id); fill(); } }, [icon("ruler"), "Edit the plan: walls, doors, windows…"])]),
             t.drawing ? h("p", { class: "lg-muted hint-text", text: `Drawn on the plan: ${t.drawing.walls.length} walls, ${t.drawing.doors.length} doors, ${t.drawing.windows.length} windows.` }) : null,

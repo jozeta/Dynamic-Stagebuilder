@@ -161,3 +161,17 @@ test("Force 90°: walls, and doors or windows in a gap, run level or upright", a
   const gap = addOpening(emptyDrawing(), "door", [100, 100], [190, 130], TOL, { ortho: true });
   assert.deepEqual(gap.doors[0], { a: [100, 100], b: [190, 100] });
 });
+
+test("the drawn walls, doors and windows can be made see-through (saved with the plan)", async () => {
+  const { cleanTemplate } = await import("../js/model/surroundings.js");
+  const { emptyDrawing, addWall } = await D();
+  const base = { id: "t2", name: "R", plan: { width: 1000, height: 800, metresPerPixel: 0.01, x: 0, z: 15, rotation: 0, opacity: 1 }, pieces: [], drawing: addWall(emptyDrawing(), [0, 400], [1000, 400], TOL) };
+  assert.equal(cleanTemplate(base).plan.wallOpacity, 1, "solid by default");
+  const t = cleanTemplate({ ...base, plan: { ...base.plan, wallOpacity: 0.4 } });
+  assert.equal(t.plan.wallOpacity, 0.4);
+  assert.equal(cleanTemplate({ ...base, plan: { ...base.plan, wallOpacity: 5 } }).plan.wallOpacity, 1);
+  const { setTemplate, custom } = await import("../js/render/environments/custom.js");
+  setTemplate(t, null);
+  const wall = custom({ width: 20, depth: 30 }, { templateId: "t2" }).group.getObjectByName("plan-built").children.find((c) => c.userData.kind === "wall");
+  assert.ok(wall.material.transparent && Math.abs(wall.material.opacity - 0.4) < 1e-9);
+});

@@ -4,6 +4,9 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Your own surroundings: under *Plan strength*, *Walls, doors and windows* makes the walls drawn on
+  the plan see-through (10–100 %), saved with the surroundings.
+
 - Plan drawing: *Force 90°* keeps every wall (and a door or window drawn across a gap) level or
   upright, whichever it is nearer.
 

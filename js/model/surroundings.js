@@ -57,7 +57,7 @@ export function cleanTemplate(t) {
     const width = num(p.width, 1, LIMITS.px), height = num(p.height, 1, LIMITS.px), mpp = num(p.metresPerPixel, ...LIMITS.mpp);
     if (width && height && mpp) {
       plan = { width, height, metresPerPixel: mpp, x: num(p.x, -LIMITS.offset, LIMITS.offset) ?? 0, z: num(p.z, -LIMITS.offset, LIMITS.offset) ?? 0,
-        rotation: num(p.rotation, -360, 360) ?? 0, opacity: num(p.opacity, 0.1, 1) ?? 1 };
+        rotation: num(p.rotation, -360, 360) ?? 0, opacity: num(p.opacity, 0.1, 1) ?? 1, wallOpacity: num(p.wallOpacity, 0.1, 1) ?? 1 };
     }
   }
   const pieces = (Array.isArray(t.pieces) ? t.pieces.slice(0, LIMITS.pieces) : []).map(cleanPiece).filter(Boolean);
