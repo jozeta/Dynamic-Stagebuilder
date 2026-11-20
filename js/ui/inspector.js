@@ -17,7 +17,7 @@ const PARAM_LABELS = {
   doorWidth: "Door width (m)", ground: "Surface", plants: "Plants", plates: "Plates", model: "Model", stance: "Stance", pads: "Pads", stack: "Drums high", items: "On the table", targets: "Targets on the carrier", shutter: "Shutter", panelHeight: "Panel height (m)", gap: "Gap underneath (m)", open: "Open (°)", hinge: "Hinge side", swing: "Opens", animate: "Animate (moves when Play is on)", thickness: "Thickness (m)", material: "Material", diameter: "Diameter (m)", depth: "Base depth (m)", pitch: "Look up/down (°)", doorHeight: "Door height (m)",
 };
 const OPTION_LABELS = { classic: "Classic (octagon)", head: "With head", orange: "Orange", black: "Black", blue: "Blue", wood: "Wood", white: "White", yellow: "Yellow", red: "Red",
-  green: "Green", grey: "Grey", sand: "Sand", "light-sand": "Light sand", "dark-sand": "Dark sand", "red-dirt": "Red dirt", gravel: "Gravel", mixed: "Grass and bushes", grass: "Grass only", rust: "Rusty", concrete: "Concrete", brick: "Brick", metal: "Metal", "20ft": "20 ft", "40ft": "40 ft", left: "Left", right: "Right", away: "Away from the shooter", toward: "Toward the shooter", closed: "Closed", open: "Open", none: "Nothing", pistol: "Pistol", "pistol-mags": "Pistol and magazines", case: "Gun case (closed)", standing: "Standing", crouching: "Crouching", kneeling: "Kneeling", sitting: "Sitting", prone: "Prone", sedan: "Saloon", hatchback: "Hatchback", pickup: "Pickup", van: "Van",
+  green: "Green", grey: "Grey", auto: "Same as the ground", sand: "Sand", "light-sand": "Light sand", "dark-sand": "Dark sand", "red-dirt": "Red dirt", gravel: "Gravel", mixed: "Grass and bushes", grass: "Grass only", rust: "Rusty", concrete: "Concrete", brick: "Brick", metal: "Metal", "20ft": "20 ft", "40ft": "40 ft", left: "Left", right: "Right", away: "Away from the shooter", toward: "Toward the shooter", closed: "Closed", open: "Open", none: "Nothing", pistol: "Pistol", "pistol-mags": "Pistol and magazines", case: "Gun case (closed)", standing: "Standing", crouching: "Crouching", kneeling: "Kneeling", sitting: "Sitting", prone: "Prone", sedan: "Saloon", hatchback: "Hatchback", pickup: "Pickup", van: "Van",
   ...Object.fromEntries([...PRESENTATIONS, ...HARD_COVERS].map((p) => [p.id, p.name])) };
 const GRID_OPTIONS = [[0, "Off"], [0.1, "0.1 m"], [0.25, "0.25 m"], [0.5, "0.5 m"], [1, "1 m"]];
 const ANGLE_OPTIONS = [[0, "Off"], [5, "5°"], [15, "15°"], [45, "45°"], [90, "90°"]];
@@ -61,16 +61,18 @@ export function createInspector(root, { editor, shapes = { list: () => [], draw:
       h("button", { type: "button", class: "lg-btn lg-btn-icon", "aria-label": `Rotate +${step}°`, onclick: () => d({ type: "rotate", by: step }) }, [icon("rotr")]),
     ])));
     for (const [k, spec] of Object.entries(def.params)) {
+      if (o.type === "berm" && o.outline && (k === "length" || k === "depth")) continue;      // a drawn berm's size is its drawing
+      const label = o.type === "berm" && k === "depth" ? "Depth, front to back (m)" : PARAM_LABELS[k] || k;
       const set = (v) => d({ type: "setParams", id: o.id, params: { [k]: v } });
       if (spec.bool) {
         // A switch (true/false), e.g. Animate: the label sits beside it.
         const id = `f${++uid}`;
         const sw = h("input", { type: "checkbox", class: "lg-toggle", id, dataset: { field: k }, onchange: (e) => set(e.target.checked) });
         sw.checked = o.params[k] === true;
-        nodes.push(h("div", { class: "lg-field inspector-switch" }, [h("label", { for: id, text: PARAM_LABELS[k] || k }), sw]));
+        nodes.push(h("div", { class: "lg-field inspector-switch" }, [h("label", { for: id, text: label }), sw]));
         continue;
       }
-      nodes.push(field(PARAM_LABELS[k] || k, spec.options
+      nodes.push(field(label, spec.options
         ? select(k, o.params[k], spec.options.map((v) => [v, OPTION_LABELS[v] || v]), set)
         : numberInput(k, o.params[k], spec, set)));
     }
@@ -98,7 +100,7 @@ export function createInspector(root, { editor, shapes = { list: () => [], draw:
         h("button", { type: "button", class: "lg-btn", onclick: () => berms.draw(o) }, [icon("ruler"), o.outline ? "Edit the outline…" : "Draw the outline…"]),
         o.outline ? h("button", { type: "button", class: "lg-btn", onclick: () => d({ type: "setOutline", id: o.id, outline: null }), text: "Back to a plain berm" }) : null,
       ].filter(Boolean)));
-      if (o.outline) nodes.push(h("p", { class: "lg-muted hint-text", text: `Drawn outline, ${o.outline.width} × ${o.outline.depth} m: length and depth above don't apply; height does.` }));
+      if (o.outline) nodes.push(h("p", { class: "lg-muted hint-text", text: `Drawn outline, ${o.outline.width} × ${o.outline.depth} m: its size comes from the drawing; Height sets how high it rises.` }));
     }
     // Safety distances from the rulebook, drawn as rings on the ground round the target.
     const ringSpec = safetyRings(o);

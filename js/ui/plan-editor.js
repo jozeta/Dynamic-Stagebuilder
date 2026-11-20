@@ -8,10 +8,14 @@ import { emptyDrawing, addWall, addOpening, eraseAt, snapPoint, cleanDrawing, HE
 
 const SNAP_M = 0.4, SNAP_PX = 10;               // snap within 40 cm, and never less than 10 screen pixels
 const COLORS = { wall: "#111418", door: "#b5651d", window: "#1f7ae0", preview: "#e0402f", snap: "#e0402f" };
+// "Colour the drawing": walls blue, doors pink, windows green, so they stand out from the plan's own
+// lines (in this window only; the 3D walls keep their materials).
+const BRIGHT = { wall: "#1e6bff", door: "#ff3fa4", window: "#16b84e" };
 
 export function createPlanEditor({ onFile }) {
   let image = null, step = 1, points = [], mpp = null, drawing = emptyDrawing(), history = [], tool = "wall", chain = null, start = null, cursor = null, resolve = null, editing = false;
   let fit = 1;                                     // screen pixels per image pixel
+  let planAlpha = 1, colourful = false;            // how strongly the plan shows while drawing; bright colours
 
   const canvas = h("canvas", { class: "plan-canvas", role: "img", "aria-label": "The plan" });
   const box = h("div", { class: "plan-box" }, [canvas]);
@@ -68,6 +72,16 @@ export function createPlanEditor({ onFile }) {
       h("div", { class: "plan-checks" }, [check("walls", "Walls"), check("doors", "Doors"), check("windows", "Windows")]),
     );
   }
+  // How the plan and the drawing show while drawing.
+  const alphaOut = h("output", { for: "plan-alpha", class: "lg-mono settings-value", text: "100 %" });
+  const alphaIn = h("input", { type: "range", class: "lg-slider", id: "plan-alpha", min: "0.1", max: "1", step: "0.05", value: "1",
+    oninput: (e) => { planAlpha = Number(e.target.value); alphaOut.textContent = `${Math.round(planAlpha * 100)} %`; draw(); } });
+  const colourIn = h("input", { type: "checkbox", id: "plan-colour", onchange: (e) => { colourful = e.target.checked; draw(); } });
+  const view = h("div", { class: "lg-stack" }, [
+    h("span", { class: "lg-label", text: "View" }),
+    h("div", { class: "settings-row" }, [h("label", { for: "plan-alpha", text: "Plan image" }), alphaIn, alphaOut]),
+    h("label", { class: "plan-check", for: "plan-colour" }, [colourIn, h("span", { text: "Colour the drawing: walls blue, doors pink, windows green" })]),
+  ]);
   const step2 = h("div", { class: "lg-stack plan-side" }, [
     h("p", { class: "lg-muted hint-text", text: "Wall: click point to point, double-click (or Finish wall) to stop. Door and window: click both ends on a wall, or across a gap between two walls. Ends close to each other snap together." }),
     h("div", { class: "plan-tools" }, tools),
@@ -76,6 +90,7 @@ export function createPlanEditor({ onFile }) {
       h("button", { type: "button", class: "lg-btn", onclick: () => undo() }, [icon("undo"), "Undo"]),
       h("button", { type: "button", class: "lg-btn", onclick: () => { push(); drawing = { ...emptyDrawing(), heights: drawing.heights, cut: drawing.cut }; draw(); }, text: "Clear" }),
     ]),
+    view,
     heights,
   ]);
 
@@ -118,7 +133,12 @@ export function createPlanEditor({ onFile }) {
     canvas.style.setProperty("width", `${Math.round(image.width * fit)}px`); canvas.style.setProperty("height", `${Math.round(image.height * fit)}px`);
     const g = canvas.getContext("2d");
     g.setTransform(fit * dpr, 0, 0, fit * dpr, 0, 0);
+    // The plan, faded as chosen (in step 2) over white, so the drawing reads on top of its black lines.
+    g.fillStyle = "#ffffff"; g.fillRect(0, 0, image.width, image.height);
+    g.globalAlpha = step === 2 ? planAlpha : 1;
     g.drawImage(image, 0, 0);
+    g.globalAlpha = 1;
+    const C = step === 2 && colourful ? { ...COLORS, ...BRIGHT } : COLORS;
     const lw = 2 / fit;
     const seg = (s, color, width, dash = []) => { g.strokeStyle = color; g.lineWidth = width; g.setLineDash(dash.map((x) => x / fit)); g.beginPath(); g.moveTo(...s.a); g.lineTo(...s.b); g.stroke(); g.setLineDash([]); };
     const dot = (p, color, r = 4) => { g.fillStyle = color; g.beginPath(); g.arc(p[0], p[1], r / fit, 0, 7); g.fill(); };
@@ -130,10 +150,10 @@ export function createPlanEditor({ onFile }) {
       return;
     }
     const wallW = Math.max(3 / fit, drawing.heights.thickness / mpp);
-    for (const w of drawing.walls) seg(w, COLORS.wall, wallW);
-    for (const w of drawing.walls) { dot(w.a, COLORS.wall, 3); dot(w.b, COLORS.wall, 3); }
-    for (const o of drawing.doors) { seg(o, "#ffffff", wallW * 1.1); seg(o, COLORS.door, 4 / fit, [6, 4]); dot(o.a, COLORS.door); dot(o.b, COLORS.door); }
-    for (const o of drawing.windows) { seg(o, "#ffffff", wallW * 1.1); seg(o, COLORS.window, 3 / fit); dot(o.a, COLORS.window); dot(o.b, COLORS.window); }
+    for (const w of drawing.walls) seg(w, C.wall, wallW);
+    for (const w of drawing.walls) { dot(w.a, C.wall, 3); dot(w.b, C.wall, 3); }
+    for (const o of drawing.doors) { seg(o, "#ffffff", wallW * 1.1); seg(o, C.door, colourful ? wallW : 4 / fit, colourful ? [] : [6, 4]); dot(o.a, C.door); dot(o.b, C.door); }
+    for (const o of drawing.windows) { seg(o, "#ffffff", wallW * 1.1); seg(o, C.window, colourful ? wallW : 3 / fit); dot(o.a, C.window); dot(o.b, C.window); }
     const from = chain ?? start;
     if (from && cursor) seg({ a: from, b: snapPoint(drawing, cursor, tolPx()) }, COLORS.preview, 2 / fit, [5, 4]);
     if (cursor && tool !== "erase") { const s = snapPoint(drawing, cursor, tolPx()); if (s[0] !== cursor[0] || s[1] !== cursor[1]) { g.strokeStyle = COLORS.snap; g.lineWidth = 2 / fit; g.beginPath(); g.arc(s[0], s[1], 7 / fit, 0, 7); g.stroke(); } }

@@ -246,7 +246,11 @@ export function buildFence(obj) {
   const net = mesh(geo, "fence-mesh");
   net.userData.part = "mesh";
   net.castShadow = true;
-  g.add(net);
+  // From a distance the wires blur into a grey veil, as real chain link does: a faint sheet behind them.
+  const veil = mesh(geo, "fence-veil");
+  veil.userData.part = "veil";
+  veil.renderOrder = -1;
+  g.add(net, veil);
   return g;
 }
 

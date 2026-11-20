@@ -5,6 +5,7 @@ import { buildProp, buildLine, buildStartMarker } from "./builders/index.js";
 import { startFacing } from "../model/start-pose.js";
 import { buildRoute, routeKey } from "./builders/route.js";
 import { dimensionsOf, getProp } from "../model/props.js";
+import { setBermGround } from "./builders/berm.js";
 
 const LABEL_GAP = 0.22;
 
@@ -42,7 +43,10 @@ export function createStageView(group, { labelFactory = null } = {}) {
 
   function sync(stage) {
     const seen = new Set();
-    for (const o of stage.objects) { seen.add(o.id); put(o.id, JSON.stringify(o), () => place(o)); }
+    // Berms on "Same as the ground" follow the Outdoor ground: it is part of their key.
+    const ground = stage.settings?.environment === "outdoor" ? stage.settings.look?.ground : "sand";
+    setBermGround(ground);
+    for (const o of stage.objects) { seen.add(o.id); put(o.id, o.type === "berm" ? JSON.stringify([o, ground]) : JSON.stringify(o), () => place(o)); }
     for (const l of stage.lines) { seen.add(l.id); put(l.id, JSON.stringify(l), () => buildLine(l)); }
     if (stage.start) { seen.add("start"); put("start", JSON.stringify([stage.start, startFacing(stage), stage.briefing?.startPosition, stage.briefing?.gunCondition]), () => buildStartMarker(stage.start, stage)); }
     // The shooter's route (start → shooting positions), when there is one.

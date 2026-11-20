@@ -4,6 +4,15 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Earth berm blends into the ground: a new *Surface* choice, *Same as the ground* (the default),
+  follows the Outdoor ground; the berm's texture now continues the ground's pattern unbroken, and its
+  foot takes the floor's tone, turning to the bank earth up the slope. A drawn berm no longer shows
+  length and depth (its size comes from the drawing); *Base depth* is now *Depth, front to back*.
+- Chain-link fence: the wire is drawn heavier so it stays visible at a distance, with a faint grey
+  veil behind it, as real chain link reads from afar.
+- Plan drawing: *Plan image* fades the plan so the drawing stands out, and *Colour the drawing* shows
+  walls blue, doors pink and windows green (in the drawing only; the 3D walls are unchanged).
+
 - Industrial looks more real: sealed concrete with a slight sheen, a worn walking lane and pools of
   lamp light; lighter cladding with sheet joints and rust runs, and a band of ribbed, dusty
   polycarbonate windows high on the walls; a pale insulated roof on purlins; glowing lamps with soft

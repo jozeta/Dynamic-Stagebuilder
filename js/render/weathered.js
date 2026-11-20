@@ -395,9 +395,10 @@ export function chainLinkMesh() {
   const S = 256;
   return paintSet(S, S, ({ c }, w, h, r) => {
     c.clearRect(0, 0, w, h);
-    const P = w / 2, wire = (0.0032 / CHAIN_TILE) * w;
+    // Drawn at twice the wire's 3 mm: the real width all but vanishes once the texture is scaled down.
+    const P = w / 2, wire = (0.0064 / CHAIN_TILE) * w;
     c.lineCap = "round";
-    for (const [lw, col] of [[wire, "#8d9396"], [wire * 0.55, "#b9bfc2"], [wire * 0.2, "#dde2e4"]]) {
+    for (const [lw, col] of [[wire, "#7a8083"], [wire * 0.55, "#a9afb2"], [wire * 0.2, "#d6dbdd"]]) {
       c.strokeStyle = col; c.lineWidth = lw;
       for (let k = -6; k <= 6; k++) {
         const o = k * P;

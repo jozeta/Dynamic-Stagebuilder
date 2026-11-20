@@ -4,7 +4,7 @@
 import * as THREE from "three";
 import { group } from "./parts.js";
 import { bermHeight, bermSize } from "../../model/berm.js";
-import { earthMaterial, grassAt, EARTH_TILE } from "../environments/ground.js";
+import { earthMaterial, grassAt, EARTH_TILE, GROUND_PALETTE } from "../environments/ground.js";
 import { bushesAt } from "../environments/foliage.js";
 import { fbm } from "../environments/terrain.js";
 import { rng } from "../environments/common.js";
@@ -14,6 +14,12 @@ const lumps = fbm(611), tone = fbm(612);
 // Lumpy dug earth on the faces: none at the foot or on the flat top, most half way up.
 const lump = (u, v, h, H) => (h > 0 && h < H ? lumps(u * 0.9, v * 0.9) * 0.14 * Math.sin(Math.PI * (h / H)) : 0);
 
+// The Outdoor ground's choice, for berms on "Same as the ground" (stage-view sets it before building).
+let ambientGround = "sand";
+export const setBermGround = (name) => { ambientGround = name || "sand"; };
+// The floor's own tone (as the Outdoor ground mixes it) and the bank earth it turns to up a slope.
+const FLOOR = new THREE.Color("#f4ece0").lerp(new THREE.Color("#d9cbb8"), 0.5);
+
 export function buildBerm(obj) {
   const g = group(obj.id);
   const [L, D] = bermSize(obj);
@@ -22,16 +28,23 @@ export function buildBerm(obj) {
   geo.rotateX(-Math.PI / 2);
   const pos = geo.attributes.position, uv = geo.attributes.uv;
   const raised = new Uint8Array(pos.count);
+  const ground = obj.params.ground === "auto" || !obj.params.ground ? ambientGround : obj.params.ground;
+  const earthTone = new THREE.Color((GROUND_PALETTE[ground] || GROUND_PALETTE.sand).earth), col = new THREE.Color();
+  const [px, pz] = obj.position || [0, 0], a = (-(obj.rotation || 0) * Math.PI) / 180, ca = Math.cos(a), sa = Math.sin(a);
   const colors = new Float32Array(pos.count * 3);
   for (let i = 0; i < pos.count; i++) {
     const u = pos.getX(i), v = pos.getZ(i);
     const h = bermHeight(obj, u, v);
     raised[i] = h > 0 ? 1 : 0;
     pos.setY(i, h + lump(u, v, h, H));
-    uv.setXY(i, u / EARTH_TILE, v / EARTH_TILE);
-    // Darker, damper earth at the foot; lighter, dried crust on top; a little patchiness.
-    const k = 0.66 + 0.14 * Math.min(1, h / H) + tone(u * 0.3, v * 0.3) * 0.07;      // faces catch more sun than the floor: a little darker
-    colors.set([k, k * 0.98, k * 0.95], i * 3);
+    // Texture coordinates in the ground's own frame, so its pattern runs on unbroken from the floor.
+    const wx = px + u * ca + v * sa, wz = pz - u * sa + v * ca;
+    uv.setXY(i, wx / EARTH_TILE, -wz / EARTH_TILE);
+    // The floor's tone at the foot, turning to the ground's bank earth up the slope (as the Outdoor
+    // banks do), with a little patchiness.
+    const w = Math.min(1, h / Math.max(0.3, H * 0.6)) * 0.8;
+    col.copy(FLOOR).lerp(earthTone, w).multiplyScalar(1 + tone(u * 0.3, v * 0.3) * 0.06);
+    colors.set([col.r, col.g, col.b], i * 3);
   }
   geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
   // Only the triangles on the berm: the flat ground round it (and in a drawing's gaps) is left out.
@@ -39,7 +52,7 @@ export function buildBerm(obj) {
   for (let t = 0; t < idx.length; t += 3) if (raised[idx[t]] || raised[idx[t + 1]] || raised[idx[t + 2]]) keep.push(idx[t], idx[t + 1], idx[t + 2]);
   geo.setIndex(keep);
   geo.computeVertexNormals();
-  const earth = new THREE.Mesh(geo, earthMaterial(obj.params.ground));
+  const earth = new THREE.Mesh(geo, earthMaterial(ground));
   earth.name = "berm-earth";
   earth.castShadow = true;
   earth.receiveShadow = true;

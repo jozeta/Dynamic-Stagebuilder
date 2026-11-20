@@ -9,7 +9,7 @@ const berm = (params = {}, outline) => ({ type: "berm", params: { ...defaultPara
 
 test("the berm's options: its surface follows the Outdoor grounds, and plants", () => {
   const p = getProp("berm").params;
-  assert.deepEqual(p.ground.options, ["sand", "light-sand", "dark-sand", "red-dirt", "gravel"]);
+  assert.deepEqual(p.ground.options, ["auto", "sand", "light-sand", "dark-sand", "red-dirt", "gravel"]);
   assert.deepEqual(p.plants.options, ["mixed", "grass", "none"]);
   assert.equal(p.plants.default, "mixed");
 });
@@ -75,4 +75,30 @@ test("the 3D berm: a lumpy mound at the berm's height, on its ground's surface, 
   assert.equal(grassOnly.children.length, 1);
   const drawn = buildProp(obj({ height: 1.5 }, { width: 3, depth: 3, rows: ["010", "111", "010"] })).getObjectByName("berm-earth");
   assert.ok(drawn, "a drawn berm");
+});
+
+test("a berm blends into the ground: same surface by default, the texture continues the ground's, floor tone at its foot", async () => {
+  const { buildProp } = await import("../js/render/builders/index.js");
+  const { setBermGround } = await import("../js/render/builders/berm.js");
+  const { EARTH_TILE } = await import("../js/render/environments/ground.js");
+  assert.equal(getProp("berm").params.ground.default, "auto");
+  assert.ok(getProp("berm").params.ground.options.includes("auto"));
+  setBermGround("gravel");
+  const o = { id: "b2", type: "berm", position: [3, 12], rotation: 90, params: { ...defaultParams("berm"), length: 6, depth: 4 } };
+  const earth = buildProp(o).getObjectByName("berm-earth");
+  assert.match(earth.material.name, /gravel/, "follows the Outdoor ground");
+  // Texture coordinates in the ground's frame: u = world x / tile, v = − world z / tile.
+  const pos = earth.geometry.attributes.position, uv = earth.geometry.attributes.uv;
+  const a = (-90 * Math.PI) / 180;
+  for (const i of [0, Math.floor(pos.count / 2), pos.count - 1]) {
+    const u = pos.getX(i), v = pos.getZ(i);
+    const wx = 3 + u * Math.cos(a) + v * Math.sin(a), wz = 12 - u * Math.sin(a) + v * Math.cos(a);
+    assert.ok(Math.abs(uv.getX(i) - wx / EARTH_TILE) < 1e-6 && Math.abs(uv.getY(i) + wz / EARTH_TILE) < 1e-6, `uv ${i}`);
+  }
+  // At the foot the colour is the floor's; up the slope it turns to the ground's bank earth.
+  const col = earth.geometry.attributes.color;
+  let foot = null, top = null;
+  for (let i = 0; i < pos.count; i++) { const y = pos.getY(i); if (y <= 0.001 && !foot) foot = [col.getX(i), col.getY(i), col.getZ(i)]; if (y > 2.4 && !top) top = [col.getX(i), col.getY(i), col.getZ(i)]; }
+  assert.ok(foot && top && foot[0] > top[0], "lighter (floor) at the foot, earthier on top");
+  setBermGround("sand");
 });

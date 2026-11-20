@@ -158,3 +158,12 @@ test("steel faces map the whole texture once, edges get the worn border", () => 
     assert.ok(faces > 0, `${type} has painted steel`);
   }
 });
+
+test("the chain-link fence reads from a distance: a faint grey veil behind the wire", async () => {
+  const { buildProp } = await import("../js/render/builders/index.js");
+  const { defaultParams } = await import("../js/model/props.js");
+  const g = buildProp({ id: "f", type: "fence", params: defaultParams("fence") });
+  const veil = g.children.find((c) => c.userData.part === "veil");
+  assert.ok(veil, "a veil");
+  assert.ok(veil.material.transparent && veil.material.opacity > 0.1 && veil.material.opacity < 0.4);
+});

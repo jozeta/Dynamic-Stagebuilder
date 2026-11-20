@@ -511,7 +511,8 @@ const specs = {
   "bld-metal": () => worn(steelCladding, 0x8d949a, { roughness: 0.6, metalness: 0.45, bumpScale: 2.5, vertexColors: true }),
   "bld-earth": () => std({ color: 0x8a6a4a, roughness: 1 }),
   "barrier-concrete": () => worn(barrierConcrete, 0xb0ada5, { roughness: 0.95, bumpScale: 1.4 }),
-  "fence-mesh": () => std({ color: 0xffffff, roughness: 0.55, metalness: 0.55, side: THREE.DoubleSide, alphaTest: 0.35, alphaToCoverage: true,
+  "fence-veil": () => std({ color: 0xaeb4b7, roughness: 0.7, metalness: 0.3, side: THREE.DoubleSide, transparent: true, opacity: 0.09, depthWrite: false }),
+  "fence-mesh": () => std({ color: 0xffffff, roughness: 0.55, metalness: 0.55, side: THREE.DoubleSide, alphaTest: 0.02, alphaToCoverage: true,   // far off, the averaged wire shows as partial cover (see-through grey), not solid
     ...(hasDom ? { map: chainLinkMesh().map } : { color: 0x9aa0a4, transparent: true, opacity: 0.4 }) }),
   "galv-steel": () => worn(galvanised, 0xa3a9ac, { roughness: 0.5, metalness: 0.65 }),
   "hole-dark": () => std({ color: 0x0b0b0c, roughness: 1, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }),

@@ -184,7 +184,7 @@ const defs = [
     params: { diameter: { default: 0.4, min: 0.15, max: 1.5, step: 0.05 }, height: { default: 3, min: 0.5, max: 8, step: 0.1 }, ...MATERIAL } },
   { type: "berm", name: "Earth berm", category: "building", scoring: null,
     params: { length: { default: 10, min: 2, max: 60, step: 0.5 }, height: { default: 2.5, min: 0.5, max: 8, step: 0.1 }, depth: { default: 5, min: 1, max: 16, step: 0.5 },
-      ground: { default: "sand", options: ["sand", "light-sand", "dark-sand", "red-dirt", "gravel"] }, plants: { default: "mixed", options: ["mixed", "grass", "none"] } },
+      ground: { default: "auto", options: ["auto", "sand", "light-sand", "dark-sand", "red-dirt", "gravel"] }, plants: { default: "mixed", options: ["mixed", "grass", "none"] } },
     note: "An earth bank on the ground's own surface, with grass and bushes. Draw the outline… gives it any shape up to 10 × 10 m." },
   { type: "container", name: "Shipping container", category: "building", scoring: null,
     params: { size: { default: "20ft", options: ["20ft", "40ft"] }, color: { default: "blue", options: ["blue", "red", "green", "grey", "rust"] } } },

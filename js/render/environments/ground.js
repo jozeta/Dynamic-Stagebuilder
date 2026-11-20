@@ -118,7 +118,7 @@ function gradeImage(img, name) {
 
 // Load the photo-scanned maps (same origin, cached offline by the service worker) and swap them
 // into the material when ready; `onUpdate` asks for a new frame.
-function loadPhotoMaps(mat, W, D, onUpdate, control) {
+function loadPhotoMaps(mat, W, D, onUpdate, control, offset = [0, 0]) {
   if (!hasDom) return;
   const loader = new THREE.TextureLoader();
   const prep = (t, color, repeat) => {
@@ -126,6 +126,7 @@ function loadPhotoMaps(mat, W, D, onUpdate, control) {
     t.anisotropy = 8;
     if (color) t.colorSpace = THREE.SRGBColorSpace;
     t.repeat.set(...repeat);
+    t.offset.set(...offset);
     return t;
   };
   const rep = [W / PHOTO_TILE, D / PHOTO_TILE];
@@ -192,7 +193,10 @@ export function buildGround(bay, { onUpdate } = {}) {
   paintBanks(GROUND_PALETTE.sand.earth);
   geo.computeVertexNormals();
   const maps = bakeGroundMaps();
-  for (const t of Object.values(maps)) t.repeat.set(W / TILE, D / TILE);
+  // Texture coordinates in the world's frame (u = x / tile, v = − z / tile), so berms on the ground
+  // (builders/berm.js) carry the same pattern on unbroken.
+  const zTop = bay.depth / 2 + D / 2;
+  for (const t of Object.values(maps)) { t.repeat.set(W / TILE, D / TILE); t.offset.set(-(W / 2) / TILE, -zTop / TILE); }
   const mat = new THREE.MeshStandardMaterial({ color: maps.map ? 0xffffff : 0xb89a78, vertexColors: true, roughness: 1,
     normalScale: new THREE.Vector2(0.9, 0.9), aoMapIntensity: 0.8, ...maps });
   const ground = new THREE.Mesh(geo, mat);
@@ -212,7 +216,7 @@ export function buildGround(bay, { onUpdate } = {}) {
     paintBanks(pal.earth);                         // the banks' earth and the stones follow the ground
     stones.material.color.set(pal.stone);
   };
-  loadPhotoMaps(mat, W, D, onUpdate, control);
+  loadPhotoMaps(mat, W, D, onUpdate, control, [-(W / 2) / PHOTO_TILE, -zTop / PHOTO_TILE]);
   return group;
 }
 
