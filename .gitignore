@@ -1,10 +1,21 @@
-# macOS, editors
+# macOS
 .DS_Store
 ._*
 .AppleDouble
 .LSOverride
+
+# Windows
 Thumbs.db
-desktop.ini
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.lnk
+*.stackdump
+~$*
+
+# Editors
 .idea/
 .vscode/
 *.swp
