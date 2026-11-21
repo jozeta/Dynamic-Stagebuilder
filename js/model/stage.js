@@ -5,7 +5,8 @@ import { defaultParams, getProp } from "./props.js";
 import { LOOK_DEFAULTS } from "./look.js";
 import { cleanBay } from "./bay.js";
 
-export const newId = () => crypto.randomUUID();
+import { newId } from "./id.js";
+export { newId };
 const SETTINGS = ["grid", "angleSnap", "environment", "objectSnap", "look", "targetStyle"];
 
 export function createStage({ name = "Stage 1", width = 20, depth = 30 } = {}) {

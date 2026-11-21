@@ -4,6 +4,11 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Fix: opened over plain `http://` from another computer (a network address, not `localhost`), the
+  app crashed on start (`crypto.randomUUID is not a function`): browsers offer that only on HTTPS or
+  localhost. Ids are now made from `crypto.getRandomValues` there, so everything works. The README
+  explains serving the app to other computers.
+
 ## 0.9.0 (2026-11-21)
 
 - View pad: faint arrow buttons in the top-right corner of the 3D view steer the camera. *Look*

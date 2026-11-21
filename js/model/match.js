@@ -5,7 +5,7 @@ import { stageStats } from "./stats.js";
 
 export const MAX_STAGES = 100;
 const NAME_MAX = 120;
-const newId = () => (globalThis.crypto?.randomUUID ? crypto.randomUUID() : `m-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+import { newId } from "./id.js";
 
 /** A new, empty match. */
 export function createMatch({ name = "New match", now = Date.now() } = {}) {

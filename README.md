@@ -178,6 +178,18 @@ python3 -m http.server 8002      # then open http://localhost:8002/ (or: claude-
 Any static web server works (the app only loads its own files). Offline support and installing
 need `http://localhost` or HTTPS; opened as a `file://` page the editor works but nothing is cached.
 
+**Open it from another computer on your network:** serve on all addresses and browse to this
+computer's address from the other one:
+
+```sh
+python3 -m http.server 8002 --bind 0.0.0.0    # then open http://<this computer's IP>:8002/
+```
+
+Over plain `http://` to a network address (not `localhost`) the editor works fully, but browsers
+don't allow offline use or installing there; use HTTPS or the online version for that. Python's
+built-in server handles only a few connections at a time, so Chrome may need a reload or two to
+load every file on the first visit.
+
 **Install as an app:** in Safari on an iPad or Mac, Share → Add to Home Screen (or Add to Dock); in
 Chrome or Edge, the install button in the address bar. Installed, it works without a connection, and
 Safari keeps its saved stages (a site that isn't installed can lose them after 7 days unvisited).

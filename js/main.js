@@ -59,6 +59,7 @@ import { eyeHeight } from "./model/positions.js";
 import { createContextMenu } from "./ui/context-menu.js";
 import { createLayers } from "./ui/layers.js";
 import { createAutosave } from "./storage/autosave.js";
+import { newId } from "./model/id.js";
 
 const canvas = document.getElementById("viewport");
 let engine;
@@ -417,7 +418,7 @@ const myShapes = (() => {
   const changed = () => { version++; render(editor.state); };
   const drawer = createBayDrawer({
     async onSave(bay, id) {
-      const shapeId = id || crypto.randomUUID();
+      const shapeId = id || newId();
       const next = [...list.filter((x) => x.id !== shapeId), { id: shapeId, ...bay }];
       if (next.length > MAX_SHAPES) { globalThis.LadaGlass?.toast?.(`My shapes holds ${MAX_SHAPES}; delete one first.`, { type: "bad" }); return; }
       if (!saveShapes(next)) globalThis.LadaGlass?.toast?.("The shape is on this stage, but this browser couldn't save it to My shapes (storage full or blocked).", { type: "bad", duration: 8000 });
@@ -469,7 +470,7 @@ const projects = createProjects({
   onDuplicate: async (id) => {
     await saveNow();
     const rec = await store.get(id);
-    if (rec) await store.put(projectRecord({ ...rec.stage, id: crypto.randomUUID(), name: `${rec.stage.name} (copy)`.slice(0, 120) }, { now: Date.now() }));
+    if (rec) await store.put(projectRecord({ ...rec.stage, id: newId(), name: `${rec.stage.name} (copy)`.slice(0, 120) }, { now: Date.now() }));
   },
   onDelete: async (id) => {
     const open = id === editor.stage().id;

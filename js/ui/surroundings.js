@@ -5,6 +5,7 @@
 import { cleanTemplate } from "../model/surroundings.js";
 import { createPlanEditor } from "./plan-editor.js";
 import { setTemplate, removeTemplate, getTemplate } from "../render/environments/index.js";
+import { newId } from "../model/id.js";
 
 const TYPES = ["image/png", "image/jpeg", "image/webp"];
 const MAX_BYTES = 20_000_000, MAX_SIDE = 4096;
@@ -68,7 +69,7 @@ export function createSurroundings({ store, onChange = () => {} }) {
     async newFromPlan() {
       const r = await editor.open();
       if (!r) return null;
-      const t = await save({ id: crypto.randomUUID(), name: r.name, plan: { width: r.image.width, height: r.image.height, metresPerPixel: r.metresPerPixel, x: 0, z: 15, rotation: 0, opacity: 1 },
+      const t = await save({ id: newId(), name: r.name, plan: { width: r.image.width, height: r.image.height, metresPerPixel: r.metresPerPixel, x: 0, z: 15, rotation: 0, opacity: 1 },
         pieces: [], drawing: r.drawing, imageBlob: await canvasToBlob(r.image) });
       setTemplate(t, r.image);
       onChange(t.id);
