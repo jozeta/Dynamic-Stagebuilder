@@ -4,7 +4,7 @@ A browser-based 3D stage builder for IPSC practical shooting. Lay out a stage at
 it from any angle, and print a Written Stage Briefing with a stage map for range officers and
 competitors.
 
-**Version:** 0.8.0 · **Try it:** [jozeta.github.io/Dynamic-Stagebuilder](https://jozeta.github.io/Dynamic-Stagebuilder/)
+**Version:** 0.9.0 · **Try it:** [jozeta.github.io/Dynamic-Stagebuilder](https://jozeta.github.io/Dynamic-Stagebuilder/)
 (runs in the browser; nothing to install, nothing leaves your device) · Started 2026-11-18 (see the
 [v1 design](docs/superpowers/specs/2026-11-18-stage-builder-v1-design.md)).
 
@@ -104,6 +104,12 @@ Computers (mouse and keyboard first) and iPads (touch; every action also has a b
 not supported: below 768 px wide the app asks you to use a larger screen. English only.
 
 ## What's new
+
+### 0.9.0 (2026-11-21)
+
+- **View pad:** faint arrow buttons in the top-right corner of the 3D view steer the camera: *Look*
+  pans and tilts, *Move* goes forward or back, *Height* raises or lowers it. Press and hold to keep
+  moving.
 
 ### 0.8.0 (2026-11-20)
 
