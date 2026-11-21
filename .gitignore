@@ -1,11 +1,26 @@
-# --- Baseline: macOS, Claude Code and secrets ---
+# macOS, editors
 .DS_Store
 ._*
+.AppleDouble
+.LSOverride
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Claude Code and its tools
 .claude/settings.local.json
 .claude/worktrees/
+.worktrees/
 .superpowers/
-PRODUCT_RESEARCH_AND_FEATURE_ROADMAP.md
 .remember/
+.playwright-mcp/
+PRODUCT_RESEARCH_AND_FEATURE_ROADMAP.md
+
+# Secrets
 .env
 .env.*
 !.env.example
@@ -14,16 +29,13 @@ PRODUCT_RESEARCH_AND_FEATURE_ROADMAP.md
 *.p12
 *.pfx
 
-# Editors
-.vscode/
-.idea/
-*.swp
-
-# Node (tooling only)
-node_modules/
+# Logs
 *.log
+logs/
 
-# Claude worktrees and plan workspaces
-.worktrees/
-.superpowers/
-.playwright-mcp/
+# Node (tooling and tests only; the app has no build step)
+node_modules/
+coverage/
+test-results/
+playwright-report/
+npm-debug.log*
