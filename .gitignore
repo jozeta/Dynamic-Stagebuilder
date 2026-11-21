@@ -2,6 +2,9 @@
 .DS_Store
 ._*
 .claude/settings.local.json
+.claude/worktrees/
+.superpowers/
+PRODUCT_RESEARCH_AND_FEATURE_ROADMAP.md
 .remember/
 .env
 .env.*
