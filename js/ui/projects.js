@@ -153,10 +153,11 @@ export function createProjects({ panel, docked = false, hide = [], onToggle = ()
     libraryBox,
   );
 
+  // Each part fills on its own: a problem in one (a damaged record) can't leave the others empty.
   async function fill() {
-    await matches.fill();
-    await fillStages();
-    await fillCrumbs();
+    for (const part of [() => matches.fill(), fillStages, fillCrumbs]) {
+      try { await part(); } catch (err) { console.error("Projects panel:", err); }
+    }
   }
   // Where you are: Projects › a match (its page) › a stage of it, or Projects › a stage on its own.
   async function fillCrumbs() {
@@ -212,10 +213,10 @@ export function createProjects({ panel, docked = false, hide = [], onToggle = ()
   return {
     // Open, or close when it's open and in view; when it's open but its panel is folded, unfold it.
     // Opened, it shows the full list (matches, then your stages), not a match page left open earlier.
-    async open() { if (isOpen && !panel.closest(".lg-dock-folded") && !panel.classList.contains("lg-dock-inactive")) return close(); if (isOpen) return show(true); say(""); matches.showList(); await fill(); fillLibrary(); show(true); panel.querySelector("button")?.focus(); },
+    async open() { if (isOpen && !panel.closest(".lg-dock-folded") && !panel.classList.contains("lg-dock-inactive")) return close(); if (isOpen) return show(true); say(""); matches.showList(); await fill(); try { fillLibrary(); } catch (err) { console.error("Stage library:", err); } show(true); panel.querySelector("button")?.focus(); },
     close,
     /** Shown by the dock (its tab clicked): fill it and count as open, without toggling. */
-    async ensureOpen() { if (isOpen) return; say(""); matches.showList(); await fill(); fillLibrary(); show(true); },
+    async ensureOpen() { if (isOpen) return; say(""); matches.showList(); await fill(); try { fillLibrary(); } catch (err) { console.error("Stage library:", err); } show(true); },
     get isOpen() { return isOpen; },
     /** Bring an open panel up to date (a stage made or closed elsewhere). */
     async refresh() { if (isOpen) await fill(); },

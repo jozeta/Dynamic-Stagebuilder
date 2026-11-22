@@ -4,6 +4,11 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Fix: the Projects panel could stay empty (no matches, no stages, no stage library) when a saved
+  stage still held a prop under an older name (from before walls, tyres and pillars were merged):
+  counting its targets stopped the panel filling. Saved stages are now upgraded as they are read,
+  the counts skip anything they don't know, and each part of the panel fills on its own.
+
 - Projects: every saved stage has a small ⓘ at the top right of its row. Hovering (or a tap, or
   keyboard focus) shows its details: paper and steel targets, no-shoots, minimum rounds, maximum
   points, stage type, bay size, props, and the matches it is in with its stage number.

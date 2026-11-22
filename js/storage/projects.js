@@ -1,3 +1,4 @@
+import { validateStage } from "../model/schema.js";
 // Project records as saved in the browser: one per stage, with when it last changed and was exported.
 export function projectRecord(stage, { now, exportedAt = null }) {
   return { id: stage.id, name: stage.name, modified: now, exportedAt, stage };
@@ -23,4 +24,16 @@ export function exportAge(record, now) {
   if (!record.exportedAt) return "Not exported yet";
   if (record.exportedAt >= record.modified) return null;
   return `Changed since the last export ${ago(now - record.exportedAt)}`;
+}
+
+
+/**
+ * A stored record as today's app reads it: its stage checked and upgraded (props saved under older
+ * names, such as wall-door or tyre-stack, become today's), same id. A record that can't be read is
+ * returned as it is.
+ */
+export function upgradeRecord(record) {
+  if (!record?.stage) return record;
+  const v = validateStage(record.stage);
+  return v.ok ? { ...record, stage: v.stage } : record;
 }

@@ -29,7 +29,7 @@ import { validateStage } from "./model/schema.js";
 import { openStore, memoryStore } from "./storage/db.js";
 import { decodeShare, encodeShare, shareHash, MAX_LINK } from "./storage/share.js";
 import { cleanMatch, briefingFor, dropStageEverywhere } from "./model/match.js";
-import { projectRecord, sortProjects, nextProjectAfterDelete } from "./storage/projects.js";
+import { projectRecord, sortProjects, nextProjectAfterDelete, upgradeRecord } from "./storage/projects.js";
 import { exportFileName, stageToJson, matchToJson, matchFileName } from "./storage/files.js";
 
 // Save text as a file download (a same-origin blob link, removed straight after).
@@ -515,7 +515,8 @@ const projects = createProjects({
     dock?.activate(open ? "projects" : "props");            // its tab comes forward (and unfolds); closing goes back to Props
   },
   store: {
-    list: () => store.list(),
+    // Stages saved before props were merged hold older prop names: upgraded as they are read.
+    list: async () => (await store.list()).map(upgradeRecord),
     matches: { list: () => store.matches.list(), put: (r) => store.matches.put(r), remove: (id) => store.matches.remove(id) },
   },
   // A new stage made from a match's page: saved and opened like New stage; its id goes in the match.
@@ -538,7 +539,7 @@ const projects = createProjects({
   onModeChange: () => updateBlankCover(),
   onDuplicate: async (id) => {
     await saveNow();
-    const rec = await store.get(id);
+    const rec = upgradeRecord(await store.get(id));
     if (rec) await store.put(projectRecord({ ...rec.stage, id: newId(), name: `${rec.stage.name} (copy)`.slice(0, 120) }, { now: Date.now() }));
   },
   onDelete: async (id) => {

@@ -1,15 +1,16 @@
 // Stage statistics, recomputed from the stage on every edit.
-import { getProp } from "./props.js";
+import { PROPS } from "./props.js";
 import { SCORING } from "./scoring-rules.js";
 import { arrayCounts } from "./arrays.js";
 
 // Steel props with several plates (a plate rack, a Texas star, a dueling tree) count each plate.
-const steelCount = (o) => getProp(o.type).plates?.(o.params ?? {}) ?? 1;
+const steelCount = (o) => PROPS[o.type].plates?.(o.params ?? {}) ?? 1;
 
 export function stageStats(stage, rules = SCORING) {
   let paper = 0, steel = 0, noShoots = 0;
   for (const o of stage.objects) {
-    const kind = getProp(o.type).scoring;
+    if (!Object.hasOwn(PROPS, o.type)) continue;      // an unknown prop (old or damaged data) counts as nothing
+    const kind = PROPS[o.type].scoring;
     if (kind === "paper") { const c = arrayCounts(o); paper += c.paper; noShoots += c.noshoot; }
     else if (kind === "steel") steel += steelCount(o);
   }
