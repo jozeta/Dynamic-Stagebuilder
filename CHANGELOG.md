@@ -4,6 +4,8 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- The New match window's button reads *Create match* (still *Save match* when editing a match).
+
 - *New stage* is gone from the Projects panel: a new stage is made with *Create new stage* in the
   greyed view (after *Close stage*), or *New stage in this match*. That button is now the side
   panels' grey button.

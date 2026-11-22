@@ -30,7 +30,7 @@ export function createMatches({ store, currentId, onOpen, onNewStage, onCreateFr
     const taken = inOtherMatches(await listMatches(), m?.id ?? "");
     const own = records.map((r) => ({ id: r.id, name: r.name, inMatch: taken.get(r.id) }));
     const items = (m?.stageIds ?? []).filter((id) => byId.has(id)).map((id) => ({ key: `own:${id}`, name: byId.get(id).name || "Untitled stage" }));
-    const r = await openMatchEditor({ title: m ? "Edit match" : "New match", name: m?.name ?? "", items, own });
+    const r = await openMatchEditor({ title: m ? "Edit match" : "New match", name: m?.name ?? "", items, own, action: m ? "Save match" : "Create match" });
     if (!r) return;
     // Example and library stages become new projects; your own stages are used as they are.
     const ids = [];

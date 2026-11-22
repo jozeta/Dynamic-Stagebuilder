@@ -11,7 +11,7 @@ let n = 0;
 /**
  * @param {{ title: string, name?: string, items?: {key: string, name: string}[], own: {id: string, name: string, inMatch?: string}[] }} o
  */
-export function openMatchEditor({ title, name = "", items = [], own }) {
+export function openMatchEditor({ title, name = "", items = [], own, action = "Save match" }) {
   return new Promise((resolve) => {
     const id = `match-ed-${++n}`;
     let list = [...items];
@@ -74,12 +74,12 @@ export function openMatchEditor({ title, name = "", items = [], own }) {
           h("div", { class: "match-ed-add" }, [pick, addB])]),
         h("span", { class: "lg-label", text: "Stages, in order" }),
         listBox,
-        h("p", { class: "lg-muted hint-text", text: "The example and library stages are saved as new projects when you save the match. Each stage gets the match name and its number in its briefing." }),
+        h("p", { class: "lg-muted hint-text", text: "The example and library stages are saved as new projects when the match is saved. Each stage gets the match name and its number in its briefing." }),
         error,
       ]),
       h("div", { class: "lg-modal-actions" }, [
         h("button", { type: "button", class: "lg-btn", onclick: () => dialog.close(), text: "Cancel" }),
-        h("button", { type: "submit", class: "lg-btn lg-btn-primary" }, [icon("check"), "Save match"]),
+        h("button", { type: "submit", class: "lg-btn lg-btn-primary" }, [icon("check"), action]),
       ]),
     ]);
     const dialog = h("dialog", { class: "lg-modal match-editor", "aria-labelledby": `${id}-title` }, [form]);
