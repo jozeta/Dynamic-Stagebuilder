@@ -4,6 +4,10 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- A new stage is clean: no props, no lines and the default surroundings and light. It used to take
+  over the open stage's surroundings, so an Industrial hall or your own surroundings' buildings and
+  walls came along.
+
 - The stage's name shows over the 3D view, between the view buttons and the camera arrows, in white
   with a thin black outline and no background (just under the view buttons when the view is too
   narrow for both). It follows renames at once.

@@ -398,11 +398,9 @@ async function addProject(stage) {
 }
 // A library stage opens in the surroundings and light you're using now.
 const withView = (s) => { const cur = editor.stage().settings; return { ...s, settings: { ...s.settings, environment: cur.environment, look: cur.look } }; };
-const freshStage = (name = "New stage") => {
-  const s = createStage({ name });
-  const cur = editor.stage().settings;
-  return { ...s, settings: { ...s.settings, environment: cur.environment, look: cur.look } };
-};
+// A new stage is clean: no props, no lines, and the default surroundings and light (it does not take
+// over the open stage's surroundings, which may be a hall or your own buildings).
+const freshStage = (name = "New stage") => createStage({ name });
 
 // A match writes its name and the stage's number into the stage's briefing. The open stage gets it
 // through the editor (so autosave keeps it); others in their saved record. With onlyIf, only when
