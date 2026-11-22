@@ -23,14 +23,17 @@ export function createProjects({ panel, docked = false, hide = [], onToggle = ()
   async function closeWhat() {
     const m = mode();
     if (m === "match") return closeMatch();
-    if (m === "stage") {
-      const inMatch = matches.contextId;               // a stage opened through its match: back to that match
-      await onCloseStage();
-      if (inMatch && (await matches.list()).some((x) => x.id === inMatch)) await matches.show(inMatch); else { matches.showList(); matches.leaveMatch(); }
-      await fill();
-      return;
-    }
+    if (m === "stage") return closeStageHere();
+
     close();
+  }
+  // Save and close the open stage: back to its match's page when you came through the match, else to
+  // the start of Projects (also used by the Stage panel's Close stage).
+  async function closeStageHere() {
+    const inMatch = matches.contextId;
+    await onCloseStage();
+    if (inMatch && (await matches.list()).some((x) => x.id === inMatch)) await matches.show(inMatch); else { matches.showList(); matches.leaveMatch(); }
+    await fill();
   }
   async function closeMatch() {
     await onCloseStage();
@@ -222,6 +225,8 @@ export function createProjects({ panel, docked = false, hide = [], onToggle = ()
     /** Shown by the dock (its tab clicked): fill it and count as open, without toggling. */
     async ensureOpen() { if (isOpen) return; say(""); matches.showList(); await fill(); try { fillLibrary(); } catch (err) { console.error("Stage library:", err); } show(true); },
     get isOpen() { return isOpen; },
+    /** Save and close the open stage (the Stage panel's Close stage). */
+    closeStage: () => closeStageHere(),
     /** Bring an open panel up to date (a stage made or closed elsewhere). */
     async refresh() { if (isOpen) await fill(); },
     /** The match you are working in (its page, or a stage opened from it), or null. */

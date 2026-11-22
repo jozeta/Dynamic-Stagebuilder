@@ -551,3 +551,6 @@ body { background: var(--lg-bg); overflow: hidden; }
 .lib-stage.icon-row { grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px; padding: 6px 6px 6px 10px; }
 .stage-info-meta { margin: 0 0 6px; color: var(--lg-muted); }
 .stage-info-text { margin: 0; line-height: 1.45; }
+
+.brief-slot { display: grid; gap: var(--lg-space-xs); }
+.brief-slot .close-stage-btn { order: 2; }      /* under Written stage briefing… */

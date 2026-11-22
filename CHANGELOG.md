@@ -4,6 +4,10 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- The right-hand Stage panel has *Close stage* under *Written stage briefing…*: it saves and closes
+  the stage like *Close stage* in Projects (back to its match when you came through one). With no
+  stage open both buttons hide.
+
 - Stage library: each card shows just the name, with an *open as a new project* icon and an ⓘ on the
   right; the category, rounds and description show in the ⓘ's box (hover, tap or focus). In your
   stage list too, the ⓘ is the last icon.

@@ -623,6 +623,10 @@ function updateBlankCover() {
   if (noStage) blankCover.querySelector(".blank-cover-label").textContent = projects?.matchContext() ? "Create new stage within this match" : "Create new stage";
 }
 updaters.push(updateBlankCover);
+// The Stage panel (nothing selected) has Close stage under the briefing: saves and closes the stage.
+const closeStageB = h("button", { type: "button", class: "lg-btn brief-btn close-stage-btn", onclick: () => projects?.closeStage() }, [icon("x"), "Close stage"]);
+document.getElementById("brief-slot")?.append(closeStageB);
+updaters.push(() => { closeStageB.hidden = noStage; const wsb = document.querySelector("#brief-slot .brief-btn:not(.close-stage-btn)"); if (wsb) wsb.hidden = noStage; });
 updaters.push((state) => { const name = noStage ? "No stage open" : state.history.present.name || "Untitled stage"; if (stageTitle.textContent !== name) stageTitle.textContent = name; requestAnimationFrame(placeStageTitle); });
 new ResizeObserver(() => placeStageTitle()).observe(document.querySelector(".viewport-wrap"));
 // Turning the view (left drag on empty ground, one finger) with something selected turns it round
