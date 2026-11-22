@@ -1,7 +1,7 @@
 // Service worker: makes the app work offline. It caches only the app's own files, under a cache
 // named after the app version; a new version installs a new cache and deletes the old ones.
 // The file list is checked by tests/pwa.test.mjs: add new app files here.
-const VERSION = "0.10.0";
+const VERSION = "0.10.1";
 const CACHE = `dsb-${VERSION}`;
 const FILES = [
   "./",

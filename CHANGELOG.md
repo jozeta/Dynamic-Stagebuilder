@@ -4,6 +4,11 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+## 0.10.1 (2026-11-22)
+
+- Props panel: *Walls* and *Paper* come right under *Stage markings*, and only those three groups
+  start open; the rest start folded (the groups you open or fold are still remembered).
+
 ## 0.10.0 (2026-11-22)
 
 - The New match window's button reads *Create match* (still *Save match* when editing a match).
