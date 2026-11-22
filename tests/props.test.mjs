@@ -9,7 +9,7 @@ const TYPES = ["paper-ipsc", "paper-mini", "popper", "mini-popper",
   "wall-solid", "ramp", "platform", "car", "table", "chair", "bed", "sofa", "office-desk", "dining-set", "coffee-table", "pallet", "sandbags", "cone",
   "swinger", "drop-turner", "clamshell", "mover", "texas-star", "plate-rack", "dueling-tree", "shooting-position", "door",
   "step-pad", "pull-lever", "start-marks", "wall-port-shutter", "hardcover-panel", "raised-barricade", "bobber", "twister", "wobble-platform", "balance-rope", "step-box",
-  "building-wall", "pillar", "column", "berm", "container", "fence", "barrier"];
+  "building-wall", "pillar", "berm", "container", "fence", "barrier"];
 
 const near = (a, b, tol = 0.005) => assert.ok(Math.abs(a - b) <= tol, `${a} ≈ ${b}`);
 const obj = (old, oldParams = {}) => { const { type, params } = upgradeProp(old, oldParams); return { type, params: { ...defaultParams(type), ...params } }; };

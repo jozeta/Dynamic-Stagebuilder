@@ -153,12 +153,14 @@ const UPGRADES = {
   "wall-door": ["wall-mesh", { length: 1.5, height: 2.2 }, { variant: "doorway" }],
   "wall-port": ["wall-wood", { length: 2, height: 2 }, { variant: "port" }],
   "tyre-stack": ["tyre", {}, {}],
+  // A round column's diameter is the round pillar's size.
+  column: ["pillar", {}, { shape: "round" }, ({ diameter, ...rest }) => (diameter === undefined ? rest : { ...rest, size: diameter })],
 };
 /** { type, params } for a prop that may have been saved under an older type. */
 export function upgradeProp(type, params = {}) {
   const u = Object.hasOwn(UPGRADES, type) ? UPGRADES[type] : null;
   if (!u) return { type, params };
-  return { type: u[0], params: { ...u[1], ...params, ...u[2] } };
+  return { type: u[0], params: { ...u[1], ...(u[3] ? u[3](params) : params), ...u[2] } };
 }
 
 const defs = [
@@ -218,9 +220,9 @@ const defs = [
     params: { length: { default: 5, min: 0.5, max: 30, step: 0.1 }, height: { default: 3, min: 0.5, max: 8, step: 0.1 },
       thickness: { default: 0.25, min: 0.1, max: 0.8, step: 0.05 }, ...MATERIAL } },
   { type: "pillar", name: "Pillar", category: "building", scoring: null,
-    params: { size: { default: 0.4, min: 0.15, max: 1.5, step: 0.05 }, height: { default: 3, min: 0.5, max: 8, step: 0.1 }, ...MATERIAL } },
-  { type: "column", name: "Round column", category: "building", scoring: null,
-    params: { diameter: { default: 0.4, min: 0.15, max: 1.5, step: 0.05 }, height: { default: 3, min: 0.5, max: 8, step: 0.1 }, ...MATERIAL } },
+    params: { shape: { default: "square", options: ["square", "round"] }, size: { default: 0.4, min: 0.15, max: 1.5, step: 0.05 },
+      height: { default: 3, min: 0.5, max: 8, step: 0.1 }, ...MATERIAL },
+    note: "Square or round; Size is its width or diameter." },
   { type: "berm", name: "Earth berm", category: "building", scoring: null,
     params: { length: { default: 10, min: 2, max: 60, step: 0.5 }, height: { default: 2.5, min: 0.5, max: 8, step: 0.1 }, depth: { default: 5, min: 1, max: 16, step: 0.5 },
       ground: { default: "auto", options: ["auto", "sand", "light-sand", "dark-sand", "red-dirt", "gravel"] }, plants: { default: "mixed", options: ["mixed", "grass", "none"] } },
@@ -349,7 +351,6 @@ export function dimensionsOf(obj) {
     case "balance-rope": [w, h, d] = [0.8, 2.4, 0.5]; break;
     case "step-box": [w, h, d] = [0.6, 0.2, 0.3]; break;
     case "pillar": [w, h, d] = [p.size, p.height, p.size]; break;
-    case "column": [w, h, d] = [p.diameter, p.height, p.diameter]; break;
     case "berm": { const [bl, bd] = bermSize(obj); [w, h, d] = [bl, p.height, bd]; break; }
     case "container": { const c = CONTAINERS[p.size] || CONTAINERS["20ft"]; [w, h, d] = [c.length, c.height, c.width]; break; }
     case "fence": [w, h, d] = [p.length, p.height, 0.5]; break;

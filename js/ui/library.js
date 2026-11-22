@@ -52,8 +52,7 @@ function sizeText(type) {
     case "step-box": return "60 × 30 × 20 cm";
     case "door": return `${cm(p.doorWidth)} × ${cm(p.height)} cm, opens`;
     case "building-wall": return `${p.length} × ${p.height} m, concrete, brick, wood or metal`;
-    case "pillar": return `${cm(p.size)} cm square, ${p.height} m`;
-    case "column": return `Ø ${cm(p.diameter)} cm, ${p.height} m`;
+    case "pillar": return `${cm(p.size)} cm, square or round, ${p.height} m`;
     case "berm": return `${p.length} m long, ${p.height} m high`;
     case "container": return "20 ft or 40 ft";
     case "fence": return `${p.length} × ${p.height} m`;

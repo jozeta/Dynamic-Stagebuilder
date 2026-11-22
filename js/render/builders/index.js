@@ -6,7 +6,7 @@ import { buildMeshWall, buildWoodWall, buildSolidWall, buildDoor, buildPortShutt
 import { buildStepPad, buildPullLever, buildStartMarks, buildBobber, buildTwister, buildWobblePlatform, buildBalanceRope, buildStepBox } from "./nationals.js";
 import { buildRamp, buildPlatform, buildTable, buildChair, buildPallet, buildSandbags, buildCone } from "./furniture.js";
 import { buildCar } from "./car.js";
-import { buildBuildingWall, buildPillar, buildColumn, buildContainer, buildFence, buildBarrier } from "./building.js";
+import { buildBuildingWall, buildPillar, buildContainer, buildFence, buildBarrier } from "./building.js";
 import { buildBerm } from "./berm.js";
 import { buildBed, buildSofa, buildOfficeDesk, buildDiningSet, buildCoffeeTable } from "./home.js";
 import { buildShootingPosition } from "./position.js";
@@ -24,7 +24,7 @@ const BUILDERS = {
   ramp: buildRamp, platform: buildPlatform, car: buildCar, table: buildTable, chair: buildChair,
   pallet: buildPallet, sandbags: buildSandbags, cone: buildCone,
   "shooting-position": buildShootingPosition,
-  "building-wall": buildBuildingWall, pillar: buildPillar, column: buildColumn, berm: buildBerm, bed: buildBed, sofa: buildSofa, "office-desk": buildOfficeDesk, "dining-set": buildDiningSet, "coffee-table": buildCoffeeTable, container: buildContainer, fence: buildFence, barrier: buildBarrier,
+  "building-wall": buildBuildingWall, pillar: buildPillar, berm: buildBerm, bed: buildBed, sofa: buildSofa, "office-desk": buildOfficeDesk, "dining-set": buildDiningSet, "coffee-table": buildCoffeeTable, container: buildContainer, fence: buildFence, barrier: buildBarrier,
   swinger: buildSwinger, "drop-turner": buildDropTurner, clamshell: buildClamshell, mover: buildMover,
   "texas-star": buildTexasStar, "plate-rack": buildPlateRack, "dueling-tree": buildDuelingTree,
 };

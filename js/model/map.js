@@ -93,7 +93,7 @@ export function mapModel(stage, { width, height, margin = 4, region = "bay" }) {
     const [x, y] = pt(o.position);
     const d = dimensionsOf(o);
     const st = style(o);
-    if (ROUND.has(o.type)) {
+    if (ROUND.has(o.type) || (o.type === "pillar" && o.params?.shape === "round")) {
       const diameter = o.type === "plate-round" ? o.params.size : d.w;
       items.push({ kind: "circle", x, y, r: Math.max((diameter / 2) * scale, 0.6), style: st });
     } else {

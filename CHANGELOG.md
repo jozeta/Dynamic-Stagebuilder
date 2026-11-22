@@ -9,6 +9,8 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
   are 1 m wide to start. A *Port* switch adds or removes the port, and the port moves left/right
   and up/down besides its width and height; the port's and the door's settings show only when they
   apply. Sight lines pass through the port where it is.
+- Pillars: *Pillar* and *Round column* are one prop, *Pillar*, with a *Shape* (square or round);
+  Size is its width or diameter. Old round columns (also in your own surroundings) open as round pillars.
 - Tyres: *Tyre* and *Tyre stack* are one prop, *Tyres*, with a count (1 to 6).
 - Stages saved with the old props open as the new ones, at their old sizes.
 

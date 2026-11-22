@@ -2,7 +2,7 @@
 // scale, and building pieces (walls, pillars, berms…) that rebuild the range on it. Saved as a
 // template ("custom:<id>") that any stage can choose in Settings. Pure: no DOM, no Three.js.
 // Templates come from browser storage, so cleanTemplate() checks everything before use.
-import { PROPS } from "./props.js";
+import { PROPS, upgradeProp } from "./props.js";
 import { addObject } from "./stage.js";
 import { cleanDrawing } from "./plan-draw.js";
 
@@ -34,8 +34,11 @@ export function planSize(plan) {
 
 const num = (v, lo, hi) => (typeof v === "number" && Number.isFinite(v) && v >= lo && v <= hi ? v : null);
 
-function cleanPiece(p) {
-  if (!p || typeof p !== "object" || typeof p.type !== "string" || !BUILDING_TYPES.includes(p.type)) return null;
+function cleanPiece(raw) {
+  if (!raw || typeof raw !== "object" || typeof raw.type !== "string") return null;
+  const u = upgradeProp(raw.type, raw.params && typeof raw.params === "object" ? raw.params : {});   // a round column is a round pillar now
+  const p = { ...raw, type: u.type, params: u.params };
+  if (!BUILDING_TYPES.includes(p.type)) return null;
   const pos = Array.isArray(p.position) && p.position.length === 2 ? p.position.map((v) => num(v, -LIMITS.offset, LIMITS.offset)) : [null];
   if (pos.some((v) => v === null)) return null;
   const params = {};

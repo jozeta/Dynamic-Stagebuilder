@@ -60,7 +60,7 @@ function assertWorldScale(mesh, m) {
 
 test("pillar, column and building wall map their texture in metres on every face", () => {
   for (const material of ["brick", "concrete", "wood", "metal"]) {
-    for (const [type, p] of [["pillar", { size: 0.4, height: 3 }], ["pillar", { size: 1.2, height: 6 }], ["column", { diameter: 0.6 }], ["building-wall", { length: 7, height: 3.5 }]]) {
+    for (const [type, p] of [["pillar", { size: 0.4, height: 3 }], ["pillar", { size: 1.2, height: 6 }], ["pillar", { shape: "round", size: 0.6 }], ["building-wall", { length: 7, height: 3.5 }]]) {
       const g = buildProp(obj(type, { ...p, material }));
       const body = meshes(g).filter((c) => c.material === getMaterial(`bld-${material}`));
       assert.ok(body.length >= 1, `${type} uses bld-${material}`);

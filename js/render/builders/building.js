@@ -31,21 +31,19 @@ export function buildBuildingWall(obj) {
   return g;
 }
 
+/** A pillar: square (Size its width) or round (Size its diameter). */
 export function buildPillar(obj) {
-  const { size, height, material } = obj.params;
+  const { shape, size, height, material } = obj.params;
   const g = group(obj.id);
+  if (shape === "round") {
+    const geo = new THREE.CylinderGeometry(size / 2, size / 2, height, 32, rows(height));
+    geo.translate(0, height / 2, 0);
+    g.add(weathered(geo, mat(material), { height, seed: 31, wrapRadius: size / 2 }));
+    return g;
+  }
   const geo = new THREE.BoxGeometry(size, height, size, 1, rows(height), 1);
   geo.translate(0, height / 2, 0);
   g.add(weathered(geo, mat(material), { height, seed: 23 }));
-  return g;
-}
-
-export function buildColumn(obj) {
-  const { diameter, height, material } = obj.params;
-  const g = group(obj.id);
-  const geo = new THREE.CylinderGeometry(diameter / 2, diameter / 2, height, 32, rows(height));
-  geo.translate(0, height / 2, 0);
-  g.add(weathered(geo, mat(material), { height, seed: 31, wrapRadius: diameter / 2 }));
   return g;
 }
 

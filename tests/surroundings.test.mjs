@@ -38,7 +38,7 @@ test("custom surroundings are named custom:<id>; the stage file accepts them", (
 });
 
 test("building pieces: walls, pillars, columns, berms, containers, fences and barriers", () => {
-  assert.deepEqual(BUILDING_TYPES, ["building-wall", "pillar", "column", "berm", "container", "fence", "barrier"]);
+  assert.deepEqual(BUILDING_TYPES, ["building-wall", "pillar", "berm", "container", "fence", "barrier"]);
   for (const t of BUILDING_TYPES) {
     assert.equal(PROPS[t].category, "building", t);
     assert.equal(PROPS[t].scoring, null, t);
@@ -48,7 +48,7 @@ test("building pieces: walls, pillars, columns, berms, containers, fences and ba
   assert.deepEqual(dimensionsOf({ type: "container", params: { ...defaultParams("container"), size: "40ft" } }), { w: 12.19, h: 2.59, d: 2.44 });
 });
 
-for (const t of ["building-wall", "pillar", "column", "berm", "container", "fence", "barrier"]) {
+for (const t of ["building-wall", "pillar", "berm", "container", "fence", "barrier"]) {
   test(`${t} is drawn at its real size`, () => {
     for (const extra of [{}, t === "building-wall" ? { material: "brick", length: 12, height: 4 } : t === "container" ? { size: "40ft", color: "rust" } : {}]) {
       const o = { id: "b", type: t, position: [0, 0], rotation: 0, params: { ...defaultParams(t), ...extra } };

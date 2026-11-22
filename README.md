@@ -65,7 +65,7 @@ training, and want a clear briefing sheet without drawing the map by hand.
 - **Your own surroundings** from a blueprint or site plan, measured with one known length. Draw
   its walls, doors and windows over the plan (snapping, Force 90°, a Move tool with arrow-key
   nudging), set their heights or cut them at a height, and pick a realistic wall surface and door
-  leaf; they are built in 3D. Add building pieces (walls, pillars, columns, earth berms you can
+  leaf; they are built in 3D. Add building pieces (walls, square or round pillars, earth berms you can
   draw, containers, fences, barriers) and save it all as a template.
 - **Activation links** from poppers, plates, step pads and pull levers to the moving targets they
   start, listed in the briefing.
