@@ -13,10 +13,10 @@ test("align left goes to the shooter's left (+x), right to the shooter's right",
 });
 
 test("mirroring swaps left and right no-shoots and hard cover", () => {
-  const a = addObject(createStage(), "paper-ipsc", [2, 8], 0, { presentation: "ns-left", hardCover: "left-1/2" });
+  const a = addObject(createStage(), "paper-ipsc", [2, 8], 0, { layout: "side-left", card1: "target:left-1/2", card2: "noshoot" });
   const p = mirrorStage(a.stage, null).objects[0].params;
-  assert.equal(p.presentation, "ns-right");
-  assert.equal(p.hardCover, "right-1/2");
+  assert.equal(p.layout, "side-right");
+  assert.equal(p.card1, "target:right-1/2");
 });
 
 test("a match's name and number on the open stage are not undo steps, and undo keeps them", () => {

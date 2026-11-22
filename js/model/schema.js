@@ -23,7 +23,7 @@ function migrateObject(o) {
   // Walls and tyres saved as separate props (with port, doorway, stack) are one prop with a choice now.
   if (typeof o.type === "string") { const u = upgradeProp(o.type, isObj(o.params) ? o.params : {}); if (u.type !== o.type || (isObj(o.params) && u.params !== o.params)) o = { ...o, type: u.type, params: u.params }; }
   if (!Object.hasOwn(OLD_NOSHOOTS, o.type)) return o;
-  return { ...o, type: OLD_NOSHOOTS[o.type], params: { ...(isObj(o.params) ? o.params : {}), presentation: "noshoot" } };
+  return { ...o, type: OLD_NOSHOOTS[o.type], params: { ...(isObj(o.params) ? o.params : {}), layout: "single", card1: "noshoot" } };
 }
 
 export function validateStage(json) {

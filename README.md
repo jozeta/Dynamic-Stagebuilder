@@ -26,10 +26,12 @@ training, and want a clear briefing sheet without drawing the map by hand.
   - stage markings (first in the panel): fault lines, shooting areas, the start position and
     numbered shooting positions with a facing, look angle and stance
   - paper: IPSC target and mini target, each in two versions, Classic (octagon, 45 × 57 cm) or
-    With head (46 × 76 cm), on sticks with an adjustable stand height. Each one can be a target, a
-    no-shoot or a common competition array (no-shoots over a side or the lower half, between two
-    no-shoots, overlapping targets, two targets with a no-shoot between, stacked), with painted
-    hard cover (lower ¼, ⅓ or ½, left or right half, lower diagonal)
+    With head (46 × 76 cm), on sticks with an adjustable stand height. Each one is a layout of one
+    to three cards from the IPSC Target Array Book (one card; two side by side, overlapping or one
+    above the other; one in front over the lower half or a side; three side by side; three in a
+    row with the middle one in front or behind; one between two; two with one above), and each card
+    is a target or a no-shoot, with or without painted hard cover (lower ¼, ⅓ or ½, left or right
+    half, lower diagonal)
   - moving and reactive: swinger, drop turner, clamshell, mover on a track (up to four cards),
     bobber, twister, Texas star (5 or 10 plates), plate rack, dueling tree (the last three are
     marked as not allowed in IPSC)
@@ -264,8 +266,8 @@ Stage settings are in the inspector when nothing is selected. They are saved wit
 | Camera view | Remembered per project as you move the camera (per browser) | The Isometric overview |
 
 Prop settings (inspector, one prop selected): label (targets), rotation, and per prop: stand height
-for paper targets (0.1–2 m, default 0.7 m to the lowest card's bottom), presentation (target,
-no-shoot or an array; default target), hard cover (default none), target style (Classic or With head), base height for steel, plate size
+for paper targets (0.1–2 m, default 0.7 m to the lowest card's bottom), layout (default one
+card) and what each card is (target or no-shoot, with or without hard cover; default target), target style (Classic or With head), base height for steel, plate size
 (15–30 cm), wall length (0.5–4 m) and height (0.5–2.5 m), mesh colour (black/blue), frame
 (wood/black), port width, height and bottom edge, door width and height, paint for poppers and
 plates (white/yellow), plates on a Texas star (5 or 10) or plate rack (4–8), mover track length
@@ -294,10 +296,12 @@ walls* off in the right-click menu (a long press on an iPad) to place walls free
 grid* off to stop grid snapping. For fine adjustments, hold
 **Shift** while you drag: the prop moves at a fifth of the speed and doesn't snap.
 
-**Set up targets and arrays.** Select an IPSC or mini target and pick a *Presentation*: target,
-no-shoot, or a common array (no-shoots over a side or the lower half, between two no-shoots,
-overlapping, two targets with a no-shoot between, stacked). *Hard cover* paints part of the first
-card black. The inspector warns when the top of the array is above 1.8 m (1.6 m for mini targets),
+**Set up targets and arrays.** Select an IPSC or mini target and pick its *Layout*: where its cards
+are (one card, two side by side, two one above the other, three side by side, and the overlaps from
+the IPSC Target Array Book). One dropdown per card then appears, named by its place (*Left*,
+*Upper (behind)*, *Middle (in front)*…): choose *Target* or *No-shoot*, each also with hard cover
+(lower ¼, ⅓ or ½, left or right half, lower diagonal). A new layout starts with its usual cards,
+such as a no-shoot in front. The inspector warns when the top of the array is above 1.8 m (1.6 m for mini targets),
 the IPSC limit. Moving and reactive targets (swinger, drop turner, clamshell, mover, Texas star,
 plate rack, dueling tree) are in their own group.
 

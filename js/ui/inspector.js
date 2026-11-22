@@ -3,7 +3,7 @@
 import { h, icon } from "./dom.js";
 import { getProp, propName } from "../model/props.js";
 import { labelPrefix } from "../model/numbering.js";
-import { PRESENTATIONS, HARD_COVERS, arrayIssues } from "../model/arrays.js";
+import { LAYOUTS, CARD_KINDS, CARD_PARAMS, layoutOf, cardKinds, arrayIssues } from "../model/arrays.js";
 import { canBeActivated, isActivator, activatorsFor, activatorOf, activationLinks, describe } from "../model/activation.js";
 import { isLocked } from "../model/layers.js";
 import { sightFrom, safetyRings } from "../model/safety.js";
@@ -12,7 +12,7 @@ import { BAY_SHAPE_NAMES, bayShapeFields as shapeFieldsOf } from "../model/bay.j
 
 const PARAM_LABELS = {
   kind: "Popper",
-  presentation: "Presentation", hardCover: "Hard cover", mountHeight: "Stand height (m)", style: "Target style", baseHeight: "Base height (m)", size: "Size (m)", length: "Length (m)",
+  layout: "Layout", mountHeight: "Stand height (m)", style: "Target style", baseHeight: "Base height (m)", size: "Size (m)", length: "Length (m)",
   height: "Height (m)", mesh: "Mesh colour", frame: "Frame", portWidth: "Port width (m)",
   portHeight: "Port height (m)", portBottom: "Port up/down: bottom edge (m)", portOffset: "Port left/right (m, + left)", variant: "Type", shape: "Shape", count: "Count", paint: "Paint", color: "Colour", width: "Width (m)", rows: "Rows",
   doorWidth: "Door width (m)", ground: "Surface", plants: "Plants", plates: "Plates", model: "Model", stance: "Stance", pads: "Pads", stack: "Drums high", items: "On the table", targets: "Targets on the carrier", shutter: "Shutter", panelHeight: "Panel height (m)", gap: "Gap underneath (m)", open: "Open (°)", hinge: "Hinge side", swing: "Opens", animate: "Animate (moves when Play is on)", thickness: "Thickness (m)", material: "Material", diameter: "Diameter (m)", depth: "Base depth (m)", pitch: "Look up/down (°)", doorHeight: "Door height (m)",
@@ -21,7 +21,7 @@ const PARAM_LABELS = {
 const sizeLabel = (type, v) => { const c = Math.round(v * 100); return type === "plate-round" ? `Ø ${c} cm` : `${c} × ${c} cm`; };
 const OPTION_LABELS = { ipsc: "IPSC popper (85 cm)", mini: "Mini popper (57 cm)", square: "Square", round: "Round", classic: "Classic (octagon)", head: "With head", orange: "Orange", black: "Black", blue: "Blue", wood: "Wood", white: "White", yellow: "Yellow", red: "Red",
   green: "Green", grey: "Grey", auto: "Same as the ground", sand: "Sand", "light-sand": "Light sand", "dark-sand": "Dark sand", "red-dirt": "Red dirt", gravel: "Gravel", mixed: "Grass and bushes", grass: "Grass only", rust: "Rusty", concrete: "Concrete", brick: "Brick", metal: "Metal", "20ft": "20 ft", "40ft": "40 ft", left: "Left", right: "Right", away: "Away from the shooter", toward: "Toward the shooter", closed: "Closed", open: "Open", none: "Nothing", pistol: "Pistol", "pistol-mags": "Pistol and magazines", case: "Gun case (closed)", standing: "Standing", crouching: "Crouching", kneeling: "Kneeling", sitting: "Sitting", prone: "Prone", sedan: "Saloon", hatchback: "Hatchback", pickup: "Pickup", van: "Van",
-  ...Object.fromEntries([...PRESENTATIONS, ...HARD_COVERS].map((p) => [p.id, p.name])) };
+};
 // Furniture options, named by parameter (a sofa's "2" is two seats, a dining set's "2" two chairs).
 const FURNITURE_LABELS = {
   "size:single": "Single (90 × 200 cm)", "size:double": "Double (160 × 200 cm)", "size:small": "Small (120 × 60 cm)", "size:medium": "Medium (140 × 70 cm)", "size:large": "Large (160 × 80 cm)",
@@ -79,6 +79,15 @@ export function createInspector(root, { editor, shapes = { list: () => [], draw:
       if (o.type === "berm" && o.outline && (k === "length" || k === "depth")) continue;      // a drawn berm's size is its drawing
       // Options for one choice only (a wall's port or door settings): shown when that is chosen.
       if (spec.when && !Object.entries(spec.when).every(([wk, wv]) => o.params[wk] === wv)) continue;
+      // A paper target: its layout, then one choice per card of that layout, named by its place.
+      if (CARD_PARAMS.includes(k)) continue;
+      if (k === "layout") {
+        nodes.push(field("Layout", select(k, layoutOf(o.params).id, LAYOUTS.map((l) => [l.id, l.name]), (v) => d({ type: "setParams", id: o.id, params: { layout: v } }))));
+        const kinds = cardKinds(o.params);
+        layoutOf(o.params).cards.forEach((c, i) => nodes.push(field(layoutOf(o.params).cards.length > 1 ? c.name : "Card",
+          select(CARD_PARAMS[i], kinds[i], CARD_KINDS.map((x) => [x.id, x.name]), (v) => d({ type: "setParams", id: o.id, params: { [CARD_PARAMS[i]]: v } })))));
+        continue;
+      }
       const furniture = getProp(o.type)?.category === "furniture";
       const label = o.type === "berm" && k === "depth" ? "Depth, front to back (m)" : typeof spec.options?.[0] === "number" ? "Size" : (furniture && FURNITURE_PARAMS[k]) || PARAM_LABELS[k] || k;
       const set = (v) => d({ type: "setParams", id: o.id, params: { [k]: v } });

@@ -5,7 +5,7 @@ import { createStage, addObject, updateObject, removeObjects, duplicateObjects, 
   setSetting, setBay, setBriefing, pruneSelection } from "./model/stage.js";
 import { createHistory, commit, replacePresent, undo, redo } from "./model/history.js";
 import { assignLabels, renumber, setLabel, closeGaps } from "./model/numbering.js";
-import { fitStand, arrayCounts, arrayExtent } from "./model/arrays.js";
+import { fitStand, arrayCounts, arrayExtent, layoutDefaults, CARD_PARAMS } from "./model/arrays.js";
 import { takeBuildingPieces, putBackPieces } from "./model/surroundings.js";
 import { snapPoint, snapAngle, clampToBay, gridOrigin } from "./model/snap.js";
 import { isRect, insideBay, isDrawn, onFloor, recentredRows } from "./model/bay.js";
@@ -202,14 +202,17 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
       if (!o) return;
       const clean = cleanParams(o.type, params);
       if (!Object.keys(clean).length) return;          // nothing valid: no edit, no empty undo step
-      let next = { ...o.params, ...clean };
       const paper = o.type === "paper-ipsc" || o.type === "paper-mini";
-      // A new presentation or style that would put the top over the IPSC limit lowers the stand
+      // A new layout starts with its usual cards (a target, and no-shoots where they usually go),
+      // unless the same edit says what the cards are.
+      const newLayout = paper && Object.hasOwn(clean, "layout") && clean.layout !== o.params.layout;
+      let next = { ...o.params, ...(newLayout && !CARD_PARAMS.some((k) => Object.hasOwn(clean, k)) ? layoutDefaults(clean.layout) : {}), ...clean };
+      // A new layout or style that would put the top over the IPSC limit lowers the stand
       // (a stand height set by hand is kept; the inspector then warns).
-      if (paper && !Object.hasOwn(params, "mountHeight") && (Object.hasOwn(params, "presentation") || Object.hasOwn(params, "style"))) {
-        // A new presentation keeps the top of the targets where it was: the sticks get shorter or
+      if (paper && !Object.hasOwn(params, "mountHeight") && (newLayout || Object.hasOwn(params, "style"))) {
+        // A new layout keeps the top of the targets where it was: the sticks get shorter or
         // longer instead (never below 10 cm). Then the IPSC height limit still applies.
-        if (Object.hasOwn(params, "presentation")) {
+        if (newLayout) {
           const keep = o.params.mountHeight + arrayExtent(o).top - arrayExtent({ type: o.type, params: next }).top;
           next = { ...next, mountHeight: Math.round(Math.min(2, Math.max(0.1, keep)) * 1e6) / 1e6 };
         }

@@ -4,6 +4,12 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Paper targets are set up in two steps: a *Layout* (one card, two side by side, two one above the
+  other, three side by side, and the overlaps from the IPSC Target Array Book: one in front over
+  the lower half or a side, three in a row with the middle in front or behind, one between two, two
+  with one above), then one dropdown per card: target or no-shoot, each with or without hard cover.
+  Stages saved with the old presentations open as the same cards.
+
 - The bay's width and depth go in whole metres, and the grid (and grid snapping) now starts at the
   bay's edges, so the two line up at any width, odd ones included.
 - Blueprint and Technical have a *Grid* switch beside the grid's intensity and colour; Industrial

@@ -6,7 +6,7 @@
 // (Appendix C3a). The appendix drawings are images, so these are the commonly published sizes.
 import { bermSize } from "./berm.js";
 
-import { PAPER_SIZES, TARGET_STYLES, PRESENTATIONS, HARD_COVERS, paperSize, arrayExtent } from "./arrays.js";
+import { PAPER_SIZES, TARGET_STYLES, LAYOUTS, CARD_KINDS, CARD_PARAMS, fromPresentation, paperSize, arrayExtent } from "./arrays.js";
 import { STANCES, positionSize } from "./positions.js";
 import { ANIMATE_PARAM } from "./animation.js";
 export { PAPER_SIZES, TARGET_STYLES, paperSize };
@@ -115,10 +115,10 @@ export const BARRIER = Object.freeze({ height: 0.81, base: 0.6 });
 const CARNIVAL = "USPSA and club matches; not allowed in IPSC matches (IPSC Target Array Handbook, January 2019 Edition, 4.1).";
 
 // Paper targets: the stand height (how high the sticks hold the card's bottom edge) and the style.
-// presentation: the target, a no-shoot or a combination (model/arrays.js); hardCover: painted cover.
+// layout: where the cards are; card1…card3: what each is, a target or a no-shoot, with or without hard cover (model/arrays.js).
 const mount = {
-  presentation: { default: "target", options: PRESENTATIONS.map((p) => p.id) },
-  hardCover: { default: "none", options: HARD_COVERS.map((c) => c.id) },
+  layout: { default: "single", options: LAYOUTS.map((l) => l.id) },
+  ...Object.fromEntries(CARD_PARAMS.map((k) => [k, { default: "target", options: CARD_KINDS.map((c) => c.id) }])),
   mountHeight: { default: 0.7, min: 0.1, max: 2.0, step: 0.05 },
   style: { default: "classic", options: TARGET_STYLES },
 };
@@ -168,7 +168,13 @@ export const popperSize = (params = {}) => (params.kind === "mini" ? TARGET_SIZE
 export function upgradeProp(type, params = {}) {
   const u = Object.hasOwn(UPGRADES, type) ? UPGRADES[type] : null;
   const out = u ? { type: u[0], params: { ...u[1], ...(u[3] ? u[3](params) : params), ...u[2] } } : { type, params };
-  return { type: out.type, params: nearestOptions(out.type, out.params) };
+  return { type: out.type, params: nearestOptions(out.type, paperLayout(out.type, out.params)) };
+}
+// A paper target saved with a presentation and a hard cover (before layouts) opens as the same cards.
+function paperLayout(type, params) {
+  if ((type !== "paper-ipsc" && type !== "paper-mini") || params.layout !== undefined || (params.presentation === undefined && params.hardCover === undefined)) return params;
+  const { presentation, hardCover, ...rest } = params;
+  return { ...rest, ...fromPresentation(presentation, hardCover) };
 }
 // A size that is now a choice of standard sizes (plates): a value saved before opens as the nearest.
 function nearestOptions(type, params) {

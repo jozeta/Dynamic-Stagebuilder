@@ -228,22 +228,24 @@ test("cars carry the small parts: wheel wells, wipers, mirrors, handles, aerial,
   }
 });
 
-test("every target presentation is drawn at its real size, with one card per target and no-shoot", async () => {
-  const { PRESENTATIONS, arrayCounts } = await import("../js/model/arrays.js");
+test("every target layout is drawn at its real size, with one card per target and no-shoot", async () => {
+  const { LAYOUTS, layoutDefaults, arrayCounts } = await import("../js/model/arrays.js");
+  // Each layout with its usual cards, and with every card a no-shoot.
+  const PRESENTATIONS = LAYOUTS.flatMap((l) => [{ id: l.id, params: layoutDefaults(l.id) }, { id: `${l.id} no-shoots`, params: { layout: l.id, card1: "noshoot", card2: "noshoot", card3: "noshoot" } }]);
   for (const t of ["paper-ipsc", "paper-mini"]) for (const p of PRESENTATIONS) for (const style of ["classic", "head"]) {
-    checkSize(t, { presentation: p.id, style, mountHeight: 0.4 });
-    const g = buildProp(obj(t, { presentation: p.id, style }));
+    checkSize(t, { ...p.params, style, mountHeight: 0.4 });
+    const g = buildProp(obj(t, { ...p.params, style }));
     let targets = 0, noshoots = 0;
     g.traverse((c) => { if (c.userData.card === "target") targets++; if (c.userData.card === "noshoot") noshoots++; });
-    const n = arrayCounts(obj(t, { presentation: p.id }));
+    const n = arrayCounts(obj(t, p.params));
     assert.deepEqual([targets, noshoots], [n.paper, n.noshoot], `${t} ${p.id}`);
   }
 });
 
-test("hard cover is painted black on the first card, inside its outline", async () => {
+test("hard cover is painted black on its card, inside its outline", async () => {
   const { HARD_COVERS } = await import("../js/model/arrays.js");
   for (const c of HARD_COVERS) {
-    const g = buildProp(obj("paper-ipsc", { hardCover: c.id }));
+    const g = buildProp(obj("paper-ipsc", { card1: c.id === "none" ? "target" : `target:${c.id}` }));
     const covers = [];
     g.traverse((m) => { if (m.userData.part === "cover") covers.push(m); });
     assert.equal(covers.length, c.id === "none" ? 0 : 1, c.id);

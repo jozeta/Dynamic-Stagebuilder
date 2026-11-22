@@ -1,15 +1,16 @@
 // Arranging props: mirror left to right, align, and spread evenly. Pure: no DOM, no Three.js.
 // Positions are [x, z]: x across the bay (centred, + is the shooter's left), z down range.
 import { mirrorBay } from "./bay.js";
+import { mirrorPaper } from "./arrays.js";
 
 const r3 = (v) => Math.round(v * 1000) / 1000 + 0;          // + 0 turns −0 into 0
 const norm = (deg) => ((Math.round(deg) % 360) + 360) % 360;
 const SWAP = { left: "right", right: "left" };
 // Left/right parameter values that a mirror swaps: door hinges, no-shoots over one side, side hard cover.
-const MIRRORED = { "ns-left": "ns-right", "ns-right": "ns-left", "left-1/2": "right-1/2", "right-1/2": "left-1/2" };
-const PARAM_SWAPS = { hinge: SWAP, presentation: MIRRORED, hardCover: MIRRORED };
-function mirroredParams(params) {
+const PARAM_SWAPS = { hinge: SWAP };
+function mirroredParams(params, type) {
   if (!params) return params;
+  if (type === "paper-ipsc" || type === "paper-mini") return mirrorPaper(params);      // layout, card places and side covers
   let out = params;
   for (const [k, map] of Object.entries(PARAM_SWAPS)) if (map[params[k]]) out = { ...out, [k]: map[params[k]] };
   return out;
@@ -34,7 +35,7 @@ export function mirrorStage(stage, ids, skip = new Set()) {
   const fx = (x) => r3(2 * c - x);
   const objects = stage.objects.map((o) => {
     if (!takes(o.id)) return o;
-    const params = mirroredParams(o.params);
+    const params = mirroredParams(o.params, o.type);
     return { ...o, position: [fx(o.position[0]), o.position[1]], rotation: norm(-o.rotation), params,
       ...(o.via ? { via: o.via.map(([x, z]) => [fx(x), z]) } : {}) };
   });

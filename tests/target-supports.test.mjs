@@ -4,7 +4,9 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { Box3 } from "three";
 import { defaultParams, STAND } from "../js/model/props.js";
-import { PRESENTATIONS, arrayCards } from "../js/model/arrays.js";
+import { LAYOUTS, layoutDefaults, arrayCards } from "../js/model/arrays.js";
+// Every layout with its usual cards.
+const PRESENTATIONS = LAYOUTS.map((l) => ({ id: l.id, params: layoutDefaults(l.id) }));
 import { buildProp } from "../js/render/builders/index.js";
 
 const obj = (type, params = {}) => ({ id: `t-${type}`, type, position: [0, 10], rotation: 0, params: { ...defaultParams(type), ...params } });
@@ -25,7 +27,7 @@ function floating(g) {
 }
 
 const CASES = [
-  ...PRESENTATIONS.flatMap((p) => ["paper-ipsc", "paper-mini"].flatMap((type) => ["classic", "head"].map((style) => [type, { presentation: p.id, style }]))),
+  ...PRESENTATIONS.flatMap((p) => ["paper-ipsc", "paper-mini"].flatMap((type) => ["classic", "head"].map((style) => [type, { ...p.params, style }]))),
   ["popper", {}], ["popper", { baseHeight: 0.5 }], ["popper", { kind: "mini", baseHeight: 0.3 }], ["plate-round", {}], ["plate-square", {}],
   ["swinger", {}], ["drop-turner", {}], ["clamshell", {}], ["mover", { targets: 3 }], ["texas-star", {}], ["plate-rack", {}],
   ["dueling-tree", {}], ["bobber", {}], ["twister", {}],
@@ -38,7 +40,7 @@ for (const [type, params] of CASES) {
 
 test("paper cards on their own sticks are centred on their stand", () => {
   for (const p of PRESENTATIONS) {
-    const o = obj("paper-ipsc", { presentation: p.id });
+    const o = obj("paper-ipsc", p.params);
     const g = buildProp(o);
     const stands = [], sticks = [];
     g.traverse((c) => { if (c.userData.stand) stands.push(c.userData.stand); if (c.userData.stick) sticks.push(c.userData.stick); });
@@ -55,7 +57,7 @@ test("paper cards on their own sticks are centred on their stand", () => {
 
 test("stands never overlap each other", () => {
   for (const p of PRESENTATIONS) {
-    const g = buildProp(obj("paper-ipsc", { presentation: p.id }));
+    const g = buildProp(obj("paper-ipsc", p.params));
     const s = [];
     g.traverse((c) => { if (c.userData.stand) s.push(c.userData.stand); });
     for (let i = 0; i < s.length; i++) for (let j = i + 1; j < s.length; j++) {
@@ -68,7 +70,7 @@ test("stands never overlap each other", () => {
 test("a card stapled in front has at least half of it backed by the cards behind it", async () => {
   const { paperSize } = await import("../js/model/arrays.js");
   for (const p of PRESENTATIONS) {
-    const o = obj("paper-ipsc", { presentation: p.id }), { w, h } = paperSize(o), cards = arrayCards(o);
+    const o = obj("paper-ipsc", p.params), { w, h } = paperSize(o), cards = arrayCards(o);
     for (const f of cards.filter((c) => c.layer === "front")) {
       let covered = 0;                                   // rectangles; the cards behind don't overlap each other here
       for (const b of cards.filter((c) => c.layer !== "front")) {

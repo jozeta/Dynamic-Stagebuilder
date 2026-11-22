@@ -31,7 +31,7 @@ export function demoStage() {
   for (const [p, r, style] of [[[-6.4, 11], 0], [[-5, 11.6], 10], [[-2.4, 14.5], 0, "head"], [[0.9, 15.4], -10, "head"], [[3.4, 16.2], 0], [[7.2, 15.6], -20]]) {
     add("paper-ipsc", p, r, style ? { style } : {});
   }
-  add("paper-ipsc", [-1.6, 14.7], 0, { presentation: "noshoot" });
+  add("paper-ipsc", [-1.6, 14.7], 0, { layout: "single", card1: "noshoot" });
   add("barrel", [5.3, 12.6]);
   add("paper-mini", [5.3, 12.05], 0, { mountHeight: 0.95 });
   add("popper", [-7.6, 14.6]);
