@@ -4,6 +4,11 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Stages from the stage library (opened, or added to a match) open clean too: their own layout on
+  the default surroundings and light, nothing taken over from the stage you had open (no hall, no
+  plan drawing or walls from your own surroundings). Imported files keep the settings they were
+  saved with; opening any stage starts a fresh undo history.
+
 - Fix: a new stage didn't seem to appear under Stages: when a match's page was open, the Projects
   panel came back on that match page, which hides the stage list. *New stage*, and opening the
   Projects panel, now show the full list (matches, then your stages).

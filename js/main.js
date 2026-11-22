@@ -396,8 +396,6 @@ async function addProject(stage) {
   await store.put(projectRecord(stage, { now: Date.now() }));
   await openProject(stage.id);
 }
-// A library stage opens in the surroundings and light you're using now.
-const withView = (s) => { const cur = editor.stage().settings; return { ...s, settings: { ...s.settings, environment: cur.environment, look: cur.look } }; };
 // A new stage is clean: no props, no lines, and the default surroundings and light (it does not take
 // over the open stage's surroundings, which may be a hall or your own buildings).
 const freshStage = (name = "New stage") => createStage({ name });
@@ -452,13 +450,15 @@ onEarthLoaded(() => engine.requestRender());           // a berm's ground textur
 
 let dock = null;                   // the side panels' dock (Låda Glass), set up below
 const projects = createProjects({
-  onOpenLibrary: (spec) => addProject(withView(libraryStage(spec))),
+  // A library stage opens clean: its own layout on the default surroundings and light, nothing taken
+  // over from the stage you had open (no hall, no drawn walls, no plan).
+  onOpenLibrary: (spec) => addProject(libraryStage(spec)),
   // A match takes the example stage or a library stage: saved as a new project (not opened).
   onCreateFrom: async (key) => {
     const spec = key.startsWith("lib:") ? STAGE_LIBRARY.find((s) => s.id === key.slice(4)) : null;
     const st = key === "demo" ? demoStage() : spec ? libraryStage(spec) : null;
     if (!st) return null;
-    const s = withView(st);
+    const s = st;
     await store.put(projectRecord(s, { now: Date.now() }));
     return s.id;
   },
