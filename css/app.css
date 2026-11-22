@@ -507,7 +507,7 @@ body { background: var(--lg-bg); overflow: hidden; }
 /* No stage open: the view greys out under one button (Create new stage). */
 .blank-cover { position: absolute; inset: 0; z-index: 4; display: grid; place-items: center; background: color-mix(in srgb, #6b6f75 72%, transparent);
   -webkit-backdrop-filter: grayscale(1) blur(2px); backdrop-filter: grayscale(1) blur(2px); }
-.blank-cover-btn { font-size: 1.05rem; padding: 14px 22px; min-height: 52px; box-shadow: 0 8px 28px rgb(0 0 0 / 0.3); }
+.blank-cover-btn { min-height: var(--lg-touch); box-shadow: 0 6px 20px rgb(0 0 0 / 0.25); }   /* the side panels' grey button */
 
 /* A stage's ⓘ (in its row's icons) and the details box it shows. */
 .stage-info { position: relative; width: 18px; height: 18px; min-width: 18px; padding: 0; margin: 0 4px; border-radius: 50%; border: 1.25px solid var(--lg-muted);

@@ -444,8 +444,12 @@ the stages of a deleted match, stay as ordinary projects. *Export the match* sav
 its stages in one file; *Import file…* takes it back as new projects in a new match.
 
 **Projects, export and import.** Every change is saved in this browser automatically (a green *Saved*
-alert shows under the toolbar for a few seconds; a problem saving stays until you close it). The *Projects* tab in the left-hand panel lists your stages: open, duplicate or delete them, start a
-*New stage*, *Export this stage* as a `.json` file, or *Import file…* to add a stage from a file.
+alert shows at the top of the 3D view for a few seconds; a problem saving stays until you close it).
+The *Projects* tab in the left-hand panel lists your stages, with small icons to open, duplicate or
+delete them and an ⓘ for their details; *Export this stage* saves a `.json` file and *Import file…*
+adds a stage from a file. *Close stage* (in Projects, or in the Stage panel on the right) saves and
+closes the stage; the view then greys out under *Create new stage*, which asks for the new stage's
+name.
 An import always becomes a new project, so it never overwrites one. Below your projects is the
 *Stage library*: 58 ready-made stages (drills and standards, short, medium and long IPSC courses,
 USPSA and club stages with moving targets). Search or pick a category, then *Open as new project*

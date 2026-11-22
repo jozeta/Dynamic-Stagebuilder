@@ -542,7 +542,6 @@ const projects = createProjects({
   },
   currentId: () => (noStage ? null : editor.stage().id),
   onOpen: openProject,
-  onNew: newStageFlow,
   onCloseStage: closeStage,
   onModeChange: () => updateBlankCover(),
   onDuplicate: async (id) => {
@@ -621,7 +620,7 @@ function placeStageTitle() {
 // No stage open: the view greys out under one button, Create new stage (within the loaded match, if
 // one is). It also keeps the empty screen from being edited by accident.
 const blankCover = h("div", { class: "blank-cover", hidden: true }, [
-  h("button", { type: "button", class: "lg-btn lg-btn-primary blank-cover-btn", onclick: async () => {
+  h("button", { type: "button", class: "lg-btn blank-cover-btn", onclick: async () => {
     if (projects?.matchContext()) await projects.newStageInMatch(); else await newStageFlow();
   } }, [icon("new"), h("span", { class: "blank-cover-label", text: "Create new stage" })]),
 ]);

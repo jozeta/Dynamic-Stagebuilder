@@ -4,6 +4,10 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- *New stage* is gone from the Projects panel: a new stage is made with *Create new stage* in the
+  greyed view (after *Close stage*), or *New stage in this match*. That button is now the side
+  panels' grey button.
+
 - Alerts show in the 3D view, centred near its top (above the grey cover): *Saved*, problems, an
   opened share link, a full *My shapes*, and new ones when you close: "*Name* saved and closed" for a
   stage or a match.

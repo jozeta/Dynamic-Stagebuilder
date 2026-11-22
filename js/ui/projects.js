@@ -10,7 +10,7 @@ import { stageDetails } from "../model/match.js";
 
 const when = (t) => new Date(t).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
 
-export function createProjects({ panel, docked = false, hide = [], onToggle = () => {}, onOpenLibrary = async () => {}, onCreateFrom = async () => null, onCloseStage = async () => {}, onModeChange = () => {}, store, currentId, onOpen, onNew, onDuplicate, onDelete, onImport, onExport,
+export function createProjects({ panel, docked = false, hide = [], onToggle = () => {}, onOpenLibrary = async () => {}, onCreateFrom = async () => null, onCloseStage = async () => {}, onModeChange = () => {}, store, currentId, onOpen, onDuplicate, onDelete, onImport, onExport,
   onNewStage = async () => null, onApplyBriefing = async () => {}, onPrintMatch = () => {}, onExportMatch = () => {}, onImportMatch = async () => [], onShareLink = async () => ({ ok: false, error: "Not available." }) }) {
   // Matches: their list above the stages, and a match's own page in place of the lists.
   const stagesBox = h("div", { class: "lg-stack" });
@@ -91,7 +91,6 @@ export function createProjects({ panel, docked = false, hide = [], onToggle = ()
     crumbs,
     h("div", { class: "lg-stack proj-body" }, [
       actions = h("div", { class: "proj-actions" }, [
-        h("button", { type: "button", class: "lg-btn", onclick: async () => { if (await onNew() !== false) { matches.showList(); matches.leaveMatch(); await fill(); close(); } } }, [icon("new"), "New stage"]),
         h("button", { type: "button", class: "lg-btn", onclick: () => matches.create() }, [icon("layers"), "New match"]),
         h("button", { type: "button", class: "lg-btn", onclick: () => file.click() }, [icon("folder"), "Import file…"]),
         h("button", { type: "button", class: "lg-btn", onclick: async () => { await onExport(); await fill(); } }, [icon("doc"), "Export this stage"]),
