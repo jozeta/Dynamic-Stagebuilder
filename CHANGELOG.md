@@ -4,6 +4,15 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Matches: drag a stage by its grip (⠿) to any place, in the match window and in the match's list in
+  the Projects panel (mouse, finger or pen; the arrow keys on a grip move it too). The up and down
+  arrows are gone. In the panel, × takes a stage out of the match after a warning that it stays in
+  your saved stages.
+- *Close match* leaves the match: the panel goes back to all your projects and the breadcrumb shows
+  the stage on its own. A match's page shows only the match, with *Close match* at the top (the
+  general buttons hide meanwhile). The breadcrumb follows how you got to a stage: through the
+  match (Projects › match › Stage 2: name) or on its own (Projects › name).
+
 - Matches are made in a window: *New match* asks for the name, then a dropdown adds stages (your
   saved stages, the example, the stage library), with up, down and remove on each; *Save match*
   shows the match in the Projects panel, where *Edit match…* opens the same window and *Close match*

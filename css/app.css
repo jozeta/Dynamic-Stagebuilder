@@ -391,6 +391,7 @@ body { background: var(--lg-bg); overflow: hidden; }
 .match-head { display: flex; align-items: center; }
 .projects-panel .match-stage { display: grid; grid-template-columns: 26px minmax(0, 1fr); align-items: center; gap: 6px var(--lg-space-s); }
 .projects-panel .match-stage .proj-buttons { grid-column: 1 / -1; flex-wrap: wrap; }
+.projects-panel .match-stage.drag-row { grid-template-columns: 32px 26px minmax(0, 1fr); }   /* grip, number, name */
 .match-num { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 7px; font-weight: 700; font-size: var(--lg-fs-small);
   background: color-mix(in srgb, var(--lg-accent) 22%, transparent); color: var(--lg-text); }
 .match-stage .proj-buttons .lg-btn-icon { width: 32px; min-width: 32px; padding: 0; }
@@ -491,3 +492,13 @@ body { background: var(--lg-bg); overflow: hidden; }
 .proj-crumbs .crumb-sep { opacity: 0.6; }
 .proj-crumbs .crumb-here { color: var(--lg-text); font-weight: 600; }
 .proj-crumbs .crumb-link { border: 0; background: none; padding: 6px 2px; min-height: var(--lg-touch); color: var(--lg-accent); font: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+/* Drag handles (match window and a match's stages in the panel): a grip that reorders the list. */
+.drag-grip { user-select: none; -webkit-user-select: none; flex: none; display: grid; place-items: center; width: 32px; min-height: var(--lg-touch); padding: 0; border: 0; border-radius: var(--lg-radius-control);
+  background: transparent; color: var(--lg-muted); cursor: grab; touch-action: none; }
+.drag-grip .lg-icon { width: 20px; height: 20px; stroke-width: 3.2; }
+.drag-grip:hover, .drag-grip:focus-visible { color: var(--lg-text); background: var(--lg-surface); outline: none; }
+.drag-grip:focus-visible { box-shadow: 0 0 0 2px var(--lg-accent); }
+.drag-row { transition: transform 0.15s; }
+.drag-row.is-dragging { transition: none; position: relative; z-index: 2; box-shadow: 0 6px 18px rgb(0 0 0 / 0.25); cursor: grabbing; background: var(--lg-bg); }
+.match-ed-row { background: var(--lg-bg); }
+@media (prefers-reduced-motion: reduce) { .drag-row { transition: none; } }

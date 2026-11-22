@@ -5,13 +5,15 @@
 // The stages stay ordinary projects; each one in the match gets its name and number in the briefing.
 // Names come from storage and are only ever shown with textContent.
 import { h, icon } from "./dom.js";
-import { createMatch, addStages, renameMatch, briefingFor, matchSummary, cleanMatch, inOtherMatches, takeFromOthers } from "../model/match.js";
+import { createMatch, addStages, renameMatch, briefingFor, matchSummary, cleanMatch, inOtherMatches, takeFromOthers, draftMoveTo, removeStage } from "../model/match.js";
 import { openMatchEditor } from "./match-editor.js";
+import { dragGrip } from "./drag-sort.js";
 import { sortProjects } from "../storage/projects.js";
 
 export function createMatches({ store, currentId, onOpen, onNewStage, onCreateFrom = async () => null, onApplyBriefing, onPrint, onExport = () => {}, onViewChange = () => {}, onChanged = async () => {} }) {
   const box = h("section", { class: "matches", "aria-labelledby": "matches-title" });
   let openId = null;            // the match whose page is shown, or null for the list
+  let contextId = null;         // the match you are working in (its page, or a stage opened from it); null: a stage on its own
 
   const listMatches = async () => (await store.matches.list()).map(cleanMatch).filter(Boolean).sort((a, b) => b.modified - a.modified);
   const stageRecords = async () => sortProjects(await store.list());
@@ -99,24 +101,45 @@ export function createMatches({ store, currentId, onOpen, onNewStage, onCreateFr
     if (m.stageIds.some((id) => !byId.has(id))) { m = { ...m, stageIds: m.stageIds.filter((id) => byId.has(id)) }; await save(m); await syncBriefings(m); }
     const sum = matchSummary(m, records.map((r) => r.stage));
     const current = currentId();
+    // Drag a stage by its grip to another place: saved at once, every stage renumbered in its briefing.
+    const listEl = h("div", { class: "proj-list", role: "list", "aria-label": "Stages in this match" });
+    const drop = async (from, to) => {
+      const next = { ...m, stageIds: draftMoveTo(m.stageIds, from, to), modified: Date.now() };
+      await save(next); await syncBriefings(next); await fill(); await onChanged();
+      box.querySelectorAll(".match-stage .drag-grip")[to]?.focus();
+    };
     const stageRows = m.stageIds.map((id, i) => {
-      const r = byId.get(id);
+      const r = byId.get(id), name = r.name || "Untitled stage";
       const st = matchSummary({ stageIds: [id] }, [r.stage]);
-      return h("div", { class: `proj-row match-stage${id === current ? " is-current" : ""}`, role: "listitem" }, [
+      const row = h("div", { class: `proj-row match-stage${m.stageIds.length > 1 ? " drag-row" : ""}${id === current ? " is-current" : ""}`, role: "listitem" });
+      const normal = () => row.replaceChildren(...[
+        m.stageIds.length > 1 ? dragGrip({ container: listEl, index: i, label: name, onDrop: drop }) : null,
         h("span", { class: "match-num", text: String(i + 1), "aria-label": `Stage ${i + 1}` }),
         h("div", { class: "proj-info" }, [
-          h("span", { class: "proj-name", text: r.name || "Untitled stage" }),
+          h("span", { class: "proj-name", text: name }),
           h("span", { class: "lg-muted proj-meta", text: `${id === current ? "Open now · " : ""}${st.minRounds} rounds · ${st.maxPoints} points` }),
         ]),
-        id === current ? null : h("div", { class: "lg-row proj-buttons" }, [btn("Open", () => onOpen(id), "lg-btn lg-btn-primary")]),
-      ]);
+        h("div", { class: "lg-row proj-buttons" }, [
+          id === current ? null : btn("Open", () => { contextId = m.id; return onOpen(id); }, "lg-btn lg-btn-primary"),
+          btn("", () => confirm(), "lg-btn lg-btn-icon", "x", { "aria-label": `Remove ${name} from the match`, title: "Remove from the match" }),
+        ].filter(Boolean)),
+      ].filter(Boolean));
+      // Taking a stage out asks first: it leaves the match, not your saved stages.
+      const confirm = () => row.replaceChildren(
+        h("span", { class: "proj-confirm", text: `Take "${name}" out of "${m.name}"? It stays in your saved stages.` }),
+        h("div", { class: "lg-row proj-buttons" }, [
+          btn("Remove", async () => { await release(m, id); const next = removeStage(m, id); await save(next); await syncBriefings(next); await fill(); await onChanged(); }, "lg-btn lg-btn-danger"),
+          btn("Keep", () => normal()),
+        ]));
+      normal();
+      return row;
     });
     box.replaceChildren(
-      h("div", { class: "match-head" }, [btn("Close match", async () => { openId = null; await fill(); }, "lg-btn lg-btn-ghost", "chevl", { title: "Back to all your projects" })]),
+      h("div", { class: "match-head" }, [btn("Close match", async () => { openId = null; contextId = null; await fill(); }, "lg-btn", "chevl", { title: "Leave the match: back to all your projects" })]),
       h("h3", { class: "match-title", text: m.name }),
       h("p", { class: "lg-muted proj-meta", text: `${sum.stages} stage${sum.stages === 1 ? "" : "s"} · ${sum.minRounds} rounds minimum · ${sum.maxPoints} points` }),
-      h("div", { class: "proj-list", role: "list", "aria-label": "Stages in this match" }, stageRows.length ? stageRows
-        : [h("p", { class: "lg-muted hint-text", text: "No stages yet. Edit the match to add some, or make a new stage in it." })]),
+      stageRows.length ? (listEl.replaceChildren(...stageRows), listEl)
+        : h("p", { class: "lg-muted hint-text", text: "No stages yet. Edit the match to add some, or make a new stage in it." }),
       h("div", { class: "proj-actions" }, [
         btn("Edit match…", () => editInWindow(m), "lg-btn lg-btn-primary", "edit", { title: "Name, stages and their order" }),
         btn("New stage in this match", async () => { const id = await onNewStage(); if (id) { const next = addStages(m, [id]); await save(next); await syncBriefings(next); await fill(); await onChanged(); } }, "lg-btn", "new"),
@@ -129,6 +152,7 @@ export function createMatches({ store, currentId, onOpen, onNewStage, onCreateFr
 
   async function fill() {
     const m = openId ? (await listMatches()).find((x) => x.id === openId) : null;
+    if (m) contextId = m.id;                        // on a match's page you are working in that match
     if (openId && !m) openId = null;
     onViewChange(Boolean(m));
     if (m) await fillMatch(m); else await fillList();
@@ -136,7 +160,9 @@ export function createMatches({ store, currentId, onOpen, onNewStage, onCreateFr
 
   /** Back to the list of matches (and, in the Projects panel, the stages under it). */
   const showList = () => { openId = null; };
-  return { box, fill, create, adopt, showList, list: listMatches, get inMatch() { return Boolean(openId); }, get openId() { return openId; },
+  /** Working on a stage on its own (opened from the stage list, a new stage…): no match around it. */
+  const leaveMatch = () => { contextId = null; };
+  return { box, fill, create, adopt, showList, leaveMatch, get contextId() { return contextId; }, list: listMatches, get inMatch() { return Boolean(openId); }, get openId() { return openId; },
     /** Show a match's page. */
     async show(id) { openId = id; await fill(); } };
 }

@@ -91,3 +91,13 @@ export function draftMove(list, i, by) {
   return out;
 }
 export const draftRemove = (list, i) => list.filter((_, k) => k !== i);
+/** Move the stage at `from` to position `to` (dragged in the window), the others closing up. */
+export function draftMoveTo(list, from, to) {
+  if (from < 0 || from >= list.length) return list;
+  const t = Math.max(0, Math.min(list.length - 1, to));
+  if (t === from) return list;
+  const out = [...list];
+  const [item] = out.splice(from, 1);
+  out.splice(t, 0, item);
+  return out;
+}

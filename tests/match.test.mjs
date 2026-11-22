@@ -72,3 +72,12 @@ test("the match window's list: add once, move up and down, remove", async () => 
   assert.deepEqual(draftMove(d, 0, -1), d, "the first can't go up");
   assert.deepEqual(draftRemove(d, 0).map((x) => x.key), ["lib:x"]);
 });
+
+test("dragging a stage in the match window: from one place to any other", async () => {
+  const { draftMoveTo } = await import("../js/model/match.js");
+  const d = ["a", "b", "c", "d"].map((key) => ({ key, name: key }));
+  assert.deepEqual(draftMoveTo(d, 0, 3).map((x) => x.key), ["b", "c", "d", "a"]);
+  assert.deepEqual(draftMoveTo(d, 3, 1).map((x) => x.key), ["a", "d", "b", "c"]);
+  assert.deepEqual(draftMoveTo(d, 2, 2), d, "dropped where it was");
+  assert.deepEqual(draftMoveTo(d, 1, 9).map((x) => x.key), ["a", "c", "d", "b"], "past the end: last");
+});

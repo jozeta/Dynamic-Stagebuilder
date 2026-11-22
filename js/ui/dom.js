@@ -36,6 +36,7 @@ const PATHS = {
   search: ["M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14z", "M20 20l-4-4"],
   check: ["M5 12l5 5 9-11"],
   plus: ["M12 5v14M5 12h14"],
+  grip: ["M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01"],
   edit: ["M4 20h4l10-10-4-4L4 16z", "M13.5 6.5l4 4"],
   doc: ["M6 3h9l4 4v14H6z", "M9 12h7M9 16h7M9 8h3"],
   print: ["M7 9V3h10v6", "M7 17H4v-7h16v7h-3", "M7 14h10v7H7z"],

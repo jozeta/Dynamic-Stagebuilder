@@ -3,7 +3,8 @@
 // with up, down and remove. Save returns { name, items: [{ key, name }] } (key "own:<id>", "demo" or
 // "lib:<id>"); Cancel or Escape returns null. Names are shown with textContent only.
 import { h, icon } from "./dom.js";
-import { draftAdd, draftMove, draftRemove } from "../model/match.js";
+import { draftAdd, draftMoveTo, draftRemove } from "../model/match.js";
+import { dragGrip } from "./drag-sort.js";
 import { STAGE_LIBRARY, LIBRARY_CATEGORIES } from "../model/stage-library.js";
 
 let n = 0;
@@ -49,14 +50,12 @@ export function openMatchEditor({ title, name = "", items = [], own }) {
     }
     function render() {
       fillPick();
-      listBox.replaceChildren(...(list.length ? list.map((x, i) => h("li", { class: "match-ed-row" }, [
+      const drop = (from, to) => { list = draftMoveTo(list, from, to); render(); listBox.children[to]?.querySelector(".drag-grip")?.focus(); };
+      listBox.replaceChildren(...(list.length ? list.map((x, i) => h("li", { class: "match-ed-row drag-row" }, [
+        dragGrip({ container: listBox, index: i, label: x.name, onDrop: drop }),
         h("span", { class: "match-num", text: String(i + 1) }),
         h("span", { class: "match-ed-name", text: x.name }),
-        h("span", { class: "lg-row match-ed-buttons" }, [
-          h("button", { type: "button", class: "lg-btn lg-btn-icon", "aria-label": `Move ${x.name} up`, title: "Move up", disabled: i === 0, onclick: () => { list = draftMove(list, i, -1); render(); } }, [icon("chevu")]),
-          h("button", { type: "button", class: "lg-btn lg-btn-icon", "aria-label": `Move ${x.name} down`, title: "Move down", disabled: i === list.length - 1, onclick: () => { list = draftMove(list, i, 1); render(); } }, [icon("chevd")]),
-          h("button", { type: "button", class: "lg-btn lg-btn-icon", "aria-label": `Remove ${x.name}`, title: "Remove from the match", onclick: () => { list = draftRemove(list, i); render(); } }, [icon("x")]),
-        ]),
+        h("button", { type: "button", class: "lg-btn lg-btn-icon", "aria-label": `Remove ${x.name}`, title: "Remove from the match", onclick: () => { list = draftRemove(list, i); render(); } }, [icon("x")]),
       ])) : [h("li", { class: "lg-muted hint-text match-ed-empty", text: "No stages yet. Choose one above and press Add." })]));
     }
 
