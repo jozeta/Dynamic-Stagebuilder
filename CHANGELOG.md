@@ -4,6 +4,9 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Fix: the rotate ring in the 3D view turns in the angle-snap steps (15° by default) while you drag,
+  not only when you let go; hold Shift to turn freely to an exact angle.
+
 - Paper targets are set up in two steps: a *Layout* (one card, two side by side, two one above the
   other, three side by side, and the overlaps from the IPSC Target Array Book: one in front over
   the lower half or a side, three in a row with the middle in front or behind, one between two, two

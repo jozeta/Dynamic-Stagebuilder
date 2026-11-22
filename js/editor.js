@@ -196,7 +196,8 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
     // Lined up or spread, props stay on the floor (a shaped bay's cut-away or raised parts are off it).
     align({ ids = state.selection, edge }) { const next = alignObjects(present(), unlocked(objIds(ids)), edge); if (next !== present()) edit(onFloor(next)); },
     distribute({ ids = state.selection, axis }) { const next = distributeObjects(present(), unlocked(objIds(ids)), axis); if (next !== present()) edit(onFloor(next)); },
-    setRotation({ id, value }) { edit(updateObject(present(), id, { rotation: snapAngle(Number(value) || 0, present().settings.angleSnap) })); },
+    // fine (Shift on the rotate ring): the exact angle, unsnapped.
+    setRotation({ id, value, fine = false }) { edit(updateObject(present(), id, { rotation: snapAngle(Number(value) || 0, fine ? 0 : present().settings.angleSnap) })); },
     setParams({ id, params }) {
       const o = present().objects.find((x) => x.id === id);
       if (!o) return;

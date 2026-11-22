@@ -11,6 +11,7 @@ import { TransformControls } from "three/addons/controls/TransformControls.js";
 import { groundPoint, createDragTracker } from "./ground.js";
 import { yawDegrees } from "./rotation.js";
 import { insertIndex } from "../model/route.js";
+import { rotationSnap } from "../model/snap.js";
 
 const TAP_PX = 6;
 
@@ -27,11 +28,18 @@ export function attachPicking({ engine, stageView, editor, cameraRig, canvas, on
   gizmo.setSize(0.8);
   engine.groups.helper.add(gizmo.getHelper());
   gizmo.addEventListener("change", () => engine.requestRender());
+  // The ring turns in the stage's angle steps while dragging (Settings → Angle snap); holding Shift
+  // turns it freely, and the prop then keeps that exact angle.
+  let shift = false;
+  const snapRing = () => gizmo.setRotationSnap(rotationSnap(editor.stage().settings.angleSnap, shift));
+  const onShift = (e) => { if (e.shiftKey !== shift) { shift = e.shiftKey; snapRing(); } };
+  window.addEventListener("keydown", onShift);
+  window.addEventListener("keyup", onShift);
   gizmo.addEventListener("dragging-changed", (e) => {
     cameraRig.controls.enabled = !e.value;
     if (!e.value && gizmo.object) {
       const id = gizmo.object.userData.id;
-      editor.dispatch({ type: "setRotation", id, value: yawDegrees(gizmo.object) });
+      editor.dispatch({ type: "setRotation", id, value: yawDegrees(gizmo.object), fine: shift });
     }
   });
 
@@ -165,6 +173,7 @@ export function attachPicking({ engine, stageView, editor, cameraRig, canvas, on
 
   /** Put the rotate ring on the single selected object (call after every stage view sync). */
   function updateGizmo() {
+    snapRing();
     const sel = editor.state.selection;
     const node = sel.length === 1 ? stageView.objectFor(sel[0]) : null;
     const o = node && editor.stage().objects.find((x) => x.id === sel[0]);

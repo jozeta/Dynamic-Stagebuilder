@@ -34,6 +34,9 @@ export function normalizeAngle(deg) {
   return a === 360 ? 0 : a;
 }
 
+/** The rotate ring's step in radians for an angle snap in degrees (null: turns freely, e.g. with Shift). */
+export const rotationSnap = (step, fine = false) => (!fine && step > 0 ? (step * Math.PI) / 180 : null);
+
 export function snapAngle(deg, step) {
   return normalizeAngle(step ? Math.round(deg / step) * step : deg);
 }
