@@ -1,10 +1,10 @@
-// The prop library: search plus Paper, Steel, Walls and Obstacles. Tap an item to arm it, then tap
+// The prop library: search, stage markings, then Walls, Paper, Steel and the other groups. Tap an item to arm it, then tap
 // the ground; with a mouse, items can also be dragged onto the 3D view.
 import { h } from "./dom.js";
 import { PROPS, defaultParams, TARGET_SIZES, BARREL, TYRE, PALLET, paperSize } from "../model/props.js";
 import { icon } from "./dom.js";
 
-import { LIBRARY_GROUPS, isShown } from "../model/visibility.js";
+import { LIBRARY_GROUPS, OPEN_BY_DEFAULT, isShown } from "../model/visibility.js";
 const CATEGORIES = LIBRARY_GROUPS.filter((g) => g.id !== "markings").map((g) => [g.id, g.name]);
 const cm = (m) => `${Math.round(m * 100)}`;
 
@@ -61,9 +61,13 @@ function sizeText(type) {
   }
 }
 
-// Which groups are folded is remembered per browser (a convenience; it may be unavailable).
-const FOLD_KEY = "dsb:library-closed";
-function loadClosed() { try { return new Set(JSON.parse(localStorage.getItem(FOLD_KEY) || "[]")); } catch { return new Set(); } }
+// Which groups are folded is remembered per browser (a convenience; it may be unavailable). Until the
+// user changes one, only OPEN_BY_DEFAULT is open. (A new key: older saved folds predate that default.)
+const FOLD_KEY = "dsb:library-folded";
+const DEFAULT_CLOSED = () => LIBRARY_GROUPS.map((g) => g.id).filter((id) => !OPEN_BY_DEFAULT.includes(id));
+function loadClosed() {
+  try { const v = JSON.parse(localStorage.getItem(FOLD_KEY)); return new Set(Array.isArray(v) ? v.filter((x) => typeof x === "string") : DEFAULT_CLOSED()); } catch { return new Set(DEFAULT_CLOSED()); }
+}
 function saveClosed(set) { try { localStorage.setItem(FOLD_KEY, JSON.stringify([...set])); } catch { /* private mode */ } }
 
 export function createLibrary(root, { editor, hidden: initialHidden = { categories: [], props: [] } }) {

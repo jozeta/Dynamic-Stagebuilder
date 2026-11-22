@@ -2,7 +2,7 @@
 // data: hiding a prop never touches stages that use it. Pure: no DOM.
 import { PROPS } from "./props.js";
 
-const CATEGORY_NAMES = [["paper", "Paper"], ["steel", "Steel"], ["moving", "Moving and reactive"], ["activator", "Activators"], ["wall", "Walls"],
+const CATEGORY_NAMES = [["wall", "Walls"], ["paper", "Paper"], ["steel", "Steel"], ["moving", "Moving and reactive"], ["activator", "Activators"],
   ["structure", "Structures"], ["obstacle", "Obstacles and range furniture"], ["furniture", "Furniture"], ["building", "Buildings and surroundings"]];
 
 // The stage markings (drawn on the ground) come first; then the prop categories.
@@ -18,6 +18,9 @@ export const LIBRARY_GROUPS = Object.freeze([
   Object.freeze({ id: "markings", name: "Stage markings", items: Object.freeze(MARKINGS.map((m) => m.id)) }),
   ...CATEGORY_NAMES.map(([id, name]) => Object.freeze({ id, name, items: Object.freeze(Object.values(PROPS).filter((p) => p.category === id).map((p) => p.type)) })),
 ]);
+
+/** The groups open in the Props panel until the user folds or opens one; the rest start folded. */
+export const OPEN_BY_DEFAULT = Object.freeze(["markings", "wall", "paper"]);
 
 const GROUP_IDS = new Set(LIBRARY_GROUPS.map((g) => g.id));
 const ITEM_IDS = new Set(LIBRARY_GROUPS.flatMap((g) => g.items));
