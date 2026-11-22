@@ -395,7 +395,6 @@ body { background: var(--lg-bg); overflow: hidden; }
   background: color-mix(in srgb, var(--lg-accent) 22%, transparent); color: var(--lg-text); }
 .match-stage .proj-buttons .lg-btn-icon { width: 32px; min-width: 32px; padding: 0; }
 @media (pointer: coarse) { .match-stage .proj-buttons .lg-btn-icon { width: var(--lg-touch); min-width: var(--lg-touch); } }
-.match-picker .vis-items { max-height: 240px; overflow: auto; }
 
 /* Exact position fields side by side; the arrange buttons for a selection. */
 .pos-fields { display: grid; grid-template-columns: 1fr 1fr; gap: var(--lg-space-s); }
@@ -429,7 +428,6 @@ body { background: var(--lg-bg); overflow: hidden; }
 .bay-swatch-white { background: #fff; }
 .bay-draw .is-gone { display: none; }
 @media (max-width: 900px) { .bay-draw-body { grid-template-columns: 1fr; grid-template-rows: auto 1fr; } .bay-draw-side { max-height: 40vh; } }
-.vis-item.is-taken { opacity: 0.6; }
 .bay-draw-canvas.is-bucket { cursor: cell; }
 .plan-modal [hidden] { display: none !important; }
 
@@ -466,9 +464,6 @@ body { background: var(--lg-bg); overflow: hidden; }
 .app.toolbar-rail .toolbar .tool > span { overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 .app-dock .lg-dock.has-toolbar > .lg-dock-frame:first-child { margin-top: calc(var(--rail-toolbar-h) + var(--lg-space-s)); }
 .app-dock .lg-dock.has-toolbar { min-height: 0; }
-/* A match's Add stages list: the 59 ready-made stages scroll in their own box. */
-.match-picker .match-ready { max-height: 260px; overflow: auto; }
-.match-picker .lg-label { margin-top: var(--lg-space-xs); }
 
 /* The stage's name over the 3D view: white with a thin black outline, no background. */
 .stage-title { position: absolute; top: var(--title-top, 8px); left: var(--title-left, 50%); right: var(--title-right, auto); height: var(--title-h, 36px);
@@ -477,3 +472,22 @@ body { background: var(--lg-bg); overflow: hidden; }
   text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 -1px 0 #000, 0 1px 0 #000, -1px 0 0 #000, 1px 0 0 #000; }
 .stage-title.is-below { text-align: left; height: auto; line-height: 1.4; }
 .stage-title:empty { display: none; }
+
+/* The New match / Edit match window. */
+.match-editor { width: min(620px, calc(100vw - 32px)); max-width: none; }
+.match-editor .lg-modal-body { overflow: auto; }
+.match-ed-add { display: flex; gap: var(--lg-space-s); align-items: center; }
+.match-ed-add .lg-select { flex: 1; min-width: 0; }
+.match-ed-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.match-ed-row { display: flex; align-items: center; gap: var(--lg-space-s); padding: 4px 6px; border: 1px solid var(--lg-border); border-radius: var(--lg-radius-control); }
+.match-ed-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.match-ed-buttons { flex: none; gap: 2px; }
+.match-ed-buttons .lg-btn { min-width: var(--lg-touch); min-height: var(--lg-touch); }
+.match-ed-empty { border: 1px dashed var(--lg-border); border-radius: var(--lg-radius-control); padding: var(--lg-space-s); }
+.match-title { margin: 0; font-size: var(--lg-fs-h3, 1.1rem); }
+
+/* The Projects panel's breadcrumb: Projects › match › stage. */
+.proj-crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; font-size: var(--lg-fs-small); color: var(--lg-muted); margin: 2px 0 var(--lg-space-s); }
+.proj-crumbs .crumb-sep { opacity: 0.6; }
+.proj-crumbs .crumb-here { color: var(--lg-text); font-weight: 600; }
+.proj-crumbs .crumb-link { border: 0; background: none; padding: 6px 2px; min-height: var(--lg-touch); color: var(--lg-accent); font: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }

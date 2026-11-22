@@ -60,3 +60,15 @@ test("adding a stage that is in another match moves it: it leaves the other matc
   assert.deepEqual(changed[0].stageIds, ["s1", "s3"]);
   assert.deepEqual(takeFromOthers([a, b], b.id, ["s7"]), [], "stages in no other match: nothing changes");
 });
+
+test("the match window's list: add once, move up and down, remove", async () => {
+  const { draftAdd, draftMove, draftRemove } = await import("../js/model/match.js");
+  let d = [];
+  d = draftAdd(d, { key: "own:a", name: "A" });
+  d = draftAdd(d, { key: "lib:x", name: "X" });
+  d = draftAdd(d, { key: "own:a", name: "A" });
+  assert.deepEqual(d.map((x) => x.key), ["own:a", "lib:x"], "each stage once");
+  assert.deepEqual(draftMove(d, 1, -1).map((x) => x.key), ["lib:x", "own:a"]);
+  assert.deepEqual(draftMove(d, 0, -1), d, "the first can't go up");
+  assert.deepEqual(draftRemove(d, 0).map((x) => x.key), ["lib:x"]);
+});

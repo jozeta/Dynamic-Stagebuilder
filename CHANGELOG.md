@@ -4,6 +4,13 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Matches are made in a window: *New match* asks for the name, then a dropdown adds stages (your
+  saved stages, the example, the stage library), with up, down and remove on each; *Save match*
+  shows the match in the Projects panel, where *Edit match…* opens the same window and *Close match*
+  goes back to all your projects. The panel's in-place checklist and reorder buttons are gone.
+- A breadcrumb under *Projects* shows where you are: Projects › a match (its page), Projects › a
+  match › Stage 2: its name (a stage in a match), or Projects › a stage on its own.
+
 - Stages from the stage library (opened, or added to a match) open clean too: their own layout on
   the default surroundings and light, nothing taken over from the stage you had open (no hall, no
   plan drawing or walls from your own surroundings). Imported files keep the settings they were

@@ -12,11 +12,12 @@ export function createProjects({ panel, docked = false, hide = [], onToggle = ()
   onNewStage = async () => null, onApplyBriefing = async () => {}, onPrintMatch = () => {}, onExportMatch = () => {}, onImportMatch = async () => [], onShareLink = async () => ({ ok: false, error: "Not available." }) }) {
   // Matches: their list above the stages, and a match's own page in place of the lists.
   const stagesBox = h("div", { class: "lg-stack" });
+  const crumbs = h("nav", { class: "proj-crumbs", "aria-label": "Where you are" });
   const matches = createMatches({
     store, currentId,
     onOpen: async (id) => { await onOpen(id); await fill(); },
     onNewStage, onCreateFrom, onApplyBriefing, onPrint: onPrintMatch, onExport: onExportMatch,
-    onViewChange: (inMatch) => { stagesBox.hidden = inMatch; },
+    onViewChange: (inMatch) => { stagesBox.hidden = inMatch; queueMicrotask(() => fillCrumbs()); },
     onChanged: async () => { await fillStages(); },     // stages a match added (example, library) show in the list
   });
   const list = h("div", { class: "proj-list", role: "list" });
@@ -56,6 +57,7 @@ export function createProjects({ panel, docked = false, hide = [], onToggle = ()
       h("h2", { class: "lg-subtitle panel-title", id: "projects-title", text: "Projects" }),
       h("button", { type: "button", class: "lg-btn lg-btn-primary", onclick: () => close(), text: "Done" }),
     ]),
+    crumbs,
     h("div", { class: "lg-stack proj-body" }, [
       h("div", { class: "proj-actions" }, [
         h("button", { type: "button", class: "lg-btn", onclick: async () => { if (await onNew() !== false) { matches.showList(); await fill(); close(); } } }, [icon("new"), "New stage"]),
@@ -128,6 +130,26 @@ export function createProjects({ panel, docked = false, hide = [], onToggle = ()
   async function fill() {
     await matches.fill();
     await fillStages();
+    await fillCrumbs();
+  }
+  // Where you are: Projects › a match (its page) › a stage of it, or Projects › a stage on its own.
+  async function fillCrumbs() {
+    const all = await matches.list(), cur = currentId();
+    const rec = cur ? (await store.list()).find((r) => r.id === cur) : null;
+    const stageName = rec?.name || "Untitled stage";
+    const page = matches.openId ? all.find((m) => m.id === matches.openId) : null;
+    const home = matches.inMatch ? h("button", { type: "button", class: "crumb-link", onclick: async () => { matches.showList(); await fill(); }, text: "Projects" }) : h("span", { text: "Projects" });
+    const parts = [home];
+    const sep = () => h("span", { class: "crumb-sep", "aria-hidden": "true", text: "›" });
+    if (page) {
+      parts.push(sep(), h("span", { class: "crumb-here", text: `${page.name} (match)` }));
+    } else {
+      const m = cur ? all.find((x) => x.stageIds.includes(cur)) : null;
+      if (m) parts.push(sep(), h("button", { type: "button", class: "crumb-link", onclick: async () => { await matches.show(m.id); await fill(); }, text: m.name }),
+        sep(), h("span", { class: "crumb-here", text: `Stage ${m.stageIds.indexOf(cur) + 1}: ${stageName}` }));
+      else if (rec) parts.push(sep(), h("span", { class: "crumb-here", text: `${stageName} (stage)` }));
+    }
+    crumbs.replaceChildren(...parts);
   }
   async function fillStages() {
     const now = Date.now();

@@ -79,3 +79,15 @@ export function takeFromOthers(matches, matchId, ids, now = Date.now()) {
   return matches.filter((m) => m.id !== matchId && m.stageIds.some((id) => ids.includes(id)))
     .map((m) => touch(m, now, { stageIds: m.stageIds.filter((id) => !ids.includes(id)) }));
 }
+
+// The New match / Edit match window's list of stages, before it is saved: [{ key, name }], where key
+// is "own:<project id>", "demo" or "lib:<library id>". Each stage once; order is the stage order.
+export const draftAdd = (list, item) => (list.some((x) => x.key === item.key) || list.length >= MAX_STAGES ? list : [...list, item]);
+export function draftMove(list, i, by) {
+  const j = i + by;
+  if (i < 0 || j < 0 || j >= list.length) return list;
+  const out = [...list];
+  [out[i], out[j]] = [out[j], out[i]];
+  return out;
+}
+export const draftRemove = (list, i) => list.filter((_, k) => k !== i);
