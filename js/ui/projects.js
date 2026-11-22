@@ -31,12 +31,13 @@ export function createProjects({ panel, docked = false, hide = [], onToggle = ()
   // the start of Projects (also used by the Stage panel's Close stage).
   async function closeStageHere() {
     const inMatch = matches.contextId;
-    await onCloseStage();
+    await onCloseStage("stage");
     if (inMatch && (await matches.list()).some((x) => x.id === inMatch)) await matches.show(inMatch); else { matches.showList(); matches.leaveMatch(); }
     await fill();
   }
   async function closeMatch() {
-    await onCloseStage();
+    const all = await matches.list(), m = all.find((x) => x.id === (matches.inMatch ? matches.openId : matches.contextId));
+    await onCloseStage("match", m?.name || "");
     matches.showList(); matches.leaveMatch();
     await fill();
   }

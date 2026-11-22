@@ -4,6 +4,11 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Alerts show in the 3D view, centred near its top (above the grey cover): *Saved*, problems, an
+  opened share link, a full *My shapes*, and new ones when you close: "*Name* saved and closed" for a
+  stage or a match.
+- After you create a stage (New stage, Create new stage, or in a match), the left panel shows Props.
+
 - The right-hand Stage panel has *Close stage* under *Written stage briefing…*: it saves and closes
   the stage like *Close stage* in Projects (back to its match when you came through one). With no
   stage open both buttons hide.

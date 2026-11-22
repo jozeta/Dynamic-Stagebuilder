@@ -344,8 +344,9 @@ picking = attachPicking({ engine, stageView: view, editor, cameraRig: rig, canva
 const LAST = "dsb:last";
 // The save alert (a Låda Glass alert under the toolbar): "Saved" fades in and out again after a few
 // seconds; a problem stays until closed or the next good save.
+// Every alert of the app shows here: in the 3D view, centred near its top (above the grey cover).
 const status = h("div", { class: "lg-alert lg-alert-ok save-alert", role: "status", "aria-live": "polite", hidden: true });
-document.body.append(status);
+document.querySelector(".viewport-wrap").append(status);
 let statusTimer = null;
 let store = null;
 let autosave = null;
@@ -353,6 +354,8 @@ let autosave = null;
 const remember = (id) => { try { localStorage.setItem(LAST, id); } catch { /* private mode */ } };
 const recall = () => { try { return localStorage.getItem(LAST); } catch { return null; } };
 function hideStatus() { status.classList.remove("is-shown"); clearTimeout(statusTimer); statusTimer = setTimeout(() => { status.hidden = true; }, 300); }
+/** An alert in the view: tone "ok" (green, goes by itself), "info", "warn" or "bad" (stay until closed). */
+const notify = (text, tone = "ok") => setStatus(text, `lg-${tone}`);
 function setStatus(text, tone = "lg-ok") {
   const ok = tone === "lg-ok";
   status.className = `lg-alert ${tone.replace("lg-", "lg-alert-")} save-alert`;
@@ -374,7 +377,8 @@ function scheduleSave() { if (noStage) { claimBlank(); return; } autosave?.sched
 // saved by itself; the first change asks for a name and makes it a project (Cancel clears it again).
 const NONE = "none";
 let noStage = false, blank = null, claiming = false;
-async function closeStage() {
+async function closeStage(kind = null, matchName = "") {
+  const name = noStage ? "" : editor.stage().name || "The stage";
   await saveNow();
   noStage = true;
   blank = createStage({ name: "" });
@@ -387,6 +391,9 @@ async function closeStage() {
   settings?.refresh();
   render(editor.state);
   await projects?.refresh();
+  // Say what was closed (a green alert in the view).
+  if (kind === "match") notify(`${matchName || "The match"} saved and closed`);
+  else if (kind === "stage" && name) notify(`${name} saved and closed`);
 }
 async function claimBlank() {
   if (claiming || editor.stage() === blank) return;
@@ -411,6 +418,7 @@ async function newStageFlow() {
   if (!name) return false;
   await addProject(freshStage(name));
   await projects?.refresh();
+  dock?.activate("props");                  // a new stage starts with the props to place
   return true;
 }
 const saveNow = () => autosave?.flush();
@@ -475,8 +483,8 @@ const myShapes = (() => {
     async onSave(bay, id) {
       const shapeId = id || newId();
       const next = [...list.filter((x) => x.id !== shapeId), { id: shapeId, ...bay }];
-      if (next.length > MAX_SHAPES) { globalThis.LadaGlass?.toast?.(`My shapes holds ${MAX_SHAPES}; delete one first.`, { type: "bad" }); return; }
-      if (!saveShapes(next)) globalThis.LadaGlass?.toast?.("The shape is on this stage, but this browser couldn't save it to My shapes (storage full or blocked).", { type: "bad", duration: 8000 });
+      if (next.length > MAX_SHAPES) { notify(`My shapes holds ${MAX_SHAPES}; delete one first.`, "bad"); return; }
+      if (!saveShapes(next)) notify("The shape is on this stage, but this browser couldn't save it to My shapes (storage full or blocked).", "bad");
       else list = loadShapes();
       editor.dispatch({ type: "setBay", ...bay, shapeId });
       changed();
@@ -521,7 +529,7 @@ const projects = createProjects({
   },
   // A new stage made from a match's page: saved and opened like New stage; its id goes in the match.
   // New stage (here or in a match): asks for its name first; Cancel makes none.
-  onNewStage: async () => { const name = await askName({ title: "New stage in this match", value: "" }); if (!name) return null; const st = freshStage(name); await addProject(st); return st.id; },
+  onNewStage: async () => { const name = await askName({ title: "New stage in this match", value: "" }); if (!name) return null; const st = freshStage(name); await addProject(st); dock?.activate("props"); return st.id; },
   onApplyBriefing: applyBriefing,
   // Print a match: a cover page, then each stage's brief page (the open stage as it is now).
   onPrintMatch: (match, stages) => {
@@ -769,9 +777,9 @@ async function openSharedLink() {
   const shared = await decodeShare(location.hash);
   if (!shared) return false;
   history.replaceState(null, "", location.pathname + location.search);
-  if (!shared.ok) { globalThis.LadaGlass?.toast?.(shared.error, { type: "bad", duration: 8000 }); return false; }
+  if (!shared.ok) { notify(shared.error, "bad"); return false; }
   await addProject(shared.stage);
-  globalThis.LadaGlass?.toast?.(`Opened the shared stage "${shared.stage.name}" as a new project.`, { type: "ok" });
+  notify(`Opened the shared stage "${shared.stage.name}" as a new project.`, "ok");
   return true;
 }
 
