@@ -61,3 +61,32 @@ test("choosing a layout gives its usual cards; mirroring swaps left and right", 
   assert.deepEqual(mirrorPaper({ layout: "side-left", card1: "target:left-1/2", card2: "noshoot" }), { layout: "side-right", card1: "target:right-1/2", card2: "noshoot" });
   assert.deepEqual(mirrorPaper({ layout: "three-side", card1: "target", card2: "noshoot", card3: "target:lower-1/2" }), { layout: "three-side", card1: "target:lower-1/2", card2: "noshoot", card3: "target" });
 });
+
+test("no two layouts are the same arrangement (what each card is, is chosen per card)", () => {
+  const RANK = { back: 0, main: 1, front: 2, fore: 2 };
+  // Left to right: each card's depth (relative to the deepest), whether it is above, and how it meets
+  // its neighbour (overlapping or apart, across and up).
+  const shape = (l) => {
+    const cards = l.cards.map((c) => ({ x: c.x, y: c.y === "up" ? 1.02 : c.y, r: RANK[c.layer] }));
+    const low = Math.min(...cards.map((c) => c.r));
+    const sorted = [...cards].sort((a, b) => b.x - a.x || a.y - b.y);
+    return sorted.map((c, i) => {
+      const n = sorted[i + 1];
+      const across = n ? (Math.abs(c.x - n.x) < 1e-9 ? "same" : Math.abs(c.x - n.x) < 1 ? "overlap" : "apart") : "";
+      const up = n ? (Math.abs(c.y - n.y) < 0.3 ? "level" : Math.abs(c.y - n.y) < 1 ? "raised" : "above") : "";
+      return `${c.r - low}${across}${up}`;
+    }).join("|");
+  };
+  const seen = new Map();
+  for (const l of LAYOUTS) {
+    const s = shape(l);
+    assert.ok(!seen.has(s), `${l.id} is the same arrangement as ${seen.get(s)}`);
+    seen.set(s, l.id);
+  }
+});
+
+test("layouts saved under a name that is gone open as the same arrangement", () => {
+  assert.deepEqual(upgradeProp("paper-ipsc", { layout: "between-two", card1: "noshoot", card2: "target", card3: "noshoot" }).params,
+    { layout: "three-middle-behind", card1: "noshoot", card2: "target", card3: "noshoot" });
+  assert.equal(upgradeProp("paper-ipsc", { layout: "two-overlap", card1: "target", card2: "target" }).params.layout, "side-right");
+});

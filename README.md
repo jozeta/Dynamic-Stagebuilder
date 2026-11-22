@@ -27,9 +27,10 @@ training, and want a clear briefing sheet without drawing the map by hand.
     numbered shooting positions with a facing, look angle and stance
   - paper: IPSC target and mini target, each in two versions, Classic (octagon, 45 × 57 cm) or
     With head (46 × 76 cm), on sticks with an adjustable stand height. Each one is a layout of one
-    to three cards from the IPSC Target Array Book (one card; two side by side, overlapping or one
-    above the other; one in front over the lower half or a side; three side by side; three in a
-    row with the middle one in front or behind; one between two; two with one above), and each card
+    to three cards from the IPSC Target Array Book (one card; two side by side or one above the
+    other; two overlapping with the left or the right one in front; the lower one in front over the
+    upper one's lower half; three side by side; three in a row with the middle one in front or
+    behind; two side by side with one above between them), and each card
     is a target or a no-shoot, with or without painted hard cover (lower ¼, ⅓ or ½, left or right
     half, lower diagonal)
   - moving and reactive: swinger, drop turner, clamshell, mover on a track (up to four cards),

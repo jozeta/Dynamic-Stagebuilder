@@ -27,7 +27,7 @@ test("deleting T2 of T1–T4: T1 stays, T3 and T4 become T2 and T3", () => {
 });
 
 test("several at once, a two-target array, and steel in its own series", () => {
-  const ed = stageWith([["paper-ipsc"], ["paper-ipsc", { layout: "two-overlap" }], ["popper"], ["paper-ipsc"], ["popper"], ["paper-ipsc"]]);
+  const ed = stageWith([["paper-ipsc"], ["paper-ipsc", { layout: "side-right", card2: "target" }], ["popper"], ["paper-ipsc"], ["popper"], ["paper-ipsc"]]);
   assert.deepEqual(labels(ed), ["T1", "T2–3", "P1", "T4", "P2", "T5"]);
   ed.dispatch({ type: "delete", ids: [idOf(ed, "T2–3")] });
   assert.deepEqual(labels(ed), ["T1", "P1", "T2", "P2", "T3"], "two numbers deleted: the ones above move down by two");

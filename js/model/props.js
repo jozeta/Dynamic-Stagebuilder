@@ -6,7 +6,7 @@
 // (Appendix C3a). The appendix drawings are images, so these are the commonly published sizes.
 import { bermSize } from "./berm.js";
 
-import { PAPER_SIZES, TARGET_STYLES, LAYOUTS, CARD_KINDS, CARD_PARAMS, fromPresentation, paperSize, arrayExtent } from "./arrays.js";
+import { PAPER_SIZES, TARGET_STYLES, LAYOUTS, LAYOUT_ALIASES, CARD_KINDS, CARD_PARAMS, fromPresentation, paperSize, arrayExtent } from "./arrays.js";
 import { STANCES, positionSize } from "./positions.js";
 import { ANIMATE_PARAM } from "./animation.js";
 export { PAPER_SIZES, TARGET_STYLES, paperSize };
@@ -172,7 +172,9 @@ export function upgradeProp(type, params = {}) {
 }
 // A paper target saved with a presentation and a hard cover (before layouts) opens as the same cards.
 function paperLayout(type, params) {
-  if ((type !== "paper-ipsc" && type !== "paper-mini") || params.layout !== undefined || (params.presentation === undefined && params.hardCover === undefined)) return params;
+  if (type !== "paper-ipsc" && type !== "paper-mini") return params;
+  if (Object.hasOwn(LAYOUT_ALIASES, params.layout)) return { ...params, layout: LAYOUT_ALIASES[params.layout] };      // a layout name that is gone
+  if (params.layout !== undefined || (params.presentation === undefined && params.hardCover === undefined)) return params;
   const { presentation, hardCover, ...rest } = params;
   return { ...rest, ...fromPresentation(presentation, hardCover) };
 }

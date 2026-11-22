@@ -13,9 +13,10 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
   not only when you let go; hold Shift to turn freely to an exact angle.
 
 - Paper targets are set up in two steps: a *Layout* (one card, two side by side, two one above the
-  other, three side by side, and the overlaps from the IPSC Target Array Book: one in front over
-  the lower half or a side, three in a row with the middle in front or behind, one between two, two
-  with one above), then one dropdown per card: target or no-shoot, each with or without hard cover.
+  other, three side by side, and the overlaps from the IPSC Target Array Book: two overlapping with
+  the left or the right one in front, the lower one in front over the lower half, three in a row
+  with the middle in front or behind, two with one above between them; no two layouts are the same
+  arrangement), then one dropdown per card: target or no-shoot, each with or without hard cover.
   Stages saved with the old presentations open as the same cards.
 
 - The bay's width and depth go in whole metres, and the grid (and grid snapping) now starts at the

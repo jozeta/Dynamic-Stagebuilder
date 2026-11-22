@@ -54,13 +54,14 @@ test("cards: the lowest card sits on the stand height, stacked targets one above
   const d = dimensionsOf(o);
   assert.ok(Math.abs(d.h - (0.3 + cards[1].y + h)) < 1e-6, `height ${d.h}`);
   const flank = arrayCards(obj("paper-ipsc", pres("ns-flank")));
-  assert.equal(flank.filter((k) => k.layer === "fore" && k.kind === "noshoot").length, 2, "the flanking no-shoots stand on their own stands in front");
+  assert.equal(flank.filter((k) => k.kind === "noshoot" && k.layer === "main").length, 2, "the flanking no-shoots stand in front of the target");
+  assert.equal(flank.find((k) => k.kind === "target").layer, "back", "the target between them stands on its own stand behind");
   const fw = dimensionsOf(obj("paper-ipsc", pres("ns-flank"))).w;
   assert.ok(fw > 2 * w, `the flanked array is wider than two cards (${fw})`);
 });
 
 test("hard cover goes on the card it is chosen for", () => {
-  const cards = arrayCards(obj("paper-ipsc", { layout: "two-overlap", card1: "target:lower-1/3", card2: "target" }));
+  const cards = arrayCards(obj("paper-ipsc", { layout: "side-right", card1: "target:lower-1/3", card2: "target" }));
   assert.equal(cards[0].cover, "lower-1/3");
   assert.equal(cards[1].cover, "none");
 });
@@ -130,7 +131,7 @@ test("changing how many targets an array has gives it fresh numbers", async () =
   ed.dispatch({ type: "place", propType: "paper-ipsc", position: [0, 5] });
   ed.dispatch({ type: "place", propType: "paper-ipsc", position: [1, 5] });
   const [a] = ed.stage().objects;
-  ed.dispatch({ type: "setParams", id: a.id, params: { layout: "two-overlap" } });
+  ed.dispatch({ type: "setParams", id: a.id, params: { layout: "side-right", card2: "target" } });
   const labels = ed.stage().objects.map((o) => o.label);
   assert.equal(new Set(labels).size, 2);
   assert.match(labels[0], /^T\d+–\d+$/);

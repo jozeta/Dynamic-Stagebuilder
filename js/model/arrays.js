@@ -36,14 +36,12 @@ export const LAYOUTS = Object.freeze([
   { id: "single", name: "One card", cards: [card("Card", 0, 0)], defaults: ["target"] },
   { id: "side-by-side", name: "Two side by side", cards: [card("Left", 0.65, 0), card("Right", -0.65, 0)], defaults: ["target", "target"], swap: [0, 1] },
   { id: "stacked", name: "Two, one above the other", cards: [card("Lower", 0, 0), card("Upper", 0, "up")], defaults: ["target", "target"] },
-  { id: "two-overlap", name: "Two overlapping", cards: [card("Left (behind)", 0.35, 0), card("Right (in front)", -0.35, 0, "fore")], defaults: ["target", "target"], swap: [0, 1] },
   { id: "lower-front", name: "Two, the lower one in front over the lower half", cards: [card("Upper (behind)", 0, 0.5), card("Lower (in front)", 0, 0, "front")], defaults: ["target", "noshoot"] },
-  { id: "side-left", name: "Two, one in front over the left side", cards: [card("Behind", 0, 0), card("In front, over the left side", 0.55, 0, "fore")], defaults: ["target", "noshoot"], mirror: "side-right" },
-  { id: "side-right", name: "Two, one in front over the right side", cards: [card("Behind", 0, 0), card("In front, over the right side", -0.55, 0, "fore")], defaults: ["target", "noshoot"], mirror: "side-left" },
+  { id: "side-left", name: "Two overlapping, the left one in front", cards: [card("Right (behind)", -0.25, 0), card("Left (in front)", 0.3, 0, "fore")], defaults: ["target", "noshoot"], mirror: "side-right" },
+  { id: "side-right", name: "Two overlapping, the right one in front", cards: [card("Left (behind)", 0.25, 0), card("Right (in front)", -0.3, 0, "fore")], defaults: ["target", "noshoot"], mirror: "side-left" },
   { id: "three-side", name: "Three side by side", cards: [card("Left", 1.3, 0), card("Middle", 0, 0), card("Right", -1.3, 0)], defaults: ["target", "target", "target"], swap: [0, 2] },
   { id: "three-middle-front", name: "Three in a row, the middle one in front", cards: [card("Left", 0.6, 0), card("Middle (in front)", 0, 0.15, "fore"), card("Right", -0.6, 0)], defaults: ["target", "noshoot", "target"], swap: [0, 2] },
-  { id: "three-middle-behind", name: "Three in a row, the middle one behind", cards: [card("Left", 0.62, 0), card("Middle (behind)", 0, 0.1, "back"), card("Right", -0.62, 0)], defaults: ["target", "noshoot", "target"], swap: [0, 2] },
-  { id: "between-two", name: "One in the middle, two in front over its sides", cards: [card("Left (in front)", 0.6, 0, "fore"), card("Middle (behind)", 0, 0), card("Right (in front)", -0.6, 0, "fore")], defaults: ["noshoot", "target", "noshoot"], swap: [0, 2] },
+  { id: "three-middle-behind", name: "Three in a row, the middle one behind", cards: [card("Left (in front)", 0.62, 0), card("Middle (behind)", 0, 0.1, "back"), card("Right (in front)", -0.62, 0)], defaults: ["target", "noshoot", "target"], swap: [0, 2] },
   { id: "pyramid", name: "Two side by side, one above between them (behind)", cards: [card("Lower left", 0.52, 0), card("Lower right", -0.52, 0), card("Upper (behind)", 0, 0.6, "back")], defaults: ["target", "target", "noshoot"], swap: [0, 1] },
 ].map((l) => Object.freeze({ ...l, cards: Object.freeze(l.cards), defaults: Object.freeze(l.defaults) })));
 export const MAX_CARDS = 3;
@@ -72,15 +70,17 @@ export function parseKind(id) {
   return { kind, cover };
 }
 
-/** The layout of a paper target's params (an unknown one is one card). */
-export const layoutOf = (params = {}) => LAYOUTS.find((l) => l.id === params.layout) || LAYOUTS[0];
+// Layouts that turned out to be the same arrangement as another (cards in the same order).
+export const LAYOUT_ALIASES = Object.freeze({ "between-two": "three-middle-behind", "two-overlap": "side-right" });
+/** The layout of a paper target's params (an old name opens as its arrangement; an unknown one is one card). */
+export const layoutOf = (params = {}) => LAYOUTS.find((l) => l.id === (LAYOUT_ALIASES[params.layout] ?? params.layout)) || LAYOUTS[0];
 
 // The presentations stages were saved with before layouts: the same cards as a layout and kinds.
 const OLD = {
   target: ["single", ["target"]], noshoot: ["single", ["noshoot"]],
   "ns-lower": ["lower-front", ["target", "noshoot"]], "ns-left": ["side-left", ["target", "noshoot"]], "ns-right": ["side-right", ["target", "noshoot"]],
-  "ns-flank": ["between-two", ["noshoot", "target", "noshoot"]], "ns-behind": ["side-left", ["noshoot", "target"], 1],
-  "two-overlap": ["two-overlap", ["target", "target"]], "two-ns-between": ["three-middle-front", ["target", "noshoot", "target"]],
+  "ns-flank": ["three-middle-behind", ["noshoot", "target", "noshoot"]], "ns-behind": ["side-left", ["noshoot", "target"], 1],
+  "two-overlap": ["side-right", ["target", "target"]], "two-ns-between": ["three-middle-front", ["target", "noshoot", "target"]],
   stacked: ["stacked", ["target", "target"]], "stacked-ns": ["stacked", ["noshoot", "target"]],
 };
 /** { layout, card1… } for an old presentation and hard cover (the cover was on its first card). */
