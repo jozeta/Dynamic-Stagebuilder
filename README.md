@@ -4,7 +4,7 @@ A browser-based 3D stage builder for IPSC practical shooting. Lay out a stage at
 it from any angle, and print a Written Stage Briefing with a stage map for range officers and
 competitors.
 
-**Version:** 0.10.1 · **Try it:** [jozeta.github.io/Dynamic-Stagebuilder](https://jozeta.github.io/Dynamic-Stagebuilder/)
+**Version:** 0.11.0 · **Try it:** [jozeta.github.io/Dynamic-Stagebuilder](https://jozeta.github.io/Dynamic-Stagebuilder/)
 (runs in the browser; nothing to install, nothing leaves your device) · Started 2026-11-18 (see the
 [v1 design](docs/superpowers/specs/2026-11-18-stage-builder-v1-design.md)).
 
@@ -109,6 +109,18 @@ Computers (mouse and keyboard first) and iPads (touch; every action also has a b
 not supported: below 768 px wide the app asks you to use a larger screen. English only.
 
 ## What's new
+
+### 0.11.0 (2026-11-22)
+
+- **Paper target layouts:** pick a *Layout* (ten arrangements from the IPSC Target Array Book: one
+  card, side by side, one above the other, overlapping, three in a row…), then for each card target
+  or no-shoot, with or without hard cover.
+- **Guides while editing:** turning a prop shows its start and current angle on the ground with the
+  turn (+30°); dragging marks where it started, with a line and the distance (2.3 m). The rotate
+  ring now snaps to the angle step while you drag (Shift turns freely).
+- **Bay and grid:** the bay is sized in whole metres and the grid starts at its edges, so they line
+  up at any width; every surroundings has a grid switch, and Industrial a floor grid.
+- **Steel:** one *Popper* (IPSC or mini); round plates Ø 20 or 30 cm, square 15 or 30 cm.
 
 ### 0.10.1 (2026-11-22)
 
