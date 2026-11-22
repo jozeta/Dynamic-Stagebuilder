@@ -180,6 +180,7 @@ export function createProjects({ panel, docked = false, hide = [], onToggle = ()
     crumbs.replaceChildren(...parts);
     onModeChange();
     closeB.textContent = { match: "Close match", stage: "Close stage", none: "Done" }[mode()];
+    closeB.hidden = mode() === "none";              // nothing open: no button (the panel tabs close it)
     closeB.title = { match: "Save and close the match; back to all your projects", stage: "Save and close this stage", none: "Close the panel" }[mode()];
   }
   async function fillStages() {
