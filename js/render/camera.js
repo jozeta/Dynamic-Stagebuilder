@@ -1,7 +1,7 @@
 // Camera navigation (orbit, pan, zoom; one finger rotates, two pan and zoom on touch) and presets.
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { moveView, orbitView } from "../model/camera-move.js";
+import { moveView, orbitView, panToView } from "../model/camera-move.js";
 import { obliqueView, stageArea, VIEW } from "./view-math.js";
 import { viewFromPosition, anglesFromView } from "../model/positions.js";
 
@@ -173,5 +173,20 @@ export function createCameraRig(engine, domElement) {
     glide = requestAnimationFrame(step);
   };
 
-  return { controls, move, glideTarget, preset, frameAll, viewFrom, currentAngles, walkTo, stopWalk, jumpTo: (v) => { stopWalk(); lens(VIEW.eyeFov); lookFrom(v); }, startView, positionView, getView, setView, setPace: (p) => { pace = p; }, dispose: () => controls.dispose() };
+  // Focus a prop: slide the whole view over to it (same distance and angle, no zoom), in 400 ms.
+  const focusOn = (centre, ms = 400) => {
+    if (!centre) return;
+    stopWalk();
+    if (glide) cancelAnimationFrame(glide);
+    const from = getView(), to = panToView(from, centre), t0 = performance.now();
+    const step = (now) => {
+      const k = Math.min(1, (now - t0) / ms), e = k < 0.5 ? 2 * k * k : 1 - (-2 * k + 2) ** 2 / 2;
+      const mix = (a, b) => a.map((v, i) => v + (b[i] - v) * e);
+      look(mix(from.position, to.position), mix(from.target, to.target));
+      glide = k < 1 ? requestAnimationFrame(step) : null;
+    };
+    glide = requestAnimationFrame(step);
+  };
+
+  return { controls, move, glideTarget, focusOn, preset, frameAll, viewFrom, currentAngles, walkTo, stopWalk, jumpTo: (v) => { stopWalk(); lens(VIEW.eyeFov); lookFrom(v); }, startView, positionView, getView, setView, setPace: (p) => { pace = p; }, dispose: () => controls.dispose() };
 }

@@ -9,7 +9,7 @@ import { layerTree, itemName, isHidden, isLocked } from "../model/layers.js";
 
 const LINE_NAMES = { "fault-line": "Fault line", "shooting-area": "Shooting area" };
 
-export function createLayers(root, { editor, menu }) {
+export function createLayers(root, { editor, menu, onFocus = () => {} }) {
   const d = (a) => editor.dispatch(a);
   let several = false, filter = "", lastKey = "";
   // Group ids folded in the list, remembered in this browser.
@@ -40,6 +40,7 @@ export function createLayers(root, { editor, menu }) {
       const allIn = ids.every((id) => sel.includes(id));
       d({ type: "select", ids: allIn ? sel.filter((id) => !ids.includes(id)) : [...sel, ...ids.filter((id) => !sel.includes(id))] });
     } else d({ type: "select", ids });
+    if (editor.state.selection.length) onFocus(editor.state.selection);   // the camera slides over to it
   }
 
   function renderBar(stage) {

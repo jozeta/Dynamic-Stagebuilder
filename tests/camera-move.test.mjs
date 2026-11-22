@@ -84,3 +84,13 @@ test("the selection's centre: the middle of the selected props, half way up them
   assert.equal(selectionCentre(stage, ["gone"]), null);
 });
 const moveOrbit = (v, c, m, a) => orbitView(v, c, m, a);
+
+const { panToView } = await import("../js/model/camera-move.js");
+test("focusing a prop slides the camera over to it: same distance, same angle, no zoom", () => {
+  const v = { position: [2, 10, -5], target: [0, 0, 10] };
+  const f = panToView(v, [4, 0.5, 14]);
+  close(f.target, [4, 0.5, 14], "looks at the prop");
+  close(f.position, [6, 10.5, -1], "moved by the same amount");
+  assert.ok(Math.abs(len(f.position, f.target) - len(v.position, v.target)) < 1e-9, "no zoom");
+  close(panToView(v, null).position, v.position, "nothing to focus: unchanged");
+});

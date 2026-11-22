@@ -4,6 +4,9 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Picking a prop (or a group) in the *On stage* list slides the camera over to it, so it is in the
+  middle of the view; the distance and angle stay, nothing zooms.
+
 - The 3D view runs to the top of the window: the toolbar (Undo, Redo, Print, Settings, Help,
   About) sits at the top of the right-hand column, above its panels (the left-hand one when the right
   is folded or empty), and only falls back to a bar across the top when both side columns are folded.

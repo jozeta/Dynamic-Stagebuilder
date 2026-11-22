@@ -62,3 +62,10 @@ export function selectionCentre(stage, ids) {
   const h = Math.max(...picked.map((o) => { try { return dimensionsOf(o).h; } catch { return 0; } }));
   return [mid(xs), h / 2, mid(zs)];
 }
+
+/** Slide the whole view so it looks at `centre`: camera and target move together (no zoom, no turn). */
+export function panToView(view, centre) {
+  if (!centre) return { position: [...view.position], target: [...view.target] };
+  const d = [centre[0] - view.target[0], centre[1] - view.target[1], centre[2] - view.target[2]];
+  return { position: view.position.map((v, i) => v + d[i]), target: [...centre] };
+}

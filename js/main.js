@@ -532,7 +532,8 @@ const library = createLibrary(document.getElementById("library-body"), { editor,
 // The right-click menu (long press on an iPad) on the 3D view and the On stage list.
 const menu = createContextMenu({ editor, rig, onShooterEye: () => document.getElementById("toolbar")?.eyeSteps?.reset() });
 menu.attach(canvas, { target: (e) => picking.objectAt(e, { locked: true }), ground: (e) => picking.groundAt(e) });
-const layers = createLayers(document.getElementById("layers"), { editor, menu });
+// Picking a prop in the On stage list slides the camera over to it (no zoom).
+const layers = createLayers(document.getElementById("layers"), { editor, menu, onFocus: (ids) => rig.focusOn(selectionCentre(editor.stage(), ids)) });
 const selectedCentre = () => selectionCentre(editor.stage(), editor.state.selection);
 createCameraPad(document.getElementById("camera-slot"), { rig, around: selectedCentre });
 // Turning the view (left drag on empty ground, one finger) with something selected turns it round
