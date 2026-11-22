@@ -215,10 +215,12 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
         // longer instead (never below 10 cm). Then the IPSC height limit still applies.
         if (newLayout) {
           const keep = o.params.mountHeight + arrayExtent(o).top - arrayExtent({ type: o.type, params: next }).top;
-          next = { ...next, mountHeight: Math.round(Math.min(2, Math.max(0.1, keep)) * 1e6) / 1e6 };
+          next = { ...next, mountHeight: Math.round(Math.min(2, Math.max(0.1, keep)) * 100) / 100 };      // whole cm, before the limit check
         }
         next = { ...next, mountHeight: fitStand({ type: o.type, params: next }) };
       }
+      // A paper target's stand height is whole centimetres (typed, or set to keep the top in place).
+      if (paper && Number.isFinite(next.mountHeight)) next = { ...next, mountHeight: Math.round(next.mountHeight * 100) / 100 };
       // An automatic label follows a change in how many targets the array is.
       const relabel = paper && !o.labelManual && arrayCounts({ type: o.type, params: next }).paper !== arrayCounts(o).paper;
       edit(updateObject(present(), id, { params: next, ...(relabel ? { label: null } : {}) }));

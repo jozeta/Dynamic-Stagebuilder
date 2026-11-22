@@ -4,6 +4,9 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- A paper target's stand height is whole centimetres, also when a new layout or style sets it to
+  keep the top of the cards in place (no more heights like 0.6145 m).
+
 ## 0.11.0 (2026-11-22)
 
 - Turning a prop with the rotate ring shows, on the ground, a line for the angle it started at, a

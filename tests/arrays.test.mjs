@@ -146,10 +146,24 @@ test("switching layout keeps the top of the targets at the same height: the stic
   ed.dispatch({ type: "place", propType: "paper-ipsc", position: [0, 5] });
   const id = ed.stage().objects.at(-1).id;
   const top = () => { const o = ed.stage().objects.find((x) => x.id === id); return o.params.mountHeight + arrayExtent(o).top; };
-  const start = top();
+  const cm = (v) => Math.abs(v * 100 - Math.round(v * 100)) < 1e-6;
   for (const p of ["stacked", "lower-front", "three-middle-front", "pyramid", "single"]) {
+    const before = top();
     ed.dispatch({ type: "setParams", id, params: { layout: p } });
-    assert.ok(Math.abs(top() - start) < 1e-6, `${p}: top at ${top().toFixed(3)}, was ${start.toFixed(3)}`);
+    // The stand height is whole centimetres, so the top stays within half a centimetre.
+    assert.ok(Math.abs(top() - before) <= 0.005 + 1e-9, `${p}: top at ${top().toFixed(3)}, was ${before.toFixed(3)}`);
+    assert.ok(cm(ed.stage().objects.find((x) => x.id === id).params.mountHeight), `${p}: whole centimetres`);
   }
-  assert.ok(Math.abs(ed.stage().objects.find((x) => x.id === id).params.mountHeight - 0.7) < 1e-9, "back to the original stand height");
+});
+
+test("the stand height is whole centimetres, typed or set by a layout", async () => {
+  const { createEditor } = await import("../js/editor.js");
+  const ed = createEditor({ stage: createStage() });
+  ed.dispatch({ type: "place", propType: "paper-ipsc", position: [0, 5] });
+  const id = ed.stage().objects.at(-1).id;
+  const h = () => ed.stage().objects.find((x) => x.id === id).params.mountHeight;
+  ed.dispatch({ type: "setParams", id, params: { mountHeight: 0.6145 } });
+  assert.equal(h(), 0.61);
+  ed.dispatch({ type: "setParams", id, params: { layout: "three-middle-front" } });
+  assert.equal(Math.round(h() * 100) / 100, h());
 });
