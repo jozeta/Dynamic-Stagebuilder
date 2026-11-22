@@ -4,6 +4,8 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+## 0.11.1 (2026-11-22)
+
 - A paper target's stand height is whole centimetres, also when a new layout or style sets it to
   keep the top of the cards in place (no more heights like 0.6145 m).
 
