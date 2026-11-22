@@ -67,7 +67,7 @@ function tyre(y) {
 
 export function buildTyre(obj) {
   const g = group(obj.id);
-  const count = obj.type === "tyre-stack" ? obj.params.count : 1;
+  const count = Math.max(1, Math.round(obj.params.count || 1));          // one tyre, or a stack
   for (let i = 0; i < count; i++) {
     g.add(tyre(i * TYRE.height));
   }

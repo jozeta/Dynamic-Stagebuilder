@@ -1,14 +1,14 @@
-// Walls: wire mesh in a pine (or black) frame with a post about every metre, a mesh wall with a
-// framed port, a plywood wall, and a plywood wall with a port. Centred on the origin, length along
+// Walls: wire mesh in a pine (or black) frame with a post about every metre, and plywood between two
+// posts; each a plain wall, a wall with a port (anywhere in it) or a doorway (props Type). Centred on the origin, length along
 // x, thickness along z. Ports are real openings.
 import * as THREE from "three";
 import { STICK, WALL_FOOT } from "../../model/props.js";
 import { getMaterial } from "../materials.js";
 import { box, extrude, group } from "./parts.js";
+import { portRect, doorRect, PORT_FRAME } from "../../model/wall-port.js";
 
 const MESH_TILE = 0.5;    // one texture tile of wire mesh (5 × 5 holes of 10 cm), in metres
 const PANEL = 0.018;
-const PORT_FRAME = 0.035;
 
 // Triangular gussets screwed into the frame's inside corners, as on DIY training walls.
 function gussets(g, length, height, material) {
@@ -73,18 +73,16 @@ function meshRect(x0, x1, y0, y1, material) {
 }
 
 /** Keep a port inside the panel, at least 5 cm from every edge. */
-function fitPort(p, inner, height) {
-  const pw = Math.min(p.portWidth, inner - 0.1);
-  const ph = Math.min(p.portHeight, height - 0.1);
-  const pb = Math.min(Math.max(p.portBottom, 0.05), height - 0.05 - ph);
-  return { pw, ph, pb };
-}
-
 const frameMaterial = (p) => (p.frame === "black" ? "frame-black" : "wood");
 const meshMaterial = (p) => `mesh-${p.mesh === "blue" || p.mesh === "black" ? p.mesh : "orange"}`;
+// An invisible marker of where the port is (for checks; never drawn or picked).
+function portMark(g, r) { const m = new THREE.Group(); m.userData.port = r; g.add(m); }
 
+/** Mesh wall: Type (model/props.js) picks a plain wall, a wall with a port, or a doorway. */
 export function buildMeshWall(obj) {
   const p = obj.params;
+  if (p.variant === "port") return buildMeshPortWall(obj);
+  if (p.variant === "doorway") return buildDoorWall(obj);
   const g = group(obj.id);
   frame(g, p.length, p.height, frameMaterial(p));
   gussets(g, p.length, p.height, frameMaterial(p));
@@ -95,7 +93,8 @@ export function buildMeshWall(obj) {
   return g;
 }
 
-export function buildMeshPortWall(obj) {
+// A mesh wall with a framed port where Port puts it (model/wall-port.js), mesh all round it.
+function buildMeshPortWall(obj) {
   const p = obj.params;
   const g = group(obj.id);
   const fm = frameMaterial(p), mm = meshMaterial(p);
@@ -104,71 +103,81 @@ export function buildMeshPortWall(obj) {
   const inner = p.length - 2 * STICK;
   g.add(box(inner, STICK, STICK, fm, 0, STICK / 2, 0));
   g.add(box(inner, STICK, STICK, fm, 0, p.height - STICK / 2, 0));
-  const { pw, ph, pb } = fitPort(p, inner - 2 * PORT_FRAME, p.height - 2 * STICK);
-  const y0 = Math.max(pb, STICK + PORT_FRAME), y1 = Math.min(y0 + ph, p.height - STICK - PORT_FRAME);
+  const r = portRect(p), F = PORT_FRAME, cx = (r.x0 + r.x1) / 2, pw = r.x1 - r.x0;
   // Port frame.
-  const F = PORT_FRAME;
-  g.add(box(pw + 2 * F, F, STICK, fm, 0, y0 - F / 2, 0));
-  g.add(box(pw + 2 * F, F, STICK, fm, 0, y1 + F / 2, 0));
-  g.add(box(F, y1 - y0, STICK, fm, -pw / 2 - F / 2, (y0 + y1) / 2, 0));
-  g.add(box(F, y1 - y0, STICK, fm, pw / 2 + F / 2, (y0 + y1) / 2, 0));
+  g.add(box(pw + 2 * F, F, STICK, fm, cx, r.y0 - F / 2, 0));
+  g.add(box(pw + 2 * F, F, STICK, fm, cx, r.y1 + F / 2, 0));
+  g.add(box(F, r.y1 - r.y0, STICK, fm, r.x0 - F / 2, (r.y0 + r.y1) / 2, 0));
+  g.add(box(F, r.y1 - r.y0, STICK, fm, r.x1 + F / 2, (r.y0 + r.y1) / 2, 0));
   // Mesh around the port.
   const L = -inner / 2, R = inner / 2, B = STICK, T = p.height - STICK;
-  for (const m of [meshRect(L, -pw / 2 - F, B, T, mm), meshRect(pw / 2 + F, R, B, T, mm),
-    meshRect(-pw / 2 - F, pw / 2 + F, B, y0 - F, mm), meshRect(-pw / 2 - F, pw / 2 + F, y1 + F, T, mm)]) if (m) g.add(m);
-  feet(g, obj.params.length, frameMaterial(obj.params));
-  return g;
-}
-
-export function buildWoodWall(obj) {
-  const { length, height } = obj.params;
-  const g = group(obj.id);
-  for (const x of [-length / 2 + STICK / 2, length / 2 - STICK / 2]) g.add(box(STICK, height, STICK, "wood", x, height / 2, 0));
-  g.add(box(length - 2 * STICK, height, PANEL, "plywood", 0, height / 2, 0));
-  feet(g, obj.params.length, "wood");
-  return g;
-}
-
-export function buildPortWall(obj) {
-  const { length, height } = obj.params;
-  const g = group(obj.id);
-  for (const x of [-length / 2 + STICK / 2, length / 2 - STICK / 2]) g.add(box(STICK, height, STICK, "wood", x, height / 2, 0));
-  const inner = length - 2 * STICK;
-  const { pw, ph, pb } = fitPort(obj.params, inner, height);
-  const s = new THREE.Shape();
-  s.moveTo(-inner / 2, 0); s.lineTo(inner / 2, 0); s.lineTo(inner / 2, height); s.lineTo(-inner / 2, height); s.closePath();
-  const hole = new THREE.Path();
-  hole.moveTo(-pw / 2, pb); hole.lineTo(-pw / 2, pb + ph); hole.lineTo(pw / 2, pb + ph); hole.lineTo(pw / 2, pb); hole.closePath();
-  s.holes.push(hole);
-  const panel = extrude(s, PANEL, "plywood", PANEL / 2);
-  // Extrude UVs are in metres; scale them so one plywood texture covers about 1.2 m.
-  const uv = panel.geometry.attributes.uv;
-  for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) / 1.2, uv.getY(i) / 1.2);
-  g.add(panel);
-  feet(g, obj.params.length, "wood");
+  for (const m of [meshRect(L, r.x0 - F, B, T, mm), meshRect(r.x1 + F, R, B, T, mm),
+    meshRect(r.x0 - F, r.x1 + F, B, r.y0 - F, mm), meshRect(r.x0 - F, r.x1 + F, r.y1 + F, T, mm)]) if (m) g.add(m);
+  feet(g, p.length, fm);
+  portMark(g, r);
   return g;
 }
 
 // A mesh doorway: end posts and a top rail, a framed door opening from the ground up to the door
 // height, mesh either side and above. A wall, so it snaps to other walls.
-export function buildDoorWall(obj) {
+function buildDoorWall(obj) {
   const p = obj.params;
   const g = group(obj.id);
   const fm = frameMaterial(p), mm = meshMaterial(p);
   const L = p.length, H = p.height, F = PORT_FRAME;
   for (const x of [-L / 2 + STICK / 2, L / 2 - STICK / 2]) g.add(box(STICK, H, STICK, fm, x, H / 2, 0));
   g.add(box(L - 2 * STICK, STICK, STICK, fm, 0, H - STICK / 2, 0));
-  const dw = Math.min(p.doorWidth, L - 2 * STICK - 2 * F - 0.1), dh = Math.min(p.doorHeight, H - STICK - F - 0.05);
+  const d = doorRect(p), dw = d.x1 - d.x0, dh = d.y1;
   g.add(box(F, dh, STICK, fm, -dw / 2 - F / 2, dh / 2, 0));
   g.add(box(F, dh, STICK, fm, dw / 2 + F / 2, dh / 2, 0));
   g.add(box(dw + 2 * F, F, STICK, fm, 0, dh + F / 2, 0));
   // Bottom rails either side of the door.
   const side = (L - 2 * STICK - dw - 2 * F) / 2;
-  for (const s of [-1, 1]) g.add(box(side, STICK, STICK, fm, s * (dw / 2 + F + side / 2), STICK / 2, 0));
+  if (side > 0.001) for (const s of [-1, 1]) g.add(box(side, STICK, STICK, fm, s * (dw / 2 + F + side / 2), STICK / 2, 0));
   const inner = L / 2 - STICK;
   for (const m of [meshRect(-inner, -dw / 2 - F, STICK, H - STICK, mm), meshRect(dw / 2 + F, inner, STICK, H - STICK, mm),
     meshRect(-dw / 2 - F, dw / 2 + F, dh + F, H - STICK, mm)]) if (m) g.add(m);
-  feet(g, obj.params.length, frameMaterial(obj.params));
+  feet(g, L, fm);
+  return g;
+}
+
+// A plywood sheet between two posts, its outline `pts` (with an optional hole), UVs so one plywood
+// texture covers about 1.2 m.
+function plywood(pts, hole = null) {
+  const s = new THREE.Shape();
+  pts.forEach(([x, y], i) => (i ? s.lineTo(x, y) : s.moveTo(x, y)));
+  s.closePath();
+  if (hole) {
+    const h = new THREE.Path();
+    hole.forEach(([x, y], i) => (i ? h.lineTo(x, y) : h.moveTo(x, y)));
+    h.closePath();
+    s.holes.push(h);
+  }
+  const panel = extrude(s, PANEL, "plywood", PANEL / 2);
+  const uv = panel.geometry.attributes.uv;
+  for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) / 1.2, uv.getY(i) / 1.2);
+  return panel;
+}
+
+/** Wooden wall: Type picks a plain plywood wall, one with a port cut where Port puts it, or a doorway. */
+export function buildWoodWall(obj) {
+  const p = obj.params, { length, height } = p;
+  const g = group(obj.id);
+  for (const x of [-length / 2 + STICK / 2, length / 2 - STICK / 2]) g.add(box(STICK, height, STICK, "wood", x, height / 2, 0));
+  const i = (length - 2 * STICK) / 2;
+  if (p.variant === "port") {
+    const r = portRect(p);
+    g.add(plywood([[-i, 0], [i, 0], [i, height], [-i, height]], [[r.x0, r.y0], [r.x0, r.y1], [r.x1, r.y1], [r.x1, r.y0]]));
+    portMark(g, r);
+  } else if (p.variant === "doorway") {
+    // The sheet cut round the door from the ground up, a lintel rail over the opening.
+    const d = doorRect(p);
+    g.add(plywood([[-i, 0], [d.x0, 0], [d.x0, d.y1], [d.x1, d.y1], [d.x1, 0], [i, 0], [i, height], [-i, height]]));
+    g.add(box(d.x1 - d.x0 + 0.1, STICK, STICK, "wood", 0, d.y1 + STICK / 2, PANEL / 2 + STICK / 2));
+  } else {
+    g.add(box(length - 2 * STICK, height, PANEL, "plywood", 0, height / 2, 0));
+  }
+  feet(g, length, "wood");
   return g;
 }
 
@@ -208,10 +217,10 @@ export function buildDoor(obj) {
 // A wooden wall with a port that has a shutter: closed, the plate covers the port; open, it hangs
 // down flat toward the shooter from a hinge at the port's foot. Animate opens and closes it.
 export function buildPortShutterWall(obj) {
-  const g = buildPortWall(obj);
-  const { pw, ph, pb } = fitPort(obj.params, obj.params.length - 2 * STICK, obj.params.height);
+  const g = buildWoodWall({ ...obj, params: { ...obj.params, variant: "port", portOffset: 0 } });
+  const r = portRect({ ...obj.params, portOffset: 0 }), pw = r.x1 - r.x0, ph = r.y1 - r.y0;
   const hinge = new THREE.Group();
-  hinge.position.set(0, pb, -PANEL / 2 - 0.008);
+  hinge.position.set(0, r.y0, -PANEL / 2 - 0.008);
   hinge.userData.anim = { kind: "shutter" };
   hinge.add(box(pw, ph, 0.012, "steel-dark", 0, ph / 2, 0));
   if (obj.params.shutter === "open") hinge.rotation.x = -Math.PI / 2;

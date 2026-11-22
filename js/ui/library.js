@@ -19,8 +19,7 @@ function sizeText(type) {
     case "plate-round": return `Ø ${cm(p.size)} cm`;
     case "plate-square": return `${cm(p.size)} × ${cm(p.size)} cm`;
     case "barrel": return `Ø ${cm(BARREL.diameter)} × ${cm(BARREL.height)} cm`;
-    case "tyre": return `Ø ${cm(TYRE.diameter)} cm`;
-    case "tyre-stack": return `${p.count} tyres`;
+    case "tyre": return p.count > 1 ? `${p.count} tyres stacked` : `Ø ${cm(TYRE.diameter)} cm`;
     case "crate": return `${cm(p.size)} cm cube`;
     case "plant-palm": return "Decoration";
     case "ramp": case "platform": return `${p.length} × ${p.width} m, ${cm(p.height)} cm high`;
@@ -42,6 +41,7 @@ function sizeText(type) {
     case "dueling-tree": return "6 paddles, not IPSC";
     case "step-pad": return p.pads > 1 ? "Three pads, activates a target" : "Pad, activates a target";
     case "pull-lever": return "Opens a shutter or releases a target";
+    case "wall-mesh": case "wall-wood": return `${p.length} × ${p.height} m: wall, port or doorway`;
     case "wall-port-shutter": return `${p.length} × ${p.height} m, port with a shutter`;
     case "hardcover-panel": return `${p.length} × ${p.height} m, black`;
     case "raised-barricade": return `${p.length} m, gap ${cm(p.gap)} cm`;
@@ -58,7 +58,6 @@ function sizeText(type) {
     case "container": return "20 ft or 40 ft";
     case "fence": return `${p.length} × ${p.height} m`;
     case "barrier": return `${p.length} m jersey barrier`;
-    case "wall-door": return `${p.length} × ${p.height} m, door ${cm(p.doorWidth)} cm`;
     default: return `${p.length} × ${p.height} m`;
   }
 }

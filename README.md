@@ -36,13 +36,13 @@ training, and want a clear briefing sheet without drawing the map by hand.
   - a door that opens, a wall with a shuttered port, hard-cover panels, raised barricades, a wobble
     platform, a balance rope and a step box
   - steel: IPSC popper, mini popper, round plate, square plate
-  - walls: mesh wall and mesh wall with port (orange safety netting, or black or blue wire mesh,
-    in a light pine or black frame on feet),
-    wooden wall, wooden wall with port; ports are real openings
-  - mesh doorway (a wall with a door opening) and solid panel (a grey sheet in a pine frame);
-    both snap like the other walls
+  - walls: mesh wall (orange safety netting, or black or blue wire mesh, in a light pine or black
+    frame on feet) and wooden wall, each 1 m wide to start, with a *Type*: a plain wall, a wall with
+    a port (*Port* switch; width, height, up/down and left/right) or a doorway (door width and
+    height); ports and doorways are real openings. A solid panel (a grey sheet in a pine frame).
+    All of them snap like the other walls
   - structures: ramp, platform
-  - obstacles and range furniture: 200 l steel drum (black, blue, red, green), tyre, tyre stack,
+  - obstacles and range furniture: 200 l steel drum (black, blue, red, green), tyres (one, or up to six stacked),
     shipping crate, potted plant, car (saloon, hatchback, pickup or van, in five colours), table,
     chair, pallets, sandbag wall, traffic cone
   - furniture: bed (single or double), sofa (armchair, 2 or 3 seats, L, U or corner, in fabric or

@@ -5,7 +5,7 @@ import { createEditor } from "../js/editor.js";
 
 function twoWalls() {
   const ed = createEditor();
-  ed.dispatch({ type: "place", propType: "wall-mesh", position: [0, 5] });       // ends x = ±1
+  ed.dispatch({ type: "place", propType: "wall-mesh", position: [0, 5] });       // 1 m walls: ends x = ±0.5
   ed.dispatch({ type: "place", propType: "wall-mesh", position: [4, 5] });
   return { ed, a: ed.stage().objects[0].id, b: ed.stage().objects[1].id };
 }
@@ -14,17 +14,17 @@ const pos = (ed, id) => ed.stage().objects.find((o) => o.id === id).position;
 test("placing a wall next to another joins their ends", () => {
   const ed = createEditor();
   ed.dispatch({ type: "place", propType: "wall-mesh", position: [0, 5] });
-  ed.dispatch({ type: "place", propType: "wall-mesh", position: [2.2, 5.1] });
-  assert.deepEqual(ed.stage().objects[1].position, [2, 5]);
+  ed.dispatch({ type: "place", propType: "wall-mesh", position: [1.2, 5.1] });
+  assert.deepEqual(ed.stage().objects[1].position, [1, 5]);
 });
 
 test("dragging one wall near another snaps it on", () => {
   const { ed, b } = twoWalls();
   ed.dispatch({ type: "select", ids: [b] });
   ed.dispatch({ type: "dragStart", ids: [b] });
-  ed.dispatch({ type: "dragMove", delta: [-1.83, 0.07] });                        // to (2.17, 5.07)
+  ed.dispatch({ type: "dragMove", delta: [-2.83, 0.07] });                        // to (1.17, 5.07)
   ed.dispatch({ type: "dragEnd" });
-  assert.deepEqual(pos(ed, b), [2, 5]);
+  assert.deepEqual(pos(ed, b), [1, 5]);
 });
 
 test("with object snap off, the grid decides", () => {

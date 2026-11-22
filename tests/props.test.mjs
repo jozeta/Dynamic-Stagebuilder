@@ -1,18 +1,18 @@
 // The prop catalogue and the scoring constants: every v1 prop exists with real-world dimensions.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { PROPS, getProp, defaultParams, dimensionsOf, TARGET_SIZES } from "../js/model/props.js";
+import { PROPS, getProp, defaultParams, dimensionsOf, TARGET_SIZES, upgradeProp } from "../js/model/props.js";
 import { SCORING } from "../js/model/scoring-rules.js";
 
 const TYPES = ["paper-ipsc", "paper-mini", "popper", "mini-popper",
-  "plate-round", "plate-square", "wall-mesh", "wall-mesh-port", "wall-wood", "wall-port", "barrel", "tyre", "tyre-stack", "crate", "plant-palm",
-  "wall-door", "wall-solid", "ramp", "platform", "car", "table", "chair", "bed", "sofa", "office-desk", "dining-set", "coffee-table", "pallet", "sandbags", "cone",
+  "plate-round", "plate-square", "wall-mesh", "wall-wood", "barrel", "tyre", "crate", "plant-palm",
+  "wall-solid", "ramp", "platform", "car", "table", "chair", "bed", "sofa", "office-desk", "dining-set", "coffee-table", "pallet", "sandbags", "cone",
   "swinger", "drop-turner", "clamshell", "mover", "texas-star", "plate-rack", "dueling-tree", "shooting-position", "door",
   "step-pad", "pull-lever", "start-marks", "wall-port-shutter", "hardcover-panel", "raised-barricade", "bobber", "twister", "wobble-platform", "balance-rope", "step-box",
   "building-wall", "pillar", "column", "berm", "container", "fence", "barrier"];
 
 const near = (a, b, tol = 0.005) => assert.ok(Math.abs(a - b) <= tol, `${a} ≈ ${b}`);
-const obj = (type, params = {}) => ({ type, params: { ...defaultParams(type), ...params } });
+const obj = (old, oldParams = {}) => { const { type, params } = upgradeProp(old, oldParams); return { type, params: { ...defaultParams(type), ...params } }; };
 
 test("every v1 prop type exists with a category", () => {
   for (const t of TYPES) {
@@ -33,7 +33,9 @@ test("scoring kinds", () => {
 });
 
 test("default params of a mesh wall", () => {
-  assert.deepEqual(defaultParams("wall-mesh"), { length: 2, height: 2, mesh: "orange", frame: "wood" });
+  const p = defaultParams("wall-mesh");
+  assert.equal(p.variant, "wall"); assert.equal(p.length, 1); assert.equal(p.height, 2);
+  assert.equal(p.mesh, "orange"); assert.equal(p.frame, "wood");
 });
 
 test("paper target height is mount height plus the target", () => {
@@ -50,6 +52,7 @@ test("wall with a port is as big as the wall", () => {
 });
 
 test("tyre stack grows with the count", () => {
+  near(dimensionsOf(obj("tyre", { count: 4 })).h, 4 * dimensionsOf(obj("tyre")).h);
   near(dimensionsOf(obj("tyre-stack", { count: 4 })).h, 4 * dimensionsOf(obj("tyre")).h);
 });
 
@@ -66,9 +69,9 @@ test("scoring constants are frozen and cite their rulebook", () => {
 });
 
 test("mesh wall with port has mesh and port settings", () => {
-  const p = defaultParams("wall-mesh-port");
-  assert.deepEqual(Object.keys(p).sort(), ["frame", "height", "length", "mesh", "portBottom", "portHeight", "portWidth"]);
-  assert.equal(getProp("wall-mesh-port").category, "wall");
+  const p = defaultParams("wall-mesh");
+  assert.deepEqual(Object.keys(p).sort(), ["doorHeight", "doorWidth", "frame", "height", "length", "mesh", "portBottom", "portHeight", "portOffset", "portWidth", "variant"]);
+  assert.equal(getProp("wall-mesh").category, "wall");
 });
 
 test("steel has a paint colour; poppers default yellow, plates white", () => {
@@ -105,8 +108,8 @@ test("new structures and range furniture have real sizes", () => {
   near(dimensionsOf(obj("pallet", { count: 4 })).h, 4 * dimensionsOf(obj("pallet", { count: 1 })).h);
   assert.equal(getProp("ramp").category, "structure");
   assert.equal(getProp("car").category, "obstacle");
-  assert.equal(getProp("wall-door").category, "wall");
-  assert.ok(defaultParams("wall-door").doorWidth >= 0.7);
+  assert.equal(getProp("wall-mesh").category, "wall");
+  assert.ok(defaultParams("wall-mesh").doorWidth >= 0.7);
 });
 
 test("the solid panel is a wall (it snaps); walls stand on feet 40 cm deep", () => {
@@ -118,6 +121,5 @@ test("the solid panel is a wall (it snaps); walls stand on feet 40 cm deep", () 
 test("mesh walls default to orange safety netting in a light pine frame", () => {
   assert.equal(defaultParams("wall-mesh").mesh, "orange");
   assert.deepEqual([...getProp("wall-mesh").params.mesh.options], ["orange", "black", "blue"]);
-  assert.equal(defaultParams("wall-mesh-port").mesh, "orange");
-  assert.equal(defaultParams("wall-door").frame, "wood");
+  assert.equal(defaultParams("wall-mesh").frame, "wood", "every type of mesh wall: port and doorway too");
 });

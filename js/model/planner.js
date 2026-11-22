@@ -8,6 +8,7 @@
 // only way to see its targets. Each position faces the targets it engages, and the walk to it goes
 // round walls (a grab point past the wall's end). Pure: no DOM, no Three.js.
 import { getProp, paperSize, CAR_MODELS, CONTAINERS, MOVING, STICK } from "./props.js";
+import { portRect, doorRect } from "./wall-port.js";
 
 // Stances the plan may use, with eye height and a cost (standing is preferred; lower stances are
 // chosen only when a low port or gap is the way to see the targets).
@@ -57,15 +58,17 @@ export function blockers(stage) {
   for (const o of stage.objects) {
     const p = o.params || {};
     switch (o.type) {
-      case "wall-mesh": case "wall-wood": case "wall-solid": case "hardcover-panel": case "building-wall":
-        out.push(segment(o.position, o.rotation, p.length, p.height)); break;
-      case "wall-port": case "wall-mesh-port": case "wall-port-shutter": {
-        const pw = Math.min(p.portWidth, p.length - 2 * STICK - 0.1), ph = Math.min(p.portHeight, p.height - 0.1);
-        const pb = Math.min(Math.max(p.portBottom, 0.05), p.height - 0.05 - ph);
-        out.push(segment(o.position, o.rotation, p.length, p.height, [{ u0: -pw / 2, u1: pw / 2, y0: pb, y1: pb + ph, walk: false }])); break;
+      case "wall-mesh": case "wall-wood": {
+        // A plain wall, a port to shoot through, or a doorway to walk through (model/wall-port.js).
+        const r = p.variant === "port" ? portRect(p) : p.variant === "doorway" ? doorRect(p) : null;
+        out.push(segment(o.position, o.rotation, p.length, p.height, r ? [{ u0: r.x0, u1: r.x1, y0: r.y0, y1: r.y1, walk: p.variant === "doorway" }] : [])); break;
       }
-      case "wall-door":
-        out.push(segment(o.position, o.rotation, p.length, p.height, [{ u0: -p.doorWidth / 2, u1: p.doorWidth / 2, y0: 0, y1: p.doorHeight, walk: true }])); break;
+      case "wall-solid": case "hardcover-panel": case "building-wall":
+        out.push(segment(o.position, o.rotation, p.length, p.height)); break;
+      case "wall-port-shutter": {
+        const r = portRect(p);
+        out.push(segment(o.position, o.rotation, p.length, p.height, [{ u0: r.x0, u1: r.x1, y0: r.y0, y1: r.y1, walk: false }])); break;
+      }
       case "door": {
         const L = p.doorWidth + 2 * STICK + 0.02;              // the shooter opens the door
         out.push(segment(o.position, o.rotation, L, p.height, [{ u0: -p.doorWidth / 2, u1: p.doorWidth / 2, y0: 0, y1: p.height - STICK, walk: true }])); break;

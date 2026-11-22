@@ -1,6 +1,7 @@
 // The stage model: pure functions that return a new stage and never change their input.
 import { test } from "node:test";
 import { LOOK_DEFAULTS } from "../js/model/look.js";
+import { defaultParams } from "../js/model/props.js";
 import assert from "node:assert/strict";
 import { createStage, addObject, updateObject, removeObjects, duplicateObjects, addLine, updateLine,
   setStart, setSetting, setBay, pruneSelection } from "../js/model/stage.js";
@@ -31,7 +32,8 @@ test("addObject returns a new stage and leaves the input alone", () => {
   assert.equal(o.id, id);
   assert.deepEqual(o.position, [1, 2]);
   assert.equal(o.rotation, 30);
-  assert.deepEqual(o.params, { length: 2, height: 2, mesh: "orange", frame: "wood" });
+  assert.deepEqual(o.params, defaultParams("wall-mesh"));
+  assert.equal(o.params.length, 1, "a mesh wall is 1 m wide to start");
   assert.equal(o.label, null);
   assert.equal(o.labelManual, false);
 });
@@ -42,7 +44,7 @@ test("updateObject merges params", () => {
   assert.equal(next.objects[0].params.length, 3);
   assert.equal(next.objects[0].params.mesh, "orange");
   assert.equal(next.objects[0].rotation, 90);
-  assert.equal(stage.objects[0].params.length, 2);
+  assert.equal(stage.objects[0].params.length, 1);
 });
 
 test("removeObjects removes objects and lines by id", () => {

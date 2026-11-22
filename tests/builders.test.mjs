@@ -3,9 +3,10 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { Box3, Vector3, Raycaster } from "three";
 import { buildProp } from "../js/render/builders/index.js";
-import { defaultParams, dimensionsOf } from "../js/model/props.js";
+import { defaultParams, dimensionsOf, upgradeProp } from "../js/model/props.js";
 
-const obj = (type, params = {}) => ({ id: `id-${type}`, type, params: { ...defaultParams(type), ...params } });
+// Older prop names (wall-port, wall-door, tyre-stack…) build as today's prop with that choice.
+const obj = (old, oldParams = {}) => { const { type, params } = upgradeProp(old, oldParams); return { id: `id-${type}`, type, params: { ...defaultParams(type), ...params } }; };
 const size = (g) => new Box3().setFromObject(g).getSize(new Vector3());
 const near = (a, b, tol, msg) => assert.ok(Math.abs(a - b) <= tol, `${msg}: ${a.toFixed(4)} vs ${b.toFixed(4)}`);
 

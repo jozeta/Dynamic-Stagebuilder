@@ -13,7 +13,7 @@ import { BAY_SHAPE_NAMES, bayShapeFields as shapeFieldsOf } from "../model/bay.j
 const PARAM_LABELS = {
   presentation: "Presentation", hardCover: "Hard cover", mountHeight: "Stand height (m)", style: "Target style", baseHeight: "Base height (m)", size: "Size (m)", length: "Length (m)",
   height: "Height (m)", mesh: "Mesh colour", frame: "Frame", portWidth: "Port width (m)",
-  portHeight: "Port height (m)", portBottom: "Port bottom (m)", count: "Count", paint: "Paint", color: "Colour", width: "Width (m)", rows: "Rows",
+  portHeight: "Port height (m)", portBottom: "Port up/down: bottom edge (m)", portOffset: "Port left/right (m, + left)", variant: "Type", count: "Count", paint: "Paint", color: "Colour", width: "Width (m)", rows: "Rows",
   doorWidth: "Door width (m)", ground: "Surface", plants: "Plants", plates: "Plates", model: "Model", stance: "Stance", pads: "Pads", stack: "Drums high", items: "On the table", targets: "Targets on the carrier", shutter: "Shutter", panelHeight: "Panel height (m)", gap: "Gap underneath (m)", open: "Open (°)", hinge: "Hinge side", swing: "Opens", animate: "Animate (moves when Play is on)", thickness: "Thickness (m)", material: "Material", diameter: "Diameter (m)", depth: "Base depth (m)", pitch: "Look up/down (°)", doorHeight: "Door height (m)",
 };
 const OPTION_LABELS = { classic: "Classic (octagon)", head: "With head", orange: "Orange", black: "Black", blue: "Blue", wood: "Wood", white: "White", yellow: "Yellow", red: "Red",
@@ -29,6 +29,7 @@ const FURNITURE_LABELS = {
   "cover:grey-fabric": "Grey fabric", "cover:beige-fabric": "Beige fabric", "cover:blue-fabric": "Blue fabric", "cover:green-fabric": "Green fabric", "cover:black-leather": "Black leather", "cover:brown-leather": "Brown leather",
   "bedding:beige": "Beige",
 };
+const WALL_TYPES = { wall: "Wall", port: "Wall with port", doorway: "Doorway" };
 const FURNITURE_PARAMS = { size: "Size", shape: "Shape", seats: "Seats", finish: "Wood finish", cover: "Cover", bedding: "Bedding", chair: "Chair colour" };
 const GRID_OPTIONS = [[0, "Off"], [0.1, "0.1 m"], [0.25, "0.25 m"], [0.5, "0.5 m"], [1, "1 m"]];
 const ANGLE_OPTIONS = [[0, "Off"], [5, "5°"], [15, "15°"], [45, "45°"], [90, "90°"]];
@@ -73,6 +74,8 @@ export function createInspector(root, { editor, shapes = { list: () => [], draw:
     ])));
     for (const [k, spec] of Object.entries(def.params)) {
       if (o.type === "berm" && o.outline && (k === "length" || k === "depth")) continue;      // a drawn berm's size is its drawing
+      // Options for one choice only (a wall's port or door settings): shown when that is chosen.
+      if (spec.when && !Object.entries(spec.when).every(([wk, wv]) => o.params[wk] === wv)) continue;
       const furniture = getProp(o.type)?.category === "furniture";
       const label = o.type === "berm" && k === "depth" ? "Depth, front to back (m)" : (furniture && FURNITURE_PARAMS[k]) || PARAM_LABELS[k] || k;
       const set = (v) => d({ type: "setParams", id: o.id, params: { [k]: v } });
@@ -85,8 +88,15 @@ export function createInspector(root, { editor, shapes = { list: () => [], draw:
         continue;
       }
       nodes.push(field(label, spec.options
-        ? select(k, o.params[k], spec.options.map((v) => [v, (furniture && FURNITURE_LABELS[`${k}:${v}`]) || OPTION_LABELS[v] || v]), set)
+        ? select(k, o.params[k], spec.options.map((v) => [v, (furniture && FURNITURE_LABELS[`${k}:${v}`]) || (k === "variant" && WALL_TYPES[v]) || OPTION_LABELS[v] || v]), set)
         : numberInput(k, o.params[k], spec, set)));
+      // A wall's Port switch, beside its Type: on is "Wall with port", off a plain wall.
+      if (k === "variant" && o.params.variant !== "doorway") {
+        const id = `f${++uid}`;
+        const sw = h("input", { type: "checkbox", class: "lg-toggle", id, dataset: { field: "port" }, onchange: (e) => set(e.target.checked ? "port" : "wall") });
+        sw.checked = o.params.variant === "port";
+        nodes.push(h("div", { class: "lg-field inspector-switch" }, [h("label", { for: id, text: "Port" }), sw]));
+      }
     }
     // Activation: what starts a moving target, and what an activator starts.
     if (canBeActivated(o.type)) {

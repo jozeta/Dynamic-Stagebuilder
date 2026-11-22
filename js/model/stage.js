@@ -1,7 +1,7 @@
 // The stage as plain JSON data (schema 1). Every function returns a new stage and never mutates its
 // input, so the undo history can keep snapshots. Coordinates in metres: x across the bay (centred),
 // z down range (0 at the uprange edge). Rotation in degrees about the vertical axis.
-import { defaultParams, getProp } from "./props.js";
+import { defaultParams, getProp, upgradeProp } from "./props.js";
 import { LOOK_DEFAULTS } from "./look.js";
 import { cleanBay } from "./bay.js";
 
@@ -28,7 +28,8 @@ export function createStage({ name = "Stage 1", width = 20, depth = 30 } = {}) {
   };
 }
 
-export function addObject(stage, type, position, rotation = 0, params = {}) {
+export function addObject(stage, oldType, position, rotation = 0, oldParams = {}) {
+  const { type, params } = upgradeProp(oldType, oldParams);     // older prop types open as today's
   getProp(type);
   const id = newId();
   const obj = { id, type, label: null, labelManual: false, position: [position[0], position[1]], rotation,

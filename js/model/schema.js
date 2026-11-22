@@ -3,7 +3,7 @@
 // rejects the whole stage on any error: nothing is ever applied halfway.
 import { cleanBay } from "./bay.js";
 import { cleanOutline } from "./berm.js";
-import { PROPS, TARGET_STYLES } from "./props.js";
+import { PROPS, TARGET_STYLES, upgradeProp } from "./props.js";
 import { MAX_GROUPS } from "./layers.js";
 import { canBeActivated, isActivator } from "./activation.js";
 import { cleanLook } from "./look.js";
@@ -20,6 +20,8 @@ const isNum = (v) => typeof v === "number" && Number.isFinite(v);
 // Stages saved before no-shoots became a target presentation had separate no-shoot props.
 const OLD_NOSHOOTS = { noshoot: "paper-ipsc", "noshoot-mini": "paper-mini" };
 function migrateObject(o) {
+  // Walls and tyres saved as separate props (with port, doorway, stack) are one prop with a choice now.
+  if (typeof o.type === "string") { const u = upgradeProp(o.type, isObj(o.params) ? o.params : {}); if (u.type !== o.type) o = { ...o, type: u.type, params: u.params }; }
   if (!Object.hasOwn(OLD_NOSHOOTS, o.type)) return o;
   return { ...o, type: OLD_NOSHOOTS[o.type], params: { ...(isObj(o.params) ? o.params : {}), presentation: "noshoot" } };
 }

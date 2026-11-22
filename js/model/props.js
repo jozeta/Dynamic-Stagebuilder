@@ -133,6 +133,33 @@ const wallSize = {
   length: { default: 2, min: 0.5, max: 4, step: 0.1 },
   height: { default: 2, min: 0.5, max: 2.5, step: 0.1 },
 };
+// The mesh wall and the wooden wall: a plain wall, a wall with a port or a doorway (Type), 1 m wide
+// to start. The port's and the door's controls show only for that type (`when`); the port moves
+// left/right (portOffset, + the wall's left seen from the front) and up/down (portBottom).
+const when = (variant, spec) => ({ ...spec, when: { variant } });
+const wallTypes = {
+  variant: { default: "wall", options: ["wall", "port", "doorway"] },
+  length: { default: 1, min: 0.5, max: 4, step: 0.1 },
+  height: { default: 2, min: 0.5, max: 2.5, step: 0.1 },
+  portWidth: when("port", port.portWidth), portHeight: when("port", port.portHeight), portBottom: when("port", port.portBottom),
+  portOffset: when("port", { default: 0, min: -1.8, max: 1.8, step: 0.05 }),
+  doorWidth: when("doorway", { default: 0.8, min: 0.5, max: 1.2, step: 0.05 }), doorHeight: when("doorway", { default: 1.95, min: 1.5, max: 2.4, step: 0.05 }),
+};
+
+// Props from older stages that are now one prop with a choice: the new type and its params (the old
+// sizes kept where the stage didn't say). Current props pass through unchanged.
+const UPGRADES = {
+  "wall-mesh-port": ["wall-mesh", { length: 2, height: 2 }, { variant: "port" }],
+  "wall-door": ["wall-mesh", { length: 1.5, height: 2.2 }, { variant: "doorway" }],
+  "wall-port": ["wall-wood", { length: 2, height: 2 }, { variant: "port" }],
+  "tyre-stack": ["tyre", {}, {}],
+};
+/** { type, params } for a prop that may have been saved under an older type. */
+export function upgradeProp(type, params = {}) {
+  const u = Object.hasOwn(UPGRADES, type) ? UPGRADES[type] : null;
+  if (!u) return { type, params };
+  return { type: u[0], params: { ...u[1], ...params, ...u[2] } };
+}
 
 const defs = [
   { type: "shooting-position", name: "Shooting position", category: "marking", scoring: "position",
@@ -204,30 +231,24 @@ const defs = [
     params: { length: { default: 5, min: 1, max: 30, step: 0.5 }, height: { default: 2, min: 1, max: 4, step: 0.1 } } },
   { type: "barrier", name: "Concrete barrier", category: "building", scoring: null,
     params: { length: { default: 2, min: 1, max: 4, step: 0.5 } } },
-  { type: "wall-mesh", name: "Mesh wall", category: "wall", scoring: null,
-    params: { ...wallSize, ...meshLook } },
-  { type: "wall-mesh-port", name: "Mesh wall with port", category: "wall", scoring: null,
-    params: { ...wallSize, ...meshLook, ...port } },
-  { type: "wall-wood", name: "Wooden wall", category: "wall", scoring: null, params: wallSize },
-  { type: "wall-port", name: "Wooden wall with port", category: "wall", scoring: null, params: { ...wallSize, ...port } },
+  { type: "wall-mesh", name: "Mesh wall", category: "wall", scoring: null, params: { ...wallTypes, ...meshLook },
+    note: "Type: a plain wall, a wall with a port or a doorway. Port moves it left/right and up/down." },
+  { type: "wall-wood", name: "Wooden wall", category: "wall", scoring: null, params: wallTypes,
+    note: "Type: a plain wall, a wall with a port or a doorway. Port moves it left/right and up/down." },
   { type: "wall-solid", name: "Solid panel", category: "wall", scoring: null,
     params: { length: { default: 1, min: 0.5, max: 2, step: 0.1 }, height: { default: 2, min: 0.5, max: 2.5, step: 0.1 } } },
   { type: "door", name: "Door", category: "wall", scoring: null,
     params: { ...ANIMATE_PARAM, doorWidth: { default: 0.9, min: 0.6, max: 1.2, step: 0.05 }, height: { default: 2.2, min: 2, max: 2.5, step: 0.05 },
       open: { default: 0, min: 0, max: 90, step: 5 }, hinge: { default: "left", options: ["left", "right"] }, swing: { default: "away", options: ["away", "toward"] } },
     note: "A wooden door in a frame. Open sets how far it stands open; Animate opens and shuts it." },
-  { type: "wall-door", name: "Mesh doorway", category: "wall", scoring: null,
-    params: { length: { default: 1.5, min: 1.2, max: 3, step: 0.1 }, height: { default: 2.2, min: 2, max: 2.5, step: 0.05 },
-      doorWidth: { default: 0.8, min: 0.6, max: 1.2, step: 0.05 }, doorHeight: { default: 1.95, min: 1.7, max: 2.1, step: 0.05 }, ...meshLook } },
   { type: "ramp", name: "Ramp", category: "structure", scoring: null,
     params: { length: { default: 2.4, min: 1, max: 4, step: 0.1 }, width: { default: 1, min: 0.6, max: 2, step: 0.1 }, height: { default: 0.4, min: 0.1, max: 1, step: 0.05 } } },
   { type: "platform", name: "Platform", category: "structure", scoring: null,
     params: { length: { default: 2, min: 1, max: 4, step: 0.1 }, width: { default: 1.2, min: 0.8, max: 3, step: 0.1 }, height: { default: 0.6, min: 0.2, max: 1.5, step: 0.05 } } },
   { type: "barrel", name: "Barrel (200 l)", category: "obstacle", scoring: null,
     params: { color: { default: "black", options: ["black", "blue", "red", "green"] }, stack: { default: 1, min: 1, max: 2, step: 1 } } },
-  { type: "tyre", name: "Tyre", category: "obstacle", scoring: null, params: {} },
-  { type: "tyre-stack", name: "Tyre stack", category: "obstacle", scoring: null,
-    params: { count: { default: 3, min: 1, max: 6, step: 1 } } },
+  { type: "tyre", name: "Tyres", category: "obstacle", scoring: null,
+    params: { count: { default: 1, min: 1, max: 6, step: 1 } }, note: "One tyre, or up to six stacked." },
   { type: "crate", name: "Wooden crate", category: "obstacle", scoring: null,
     params: { size: { default: 0.6, min: 0.3, max: 1.2, step: 0.05 } } },
   { type: "plant-palm", name: "Potted plant", category: "obstacle", scoring: null, params: {} },
@@ -289,11 +310,10 @@ export function dimensionsOf(obj) {
     }
     case "plate-round": case "plate-square":
       [w, h, d] = [Math.max(p.size, PLATE_FOOT), p.baseHeight + p.size, PLATE_FOOT]; break;
-    case "wall-mesh": case "wall-mesh-port": case "wall-wood": case "wall-port": case "wall-door": case "wall-solid":
+    case "wall-mesh": case "wall-wood": case "wall-solid":
       [w, h, d] = [p.length, p.height, WALL_FOOT]; break;
     case "barrel": [w, h, d] = [BARREL.diameter, BARREL.height * (p.stack || 1), BARREL.diameter]; break;
-    case "tyre": [w, h, d] = [TYRE.diameter, TYRE.height, TYRE.diameter]; break;
-    case "tyre-stack": [w, h, d] = [TYRE.diameter, TYRE.height * p.count, TYRE.diameter]; break;
+    case "tyre": [w, h, d] = [TYRE.diameter, TYRE.height * (p.count || 1), TYRE.diameter]; break;
     case "crate": [w, h, d] = [p.size, p.size, p.size]; break;
     case "plant-palm": [w, h, d] = [PLANT.diameter, PLANT.height, PLANT.diameter]; break;
     case "ramp": case "platform": [w, h, d] = [p.length, p.height, p.width]; break;

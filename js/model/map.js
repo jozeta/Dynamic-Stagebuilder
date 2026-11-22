@@ -5,7 +5,7 @@ import { dimensionsOf, getProp, STICK } from "./props.js";
 import { arrayCounts } from "./arrays.js";
 import { bayOutline, isRect, isDrawn } from "./bay.js";
 
-const ROUND = new Set(["shooting-position", "barrel", "tyre", "tyre-stack", "plate-round", "plant-palm", "cone"]);
+const ROUND = new Set(["shooting-position", "barrel", "tyre", "plate-round", "plant-palm", "cone"]);
 const CARD_DEPTH = 0.03;   // paper targets are drawn as their thin face, not their stand
 
 function style(o) {
