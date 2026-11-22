@@ -4,6 +4,10 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Sandbag wall: bags look like filled sandbags (squashed pillows, rounded edges, a tied end) and lie
+  in a running bond with half bags closing the offset rows, so no bag hangs in the air at the ends;
+  each row settles a little into the one below.
+
 - Walls: *Mesh wall*, *Mesh wall with port* and *Mesh doorway* are one prop, *Mesh wall*, with a
   *Type* (Wall, Wall with port, Doorway); the same for *Wooden wall*, which gains a doorway. They
   are 1 m wide to start. A *Port* switch adds or removes the port, and the port moves left/right

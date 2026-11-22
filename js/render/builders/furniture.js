@@ -91,35 +91,50 @@ export function buildPallet(obj) {
 }
 
 // A sandbag wall: rows of rounded burlap bags, staggered like brickwork.
-function bag(w) {
-  const geo = new THREE.BoxGeometry(w, SANDBAG.height, SANDBAG.depth * 0.95, 6, 3, 4);
+// One filled sandbag, w long: a squashed pillow, rounded on every edge and bulging a little on top,
+// with its tied end gathered in at + x (flipped on alternate bags), so a wall of them reads as bags.
+function bag(w, flip = false) {
+  const H = SANDBAG.height, D = SANDBAG.depth;
+  const geo = new THREE.BoxGeometry(w, H, D, 10, 4, 6);
   const p = geo.attributes.position;
   for (let i = 0; i < p.count; i++) {
-    const x = p.getX(i) / (w / 2), y = p.getY(i) / (SANDBAG.height / 2);
-    const k = 1 - 0.18 * (y * y) - 0.08 * (x * x * x * x);      // round the bag's sides and ends
-    p.setXYZ(i, p.getX(i) * (1 - 0.05 * y * y), p.getY(i), p.getZ(i) * k);
+    const x = p.getX(i) / (w / 2), y = p.getY(i) / (H / 2), z = p.getZ(i) / (D / 2);
+    const end = Math.max(0, Math.abs(x) - 0.7) / 0.3;                  // 0 in the body, 1 at the very end
+    const tied = (flip ? -x : x) > 0.7 ? end : 0;                      // the gathered, tied end
+    const ys = 1 - 0.35 * end * end - 0.25 * tied;                     // ends slimmer, the tied end most
+    const zs = (1 - 0.22 * y * y) * (1 - 0.15 * end * end - 0.3 * tied * tied);
+    const xs = 1 - 0.07 * y * y - 0.04 * z * z;                        // rounded ends
+    const bulge = y > 0 ? 0.06 * (1 - z * z) * (1 - end) : 0;          // a little fuller on top
+    p.setXYZ(i, x * xs * (w / 2), (y * ys + bulge) * (H / 2), z * zs * (D / 2));
   }
   geo.computeVertexNormals();
-  return mesh(geo, "burlap");
+  const m = mesh(geo, "burlap");
+  m.userData.bag = true;
+  return m;
 }
 
+// A sandbag wall in running bond: alternate rows shift half a bag and are closed at both ends with
+// half bags, so every bag lies on the row below; each row settles a little into the one under it.
 export function buildSandbags(obj) {
   const g = group(obj.id);
   const inner = new THREE.Group();
   const { length: L, rows } = obj.params;
-  const n = Math.max(1, Math.round(L / 0.55)), w = L / n;
+  const n = Math.max(1, Math.round(L / 0.6)), w = L / n, H = SANDBAG.height, SETTLE = 0.93;
+  let k = 0;
   for (let r = 0; r < rows; r++) {
-    // Offset rows sit half a bag over (brickwork); a one-bag-wide wall stacks straight.
-    const offset = r % 2 && n > 1;
-    const shift = offset ? w / 2 : 0, count = offset ? n - 1 : n;
-    for (let i = 0; i < count; i++) {
-      const b = bag(w * 0.98);
-      b.position.set(-L / 2 + w / 2 + shift + i * w, SANDBAG.height * (r + 0.5), 0);
-      b.rotation.y = (i % 3 - 1) * 0.03;
+    // Offset rows: a half bag, n − 1 whole bags, a half bag. A one-bag-wide wall stacks straight.
+    const offset = r % 2 === 1 && n > 1;
+    const pieces = offset ? [w / 2, ...Array(n - 1).fill(w), w / 2] : Array(n).fill(w);
+    let x = -L / 2;
+    for (const len of pieces) {
+      const b = bag(len, (k++) % 2 === 1);
+      b.position.set(x + len / 2, H * SETTLE * r + H / 2, ((k * 7) % 5 - 2) * 0.004);
+      b.rotation.y = ((k * 3) % 5 - 2) * 0.008;
       inner.add(b);
+      x += len;
     }
   }
-  g.add(fitTo(inner, L, SANDBAG.height * rows, SANDBAG.depth));
+  g.add(fitTo(inner, L, H * rows, SANDBAG.depth));
   return g;
 }
 

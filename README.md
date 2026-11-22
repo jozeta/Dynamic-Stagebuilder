@@ -302,7 +302,7 @@ wall thickness, and *Cut at* a height for walls, doors, windows or any mix, to s
 lays the plan on the ground with the walls built on it; *Edit the plan: walls, doors, windows…* in
 Settings goes back to it. Use the
 sliders to move, turn and fade it until it lines up. Then rebuild what's really there with the
-*Buildings and surroundings* props (walls, pillars, columns, berms, containers, fences, barriers) and
+*Buildings and surroundings* props (walls, square or round pillars, berms, containers, fences, barriers) and
 press *Save pieces to these surroundings*. The template then shows up under *My surroundings* for
 every stage. *Edit the pieces on the stage* brings them back to change. Templates live in this
 browser only; a stage opened on another device shows a plain floor until you make the template there.
