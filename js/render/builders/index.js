@@ -17,7 +17,7 @@ export { buildLine, buildStartMarker } from "./lines.js";
 
 const BUILDERS = {
   "paper-ipsc": buildPaper, "paper-mini": buildPaper, noshoot: buildPaper, "noshoot-mini": buildPaper,
-  popper: buildPopper, "mini-popper": buildPopper, "plate-round": buildPlate, "plate-square": buildPlate,
+  popper: buildPopper, "plate-round": buildPlate, "plate-square": buildPlate,
   "wall-mesh": buildMeshWall, "wall-wood": buildWoodWall,
   barrel: buildBarrel, tyre: buildTyre, crate: buildCrate, "plant-palm": buildPlant, door: buildDoor, "wall-port-shutter": buildPortShutterWall, "hardcover-panel": buildHardcoverPanel, "raised-barricade": buildRaisedBarricade,
   "step-pad": buildStepPad, "pull-lever": buildPullLever, "start-marks": buildStartMarks, bobber: buildBobber, twister: buildTwister, "wobble-platform": buildWobblePlatform, "balance-rope": buildBalanceRope, "step-box": buildStepBox, "wall-solid": buildSolidWall,

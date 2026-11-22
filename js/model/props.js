@@ -153,14 +153,35 @@ const UPGRADES = {
   "wall-door": ["wall-mesh", { length: 1.5, height: 2.2 }, { variant: "doorway" }],
   "wall-port": ["wall-wood", { length: 2, height: 2 }, { variant: "port" }],
   "tyre-stack": ["tyre", {}, {}],
+  "mini-popper": ["popper", {}, { kind: "mini" }],
   // A round column's diameter is the round pillar's size.
   column: ["pillar", {}, { shape: "round" }, ({ diameter, ...rest }) => (diameter === undefined ? rest : { ...rest, size: diameter })],
 };
 /** { type, params } for a prop that may have been saved under an older type. */
+/** A placed prop's name: its kind's name, except a popper says which (IPSC or mini). */
+export function propName(obj) {
+  if (obj.type === "popper") return obj.params?.kind === "mini" ? "Mini popper" : "IPSC popper";
+  return getProp(obj.type).name;
+}
+/** A popper's size { w, h, d } from its kind ("ipsc" or "mini"). */
+export const popperSize = (params = {}) => (params.kind === "mini" ? TARGET_SIZES.miniPopper : TARGET_SIZES.popper);
 export function upgradeProp(type, params = {}) {
   const u = Object.hasOwn(UPGRADES, type) ? UPGRADES[type] : null;
-  if (!u) return { type, params };
-  return { type: u[0], params: { ...u[1], ...(u[3] ? u[3](params) : params), ...u[2] } };
+  const out = u ? { type: u[0], params: { ...u[1], ...(u[3] ? u[3](params) : params), ...u[2] } } : { type, params };
+  return { type: out.type, params: nearestOptions(out.type, out.params) };
+}
+// A size that is now a choice of standard sizes (plates): a value saved before opens as the nearest.
+function nearestOptions(type, params) {
+  const specs = Object.hasOwn(PROPS, type) ? PROPS[type].params : null;
+  if (!specs) return params;
+  let out = params;
+  for (const [k, spec] of Object.entries(specs)) {
+    const v = params[k];
+    if (!spec.options || typeof v !== "number" || spec.options.includes(v) || typeof spec.options[0] !== "number") continue;
+    const best = spec.options.reduce((a, b) => (Math.abs(b - v) <= Math.abs(a - v) ? b : a));
+    out = { ...out, [k]: best };
+  }
+  return out;
 }
 
 const defs = [
@@ -169,14 +190,14 @@ const defs = [
     note: "A place the shooter shoots from. Shooter's eye steps through the positions in number order." },
   { type: "paper-ipsc", name: "IPSC target", category: "paper", scoring: "paper", params: mount },
   { type: "paper-mini", name: "IPSC mini target", category: "paper", scoring: "paper", params: mount },
-  { type: "popper", name: "IPSC popper", category: "steel", scoring: "steel",
-    params: { ...ANIMATE_PARAM, baseHeight: { default: 0, min: 0, max: 1.5, step: 0.05 }, ...paint("yellow") } },
-  { type: "mini-popper", name: "Mini popper", category: "steel", scoring: "steel",
-    params: { ...ANIMATE_PARAM, baseHeight: { default: 0, min: 0, max: 1.5, step: 0.05 }, ...paint("yellow") } },
+  // One popper with a choice: the full-size IPSC popper or the mini popper.
+  { type: "popper", name: "Popper", category: "steel", scoring: "steel",
+    params: { kind: { default: "ipsc", options: ["ipsc", "mini"] }, ...ANIMATE_PARAM, baseHeight: { default: 0, min: 0, max: 1.5, step: 0.05 }, ...paint("yellow") } },
+  // Plates in their standard sizes (metres): round Ø 20 or 30 cm, square 15 × 15 or 30 × 30 cm.
   { type: "plate-round", name: "Round plate", category: "steel", scoring: "steel",
-    params: { size: { default: 0.2, min: 0.15, max: 0.3, step: 0.01 }, baseHeight: { default: 1.0, min: 0.2, max: 1.5, step: 0.05 }, ...paint("white") } },
+    params: { size: { default: 0.2, options: [0.2, 0.3] }, baseHeight: { default: 1.0, min: 0.2, max: 1.5, step: 0.05 }, ...paint("white") } },
   { type: "plate-square", name: "Square plate", category: "steel", scoring: "steel",
-    params: { size: { default: 0.15, min: 0.15, max: 0.3, step: 0.01 }, baseHeight: { default: 1.0, min: 0.2, max: 1.5, step: 0.05 }, ...paint("white") } },
+    params: { size: { default: 0.15, options: [0.15, 0.3] }, baseHeight: { default: 1.0, min: 0.2, max: 1.5, step: 0.05 }, ...paint("white") } },
   { type: "swinger", name: "Swinger", category: "moving", scoring: "paper", params: { ...ANIMATE_PARAM, style: mount.style },
     note: "A paper target on a weighted arm that swings once activated (usually by a popper)." },
   { type: "drop-turner", name: "Drop turner", category: "moving", scoring: "paper", params: { ...ANIMATE_PARAM, style: mount.style },
@@ -305,10 +326,7 @@ export function dimensionsOf(obj) {
       [w, h, d] = [e.maxX - e.minX, p.mountHeight + e.top, e.maxZ - e.minZ]; break;
     }
     case "popper": {
-      const s = TARGET_SIZES.popper, f = p.baseHeight > 0 ? PLATE_FOOT : 0; [w, h, d] = [Math.max(s.w, f), p.baseHeight + s.h, Math.max(s.d, f)]; break;
-    }
-    case "mini-popper": {
-      const s = TARGET_SIZES.miniPopper, f = p.baseHeight > 0 ? PLATE_FOOT : 0; [w, h, d] = [Math.max(s.w, f), p.baseHeight + s.h, Math.max(s.d, f)]; break;
+      const s = popperSize(p), f = p.baseHeight > 0 ? PLATE_FOOT : 0; [w, h, d] = [Math.max(s.w, f), p.baseHeight + s.h, Math.max(s.d, f)]; break;
     }
     case "plate-round": case "plate-square":
       [w, h, d] = [Math.max(p.size, PLATE_FOOT), p.baseHeight + p.size, PLATE_FOOT]; break;

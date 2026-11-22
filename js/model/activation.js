@@ -2,10 +2,10 @@
 // plate falls, a step pad is stepped on, a lever is pulled). Stored on the moving target as
 // `activatedBy: <activator id>`; a link to something no longer on the stage counts as none.
 // Pure: no DOM, no Three.js.
-import { getProp } from "./props.js";
+import { propName } from "./props.js";
 
 const ACTIVATED = new Set(["swinger", "drop-turner", "clamshell", "mover", "bobber", "twister", "texas-star", "wall-port-shutter"]);
-const ACTIVATORS = new Set(["popper", "mini-popper", "plate-round", "plate-square", "step-pad", "pull-lever"]);
+const ACTIVATORS = new Set(["popper", "plate-round", "plate-square", "step-pad", "pull-lever"]);
 
 export const canBeActivated = (type) => ACTIVATED.has(type);
 export const isActivator = (type) => ACTIVATORS.has(type);
@@ -27,7 +27,7 @@ export function activationLinks(stage) {
 
 /** How a prop is named in a sentence: its label and kind, e.g. "T5 (swinger)" or "the step pad". */
 export function describe(o) {
-  const kind = getProp(o.type).name.split(" ").map((w) => (w === w.toUpperCase() ? w : w.toLowerCase())).join(" ");
+  const kind = propName(o).split(" ").map((w) => (w === w.toUpperCase() ? w : w.toLowerCase())).join(" ");
   return o.label ? `${o.label} (${kind})` : `the ${kind}`;
 }
 

@@ -26,7 +26,7 @@ function floating(g) {
 
 const CASES = [
   ...PRESENTATIONS.flatMap((p) => ["paper-ipsc", "paper-mini"].flatMap((type) => ["classic", "head"].map((style) => [type, { presentation: p.id, style }]))),
-  ["popper", {}], ["popper", { baseHeight: 0.5 }], ["mini-popper", { baseHeight: 0.3 }], ["plate-round", {}], ["plate-square", {}],
+  ["popper", {}], ["popper", { baseHeight: 0.5 }], ["popper", { kind: "mini", baseHeight: 0.3 }], ["plate-round", {}], ["plate-square", {}],
   ["swinger", {}], ["drop-turner", {}], ["clamshell", {}], ["mover", { targets: 3 }], ["texas-star", {}], ["plate-rack", {}],
   ["dueling-tree", {}], ["bobber", {}], ["twister", {}],
 ];

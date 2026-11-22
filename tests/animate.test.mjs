@@ -12,7 +12,7 @@ import { createStageView } from "../js/render/stage-view.js";
 import { createAnimator } from "../js/render/animate.js";
 
 test("every moving prop has an Animate switch, off by default", () => {
-  assert.deepEqual(ANIMATED_TYPES, ["swinger", "drop-turner", "clamshell", "mover", "texas-star", "plate-rack", "dueling-tree", "popper", "mini-popper", "door", "bobber", "twister", "wobble-platform", "wall-port-shutter"]);
+  assert.deepEqual(ANIMATED_TYPES, ["swinger", "drop-turner", "clamshell", "mover", "texas-star", "plate-rack", "dueling-tree", "popper", "door", "bobber", "twister", "wobble-platform", "wall-port-shutter"]);
   for (const t of ANIMATED_TYPES) {
     assert.equal(PROPS[t].params.animate?.bool, true, t);
     assert.equal(defaultParams(t).animate, false, t);

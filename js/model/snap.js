@@ -10,8 +10,23 @@ export function snapValue(v, step) {
   return clean(Math.round(v / step) * step);
 }
 
-export function snapPoint([x, z], step) {
-  return [snapValue(x, step), snapValue(z, step)];
+/** A point on the grid; the grid's lines run through `origin` (default: whole metres from 0). */
+export function snapPoint([x, z], step, [x0, z0] = [0, 0]) {
+  return [clean(x0 + snapValue(x - x0, step)), clean(z0 + snapValue(z - z0, step))];
+}
+
+/** Where the bay's grid starts: its left edge (across) and its up-range edge, so grid and bay line up
+ * whatever the width (an odd width puts the edges on half metres, and the grid with them). */
+export const gridOrigin = (bay) => [-bay.width / 2, 0];
+
+/**
+ * The texture offset ([u, v], in tiles) that lines a repeating grid texture up with the bay: for a
+ * ground plane `span` metres a side centred on the bay's middle (common.js ground), with one texture
+ * tile every `tile` metres.
+ */
+export function gridPhase(bay, span, tile) {
+  const frac = (v) => { const f = ((v % 1) + 1) % 1; return f > 1 - 1e-9 ? 0 : clean(f); };
+  return [frac((bay.width - span) / (2 * tile)), frac(-(bay.depth / 2 + span / 2) / tile)];
 }
 
 export function normalizeAngle(deg) {

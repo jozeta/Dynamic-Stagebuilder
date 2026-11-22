@@ -1,6 +1,6 @@
 // Steel: poppers (round head on a tapered body, on a base plate) and plates on a post with a foot.
 import * as THREE from "three";
-import { TARGET_SIZES, PLATE_FOOT } from "../../model/props.js";
+import { PLATE_FOOT, popperSize } from "../../model/props.js";
 import { getMaterial } from "../materials.js";
 import { box as plainBox, worldBox, group } from "./parts.js";
 import { steelFaceUV } from "./wear.js";
@@ -27,7 +27,7 @@ function popperShape(w, h) {
 }
 
 export function buildPopper(obj) {
-  const s = obj.type === "mini-popper" ? TARGET_SIZES.miniPopper : TARGET_SIZES.popper;
+  const s = popperSize(obj.params);
   const g = group(obj.id);
   const bh = obj.params.baseHeight;
   // Raised: the base plate on a post, the post on a foot plate on the ground.

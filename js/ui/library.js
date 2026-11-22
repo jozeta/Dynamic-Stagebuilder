@@ -1,7 +1,7 @@
 // The prop library: search, stage markings, then Walls, Paper, Steel and the other groups. Tap an item to arm it, then tap
 // the ground; with a mouse, items can also be dragged onto the 3D view.
 import { h } from "./dom.js";
-import { PROPS, defaultParams, TARGET_SIZES, BARREL, TYRE, PALLET, paperSize } from "../model/props.js";
+import { PROPS, getProp, defaultParams, TARGET_SIZES, BARREL, TYRE, PALLET, paperSize } from "../model/props.js";
 import { icon } from "./dom.js";
 
 import { LIBRARY_GROUPS, OPEN_BY_DEFAULT, isShown } from "../model/visibility.js";
@@ -14,10 +14,9 @@ function sizeText(type) {
   const face = (s) => `${cm(s.w)} × ${cm(s.h)} cm`;
   switch (type) {
     case "paper-ipsc": case "paper-mini": return `${face(paperSize({ type, params: p }))}, no-shoots, arrays, hard cover`;
-    case "popper": return `${cm(TARGET_SIZES.popper.h)} cm tall`;
-    case "mini-popper": return `${cm(TARGET_SIZES.miniPopper.h)} cm tall`;
-    case "plate-round": return `Ø ${cm(p.size)} cm`;
-    case "plate-square": return `${cm(p.size)} × ${cm(p.size)} cm`;
+    case "popper": return `IPSC ${cm(TARGET_SIZES.popper.h)} cm or mini ${cm(TARGET_SIZES.miniPopper.h)} cm tall`;
+    case "plate-round": return `Ø ${getProp("plate-round").params.size.options.map(cm).join(" or ")} cm`;
+    case "plate-square": return getProp("plate-square").params.size.options.map((v) => `${cm(v)} × ${cm(v)}`).join(" or ") + " cm";
     case "barrel": return `Ø ${cm(BARREL.diameter)} × ${cm(BARREL.height)} cm`;
     case "tyre": return p.count > 1 ? `${p.count} tyres stacked` : `Ø ${cm(TYRE.diameter)} cm`;
     case "crate": return `${cm(p.size)} cm cube`;

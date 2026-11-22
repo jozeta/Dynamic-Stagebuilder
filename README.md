@@ -15,7 +15,8 @@ training, and want a clear briefing sheet without drawing the map by hand.
 
 ## What it does
 
-- **Shooting bay** at real scale: width × depth in metres (default 20 × 30 m), 1 m grid; a
+- **Shooting bay** at real scale: width × depth in whole metres (default 20 × 30 m), a 1 m grid that
+  starts at the bay's edges (so it lines up with them at any width); a
   rectangle or tapered, L, T, U, dogleg or with a corner cut away.
 - **Safety distances** from the IPSC Handgun Rules (January 2026): rings round a target at 7 and 8 m for
   steel, 3 m for paper.
@@ -35,7 +36,7 @@ training, and want a clear briefing sheet without drawing the map by hand.
   - activators: step pads and pull levers; start X marks
   - a door that opens, a wall with a shuttered port, hard-cover panels, raised barricades, a wobble
     platform, a balance rope and a step box
-  - steel: IPSC popper, mini popper, round plate, square plate
+  - steel: popper (IPSC or mini), round plate (Ø 20 or 30 cm), square plate (15 × 15 or 30 × 30 cm)
   - walls: mesh wall (orange safety netting, or black or blue wire mesh, in a light pine or black
     frame on feet) and wooden wall, each 1 m wide to start, with a *Type*: a plain wall, a wall with
     a port (*Port* switch; width, height, up/down and left/right) or a doorway (door width and
@@ -74,7 +75,8 @@ training, and want a clear briefing sheet without drawing the map by hand.
 - **Four surroundings,** Outdoor (a dirt range with earth banks, bushes and trees, stones, a
   choice of sand, light sand, dark sand, red dirt or gravel, and an optional ground grid), Technical
   (grey floor, grid), Blueprint (an endless, worn blue drafting sheet with grid, title block,
-  comments, arrows and stamps) and Industrial (a worn indoor factory hall, with a roof you can hide).
+  comments, arrows and stamps) and Industrial (a worn indoor factory hall, with a roof you can hide
+  and an optional floor grid). Every surroundings' grid can be turned on or off in Settings.
   Switching never moves anything on the stage; a warning asks first if your surroundings settings
   would be lost.
 - **Environment settings:** time of day (the sun moves and warms toward evening), sunlight,
@@ -226,8 +228,8 @@ Stage settings are in the inspector when nothing is selected. They are saved wit
 
 | Setting | What it does | Default |
 |---|---|---|
-| Bay width | Width of the shooting bay across the range, 1–200 m | 20 m |
-| Bay depth | Depth of the bay down range, 1–200 m | 30 m |
+| Bay width | Width of the shooting bay across the range, 1–200 m in whole metres; it grows from the centre and the grid follows its edges | 20 m |
+| Bay depth | Depth of the bay down range, 1–200 m in whole metres | 30 m |
 | Bay shape | Rectangle; *Tapered* (narrow end back or front, its width); *Corner cut away* (back left or right, cut width and depth); *L* / *Reverse L* (width of the back part, depth of the full-width front); *T* (width and depth of the front stem); *U* (arm width, depth of the full-width front); *Reverse U* (arm width, depth of the front arms); *Dogleg (Z)* / *Reverse dogleg (S)* (width of each part, where it bends). Width and depth stay the outer rectangle. *Draw a new shape…* and *My shapes*: a drawn grid of raised ground and floor (see How to) | Rectangle |
 | Grid snap | Positions snap to this grid: off, 0.1, 0.25, 0.5 or 1 m (*Snap to the grid* in the right-click menu turns it on/off) | 0.25 m |
 | Object snap | Toolbar *Objects*: a wall's end jumps onto another wall's end within 35 cm | On |

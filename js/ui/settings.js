@@ -294,15 +294,15 @@ export function createSettings({ editor, panel, docked = false, modal = panel.ta
       on.checked = lk.roof !== false;
       return h("div", { class: "settings-row" }, [h("label", { for: "set-roof", text: "Show roof and baffles" }), on]);
     }
-    // Outdoor: a 1 m grid on the ground, on or off, and how see-through it is.
-    function outdoorGridRows(lk) {
+    // Outdoor and Industrial: a 1 m line grid on the ground or floor, on or off, and how see-through it is.
+    function outdoorGridRows(lk, where = "ground") {
       const on = h("input", { type: "checkbox", class: "lg-toggle", id: "set-outdoorGrid", onchange: (e) => { d({ type: "setLook", patch: { outdoorGrid: e.target.checked } }); fill(); } });
       on.checked = lk.outdoorGrid === true;
       const op = lk.outdoorGridOpacity ?? 0.35;
       const out = h("output", { for: "set-outdoorGridOpacity", class: "lg-mono settings-value", text: `${Math.round(op * 100)} %` });
       const slider = h("input", { type: "range", class: "lg-slider", id: "set-outdoorGridOpacity", min: 0.05, max: 1, step: 0.05, value: String(op), disabled: !on.checked,
         oninput: (e) => { const v = Number(e.target.value); out.textContent = `${Math.round(v * 100)} %`; d({ type: "setLook", patch: { outdoorGridOpacity: v } }); } });
-      return [h("div", { class: "settings-row" }, [h("label", { for: "set-outdoorGrid", text: "Grid on the ground" }), on]),
+      return [h("div", { class: "settings-row" }, [h("label", { for: "set-outdoorGrid", text: `Grid on the ${where}` }), on]),
         h("div", { class: "settings-row" }, [h("label", { for: "set-outdoorGridOpacity", text: "Grid opacity" }), slider, out]),
         h("p", { class: "lg-muted hint-text", text: "1 m squares, a stronger line every 5 m." })];
     }
@@ -326,16 +326,20 @@ export function createSettings({ editor, panel, docked = false, modal = panel.ta
       const grid = gridTone(look, st.environment);
       const gid = "set-gridIntensity";
       const gout = h("output", { for: gid, class: "lg-mono settings-value", text: grid.intensity ? `${Math.round(grid.intensity * 100)} %` : "Hidden" });
-      const gin = h("input", { type: "range", class: "lg-slider", id: gid, min: 0, max: 1, step: 0.02, value: String(grid.intensity),
+      const shown = look.gridShown !== false;
+      const gon = h("input", { type: "checkbox", class: "lg-toggle", id: "set-gridShown", onchange: (e) => { d({ type: "setLook", patch: { gridShown: e.target.checked } }); fill(); } });
+      gon.checked = shown;
+      const gin = h("input", { type: "range", class: "lg-slider", id: gid, min: 0, max: 1, step: 0.02, value: String(grid.intensity), disabled: !shown,
         oninput: (e) => { const v = Number(e.target.value); gout.textContent = v ? `${Math.round(v * 100)} %` : "Hidden"; d({ type: "setLook", patch: { gridIntensity: v } }); } });
       const setColor = (hex) => { d({ type: "setLook", patch: { gridColor: hex } }); fill(); };
       const swatches = h("div", { class: "run-swatches", role: "radiogroup", "aria-label": "Grid colour" }, GRID_COLORS.map(([hex, label]) => {
-        const b = h("button", { type: "button", class: "run-swatch", role: "radio", "aria-checked": String(grid.color === hex), "aria-label": label, title: label, onclick: () => setColor(hex) });
+        const b = h("button", { type: "button", class: "run-swatch", role: "radio", "aria-checked": String(grid.color === hex), "aria-label": label, title: label, disabled: !shown, onclick: () => setColor(hex) });
         b.style.setProperty("--swatch", hex);
         return b;
       }));
-      const own = h("input", { type: "color", class: "run-color", id: "set-gridColor", value: grid.color, "aria-label": "Grid: your own colour", title: "Your own colour", onchange: (e) => setColor(e.target.value) });
+      const own = h("input", { type: "color", class: "run-color", id: "set-gridColor", value: grid.color, "aria-label": "Grid: your own colour", title: "Your own colour", disabled: !shown, onchange: (e) => setColor(e.target.value) });
       toneRows.push(
+        h("div", { class: "settings-row" }, [h("label", { for: "set-gridShown", text: "Grid" }), gon]),
         h("div", { class: "settings-row" }, [h("label", { for: gid, text: "Grid intensity" }), gin, gout]),
         h("div", { class: "settings-row" }, [h("span", { class: "settings-label", text: "Grid colour" }), h("div", { class: "run-colors settings-wide" }, [swatches, own])]),
       );
@@ -351,7 +355,7 @@ export function createSettings({ editor, panel, docked = false, modal = panel.ta
       st.environment === "outdoor" ? h("div", { class: "settings-row" }, [h("label", { for: "set-ground", text: "Ground" }), groundSel]) : null,
       st.environment === "outdoor" ? h("div", { class: "settings-row" }, [h("label", { for: "set-foliage", text: "Foliage" }), foliageSel]) : null,
       ...(st.environment === "outdoor" ? outdoorGridRows(look) : []),
-      ...(st.environment === "industrial" ? [roofRow(look)] : []),
+      ...(st.environment === "industrial" ? [roofRow(look), ...outdoorGridRows(look, "floor")] : []),
       ...toneRows,
       ...myRows,
       h("div", { class: "settings-row" }, [h("label", { for: "set-sun-auto", text: "Time of day" }), clock]),

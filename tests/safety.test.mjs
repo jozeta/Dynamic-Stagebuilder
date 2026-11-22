@@ -54,7 +54,7 @@ test("no library stage puts steel closer than 7 m to where a shooter may stand (
     const s = libraryStage(spec);
     const areas = s.lines.filter((l) => l.type === "shooting-area").map((l) => l.points);
     const spots = [...s.objects.filter((o) => o.type === "shooting-position").map((o) => o.position), ...(s.start ? [s.start.position] : [])];
-    for (const o of s.objects.filter((x) => ["popper", "mini-popper", "plate-round", "plate-square", "texas-star", "plate-rack", "dueling-tree"].includes(x.type))) {
+    for (const o of s.objects.filter((x) => ["popper", "plate-round", "plate-square", "texas-star", "plate-rack", "dueling-tree"].includes(x.type))) {
       const d = Math.min(...areas.map((a) => (insidePolygon(o.position, a) ? 0 : Math.min(...a.map((p, i) => seg(o.position, p, a[(i + 1) % a.length]))))),
         ...spots.map((p) => Math.hypot(p[0] - o.position[0], p[1] - o.position[1])));
       assert.ok(d >= 7 - 1e-6, `${spec.id} ${o.label}: ${d.toFixed(2)} m`);

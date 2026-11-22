@@ -9,7 +9,7 @@
 // like a cut-away, so the overviews from behind the shooters see in. Lit from overhead (the lamps),
 // so the time of day only changes how bright it is. Every texture is drawn in code from a seed.
 import * as THREE from "three";
-import { canvasTexture, reliefMesh } from "./common.js";
+import { canvasTexture, reliefMesh, lineGrid } from "./common.js";
 
 const MARGIN = { side: 9, back: 6, front: 10 };       // metres from the bay to the hall's walls
 const WALL_H = 14, BLOCK_H = 2.6, WIN = [9.6, 11.6];  // a high hall (room to fly the camera); the window band, from … to (m)
@@ -298,7 +298,11 @@ export function industrial(bay) {
   const touch = typeof matchMedia !== "undefined" && matchMedia("(pointer: coarse)").matches;
   sunLight.shadow.mapSize.set(touch ? 2048 : 4096, touch ? 2048 : 4096);
   sunLight.shadow.bias = -0.0003; sunLight.shadow.normalBias = 0.03;
+  // A 1 m line grid on the floor (Settings → Grid on the floor), off until turned on.
+  const grid = lineGrid(bay);
+  group.add(grid.group);
   return {
+    setOutdoorGrid({ shown, opacity }) { grid.set(shown, opacity); },
     beforeRender(camera) {
       const c = camera.position;
       overhead.visible = c.y < WALL_H + 0.8;

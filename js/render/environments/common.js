@@ -3,6 +3,7 @@
 import * as THREE from "three";
 import { sunFromLook, groundTone, gridTone } from "../../model/look.js";
 import { isDrawn, raisedHeight, RAISE } from "../../model/bay.js";
+import { gridOrigin } from "../../model/snap.js";
 
 export const hasDom = typeof document !== "undefined";
 
@@ -23,6 +24,40 @@ export function canvasTexture(size, draw, repeat, { color = true, seed = 1 } = {
   t.repeat.set(repeat[0], repeat[1]);
   t.anisotropy = 8;
   return t;
+}
+
+/**
+ * Lines every metre over the bay (and a little round it), from the bay's left and up-range edges so
+ * they meet its edges whatever its width, and a stronger line every 5 m. Split into 0.5 m pieces
+ * 3 cm above `heightAt(x, z)` so they follow slopes (Outdoor), or flat (Industrial). Off until set.
+ */
+export function lineGrid(bay, heightAt = () => 0) {
+  const g = new THREE.Group();
+  g.name = "ground-grid";
+  g.visible = false;
+  const fine = [], bold = [];
+  const [ox, oz] = gridOrigin(bay);
+  const nx = Math.ceil(bay.width), nz = Math.ceil(bay.depth);
+  const y = (x, z) => heightAt(x, z) + 0.03;
+  const line = (out, a, b) => {
+    const n = Math.max(1, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / 0.5));
+    for (let i = 0; i < n; i++) {
+      const p = [a[0] + ((b[0] - a[0]) * i) / n, a[1] + ((b[1] - a[1]) * i) / n], q = [a[0] + ((b[0] - a[0]) * (i + 1)) / n, a[1] + ((b[1] - a[1]) * (i + 1)) / n];
+      out.push(p[0], y(...p), p[1], q[0], y(...q), q[1]);
+    }
+  };
+  for (let i = 0; i <= nx; i++) line(i % 5 === 0 ? bold : fine, [ox + i, oz], [ox + i, oz + nz]);
+  for (let k = 0; k <= nz; k++) line(k % 5 === 0 ? bold : fine, [ox, oz + k], [ox + nx, oz + k]);
+  const mats = [];
+  for (const [pts, k] of [[fine, 1], [bold, 1.6]]) {
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.Float32BufferAttribute(pts, 3));
+    const mat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.35, depthWrite: false });
+    mat.userData.k = k;
+    mats.push(mat);
+    g.add(new THREE.LineSegments(geo, mat));
+  }
+  return { group: g, set(shown, opacity) { g.visible = Boolean(shown) && opacity > 0.001; for (const m of mats) m.opacity = Math.min(1, opacity * m.userData.k); } };
 }
 
 export function ground(width, depth, material, centreZ) {
@@ -103,7 +138,7 @@ export function applyLook(env, look, bay) {
   if (env.setFoliage && look.foliage && look.foliage !== env.foliage) env.setFoliage(look.foliage);
   if (env.setWalls && look.walls !== undefined && look.walls !== env.walls) env.setWalls(look.walls !== false);
   if (env.setGroundTone) env.setGroundTone(groundTone(look, env.toneName || "technical"));
-  if (env.setGrid) env.setGrid(gridTone(look, env.toneName || "technical"));
+  if (env.setGrid) { const t = gridTone(look, env.toneName || "technical"); env.setGrid(look.gridShown === false ? { ...t, intensity: 0 } : t); }
   if (env.setRoof) env.setRoof(look.roof !== false);
   if (env.setOutdoorGrid) env.setOutdoorGrid({ shown: look.outdoorGrid === true, opacity: look.outdoorGridOpacity ?? 0.35 });
   return env;

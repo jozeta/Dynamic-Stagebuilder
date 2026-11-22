@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { PROPS, getProp, defaultParams, dimensionsOf, TARGET_SIZES, upgradeProp } from "../js/model/props.js";
 import { SCORING } from "../js/model/scoring-rules.js";
 
-const TYPES = ["paper-ipsc", "paper-mini", "popper", "mini-popper",
+const TYPES = ["paper-ipsc", "paper-mini", "popper",
   "plate-round", "plate-square", "wall-mesh", "wall-wood", "barrel", "tyre", "crate", "plant-palm",
   "wall-solid", "ramp", "platform", "car", "table", "chair", "bed", "sofa", "office-desk", "dining-set", "coffee-table", "pallet", "sandbags", "cone",
   "swinger", "drop-turner", "clamshell", "mover", "texas-star", "plate-rack", "dueling-tree", "shooting-position", "door",
@@ -77,7 +77,7 @@ test("mesh wall with port has mesh and port settings", () => {
 test("steel has a paint colour; poppers default yellow, plates white", () => {
   assert.equal(defaultParams("popper").paint, "yellow");
   assert.equal(defaultParams("plate-round").paint, "white");
-  assert.deepEqual([...getProp("mini-popper").params.paint.options], ["white", "yellow"]);
+  assert.deepEqual([...getProp("popper").params.kind.options], ["ipsc", "mini"]);
 });
 
 test("the potted plant is a decorative obstacle that scores nothing", () => {

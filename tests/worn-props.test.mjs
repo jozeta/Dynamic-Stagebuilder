@@ -144,7 +144,7 @@ test("concrete barrier: Jersey profile with base slots and lifting pockets", () 
 });
 
 test("steel faces map the whole texture once, edges get the worn border", () => {
-  for (const [type, p] of [["plate-round", {}], ["plate-square", {}], ["popper", {}], ["mini-popper", {}], ["texas-star", {}], ["plate-rack", {}], ["dueling-tree", {}]]) {
+  for (const [type, p] of [["plate-round", {}], ["plate-square", {}], ["popper", {}], ["popper", { kind: "mini" }], ["texas-star", {}], ["plate-rack", {}], ["dueling-tree", {}]]) {
     const g = buildProp(obj(type, p));
     let faces = 0;
     g.traverse((c) => {

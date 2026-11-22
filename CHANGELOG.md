@@ -4,6 +4,15 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- The bay's width and depth go in whole metres, and the grid (and grid snapping) now starts at the
+  bay's edges, so the two line up at any width, odd ones included.
+- Blueprint and Technical have a *Grid* switch beside the grid's intensity and colour; Industrial
+  has an optional floor grid with its opacity, like Outdoor.
+- The IPSC popper and the mini popper are one *Popper* with a choice of IPSC (85 cm) or mini
+  (57 cm); stages with mini poppers open with them as mini poppers.
+- Round plates come in Ø 20 or 30 cm, square plates in 15 × 15 or 30 × 30 cm (a size saved before
+  opens as the nearest). The Props panel's text under each name says so.
+
 ## 0.10.1 (2026-11-22)
 
 - Props panel: *Walls* and *Paper* come right under *Stage markings*, and only those three groups

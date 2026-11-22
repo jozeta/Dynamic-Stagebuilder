@@ -4,7 +4,7 @@
 // a locked prop can't be clicked or dragged in the 3D view (pick it in the list to change it).
 // Pure: no DOM, no Three.js.
 import { newId } from "./stage.js";
-import { getProp } from "./props.js";
+import { propName } from "./props.js";
 
 export const MAX_GROUPS = 200;
 const groupsOf = (stage) => stage.groups ?? [];
@@ -84,7 +84,7 @@ export function layerTree(stage) {
 
 /** A row's text: its label and name, e.g. "T3 · IPSC target". */
 export function itemName(o) {
-  const name = getProp(o.type).name;
+  const name = propName(o);
   return o.label ? `${o.label} · ${name}` : name;
 }
 

@@ -7,7 +7,7 @@ import { createHistory, commit, replacePresent, undo, redo } from "./model/histo
 import { assignLabels, renumber, setLabel, closeGaps } from "./model/numbering.js";
 import { fitStand, arrayCounts, arrayExtent } from "./model/arrays.js";
 import { takeBuildingPieces, putBackPieces } from "./model/surroundings.js";
-import { snapPoint, snapAngle, clampToBay } from "./model/snap.js";
+import { snapPoint, snapAngle, clampToBay, gridOrigin } from "./model/snap.js";
 import { isRect, insideBay, isDrawn, onFloor, recentredRows } from "./model/bay.js";
 import { getProp } from "./model/props.js";
 import { snapToObjects, SNAP_RADIUS } from "./model/objsnap.js";
@@ -39,7 +39,7 @@ function withoutGaps(stage, ids) {
 export function createEditor({ stage = createStage(), onChange = () => {} } = {}) {
   const state = { history: createHistory(assignLabels(stage)), selection: [], mode: "select", drag: null, clipboard: [], measures: [] };
   const present = () => state.history.present;
-  const fit = (p, s = present()) => clampToBay(snapPoint(p, s.settings.grid), s.bay);
+  const fit = (p, s = present()) => clampToBay(snapPoint(p, s.settings.grid, gridOrigin(s.bay)), s.bay);
   let lastGrid = stage.settings.grid || 0.25;
 
   // Where one object lands: on a nearby wall end (object snap), else on the grid; a fine (Shift)
@@ -68,7 +68,7 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
       const spec = getProp(type).params[k];
       if (!spec) continue;
       if (spec.bool) { if (typeof v === "boolean") out[k] = v; }
-      else if (spec.options) { if (spec.options.includes(v)) out[k] = v; }
+      else if (spec.options) { const m = spec.options.find((x) => x === v || String(x) === String(v)); if (m !== undefined) out[k] = m; }
       else if (Number.isFinite(Number(v))) out[k] = clampNum(Number(v), spec.min, spec.max);
     }
     return out;
@@ -352,8 +352,10 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
       const shape = Object.fromEntries(Object.entries(rest).filter(([k]) => k !== "type"));      // the action's own type isn't a bay field
       let keep = Object.keys(shape).length ? shape : present().bay;
       // A drawn bay resized here keeps its drawing centred under the props.
-      if (!Object.keys(shape).length && isDrawn(keep)) keep = { ...keep, rows: recentredRows(keep.rows, keep.width, Math.round(clampNum(Number(width) || 1, 1, 200)), Math.round(clampNum(Number(depth) || 1, 1, 200))) };
-      let s = setBay(present(), clampNum(Number(width) || 1, 1, 200), clampNum(Number(depth) || 1, 1, 200), { ...keep, ...shape });
+      // The bay is sized in whole metres (it grows from its centre, so the grid follows its edges).
+      const W = Math.round(clampNum(Number(width) || 1, 1, 200)), D = Math.round(clampNum(Number(depth) || 1, 1, 200));
+      if (!Object.keys(shape).length && isDrawn(keep)) keep = { ...keep, rows: recentredRows(keep.rows, keep.width, W, D) };
+      let s = setBay(present(), W, D, { ...keep, ...shape });
       const bay = s.bay;
       s = { ...s,
         objects: s.objects.map((o) => ({ ...o, position: clampToBay(o.position, bay) })),

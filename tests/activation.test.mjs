@@ -19,7 +19,7 @@ function stage() {
 test("moving targets can be activated; poppers, plates, step pads and pull levers activate", () => {
   for (const t of ["swinger", "drop-turner", "clamshell", "mover", "bobber", "twister", "texas-star", "wall-port-shutter"]) assert.ok(canBeActivated(t), t);
   for (const t of ["paper-ipsc", "popper", "wall-wood", "door"]) assert.ok(!canBeActivated(t), t);
-  for (const t of ["popper", "mini-popper", "plate-round", "plate-square", "step-pad", "pull-lever"]) assert.ok(isActivator(t), t);
+  for (const t of ["popper", "plate-round", "plate-square", "step-pad", "pull-lever"]) assert.ok(isActivator(t), t);
   for (const t of ["paper-ipsc", "swinger", "barrel"]) assert.ok(!isActivator(t), t);
 });
 

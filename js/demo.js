@@ -36,7 +36,7 @@ export function demoStage() {
   add("paper-mini", [5.3, 12.05], 0, { mountHeight: 0.95 });
   add("popper", [-7.6, 14.6]);
   add("popper", [-7, 14.8], 0, { paint: "white" });
-  add("mini-popper", [-6.4, 14.6]);
+  add("popper", [-6.4, 14.6], 0, { kind: "mini" });
   add("plate-round", [8.2, 18]);
   add("plate-square", [8.8, 18]);
   add("plant-palm", [2.6, 8.2]);

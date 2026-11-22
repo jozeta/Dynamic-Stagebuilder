@@ -1,7 +1,7 @@
 // The inspector: settings for the selected object(s), or the stage when nothing is selected.
 // Fields commit on change (Enter or leaving the field); every change goes through the editor.
 import { h, icon } from "./dom.js";
-import { getProp } from "../model/props.js";
+import { getProp, propName } from "../model/props.js";
 import { labelPrefix } from "../model/numbering.js";
 import { PRESENTATIONS, HARD_COVERS, arrayIssues } from "../model/arrays.js";
 import { canBeActivated, isActivator, activatorsFor, activatorOf, activationLinks, describe } from "../model/activation.js";
@@ -11,12 +11,15 @@ import { eyeHeight } from "../model/positions.js";
 import { BAY_SHAPE_NAMES, bayShapeFields as shapeFieldsOf } from "../model/bay.js";
 
 const PARAM_LABELS = {
+  kind: "Popper",
   presentation: "Presentation", hardCover: "Hard cover", mountHeight: "Stand height (m)", style: "Target style", baseHeight: "Base height (m)", size: "Size (m)", length: "Length (m)",
   height: "Height (m)", mesh: "Mesh colour", frame: "Frame", portWidth: "Port width (m)",
   portHeight: "Port height (m)", portBottom: "Port up/down: bottom edge (m)", portOffset: "Port left/right (m, + left)", variant: "Type", shape: "Shape", count: "Count", paint: "Paint", color: "Colour", width: "Width (m)", rows: "Rows",
   doorWidth: "Door width (m)", ground: "Surface", plants: "Plants", plates: "Plates", model: "Model", stance: "Stance", pads: "Pads", stack: "Drums high", items: "On the table", targets: "Targets on the carrier", shutter: "Shutter", panelHeight: "Panel height (m)", gap: "Gap underneath (m)", open: "Open (°)", hinge: "Hinge side", swing: "Opens", animate: "Animate (moves when Play is on)", thickness: "Thickness (m)", material: "Material", diameter: "Diameter (m)", depth: "Base depth (m)", pitch: "Look up/down (°)", doorHeight: "Door height (m)",
 };
-const OPTION_LABELS = { square: "Square", round: "Round", classic: "Classic (octagon)", head: "With head", orange: "Orange", black: "Black", blue: "Blue", wood: "Wood", white: "White", yellow: "Yellow", red: "Red",
+// A standard size in a choice (plates): Ø 20 cm, 15 × 15 cm.
+const sizeLabel = (type, v) => { const c = Math.round(v * 100); return type === "plate-round" ? `Ø ${c} cm` : `${c} × ${c} cm`; };
+const OPTION_LABELS = { ipsc: "IPSC popper (85 cm)", mini: "Mini popper (57 cm)", square: "Square", round: "Round", classic: "Classic (octagon)", head: "With head", orange: "Orange", black: "Black", blue: "Blue", wood: "Wood", white: "White", yellow: "Yellow", red: "Red",
   green: "Green", grey: "Grey", auto: "Same as the ground", sand: "Sand", "light-sand": "Light sand", "dark-sand": "Dark sand", "red-dirt": "Red dirt", gravel: "Gravel", mixed: "Grass and bushes", grass: "Grass only", rust: "Rusty", concrete: "Concrete", brick: "Brick", metal: "Metal", "20ft": "20 ft", "40ft": "40 ft", left: "Left", right: "Right", away: "Away from the shooter", toward: "Toward the shooter", closed: "Closed", open: "Open", none: "Nothing", pistol: "Pistol", "pistol-mags": "Pistol and magazines", case: "Gun case (closed)", standing: "Standing", crouching: "Crouching", kneeling: "Kneeling", sitting: "Sitting", prone: "Prone", sedan: "Saloon", hatchback: "Hatchback", pickup: "Pickup", van: "Van",
   ...Object.fromEntries([...PRESENTATIONS, ...HARD_COVERS].map((p) => [p.id, p.name])) };
 // Furniture options, named by parameter (a sofa's "2" is two seats, a dining set's "2" two chairs).
@@ -56,7 +59,7 @@ export function createInspector(root, { editor, shapes = { list: () => [], draw:
 
   function objectPanel(o, angle, stage) {
     const def = getProp(o.type);
-    const nodes = [h("h2", { class: "lg-subtitle panel-title", text: def.name })];
+    const nodes = [h("h2", { class: "lg-subtitle panel-title", text: propName(o) })];
     if (labelPrefix(o) !== null) {
       nodes.push(field("Label", h("input", { class: "lg-input", value: o.label ?? "", maxlength: "12", dataset: { field: "label" },
         placeholder: "Automatic", onchange: (e) => d({ type: "setLabel", id: o.id, text: e.target.value }) })));
@@ -77,7 +80,7 @@ export function createInspector(root, { editor, shapes = { list: () => [], draw:
       // Options for one choice only (a wall's port or door settings): shown when that is chosen.
       if (spec.when && !Object.entries(spec.when).every(([wk, wv]) => o.params[wk] === wv)) continue;
       const furniture = getProp(o.type)?.category === "furniture";
-      const label = o.type === "berm" && k === "depth" ? "Depth, front to back (m)" : (furniture && FURNITURE_PARAMS[k]) || PARAM_LABELS[k] || k;
+      const label = o.type === "berm" && k === "depth" ? "Depth, front to back (m)" : typeof spec.options?.[0] === "number" ? "Size" : (furniture && FURNITURE_PARAMS[k]) || PARAM_LABELS[k] || k;
       const set = (v) => d({ type: "setParams", id: o.id, params: { [k]: v } });
       if (spec.bool) {
         // A switch (true/false), e.g. Animate: the label sits beside it.
@@ -88,7 +91,7 @@ export function createInspector(root, { editor, shapes = { list: () => [], draw:
         continue;
       }
       nodes.push(field(label, spec.options
-        ? select(k, o.params[k], spec.options.map((v) => [v, (furniture && FURNITURE_LABELS[`${k}:${v}`]) || (k === "variant" && WALL_TYPES[v]) || OPTION_LABELS[v] || v]), set)
+        ? select(k, o.params[k], spec.options.map((v) => [v, typeof v === "number" ? sizeLabel(o.type, v) : (furniture && FURNITURE_LABELS[`${k}:${v}`]) || (k === "variant" && WALL_TYPES[v]) || OPTION_LABELS[v] || v]), set)
         : numberInput(k, o.params[k], spec, set)));
       // A wall's Port switch, beside its Type: on is "Wall with port", off a plain wall.
       if (k === "variant" && o.params.variant !== "doorway") {
@@ -142,7 +145,7 @@ export function createInspector(root, { editor, shapes = { list: () => [], draw:
     // draws a green sight line to each target seen.
     if (o.type === "shooting-position") {
       const r = sightFrom(stage, o.position, eyeHeight(o.params.stance));
-      const name = (id) => { const t = stage.objects.find((x) => x.id === id); return t.label || getProp(t.type).name; };
+      const name = (id) => { const t = stage.objects.find((x) => x.id === id); return t.label || propName(t); };
       nodes.push(h("div", { class: "lg-stack sight" }, [
         h("span", { class: "lg-label", text: "From here" }),
         h("p", { class: "sight-seen", text: r.seen.length ? `Sees ${r.seen.map((x) => name(x.id)).join(", ")}` : "Sees no targets." }),
@@ -214,8 +217,8 @@ export function createInspector(root, { editor, shapes = { list: () => [], draw:
     return [
       h("h2", { class: "lg-subtitle panel-title", text: "Stage" }),
       h("p", { class: "lg-muted hint-text", text: "Nothing selected. Tap a prop on the stage to edit it." }),
-      field("Bay width (m)", numberInput("bayWidth", stage.bay.width, { min: 1, max: 200, step: 0.5 }, (v) => d({ type: "setBay", width: v, depth: stage.bay.depth }))),
-      field("Bay depth (m)", numberInput("bayDepth", stage.bay.depth, { min: 1, max: 200, step: 0.5 }, (v) => d({ type: "setBay", width: stage.bay.width, depth: v }))),
+      field("Bay width (m)", numberInput("bayWidth", stage.bay.width, { min: 1, max: 200, step: 1 }, (v) => d({ type: "setBay", width: v, depth: stage.bay.depth }))),
+      field("Bay depth (m)", numberInput("bayDepth", stage.bay.depth, { min: 1, max: 200, step: 1 }, (v) => d({ type: "setBay", width: stage.bay.width, depth: v }))),
       ...bayShapeFields(stage.bay),
       field("Grid snap", select("grid", stage.settings.grid, GRID_OPTIONS, (v) => d({ type: "setSetting", key: "grid", value: Number(v) }))),
       field("Angle snap", select("angle", stage.settings.angleSnap, ANGLE_OPTIONS, (v) => d({ type: "setSetting", key: "angleSnap", value: Number(v) }))),

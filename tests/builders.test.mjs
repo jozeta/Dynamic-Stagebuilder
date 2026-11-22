@@ -22,7 +22,7 @@ function checkSize(type, params) {
   assert.equal(g.userData.id, o.id);
 }
 
-for (const type of ["paper-ipsc", "paper-mini", "popper", "mini-popper", "plate-round", "plate-square"]) {
+for (const type of ["paper-ipsc", "paper-mini", "popper", "plate-round", "plate-square"]) {
   test(`${type} is drawn at its real size`, () => checkSize(type));
 }
 

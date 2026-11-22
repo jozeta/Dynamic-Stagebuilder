@@ -14,7 +14,7 @@ const CLOUDS = { clouds: 0.35, cloudSpeed: 1, wind: 60, cloudShadow: 0.5 };     
 const SUN = { sunAuto: true, sunElevation: 35, sunAzimuth: 20, sunColor: 0.8 };
 // The Blueprint paper and the Technical floor can take a colour (null: the surroundings' own), and
 // the Technical walls can be hidden (then its floor runs on to the horizon).
-const TONE = { groundHue: null, groundIntensity: null, groundBrightness: null, walls: true, gridIntensity: null, gridColor: null };
+const TONE = { groundHue: null, groundIntensity: null, groundBrightness: null, walls: true, gridShown: true, gridIntensity: null, gridColor: null };
 // Outdoor: a 1 m grid on the ground, off by default, with its own opacity.
 const OUTDOOR_GRID = { outdoorGrid: false, outdoorGridOpacity: 0.35, roof: true };       // roof: Industrial's Show roof
 /** Each surroundings' own grid: Blueprint's pale ink lines, Technical's dark tile seams (intensity 1 = as drawn). */
@@ -67,12 +67,12 @@ export const LOOK_DEFAULTS = Object.freeze({ hour: 15.75, sun: 0.85, ambient: 1.
 // The Technical surroundings: brighter afternoon light with softer, lighter shadows.
 export const TECHNICAL_LOOK = Object.freeze({ hour: 16, sun: 0.85, ambient: 1.05, shadows: true, softness: 4, shadowStrength: 0.55, haze: 0.15, exposure: 1, ground: "sand", foliage: "mixed",
   clouds: 0.45, cloudSpeed: 0.5, wind: 70, cloudShadow: 0.5, sunAuto: false, sunElevation: 31, sunAzimuth: 35, sunColor: 0.78,
-  groundHue: 220, groundIntensity: 0, groundBrightness: 1.1, walls: false, gridIntensity: 0.4, gridColor: null, ...OUTDOOR_GRID });
+  groundHue: 220, groundIntensity: 0, groundBrightness: 1.1, walls: false, gridShown: true, gridIntensity: 0.4, gridColor: null, ...OUTDOOR_GRID });
 
 // Blueprint: late-morning light with soft shadows; no haze.
 export const BLUEPRINT_LOOK = Object.freeze({ hour: 11, sun: 0.85, ambient: 1.05, shadows: true, softness: 4, shadowStrength: 0.55, haze: 0.15, exposure: 1, ground: "sand", foliage: "mixed",
   clouds: 0.45, cloudSpeed: 0.5, wind: 70, cloudShadow: 0.5, sunAuto: false, sunElevation: 31, sunAzimuth: 35, sunColor: 0.78,
-  groundHue: 220, groundIntensity: 0.54, groundBrightness: 0.4, walls: true, gridIntensity: 0.14, gridColor: "#ffffff", ...OUTDOOR_GRID });
+  groundHue: 220, groundIntensity: 0.54, groundBrightness: 0.4, walls: true, gridShown: true, gridIntensity: 0.14, gridColor: "#ffffff", ...OUTDOOR_GRID });
 
 // Industrial (indoors): lit by the hall's lamps, a little dust in the air, softer shadows.
 export const INDUSTRIAL_LOOK = Object.freeze({ ...TECHNICAL_LOOK, sun: 0.9, ambient: 1, softness: 5, shadowStrength: 0.5, haze: 0.06, exposure: 1.05, walls: true, gridIntensity: null });

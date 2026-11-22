@@ -2,7 +2,7 @@
 // round three sides with grass on top, flat-shaded bushes, grass tufts and trees (the slightly
 // illustrated feel), a low warm sun with long soft shadows, and a warm-to-blue sky with haze.
 import * as THREE from "three";
-import { canvasTexture, sun, disposeGroup } from "./common.js";
+import { canvasTexture, sun, disposeGroup, lineGrid } from "./common.js";
 import { buildGround } from "./ground.js";
 import { createClouds } from "./clouds.js";
 import { buildFoliage } from "./foliage.js";
@@ -38,36 +38,6 @@ function reflectionSky() {
   return t;
 }
 
-// Lines every metre over the bay (and its apron), split into 0.5 m pieces that sit 3 cm above the
-// ground there, so they follow slopes. Two line sets: every metre, and every 5 m a stronger one.
-function groundGrid(bay) {
-  const g = new THREE.Group();
-  g.name = "ground-grid";
-  g.visible = false;
-  const fine = [], bold = [];
-  const x0 = -Math.ceil(bay.width / 2), x1 = Math.ceil(bay.width / 2), z1 = Math.ceil(bay.depth);
-  const y = (x, z) => heightAt(x, z, bay) + 0.03;
-  const line = (out, a, b) => {
-    const n = Math.max(1, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / 0.5));
-    for (let i = 0; i < n; i++) {
-      const p = [a[0] + ((b[0] - a[0]) * i) / n, a[1] + ((b[1] - a[1]) * i) / n], q = [a[0] + ((b[0] - a[0]) * (i + 1)) / n, a[1] + ((b[1] - a[1]) * (i + 1)) / n];
-      out.push(p[0], y(...p), p[1], q[0], y(...q), q[1]);
-    }
-  };
-  for (let x = x0; x <= x1; x++) line(x % 5 === 0 ? bold : fine, [x, 0], [x, z1]);
-  for (let z = 0; z <= z1; z++) line(z % 5 === 0 ? bold : fine, [x0, z], [x1, z]);
-  const mats = [];
-  for (const [pts, k] of [[fine, 1], [bold, 1.6]]) {
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute("position", new THREE.Float32BufferAttribute(pts, 3));
-    const mat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.35, depthWrite: false });
-    mat.userData.k = k;
-    mats.push(mat);
-    g.add(new THREE.LineSegments(geo, mat));
-  }
-  return { group: g, set(shown, opacity) { g.visible = Boolean(shown) && opacity > 0.001; for (const m of mats) m.opacity = Math.min(1, opacity * m.userData.k); } };
-}
-
 export function outdoor(bay, { onUpdate } = {}) {
   const group = new THREE.Group();
   const groundGroup = buildGround(bay, { onUpdate });
@@ -84,7 +54,7 @@ export function outdoor(bay, { onUpdate } = {}) {
   const skyTex = canvasTexture(256, (g, s) => paintSky(g, s, 0.5), [1, 1]);
   const clouds = createClouds(bay, groundGroup.children.find((c) => c.userData.ground));
   // The ground grid (Settings → Grid on the ground): 1 m lines, bold every 5 m, draped on the ground.
-  const grid = groundGrid(bay);
+  const grid = lineGrid(bay, (x, z) => heightAt(x, z, bay));
   group.add(grid.group);
   if (clouds) group.add(clouds.mesh, clouds.shadow);
   return {

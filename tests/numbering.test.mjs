@@ -17,7 +17,7 @@ const labels = (s) => s.objects.map((o) => o.label);
 
 test("prefixes", () => {
   assert.equal(labelPrefix("paper-mini"), "T");
-  assert.equal(labelPrefix("mini-popper"), "P");
+  assert.equal(labelPrefix({ type: "popper", params: { kind: "mini" } }), "P");
   assert.equal(labelPrefix("plate-square"), "P");
   assert.equal(labelPrefix({ type: "paper-mini", params: { presentation: "noshoot" } }), "NS");
   assert.equal(labelPrefix("barrel"), null);

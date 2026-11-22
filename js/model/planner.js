@@ -124,8 +124,7 @@ function aimHeight(o) {
   const p = o.params || {};
   switch (o.type) {
     case "paper-ipsc": case "paper-mini": return p.mountHeight + paperSize(o).h * 0.5;
-    case "popper": return (p.baseHeight || 0) + 0.65;
-    case "mini-popper": return (p.baseHeight || 0) + 0.45;
+    case "popper": return (p.baseHeight || 0) + (p.kind === "mini" ? 0.45 : 0.65);
     case "plate-round": case "plate-square": return p.baseHeight + p.size / 2;
     case "texas-star": return MOVING.star.hub;
     case "plate-rack": return MOVING.rack.centre;

@@ -5,6 +5,7 @@ import * as THREE from "three";
 import { canvasTexture, ground, sun, reliefMesh } from "./common.js";
 import { hsvToRgb } from "../../model/look.js";
 import { bayOutline, isRect, isFrontEdge, isDrawn } from "../../model/bay.js";
+import { gridPhase } from "../../model/snap.js";
 
 const FLOOR = 900;                 // metres a side: well past the fog, so it reads as endless
 const BG = 0xb7bcc2;
@@ -28,6 +29,9 @@ export function technical(bay) {
   const floorBase = floorMat.color.clone();
   const gridMat = new THREE.MeshStandardMaterial({ color: 0x55585c, map: seams, transparent: true, opacity: seams ? 1 : 0, depthWrite: false,
     polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1, roughness: 0.92 });
+  // Seams on the bay's grid: from its left and up-range edges, whole metres (an odd width puts them on halves).
+  if (seams) seams.offset.set(...gridPhase(bay, W, 1));
+  if (tiles) tiles.offset.set(...gridPhase(bay, W, 1));
   const gridMesh = ground(W, D, gridMat, bay.depth / 2);
   gridMesh.position.y = 0.001;
   gridMesh.userData.grid = true;

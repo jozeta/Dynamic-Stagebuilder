@@ -8,6 +8,7 @@ import * as THREE from "three";
 import { canvasTexture, ground, sun, hasDom, reliefMesh } from "./common.js";
 import { GROUND_TONE_DEFAULTS } from "../../model/look.js";
 import { bayOutline } from "../../model/bay.js";
+import { gridPhase } from "../../model/snap.js";
 
 const PAPER = "#1f63cc";
 const BG = 0x3a78d0;
@@ -110,8 +111,9 @@ export function blueprint(bay) {
   // Toned down so the lit paper reads as deep Prussian blue, not bright royal blue.
   const paper = toned(new THREE.MeshStandardMaterial({ color: grid ? 0xdce6f6 : 0x2a6fd6, map: grid, roughness: 0.95 }), uTone);
   const g0 = ground(SIZE, SIZE, paper, D / 2);
-  // Line the grid up with the world: whole metres on whole metres, a bold line on the bay's centre.
-  if (grid) grid.offset.set(((SIZE / 2) % TILE) / TILE, ((SIZE / 2 - D / 2) % TILE) / TILE);
+  // Line the grid up with the bay: from its left and up-range edges (so an odd width puts the lines on
+  // half metres, on its edges), a bold line every 5 m from there.
+  if (grid) grid.offset.set(...gridPhase(bay, SIZE, TILE));
   group.add(g0);
   if (lines) lines.offset.copy(grid.offset);
   const gridMat = new THREE.MeshStandardMaterial({ color: 0xe2eeff, map: lines, transparent: true, opacity: lines ? 1 : 0, depthWrite: false,
