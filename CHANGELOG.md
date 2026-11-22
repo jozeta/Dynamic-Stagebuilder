@@ -4,6 +4,12 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- The Projects panel's corner button says what it closes: *Close stage* (saves it; back to the start
+  of Projects, or to its match's page when you came through the match) or *Close match* (saves; back
+  to the start); *Done* when nothing is open. Closing leaves the view empty: greyed out under one
+  button, *Create new stage*, or *Create new stage within this match* while a match is loaded. A
+  reload stays closed. Building on the empty view asks for the stage's name first.
+
 - Matches: drag a stage by its grip (⠿) to any place, in the match window and in the match's list in
   the Projects panel (mouse, finger or pen; the arrow keys on a grip move it too). The up and down
   arrows are gone. In the panel, × takes a stage out of the match after a warning that it stays in

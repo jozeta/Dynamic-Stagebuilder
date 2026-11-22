@@ -8,16 +8,37 @@ import { createMatches } from "./matches.js";
 
 const when = (t) => new Date(t).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
 
-export function createProjects({ panel, docked = false, hide = [], onToggle = () => {}, onOpenLibrary = async () => {}, onCreateFrom = async () => null, store, currentId, onOpen, onNew, onDuplicate, onDelete, onImport, onExport,
+export function createProjects({ panel, docked = false, hide = [], onToggle = () => {}, onOpenLibrary = async () => {}, onCreateFrom = async () => null, onCloseStage = async () => {}, onModeChange = () => {}, store, currentId, onOpen, onNew, onDuplicate, onDelete, onImport, onExport,
   onNewStage = async () => null, onApplyBriefing = async () => {}, onPrintMatch = () => {}, onExportMatch = () => {}, onImportMatch = async () => [], onShareLink = async () => ({ ok: false, error: "Not available." }) }) {
   // Matches: their list above the stages, and a match's own page in place of the lists.
   const stagesBox = h("div", { class: "lg-stack" });
   const crumbs = h("nav", { class: "proj-crumbs", "aria-label": "Where you are" });
   let actions = null;
+  // The button in the corner says what it closes: the match (on its page), the stage you have open,
+  // or just the panel when nothing is open. Closing saves first and leaves an empty view.
+  const closeB = h("button", { type: "button", class: "lg-btn lg-btn-primary", onclick: () => closeWhat(), text: "Done" });
+  const mode = () => (matches.inMatch ? "match" : currentId() ? "stage" : "none");
+  async function closeWhat() {
+    const m = mode();
+    if (m === "match") return closeMatch();
+    if (m === "stage") {
+      const inMatch = matches.contextId;               // a stage opened through its match: back to that match
+      await onCloseStage();
+      if (inMatch && (await matches.list()).some((x) => x.id === inMatch)) await matches.show(inMatch); else { matches.showList(); matches.leaveMatch(); }
+      await fill();
+      return;
+    }
+    close();
+  }
+  async function closeMatch() {
+    await onCloseStage();
+    matches.showList(); matches.leaveMatch();
+    await fill();
+  }
   const matches = createMatches({
     store, currentId,
     onOpen: async (id) => { await onOpen(id); await fill(); },
-    onNewStage, onCreateFrom, onApplyBriefing, onPrint: onPrintMatch, onExport: onExportMatch,
+    onNewStage, onCreateFrom, onApplyBriefing, onPrint: onPrintMatch, onExport: onExportMatch, onCloseMatch: () => closeMatch(),
     // A match's page shows only the match (with Close match at the top): the general buttons and the
     // stage list are hidden meanwhile.
     onViewChange: (inMatch) => { stagesBox.hidden = inMatch; if (actions) actions.hidden = inMatch; queueMicrotask(() => fillCrumbs()); },
@@ -58,7 +79,7 @@ export function createProjects({ panel, docked = false, hide = [], onToggle = ()
   panel.append(
     h("div", { class: "side-head" }, [
       h("h2", { class: "lg-subtitle panel-title", id: "projects-title", text: "Projects" }),
-      h("button", { type: "button", class: "lg-btn lg-btn-primary", onclick: () => close(), text: "Done" }),
+      closeB,
     ]),
     crumbs,
     h("div", { class: "lg-stack proj-body" }, [
@@ -154,6 +175,9 @@ export function createProjects({ panel, docked = false, hide = [], onToggle = ()
       else if (rec) parts.push(sep(), h("span", { class: "crumb-here", text: `${stageName} (stage)` }));
     }
     crumbs.replaceChildren(...parts);
+    onModeChange();
+    closeB.textContent = { match: "Close match", stage: "Close stage", none: "Done" }[mode()];
+    closeB.title = { match: "Save and close the match; back to all your projects", stage: "Save and close this stage", none: "Close the panel" }[mode()];
   }
   async function fillStages() {
     const now = Date.now();
@@ -189,5 +213,11 @@ export function createProjects({ panel, docked = false, hide = [], onToggle = ()
     /** Shown by the dock (its tab clicked): fill it and count as open, without toggling. */
     async ensureOpen() { if (isOpen) return; say(""); matches.showList(); await fill(); fillLibrary(); show(true); },
     get isOpen() { return isOpen; },
+    /** Bring an open panel up to date (a stage made or closed elsewhere). */
+    async refresh() { if (isOpen) await fill(); },
+    /** The match you are working in (its page, or a stage opened from it), or null. */
+    matchContext: () => (matches.inMatch ? matches.openId : matches.contextId) || null,
+    /** New stage in that match: asks its name, adds it to the match, opens it. */
+    async newStageInMatch() { const id = matches.inMatch ? matches.openId : matches.contextId; if (id) { await matches.newStageIn(id); await fill(); } },
   };
 }

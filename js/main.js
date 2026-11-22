@@ -253,6 +253,7 @@ function updateHint(state) {
       h("button", { type: "button", class: "lg-btn", disabled: !state.measures.length, onclick: () => editor.dispatch({ type: "clearMeasures" }), text: "Clear" }),
       h("button", { type: "button", class: "lg-btn lg-btn-primary", onclick: () => editor.dispatch({ type: "cancel" }), text: "Done" })];
   }
+  else if (noStage) nodes = null;                    // the grey cover with its button says it
   else if (!stage.objects.length && !stage.lines.length) nodes = [h("span", { text: "Empty stage. Pick a prop on the left, then tap the ground to place it." })];
   hint.hidden = !nodes;
   if (nodes) hint.replaceChildren(...nodes);
@@ -367,7 +368,51 @@ function onSaveStatus(kind, err) {
   else if (kind === "saved") setStatus(store.memory ? "Not saved: this browser blocks storage" : "Saved", store.memory ? "lg-warn" : "lg-ok");
   else { console.error(err); setStatus("Not saved: storage error", "lg-bad"); }
 }
-function scheduleSave() { autosave?.schedule(); }
+function scheduleSave() { if (noStage) { claimBlank(); return; } autosave?.schedule(); }
+
+// No stage open (Close stage / Close match): an empty, unsaved stage on screen. Nothing on it is
+// saved by itself; the first change asks for a name and makes it a project (Cancel clears it again).
+const NONE = "none";
+let noStage = false, blank = null, claiming = false;
+async function closeStage() {
+  await saveNow();
+  noStage = true;
+  blank = createStage({ name: "" });
+  editor.dispatch({ type: "load", stage: blank });
+  blank = editor.stage();
+  autosave.markSaved(blank);
+  remember(NONE);
+  rig.preset("iso", blank);
+  document.getElementById("toolbar")?.eyeSteps?.hide();
+  settings?.refresh();
+  render(editor.state);
+  await projects?.refresh();
+}
+async function claimBlank() {
+  if (claiming || editor.stage() === blank) return;
+  // Only building something (a prop, a line, the start) makes it a stage; settings, light or the
+  // camera changing on the empty screen don't.
+  const st = editor.stage();
+  if (!st.objects.length && !st.lines.length && !st.start) { blank = st; autosave.markSaved(st); return; }
+  claiming = true;
+  const name = await askName({ title: "Name this stage", value: "" });
+  claiming = false;
+  if (!name) { await closeStage(); return; }          // not kept: back to an empty screen
+  editor.dispatch({ type: "rename", name });
+  noStage = false;
+  await store.put(projectRecord(editor.stage(), { now: Date.now() }));
+  autosave.markSaved(editor.stage());
+  remember(editor.stage().id);
+  render(editor.state);
+}
+// New stage (Projects, or the empty screen's button): asks for its name; Cancel makes none.
+async function newStageFlow() {
+  const name = await askName({ title: "New stage", value: "" });
+  if (!name) return false;
+  await addProject(freshStage(name));
+  await projects?.refresh();
+  return true;
+}
 const saveNow = () => autosave?.flush();
 addEventListener("pagehide", () => { saveNow(); });
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") saveNow(); });
@@ -378,6 +423,7 @@ async function openProject(id) {
   const rec = await store.get(id);
   const r = rec ? validateStage(rec.stage) : { ok: false };
   if (!r.ok) { setStatus("That project could not be read", "lg-bad"); return false; }
+  noStage = false;                           // before loading, so the view and title draw the stage
   editor.dispatch({ type: "load", stage: r.stage });
   settings?.refresh();                       // an open Settings panel shows this stage's surroundings
   autosave.markSaved(editor.stage(), rec.exportedAt ?? null);
@@ -485,9 +531,11 @@ const projects = createProjects({
     window.print();
     printReady = false;
   },
-  currentId: () => editor.stage().id,
+  currentId: () => (noStage ? null : editor.stage().id),
   onOpen: openProject,
-  onNew: async () => { const name = await askName({ title: "New stage", value: "" }); if (!name) return false; await addProject(freshStage(name)); return true; },
+  onNew: newStageFlow,
+  onCloseStage: closeStage,
+  onModeChange: () => updateBlankCover(),
   onDuplicate: async (id) => {
     await saveNow();
     const rec = await store.get(id);
@@ -561,7 +609,20 @@ function placeStageTitle() {
   stageTitle.style.setProperty("--title-top", `${roomy ? bar.top - slot.top : bar.bottom - slot.top + 6}px`);
   stageTitle.style.setProperty("--title-h", `${bar.height}px`);
 }
-updaters.push((state) => { const name = state.history.present.name || "Untitled stage"; if (stageTitle.textContent !== name) stageTitle.textContent = name; requestAnimationFrame(placeStageTitle); });
+// No stage open: the view greys out under one button, Create new stage (within the loaded match, if
+// one is). It also keeps the empty screen from being edited by accident.
+const blankCover = h("div", { class: "blank-cover", hidden: true }, [
+  h("button", { type: "button", class: "lg-btn lg-btn-primary blank-cover-btn", onclick: async () => {
+    if (projects?.matchContext()) await projects.newStageInMatch(); else await newStageFlow();
+  } }, [icon("new"), h("span", { class: "blank-cover-label", text: "Create new stage" })]),
+]);
+document.querySelector(".viewport-wrap").append(blankCover);
+function updateBlankCover() {
+  blankCover.hidden = !noStage;
+  if (noStage) blankCover.querySelector(".blank-cover-label").textContent = projects?.matchContext() ? "Create new stage within this match" : "Create new stage";
+}
+updaters.push(updateBlankCover);
+updaters.push((state) => { const name = noStage ? "No stage open" : state.history.present.name || "Untitled stage"; if (stageTitle.textContent !== name) stageTitle.textContent = name; requestAnimationFrame(placeStageTitle); });
 new ResizeObserver(() => placeStageTitle()).observe(document.querySelector(".viewport-wrap"));
 // Turning the view (left drag on empty ground, one finger) with something selected turns it round
 // the selection: the pivot glides onto it as the drag starts. Dragging a prop doesn't move the camera.
@@ -692,7 +753,7 @@ render(editor.state);
 document.getElementById("boot-state")?.remove();
 // Remember the camera (per project, in this browser) a moment after it stops moving, and on leaving.
 let viewTimer = 0, viewReady = false;
-const keepView = () => { if (viewReady) saveView(editor.stage().id, rig.getView()); };
+const keepView = () => { if (viewReady && !noStage) saveView(editor.stage().id, rig.getView()); };
 rig.controls.addEventListener("change", () => { clearTimeout(viewTimer); viewTimer = setTimeout(keepView, 400); });
 addEventListener("pagehide", keepView);
 rig.preset("iso", editor.stage());
@@ -720,7 +781,11 @@ async function openSharedLink() {
   const last = recall();
   const pick = all.find((r) => r.id === last) ?? all[0];
   // A share link (#stage=…) opens its stage as a new project; the link leaves the address bar.
-  if (!(await openSharedLink()) && !(pick && await openProject(pick.id))) await addProject(demoStage());
+  // Closed last time (Close stage / Close match): an empty screen again.
+  if (!(await openSharedLink())) {
+    if (last === NONE && all.length) await closeStage();
+    else if (!(pick && await openProject(pick.id))) await addProject(demoStage());
+  }
   // A share link pasted into this tab while it is open changes only the hash: open it too.
   addEventListener("hashchange", () => { openSharedLink(); });
   viewReady = true;                        // from now on the camera belongs to an opened project

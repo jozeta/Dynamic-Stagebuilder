@@ -10,7 +10,7 @@ import { openMatchEditor } from "./match-editor.js";
 import { dragGrip } from "./drag-sort.js";
 import { sortProjects } from "../storage/projects.js";
 
-export function createMatches({ store, currentId, onOpen, onNewStage, onCreateFrom = async () => null, onApplyBriefing, onPrint, onExport = () => {}, onViewChange = () => {}, onChanged = async () => {} }) {
+export function createMatches({ store, currentId, onOpen, onNewStage, onCreateFrom = async () => null, onCloseMatch = null, onApplyBriefing, onPrint, onExport = () => {}, onViewChange = () => {}, onChanged = async () => {} }) {
   const box = h("section", { class: "matches", "aria-labelledby": "matches-title" });
   let openId = null;            // the match whose page is shown, or null for the list
   let contextId = null;         // the match you are working in (its page, or a stage opened from it); null: a stage on its own
@@ -135,7 +135,7 @@ export function createMatches({ store, currentId, onOpen, onNewStage, onCreateFr
       return row;
     });
     box.replaceChildren(
-      h("div", { class: "match-head" }, [btn("Close match", async () => { openId = null; contextId = null; await fill(); }, "lg-btn", "chevl", { title: "Leave the match: back to all your projects" })]),
+      h("div", { class: "match-head" }, [btn("Close match", async () => { if (onCloseMatch) return onCloseMatch(); openId = null; contextId = null; await fill(); }, "lg-btn", "chevl", { title: "Leave the match: back to all your projects" })]),
       h("h3", { class: "match-title", text: m.name }),
       h("p", { class: "lg-muted proj-meta", text: `${sum.stages} stage${sum.stages === 1 ? "" : "s"} · ${sum.minRounds} rounds minimum · ${sum.maxPoints} points` }),
       stageRows.length ? (listEl.replaceChildren(...stageRows), listEl)
@@ -160,9 +160,20 @@ export function createMatches({ store, currentId, onOpen, onNewStage, onCreateFr
 
   /** Back to the list of matches (and, in the Projects panel, the stages under it). */
   const showList = () => { openId = null; };
+  /** A new stage (named first) at the end of match `id`, opened, with the match as its context. */
+  async function newStageIn(id) {
+    const m = (await listMatches()).find((x) => x.id === id);
+    if (!m) return;
+    const sid = await onNewStage();
+    if (!sid) return;
+    const next = addStages(m, [sid]);
+    await save(next); await syncBriefings(next);
+    contextId = id;
+    await onChanged();
+  }
   /** Working on a stage on its own (opened from the stage list, a new stage…): no match around it. */
   const leaveMatch = () => { contextId = null; };
-  return { box, fill, create, adopt, showList, leaveMatch, get contextId() { return contextId; }, list: listMatches, get inMatch() { return Boolean(openId); }, get openId() { return openId; },
+  return { box, fill, create, adopt, showList, leaveMatch, newStageIn, get contextId() { return contextId; }, list: listMatches, get inMatch() { return Boolean(openId); }, get openId() { return openId; },
     /** Show a match's page. */
     async show(id) { openId = id; await fill(); } };
 }

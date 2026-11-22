@@ -502,3 +502,8 @@ body { background: var(--lg-bg); overflow: hidden; }
 .drag-row.is-dragging { transition: none; position: relative; z-index: 2; box-shadow: 0 6px 18px rgb(0 0 0 / 0.25); cursor: grabbing; background: var(--lg-bg); }
 .match-ed-row { background: var(--lg-bg); }
 @media (prefers-reduced-motion: reduce) { .drag-row { transition: none; } }
+
+/* No stage open: the view greys out under one button (Create new stage). */
+.blank-cover { position: absolute; inset: 0; z-index: 4; display: grid; place-items: center; background: color-mix(in srgb, #6b6f75 72%, transparent);
+  -webkit-backdrop-filter: grayscale(1) blur(2px); backdrop-filter: grayscale(1) blur(2px); }
+.blank-cover-btn { font-size: 1.05rem; padding: 14px 22px; min-height: 52px; box-shadow: 0 8px 28px rgb(0 0 0 / 0.3); }
