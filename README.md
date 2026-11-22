@@ -212,7 +212,7 @@ Stage settings are in the inspector when nothing is selected. They are saved wit
 | Grid snap | Positions snap to this grid: off, 0.1, 0.25, 0.5 or 1 m (toolbar *Grid* turns it on/off) | 0.25 m |
 | Object snap | Toolbar *Objects*: a wall's end jumps onto another wall's end within 35 cm | On |
 | Angle snap | Rotations snap to this step: off, 5°, 15°, 45° or 90° | 15° |
-| Surroundings | *Settings*: Outdoor (dirt range), Technical (grey floor, grid), Blueprint (drafting sheet) or Industrial (an indoor factory hall, lit from overhead); never moves the stage | Outdoor |
+| Surroundings | *Settings* (a window opened from the toolbar): Outdoor (dirt range), Technical (grey floor, grid), Blueprint (drafting sheet) or Industrial (an indoor factory hall, lit from overhead); never moves the stage | Outdoor |
 | Ground | *Settings* (Outdoor): sand, light sand, dark sand, red dirt or gravel | Gravel |
 | Foliage | *Settings* (Outdoor): mixed broadleaf, Nordic, desert, savanna, tropical or bare banks | Nordic |
 | Grid on the ground | *Settings* (Outdoor): 1 m squares on the ground, a stronger line every 5 m; *Grid opacity* 5–100 % | Off, 35 % |
@@ -414,7 +414,7 @@ the printed 3D view uses the same light.
 
 **Undo anything** with Undo/Redo or ⌘Z / ⇧⌘Z (Ctrl on Windows).
 
-**Write the briefing.** *Briefing* opens the Written Stage Briefing. Fill in the match, stage
+**Write the briefing.** *Written stage briefing…*, in the right-hand panel under the stage statistics, opens the Written Stage Briefing. Fill in the match, stage
 number, designer, start signal, start position, gun condition, procedure and notes. Scoring, start
 signal, start position, gun condition and stop time have a list of common wordings; *Custom text…*
 lets you type your own. *Add a common sentence…* adds a usual procedure line. Targets,
@@ -440,8 +440,8 @@ the 3D view page is left out, since only the open stage can be drawn. A stage ta
 the stages of a deleted match, stay as ordinary projects. *Export the match* saves the match and all
 its stages in one file; *Import file…* takes it back as new projects in a new match.
 
-**Projects, export and import.** Every change is saved in this browser automatically (the chip in
-the toolbar says *Saved*). The *Projects* tab in the left-hand panel lists your stages: open, duplicate or delete them, start a
+**Projects, export and import.** Every change is saved in this browser automatically (a green *Saved*
+alert shows under the toolbar for a few seconds; a problem saving stays until you close it). The *Projects* tab in the left-hand panel lists your stages: open, duplicate or delete them, start a
 *New stage*, *Export this stage* as a `.json` file, or *Import file…* to add a stage from a file.
 An import always becomes a new project, so it never overwrites one. Below your projects is the
 *Stage library*: 58 ready-made stages (drills and standards, short, medium and long IPSC courses,

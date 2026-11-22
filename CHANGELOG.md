@@ -4,6 +4,15 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Settings opens as a window over the app (Done or Escape closes it) instead of a tab in the
+  right-hand panel.
+- The toolbar: *Duplicate* and *Delete* are gone from it (they are in the inspector, the right-click
+  menu and ⌘/Ctrl D, Delete); *Print* sits left of *Settings*; *Written stage briefing…* moved to the
+  right-hand panel, under the stage statistics.
+- Saving shows a green *Saved* alert under the toolbar that fades away after a few seconds (it was a
+  chip in the toolbar); a problem saving stays until you close it.
+- The Help window is nearly as big as the browser window.
+
 - Dining table and chairs: the chairs are pushed in, half of each seat under the table, and spaced
   between the table's legs.
 

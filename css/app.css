@@ -187,7 +187,14 @@ body { background: var(--lg-bg); overflow: hidden; }
 .briefing-body .lg-input, .briefing-body .lg-select { width: 100%; box-sizing: border-box; }
 .wsb-wide { grid-column: 1 / -1; }
 
-.save-status { white-space: nowrap; }
+/* The save alert: under the toolbar, top right, fading in and out. */
+.save-alert { position: fixed; z-index: 50; top: calc(var(--toolbar-h, 56px) + 10px); right: max(16px, env(safe-area-inset-right)); display: flex; align-items: center; gap: 8px;
+  margin: 0; max-width: min(360px, calc(100vw - 32px)); box-shadow: 0 6px 24px rgb(0 0 0 / 0.25); opacity: 0; transform: translateY(-6px); transition: opacity 0.25s, transform 0.25s; pointer-events: none; }
+.save-alert.is-shown { opacity: 1; transform: none; pointer-events: auto; }
+.save-alert[hidden] { display: none; }
+.save-alert .lg-icon { flex: none; width: 18px; height: 18px; }
+.save-alert-close { margin-left: auto; }
+@media (prefers-reduced-motion: reduce) { .save-alert { transition: none; } }
 .proj-actions { flex-wrap: wrap; gap: var(--lg-space-s); }
 .proj-list { display: grid; gap: var(--lg-space-xs); }
 .proj-row { display: flex; align-items: center; justify-content: space-between; gap: var(--lg-space-m); flex-wrap: wrap;
@@ -232,11 +239,12 @@ body { background: var(--lg-bg); overflow: hidden; }
 .inspector .settings-panel { grid-column: 1 / -1; }
 
 /* Help window */
-.help-modal { width: min(940px, calc(100vw - 32px)); max-height: min(720px, calc(100dvh - 32px)); padding: 0; display: none; }
+/* Help: nearly the whole window, so the drawings and text have room. */
+.help-modal { width: min(1400px, calc(100vw - 48px)); max-width: none; height: calc(100dvh - 48px); max-height: none; padding: 0; display: none; }
 .help-modal[open] { display: flex; flex-direction: column; }
 .help-head { display: flex; align-items: center; justify-content: space-between; padding: var(--lg-space-m) var(--lg-space-l); border-bottom: 1px solid var(--lg-border); }
 .help-head .lg-modal-title { margin: 0; }
-.help-body { display: grid; grid-template-columns: 230px minmax(0, 1fr); min-height: 0; flex: 1; }
+.help-body { display: grid; grid-template-columns: 260px minmax(0, 1fr); min-height: 0; flex: 1; }
 .help-nav { display: grid; align-content: start; gap: 2px; padding: var(--lg-space-s); border-right: 1px solid var(--lg-border); overflow: auto; }
 .help-topic { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 6px 10px; border: 0; border-radius: var(--lg-radius-control);
   background: transparent; color: var(--lg-muted); font: inherit; text-align: left; cursor: pointer; }
@@ -422,3 +430,11 @@ body { background: var(--lg-bg); overflow: hidden; }
 .vis-item.is-taken { opacity: 0.6; }
 .bay-draw-canvas.is-bucket { cursor: cell; }
 .plan-modal [hidden] { display: none !important; }
+
+/* Settings in a modal window: roomy, scrolling inside, Done kept in view at the bottom. */
+.settings-modal { width: min(760px, calc(100vw - 32px)); max-width: none; max-height: calc(100dvh - 32px); padding: var(--lg-space-m); overflow: auto; }
+.settings-modal .settings-head { padding-right: 0; }
+.settings-modal .settings-foot { background: var(--lg-bg); }
+.brief-slot { padding-top: var(--lg-space-s); }
+.brief-slot .lg-btn { width: 100%; justify-content: center; min-height: var(--lg-touch); }
+.settings-modal > * { flex-shrink: 0; }          /* the modal scrolls; its tabs and rows keep their height */

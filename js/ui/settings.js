@@ -39,7 +39,7 @@ const SLIDERS = [
 const SUN_KEYS = ["sunElevation", "sunAzimuth", "sunColor"];
 const OUTDOOR_ONLY = new Set(["haze", "clouds", "cloudSpeed", "wind", "cloudShadow"]);
 
-export function createSettings({ editor, panel, docked = false, hide = [], onToggle = () => {}, getHidden = () => ({ categories: [], props: [] }), onHidden = () => {}, mine = null,
+export function createSettings({ editor, panel, docked = false, modal = panel.tagName === "DIALOG", hide = [], onToggle = () => {}, getHidden = () => ({ categories: [], props: [] }), onHidden = () => {}, mine = null,
   getSpeed = () => "sprint", onSpeed = () => {}, getRunLook = () => null, onRunLook = () => {} }) {
   const d = (a) => editor.dispatch(a);
   const body = h("div", { class: "settings-body" });
@@ -159,16 +159,19 @@ export function createSettings({ editor, panel, docked = false, hide = [], onTog
   let savedTab = null;
   try { savedTab = localStorage.getItem("dsb:settings-tab"); } catch { /* private mode */ }
   if (["view", "props"].includes(savedTab)) selectTab(savedTab);
-  if (!docked) panel.hidden = true;
+  if (!docked && !modal) panel.hidden = true;
   let isOpen = false;
   function show(open) {
     isOpen = open;
-    if (!docked) panel.hidden = !open;            // docked, the dock shows or hides its tab
+    if (modal) { if (open && !panel.open) panel.showModal(); else if (!open && panel.open) panel.close(); }   // a modal window
+    else if (!docked) panel.hidden = !open;      // docked, the dock shows or hides its tab
     for (const el of hide) el.hidden = open;
     onToggle(open);
   }
   function close() { show(false); }
-  panel.addEventListener("keydown", (e) => { if (e.key === "Escape") { e.stopPropagation(); close(); } });
+  // A modal closes itself on Escape (and asks nothing: settings apply as you change them).
+  if (modal) panel.addEventListener("close", () => { if (isOpen) { isOpen = false; for (const el of hide) el.hidden = false; onToggle(false); } });
+  else panel.addEventListener("keydown", (e) => { if (e.key === "Escape") { e.stopPropagation(); close(); } });
 
   // Switching surroundings gives the new ones their own light and surroundings settings: when you
   // have changed any, ask first (Cancel keeps everything as it is).
@@ -362,7 +365,10 @@ export function createSettings({ editor, panel, docked = false, hide = [], onTog
 
   return {
     // Open, or close when it's open and in view; when it's open but its panel is folded, unfold it.
-    open() { if (isOpen && !panel.closest(".lg-dock-folded") && !panel.classList.contains("lg-dock-inactive")) return close(); if (isOpen) return show(true); fill(); show(true); panel.querySelector("input, button")?.focus(); },
+    open() {
+      if (modal) { if (isOpen) return close(); fill(); show(true); panel.querySelector("input, button")?.focus(); return; }
+      if (isOpen && !panel.closest(".lg-dock-folded") && !panel.classList.contains("lg-dock-inactive")) return close(); if (isOpen) return show(true); fill(); show(true); panel.querySelector("input, button")?.focus();
+    },
     close,
     /** Shown by the dock (its tab clicked): fill it and count as open, without toggling. */
     ensureOpen() { if (isOpen) return; fill(); show(true); },

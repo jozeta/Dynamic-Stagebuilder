@@ -64,7 +64,7 @@ export const HELP_TOPICS = Object.freeze([
       "Each surroundings has its own defaults, and Reset light to defaults goes back to them. Light settings are saved with the stage but are not undo steps."],
     tips: ["Lower Shadow strength for lighter shadows.", "The Props tab hides what you don't need in the props panel."] },
   { id: "briefing", title: "Briefing and printing", icon: "print", art: "page",
-    text: ["Briefing opens the Written Stage Briefing. Scoring, start signal, start position, gun condition and stop time have common choices; pick Custom text… to type your own. Procedure has common sentences to add.",
+    text: ["Written stage briefing… (in the right-hand panel, under the statistics) opens the Written Stage Briefing. Scoring, start signal, start position, gun condition and stop time have common choices; pick Custom text… to type your own. Procedure has common sentences to add.",
       "Targets, minimum rounds and maximum points are counted from the stage. Print makes an A4 brief: the briefing and a map with a legend on page 1, the 3D view on page 2. Choose Save as PDF in the print dialog."],
     tips: ["On an iPad: Share → Print, pinch out on the preview, then Share → Save to Files.", "Stage type is suggested from the round count; you can set it yourself."] },
   { id: "arrange", title: "Exact positions, mirror and align", icon: "mirror", art: "place",

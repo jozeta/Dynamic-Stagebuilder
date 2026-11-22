@@ -148,14 +148,12 @@ engine.onRender(() => {
 });
 engine.onRender(() => fadeFigures(engine.groups.stage, engine.camera));   // figures fade as the camera comes close
 
-// Selecting something new brings its settings into view: the inspector unfolds, and Settings (which
-// shares that panel) closes.
+// Selecting something new brings its settings into view: the inspector unfolds.
 let shownSelection = [];
 function revealInspector(selection) {
   const reveal = revealOnSelect(shownSelection, selection);
   shownSelection = [...selection];
   if (!reveal) return;
-  if (settings?.isOpen && dock.side("settings") === dock.side("inspector")) settings.close();
   dock.activate("inspector");                // its tab comes forward, unfolded
 }
 
@@ -341,15 +339,29 @@ picking = attachPicking({ engine, stageView: view, editor, cameraRig: rig, canva
 
 // --- Saved projects: autosave 600 ms after the last change, and when the page is hidden. ---
 const LAST = "dsb:last";
-const status = h("span", { class: "lg-chip save-status", role: "status", "aria-live": "polite", text: "…" });
+// The save alert (a Låda Glass alert under the toolbar): "Saved" fades in and out again after a few
+// seconds; a problem stays until closed or the next good save.
+const status = h("div", { class: "lg-alert lg-alert-ok save-alert", role: "status", "aria-live": "polite", hidden: true });
+document.body.append(status);
+let statusTimer = null;
 let store = null;
 let autosave = null;
 
 const remember = (id) => { try { localStorage.setItem(LAST, id); } catch { /* private mode */ } };
 const recall = () => { try { return localStorage.getItem(LAST); } catch { return null; } };
-function setStatus(text, tone = "") { status.textContent = text; status.className = `lg-chip save-status ${tone}`; }
+function hideStatus() { status.classList.remove("is-shown"); clearTimeout(statusTimer); statusTimer = setTimeout(() => { status.hidden = true; }, 300); }
+function setStatus(text, tone = "lg-ok") {
+  const ok = tone === "lg-ok";
+  status.className = `lg-alert ${tone.replace("lg-", "lg-alert-")} save-alert`;
+  status.replaceChildren(icon(ok ? "check" : "info"), h("span", { text }),
+    ...(ok ? [] : [h("button", { type: "button", class: "lg-btn lg-btn-ghost lg-btn-icon save-alert-close", "aria-label": "Close", onclick: hideStatus }, [icon("x")])]));
+  clearTimeout(statusTimer);
+  status.hidden = false;
+  requestAnimationFrame(() => status.classList.add("is-shown"));
+  if (ok) statusTimer = setTimeout(hideStatus, 2500);             // "Saved" goes away by itself
+}
 function onSaveStatus(kind, err) {
-  if (kind === "saving") setStatus("Saving…");
+  if (kind === "saving") return;                                  // only the outcome is worth showing
   else if (kind === "saved") setStatus(store.memory ? "Not saved: this browser blocks storage" : "Saved", store.memory ? "lg-warn" : "lg-ok");
   else { console.error(err); setStatus("Not saved: storage error", "lg-bad"); }
 }
@@ -368,7 +380,6 @@ async function openProject(id) {
   settings?.refresh();                       // an open Settings panel shows this stage's surroundings
   autosave.markSaved(editor.stage(), rec.exportedAt ?? null);
   remember(id);
-  setStatus("Saved", "lg-ok");
   const view = loadView(id);                // where you left the camera, else the overview
   if (view) rig.setView(view); else rig.preset("iso", editor.stage());        // the high oblique overview of the whole bay
   // Shooter's eye, if it was on in this project (and where you stood).
@@ -524,7 +535,7 @@ const layers = createLayers(document.getElementById("layers"), { editor, menu })
 createCameraPad(document.getElementById("camera-slot"), { rig });
 updaters.push(
   createToolbar(document.getElementById("toolbar"), {
-    editor, rig, status, onAbout: () => about.open(), onHelp: () => help.open(), onBriefing: () => briefing.open(), onPrint: () => printBrief(),
+    editor, rig, onAbout: () => about.open(), onHelp: () => help.open(), onBriefing: () => briefing.open(), onPrint: () => printBrief(),
     onSettings: () => settings.open(), onViewing: viewingFrom, walking: () => animator.playing(),
     onEyeState: (st) => { try { localStorage.setItem(`dsb:eye:${editor.stage().id}`, JSON.stringify(st)); } catch { /* private mode */ } },
   }),
@@ -565,12 +576,11 @@ playButton = (() => {
 // right or under the view (drag the grip, or click it), fold to a rail and resize; remembered per
 // browser. On a narrow screen (an iPad upright) the Inspector starts under the view.
 const dockEl = document.getElementById("dock");
-if (matchMedia("(max-width: 1099px)").matches) for (const id of ["inspector", "settings-panel"]) document.getElementById(id).setAttribute("data-lg-dock-side", "bottom");
+if (matchMedia("(max-width: 1099px)").matches) for (const id of ["inspector"]) document.getElementById(id).setAttribute("data-lg-dock-side", "bottom");
 dock = window.LadaGlass.dock.init(dockEl, { key: "dsb", onChange: () => { engine.resize?.(); syncDockTabs(); } });
 // A tab shown by the dock (clicked, or still shown after a reload) is filled in.
 function syncDockTabs() {
   if (!dock) return;                         // still being set up
-  if (dock.active("settings") && !dock.folded("settings") && settings && !settings.isOpen) settings.ensureOpen();
   // Projects needs the store, which opens a moment after start-up (that end of start-up calls this again).
   if (store && dock.active("projects") && !dock.folded("projects") && projects && !projects.isOpen) projects.ensureOpen();
 }
@@ -608,11 +618,8 @@ settings = createSettings({
   mine: mineApi,
   editor,
   panel: document.getElementById("settings-panel"),
-  docked: true,
-  onToggle: (open) => {
-    document.querySelector('[aria-label="Settings"].tool')?.setAttribute("aria-pressed", String(open));
-    dock?.activate(open ? "settings" : "inspector");        // its tab comes forward; Done goes back to the Inspector
-  },
+  // A modal window over the app (Done or Escape closes it).
+  onToggle: (open) => { document.querySelector('[aria-label="Settings"].tool')?.setAttribute("aria-pressed", String(open)); },
   getHidden: () => hiddenProps,
   onHidden: (next) => { hiddenProps = next; saveHidden(next); library.setHidden(next); },
   getSpeed: () => speed,
