@@ -4,7 +4,7 @@ A browser-based 3D stage builder for IPSC practical shooting. Lay out a stage at
 it from any angle, and print a Written Stage Briefing with a stage map for range officers and
 competitors.
 
-**Version:** 0.9.1 · **Try it:** [jozeta.github.io/Dynamic-Stagebuilder](https://jozeta.github.io/Dynamic-Stagebuilder/)
+**Version:** 0.10.0 · **Try it:** [jozeta.github.io/Dynamic-Stagebuilder](https://jozeta.github.io/Dynamic-Stagebuilder/)
 (runs in the browser; nothing to install, nothing leaves your device) · Started 2026-11-18 (see the
 [v1 design](docs/superpowers/specs/2026-11-18-stage-builder-v1-design.md)).
 
@@ -104,6 +104,21 @@ Computers (mouse and keyboard first) and iPads (touch; every action also has a b
 not supported: below 768 px wide the app asks you to use a larger screen. English only.
 
 ## What's new
+
+### 0.10.0 (2026-11-22)
+
+- **Matches reworked:** *New match* opens a window with the match name, a dropdown of your stages,
+  the example and the stage library, drag handles to order them and *Create match*. In the panel,
+  drag to reorder, remove a stage (it stays saved), and a breadcrumb shows where you are.
+- **Stages:** a new stage asks for a name and starts clean; *Close stage* / *Close match* save and
+  close, greying the view under *Create new stage*. Saved stages list with small icons (open,
+  duplicate, a red-glowing delete) and an ⓘ with details; library cards work the same way.
+- **Alerts** show centred at the top of the 3D view, including "saved and closed".
+- **Props:** walls merged (wall, port or doorway with port controls), tyres and pillars merged,
+  realistic target stands, better sandbags and dining chairs.
+- **Layout:** the view reaches the top; Settings is a modal; Measure and snapping are in the
+  right-click menu; picking in *On stage* moves the camera to the object, and turning orbits it;
+  deleting a target closes the number gap. See [CHANGELOG.md](CHANGELOG.md) for everything.
 
 ### 0.9.1 (2026-11-21)
 
