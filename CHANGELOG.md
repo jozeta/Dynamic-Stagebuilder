@@ -4,6 +4,10 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Stage library: each card shows just the name, with an *open as a new project* icon and an ⓘ on the
+  right; the category, rounds and description show in the ⓘ's box (hover, tap or focus). In your
+  stage list too, the ⓘ is the last icon.
+
 - Projects: the buttons on matches and stages are small icons on the right of each row (open,
   duplicate, delete or remove); the trash glows red under the pointer and still asks first. The ⓘ
   is smaller and sits with them.

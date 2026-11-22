@@ -12,11 +12,15 @@ function show(btn, details) {
   owner?.setAttribute("aria-expanded", "false");
   owner = btn;
   btn.setAttribute("aria-expanded", "true");
-  box.replaceChildren(...[
+  // A saved stage: { rows, matches }; a library stage: { meta, text } (category line and description).
+  box.replaceChildren(...(details.rows ? [
     h("dl", { class: "stage-info-rows" }, details.rows.flatMap(([k, v]) => [h("dt", { text: k }), h("dd", { text: v })])),
     h("p", { class: "stage-info-head", text: details.matches.length ? "In matches" : "Not in a match" }),
     details.matches.length ? h("ul", { class: "stage-info-matches" }, details.matches.map((m) => h("li", { text: m }))) : null,
-  ].filter(Boolean));
+  ] : [
+    h("p", { class: "stage-info-meta", text: details.meta }),
+    h("p", { class: "stage-info-text", text: details.text }),
+  ]).filter(Boolean));
   box.hidden = false;
   // Beside the button, inside the window.
   const r = btn.getBoundingClientRect(), b = box.getBoundingClientRect();
@@ -27,8 +31,11 @@ function show(btn, details) {
 addEventListener("keydown", (e) => { if (e.key === "Escape" && owner) hide(); });
 addEventListener("pointerdown", (e) => { if (owner && !owner.contains(e.target) && !box.contains(e.target)) hide(); }, true);
 
-/** The ⓘ button for a stage; `details` is model/match.js stageDetails(…). */
-export function stageInfoButton(name, details) {
+/** The ⓘ button for a stage; `details` is model/match.js stageDetails(…), or { meta, text } for a library stage (a function is called when shown). */
+export function stageInfoButton(name, detailsOrFn) {
+  const details = { get rows() { return resolved().rows; }, get matches() { return resolved().matches; }, get meta() { return resolved().meta; }, get text() { return resolved().text; } };
+  let cached = null;
+  const resolved = () => (cached ??= typeof detailsOrFn === "function" ? detailsOrFn() : detailsOrFn);
   const btn = h("button", { type: "button", class: "stage-info", "aria-label": `About ${name}`, "aria-describedby": "stage-info-box", "aria-expanded": "false", text: "i" });
   btn.addEventListener("mouseenter", () => show(btn, details));
   btn.addEventListener("mouseleave", () => { if (owner === btn) hide(); });

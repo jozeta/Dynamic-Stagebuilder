@@ -547,3 +547,7 @@ body { background: var(--lg-bg); overflow: hidden; }
 .projects-panel .match-stage .match-num { width: 22px; height: 22px; }
 .projects-panel .match-stage .row-icons { gap: 0; }
 .projects-panel .match-stage .proj-name { overflow-wrap: normal; word-break: normal; hyphens: auto; }
+/* Stage library cards: the name, with its ⓘ and open icon on the right. */
+.lib-stage.icon-row { grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px; padding: 6px 6px 6px 10px; }
+.stage-info-meta { margin: 0 0 6px; color: var(--lg-muted); }
+.stage-info-text { margin: 0; line-height: 1.45; }

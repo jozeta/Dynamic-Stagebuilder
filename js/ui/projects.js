@@ -67,13 +67,14 @@ export function createProjects({ panel, docked = false, hide = [], onToggle = ()
     const q = libSearch.value.trim().toLowerCase(), cat = libCat.value;
     const shown = STAGE_LIBRARY.filter((s) => (!cat || s.category === cat) && (!q || `${s.name} ${s.summary} ${s.discipline}`.toLowerCase().includes(q)));
     libList.replaceChildren(...(shown.length ? shown.map((spec) => {
-      const sum = summaryOf(spec);
       const catName = LIBRARY_CATEGORIES.find((c) => c.id === spec.category)?.name || spec.category;
-      return h("div", { class: "lib-stage", role: "listitem" }, [
+      // The name, and on the right an ⓘ (category, rounds and the description on hover) and the open icon.
+      return h("div", { class: "lib-stage icon-row", role: "listitem" }, [
         h("span", { class: "proj-name", text: spec.name }),
-        h("span", { class: "lg-muted proj-meta", text: `${catName} · ${spec.discipline === "both" ? "IPSC and USPSA" : spec.discipline} · ${sum.rounds}` }),
-        h("span", { class: "lib-stage-summary", text: spec.summary }),
-        h("button", { type: "button", class: "lg-btn", onclick: async () => { matches.leaveMatch(); await onOpenLibrary(spec); close(); } }, [icon("new"), "Open as new project"]),
+        h("div", { class: "row-icons" }, [
+          rowIcon("open", `Open ${spec.name} as a new project`, async () => { matches.leaveMatch(); await onOpenLibrary(spec); close(); }),
+          stageInfoButton(spec.name, () => ({ meta: `${catName} · ${spec.discipline === "both" ? "IPSC and USPSA" : spec.discipline} · ${summaryOf(spec).rounds}`, text: spec.summary })),
+        ]),
       ]);
     }) : [h("p", { class: "lg-muted", text: "No stages match. Try another word or category." })]));
   }
@@ -199,10 +200,10 @@ export function createProjects({ panel, docked = false, hide = [], onToggle = ()
       ]);
       const nm = r.name || "Untitled stage";
       const normal = () => row.replaceChildren(info, h("div", { class: "row-icons" }, [
-        infoB,
         r.id === id ? null : rowIcon("open", `Open ${nm}`, async () => { matches.leaveMatch(); await onOpen(r.id); close(); }),
         rowIcon("copy", `Duplicate ${nm}`, async () => { await onDuplicate(r.id); await fill(); }),
         rowIcon("trash", `Delete ${nm}`, () => confirm(), { danger: true }),
+        infoB,
       ]));
       const confirm = () => row.replaceChildren(h("span", { class: "proj-confirm", text: `Delete "${r.name || "Untitled stage"}"? This can't be undone.` }),
         h("div", { class: "lg-row proj-buttons" }, [
