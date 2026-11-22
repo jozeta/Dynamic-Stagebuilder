@@ -452,3 +452,15 @@ body { background: var(--lg-bg); overflow: hidden; }
 .lg-menu [role="menuitemcheckbox"]:is(:hover, :focus) { outline: none; background: color-mix(in srgb, var(--lg-accent) 16%, transparent); }
 .lg-menu [role="menuitemcheckbox"]:focus-visible { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--lg-accent) 55%, transparent); }
 .lg-menu [role="menuitemcheckbox"][aria-checked="true"] > .lg-kbd { color: var(--lg-ok-text, var(--lg-text)); }
+
+/* The toolbar rides at the top of a side column (the right one, else the left), so the 3D view runs
+   to the top of the window; that column's panels start below it. With no side column wide enough
+   (both folded, or every panel under the view) it falls back to a bar across the top. */
+.app.toolbar-rail { grid-template-rows: minmax(0, 1fr); grid-template-areas: "dock"; position: relative; }
+.app.toolbar-rail .toolbar { position: absolute; z-index: 5; top: max(var(--lg-space-s), env(safe-area-inset-top)); box-sizing: border-box;
+  left: var(--rail-left); width: var(--rail-width); justify-content: center; padding: 2px 4px; }
+.app.toolbar-rail .toolgroup.end { margin-left: 0; width: 100%; }
+.app.toolbar-rail .toolbar .tool { flex: 1 1 auto; min-width: 0; min-height: var(--lg-touch); padding: 4px 1px; font-size: 11px; }
+.app.toolbar-rail .toolbar .tool > span { overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.app-dock .lg-dock.has-toolbar > .lg-dock-frame:first-child { margin-top: calc(var(--rail-toolbar-h) + var(--lg-space-s)); }
+.app-dock .lg-dock.has-toolbar { min-height: 0; }

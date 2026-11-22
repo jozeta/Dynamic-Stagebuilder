@@ -587,7 +587,25 @@ playButton = (() => {
 // browser. On a narrow screen (an iPad upright) the Inspector starts under the view.
 const dockEl = document.getElementById("dock");
 if (matchMedia("(max-width: 1099px)").matches) for (const id of ["inspector"]) document.getElementById(id).setAttribute("data-lg-dock-side", "bottom");
-dock = window.LadaGlass.dock.init(dockEl, { key: "dsb", onChange: () => { engine.resize?.(); syncDockTabs(); } });
+dock = window.LadaGlass.dock.init(dockEl, { key: "dsb", onChange: () => { engine.resize?.(); syncDockTabs(); placeToolbar(); } });
+// The toolbar sits at the top of the right-hand column (else the left), so the 3D view reaches the
+// top of the window; with no side column wide enough, it is a bar across the top as before.
+function placeToolbar() {
+  const app = document.querySelector(".app"), bar = document.getElementById("toolbar");
+  const cols = ["right", "left"].map((side) => dockEl.querySelector(`.lg-dock[data-side="${side}"]`)).filter(Boolean);
+  for (const c of cols) c.classList.remove("has-toolbar");
+  const appBox = app.getBoundingClientRect();
+  const col = cols.find((c) => { const r = c.getBoundingClientRect(); return r.width >= 260 && r.height > 200 && c.querySelector(".lg-dock-frame"); });
+  app.classList.toggle("toolbar-rail", Boolean(col));
+  if (!col) return;
+  const frame = col.querySelector(".lg-dock-frame").getBoundingClientRect();
+  app.style.setProperty("--rail-left", `${frame.left - appBox.left}px`);
+  app.style.setProperty("--rail-width", `${frame.width}px`);
+  col.classList.add("has-toolbar");
+  app.style.setProperty("--rail-toolbar-h", `${bar.getBoundingClientRect().height}px`);
+}
+addEventListener("resize", () => requestAnimationFrame(placeToolbar));
+requestAnimationFrame(placeToolbar);
 // A tab shown by the dock (clicked, or still shown after a reload) is filled in.
 function syncDockTabs() {
   if (!dock) return;                         // still being set up

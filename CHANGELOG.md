@@ -4,6 +4,10 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- The 3D view runs to the top of the window: the toolbar (Undo, Redo, Print, Settings, Help,
+  About) sits at the top of the right-hand column, above its panels (the left-hand one when the right
+  is folded or empty), and only falls back to a bar across the top when both side columns are folded.
+
 - Deleting (or cutting) a target closes its number's gap: numbers below it stay, numbers above move
   down by one (by two for a two-target array). The same for steel, no-shoots and shooting positions,
   each in its own series; labels typed by hand stay. *Renumber* is gone from the toolbar.
