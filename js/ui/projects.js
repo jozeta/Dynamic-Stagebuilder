@@ -5,6 +5,8 @@ import { sortProjects, exportAge } from "../storage/projects.js";
 import { parseFile } from "../storage/files.js";
 import { STAGE_LIBRARY, LIBRARY_CATEGORIES, librarySummary } from "../model/stage-library.js";
 import { createMatches } from "./matches.js";
+import { stageInfoButton } from "./stage-info.js";
+import { stageDetails } from "../model/match.js";
 
 const when = (t) => new Date(t).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
 
@@ -182,16 +184,18 @@ export function createProjects({ panel, docked = false, hide = [], onToggle = ()
   async function fillStages() {
     const now = Date.now();
     const records = sortProjects(await store.list());
+    const all = await matches.list();
     const id = currentId();
     list.replaceChildren(...records.map((r) => {
       const hint = exportAge(r, now);
-      const row = h("div", { class: `proj-row${r.id === id ? " is-current" : ""}`, role: "listitem" });
+      const row = h("div", { class: `proj-row has-info${r.id === id ? " is-current" : ""}`, role: "listitem" });
+      const infoB = stageInfoButton(r.name || "Untitled stage", stageDetails(r.stage, all));
       const info = h("div", { class: "proj-info" }, [
         h("span", { class: "proj-name", text: r.name || "Untitled stage" }),
         h("span", { class: "lg-muted proj-meta", text: `${r.id === id ? "Open now · " : ""}Changed ${when(r.modified)}` }),
         hint ? h("span", { class: "proj-hint", text: hint }) : null,
       ]);
-      const normal = () => row.replaceChildren(info, h("div", { class: "lg-row proj-buttons" }, [
+      const normal = () => row.replaceChildren(infoB, info, h("div", { class: "lg-row proj-buttons" }, [
         r.id === id ? null : h("button", { type: "button", class: "lg-btn lg-btn-primary", onclick: async () => { matches.leaveMatch(); await onOpen(r.id); close(); }, text: "Open" }),
         h("button", { type: "button", class: "lg-btn", onclick: async () => { await onDuplicate(r.id); await fill(); }, text: "Duplicate" }),
         h("button", { type: "button", class: "lg-btn lg-btn-danger", onclick: () => confirm(), text: "Delete" }),

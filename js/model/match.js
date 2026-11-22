@@ -101,3 +101,13 @@ export function draftMoveTo(list, from, to) {
   out.splice(t, 0, item);
   return out;
 }
+
+/** What a stage's ⓘ in the Projects panel shows: { rows: [label, value][], matches: ["Name (stage n)"] }. */
+export function stageDetails(stage, matches) {
+  const st = stageStats(stage);
+  const rows = [["Paper targets", String(st.paper)], ["Steel targets", String(st.steel)], ["No-shoots", String(st.noShoots)],
+    ["Minimum rounds", String(st.minRounds)], ["Maximum points", String(st.maxPoints)], ["Stage type", st.suggestedType || "–"],
+    ["Bay", `${stage.bay.width} × ${stage.bay.depth} m`], ["Props", String(stage.objects.length)]];
+  const inMatches = matches.filter((m) => m.stageIds.includes(stage.id)).map((m) => `${m.name} (stage ${m.stageIds.indexOf(stage.id) + 1})`);
+  return { rows, matches: inMatches };
+}

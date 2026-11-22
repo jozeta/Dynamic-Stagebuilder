@@ -4,6 +4,10 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Projects: every saved stage has a small ⓘ at the top right of its row. Hovering (or a tap, or
+  keyboard focus) shows its details: paper and steel targets, no-shoots, minimum rounds, maximum
+  points, stage type, bay size, props, and the matches it is in with its stage number.
+
 - The Projects panel's corner button says what it closes: *Close stage* (saves it; back to the start
   of Projects, or to its match's page when you came through the match) or *Close match* (saves; back
   to the start); *Done* when nothing is open. Closing leaves the view empty: greyed out under one

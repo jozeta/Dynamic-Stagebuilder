@@ -81,3 +81,18 @@ test("dragging a stage in the match window: from one place to any other", async 
   assert.deepEqual(draftMoveTo(d, 2, 2), d, "dropped where it was");
   assert.deepEqual(draftMoveTo(d, 1, 9).map((x) => x.key), ["a", "c", "d", "b"], "past the end: last");
 });
+
+test("a stage's details for its ⓘ: targets, rounds, points, type, bay, props, and its matches", async () => {
+  const { stageDetails, createMatch, addStages } = await import("../js/model/match.js");
+  const { createStage, addObject } = await import("../js/model/stage.js");
+  let s = createStage({ name: "Bravo" });
+  s = addObject(s, "paper-ipsc", [0, 8]).stage;
+  s = addObject(s, "paper-ipsc", [1, 8], 0, { presentation: "noshoot" }).stage;
+  s = addObject(s, "popper", [2, 9]).stage;
+  const a = addStages(createMatch({ name: "Club match" }), ["x", s.id]), b = addStages(createMatch({ name: "Open" }), [s.id]);
+  const d = stageDetails(s, [a, b, createMatch({ name: "Other" })]);
+  assert.deepEqual(d.rows, [["Paper targets", "1"], ["Steel targets", "1"], ["No-shoots", "1"], ["Minimum rounds", "3"], ["Maximum points", "15"],
+    ["Stage type", "Short"], ["Bay", "20 × 30 m"], ["Props", "3"]]);
+  assert.deepEqual(d.matches, ["Club match (stage 2)", "Open (stage 1)"]);
+  assert.deepEqual(stageDetails(createStage(), []).matches, []);
+});
