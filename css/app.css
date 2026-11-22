@@ -508,13 +508,11 @@ body { background: var(--lg-bg); overflow: hidden; }
   -webkit-backdrop-filter: grayscale(1) blur(2px); backdrop-filter: grayscale(1) blur(2px); }
 .blank-cover-btn { font-size: 1.05rem; padding: 14px 22px; min-height: 52px; box-shadow: 0 8px 28px rgb(0 0 0 / 0.3); }
 
-/* A stage's ⓘ in the Projects list (top right of its row) and the details box it shows. */
-.proj-row.has-info { position: relative; }
-.stage-info { position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; min-width: 24px; padding: 0; border-radius: 50%;
-  border: 1.5px solid var(--lg-muted); background: transparent; color: var(--lg-muted); font: 700 13px/1 Georgia, serif; font-style: italic; cursor: help; }
-.stage-info::before { content: ""; position: absolute; inset: -10px; }      /* a 44 px touch target round the small circle */
+/* A stage's ⓘ (in its row's icons) and the details box it shows. */
+.stage-info { position: relative; width: 18px; height: 18px; min-width: 18px; padding: 0; margin: 0 4px; border-radius: 50%; border: 1.25px solid var(--lg-muted);
+  background: transparent; color: var(--lg-muted); font: 700 11px/1 Georgia, serif; font-style: italic; cursor: help; }
+.stage-info::before { content: ""; position: absolute; inset: -9px; }       /* a larger target round the small circle */
 .stage-info:hover, .stage-info:focus-visible, .stage-info[aria-expanded="true"] { color: var(--lg-accent); border-color: var(--lg-accent); outline: none; }
-.proj-row.has-info .proj-info { padding-right: 28px; }
 .stage-info-box { position: fixed; z-index: 1002; width: 240px; padding: var(--lg-space-s) var(--lg-space-m); border-radius: var(--lg-radius-control);
   background: var(--lg-surface); border: 1px solid var(--lg-border); box-shadow: 0 10px 30px rgb(0 0 0 / 0.25); font-size: var(--lg-fs-small); color: var(--lg-text);
   -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
@@ -523,3 +521,29 @@ body { background: var(--lg-bg); overflow: hidden; }
 .stage-info-rows dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
 .stage-info-head { margin: var(--lg-space-s) 0 2px; font-weight: 650; }
 .stage-info-matches { margin: 0; padding-left: 1.1em; }
+
+/* Rows with small icons on the right (open, duplicate, delete): name left, icons right, one line. */
+.projects-panel .proj-row.icon-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 4px var(--lg-space-s); }
+.projects-panel .match-stage.icon-row { grid-template-columns: 26px minmax(0, 1fr) auto; }
+.projects-panel .match-stage.icon-row.drag-row { grid-template-columns: 32px 26px minmax(0, 1fr) auto; }
+.projects-panel .proj-row.icon-row > .proj-confirm { grid-column: 1 / -1; }
+.projects-panel .proj-row.icon-row > .proj-buttons { grid-column: 1 / -1; }
+.row-icons { display: flex; align-items: center; gap: 2px; justify-self: end; }
+.row-icon { display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 0; border-radius: var(--lg-radius-control);
+  background: transparent; color: var(--lg-muted); cursor: pointer; transition: color 0.15s, background 0.15s, box-shadow 0.15s; }
+.row-icon .lg-icon { width: 18px; height: 18px; }
+.row-icon:hover, .row-icon:focus-visible { color: var(--lg-text); background: var(--lg-surface); outline: none; }
+.row-icon:focus-visible { box-shadow: 0 0 0 2px var(--lg-accent); }
+/* The trash glows red under the pointer. */
+.row-icon.is-danger:hover, .row-icon.is-danger:focus-visible { color: #ff4d4f; background: color-mix(in srgb, #ff4d4f 14%, transparent);
+  box-shadow: 0 0 10px 1px color-mix(in srgb, #ff4d4f 55%, transparent); }
+.row-icon.is-danger:hover .lg-icon { filter: drop-shadow(0 0 3px #ff4d4f); }
+@media (pointer: coarse) { .row-icon { width: var(--lg-touch); height: var(--lg-touch); } }
+@media (prefers-reduced-motion: reduce) { .row-icon { transition: none; } }
+/* A match's stage rows are narrow: a slimmer grip and number, tighter gaps, so the name has room. */
+.projects-panel .match-stage.icon-row { grid-template-columns: 22px minmax(0, 1fr) auto; column-gap: 6px; }
+.projects-panel .match-stage.icon-row.drag-row { grid-template-columns: 20px 22px minmax(0, 1fr) auto; }
+.projects-panel .match-stage .drag-grip { width: 20px; }
+.projects-panel .match-stage .match-num { width: 22px; height: 22px; }
+.projects-panel .match-stage .row-icons { gap: 0; }
+.projects-panel .match-stage .proj-name { overflow-wrap: normal; word-break: normal; hyphens: auto; }

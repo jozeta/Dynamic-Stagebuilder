@@ -36,6 +36,7 @@ const PATHS = {
   search: ["M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14z", "M20 20l-4-4"],
   check: ["M5 12l5 5 9-11"],
   plus: ["M12 5v14M5 12h14"],
+  open: ["M14 4h6v6", "M20 4l-9 9", "M18 14v5H5V6h5"],
   grip: ["M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01"],
   edit: ["M4 20h4l10-10-4-4L4 16z", "M13.5 6.5l4 4"],
   doc: ["M6 3h9l4 4v14H6z", "M9 12h7M9 16h7M9 8h3"],
@@ -90,5 +91,9 @@ export function icon(name) {
   }
   return svg;
 }
+
+/** A small icon button for a list row (open, duplicate, delete…), right-aligned by its row. */
+export const rowIcon = (name, label, onclick, { danger = false } = {}) =>
+  h("button", { type: "button", class: `row-icon${danger ? " is-danger" : ""}`, "aria-label": label, title: label, onclick }, [icon(name)]);
 
 export const isTyping = (el) => !!el && (el.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(el.tagName));

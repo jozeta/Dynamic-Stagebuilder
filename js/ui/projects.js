@@ -1,6 +1,6 @@
 // The Projects panel (in the left-hand panel, in place of the props): every stage saved in this browser, with open, duplicate, delete, new,
 // import and export. Names and file contents are untrusted and only ever shown with textContent.
-import { h, icon } from "./dom.js";
+import { h, icon, rowIcon } from "./dom.js";
 import { sortProjects, exportAge } from "../storage/projects.js";
 import { parseFile } from "../storage/files.js";
 import { STAGE_LIBRARY, LIBRARY_CATEGORIES, librarySummary } from "../model/stage-library.js";
@@ -190,17 +190,19 @@ export function createProjects({ panel, docked = false, hide = [], onToggle = ()
     const id = currentId();
     list.replaceChildren(...records.map((r) => {
       const hint = exportAge(r, now);
-      const row = h("div", { class: `proj-row has-info${r.id === id ? " is-current" : ""}`, role: "listitem" });
+      const row = h("div", { class: `proj-row icon-row${r.id === id ? " is-current" : ""}`, role: "listitem" });
       const infoB = stageInfoButton(r.name || "Untitled stage", stageDetails(r.stage, all));
       const info = h("div", { class: "proj-info" }, [
         h("span", { class: "proj-name", text: r.name || "Untitled stage" }),
         h("span", { class: "lg-muted proj-meta", text: `${r.id === id ? "Open now · " : ""}Changed ${when(r.modified)}` }),
         hint ? h("span", { class: "proj-hint", text: hint }) : null,
       ]);
-      const normal = () => row.replaceChildren(infoB, info, h("div", { class: "lg-row proj-buttons" }, [
-        r.id === id ? null : h("button", { type: "button", class: "lg-btn lg-btn-primary", onclick: async () => { matches.leaveMatch(); await onOpen(r.id); close(); }, text: "Open" }),
-        h("button", { type: "button", class: "lg-btn", onclick: async () => { await onDuplicate(r.id); await fill(); }, text: "Duplicate" }),
-        h("button", { type: "button", class: "lg-btn lg-btn-danger", onclick: () => confirm(), text: "Delete" }),
+      const nm = r.name || "Untitled stage";
+      const normal = () => row.replaceChildren(info, h("div", { class: "row-icons" }, [
+        infoB,
+        r.id === id ? null : rowIcon("open", `Open ${nm}`, async () => { matches.leaveMatch(); await onOpen(r.id); close(); }),
+        rowIcon("copy", `Duplicate ${nm}`, async () => { await onDuplicate(r.id); await fill(); }),
+        rowIcon("trash", `Delete ${nm}`, () => confirm(), { danger: true }),
       ]));
       const confirm = () => row.replaceChildren(h("span", { class: "proj-confirm", text: `Delete "${r.name || "Untitled stage"}"? This can't be undone.` }),
         h("div", { class: "lg-row proj-buttons" }, [

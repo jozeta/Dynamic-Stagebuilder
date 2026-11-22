@@ -4,7 +4,7 @@
 // shows the match: open a stage, make a new one in it, print or export it, or close it.
 // The stages stay ordinary projects; each one in the match gets its name and number in the briefing.
 // Names come from storage and are only ever shown with textContent.
-import { h, icon } from "./dom.js";
+import { h, icon, rowIcon } from "./dom.js";
 import { createMatch, addStages, renameMatch, briefingFor, matchSummary, cleanMatch, inOtherMatches, takeFromOthers, draftMoveTo, removeStage } from "../model/match.js";
 import { openMatchEditor } from "./match-editor.js";
 import { dragGrip } from "./drag-sort.js";
@@ -69,15 +69,15 @@ export function createMatches({ store, currentId, onOpen, onNewStage, onCreateFr
     const stages = records.map((r) => r.stage);
     const rows = matches.map((m) => {
       const sum = matchSummary(m, stages);
-      const row = h("div", { class: "proj-row match-row", role: "listitem" });
+      const row = h("div", { class: "proj-row match-row icon-row", role: "listitem" });
       const normal = () => row.replaceChildren(
         h("div", { class: "proj-info" }, [
           h("span", { class: "proj-name", text: m.name }),
           h("span", { class: "lg-muted proj-meta", text: `${sum.stages} stage${sum.stages === 1 ? "" : "s"} · ${sum.minRounds} rounds · ${sum.maxPoints} points` }),
         ]),
-        h("div", { class: "lg-row proj-buttons" }, [
-          btn("Open", async () => { openId = m.id; await fill(); }, "lg-btn lg-btn-primary"),
-          btn("Delete", () => confirm(), "lg-btn lg-btn-danger"),
+        h("div", { class: "row-icons" }, [
+          rowIcon("open", `Open the match ${m.name}`, async () => { openId = m.id; await fill(); }),
+          rowIcon("trash", `Delete the match ${m.name}`, () => confirm(), { danger: true }),
         ]));
       const confirm = () => row.replaceChildren(h("span", { class: "proj-confirm", text: `Delete the match "${m.name}"? Its stages stay as projects.` }),
         h("div", { class: "lg-row proj-buttons" }, [
@@ -111,7 +111,7 @@ export function createMatches({ store, currentId, onOpen, onNewStage, onCreateFr
     const stageRows = m.stageIds.map((id, i) => {
       const r = byId.get(id), name = r.name || "Untitled stage";
       const st = matchSummary({ stageIds: [id] }, [r.stage]);
-      const row = h("div", { class: `proj-row match-stage${m.stageIds.length > 1 ? " drag-row" : ""}${id === current ? " is-current" : ""}`, role: "listitem" });
+      const row = h("div", { class: `proj-row match-stage icon-row${m.stageIds.length > 1 ? " drag-row" : ""}${id === current ? " is-current" : ""}`, role: "listitem" });
       const normal = () => row.replaceChildren(...[
         m.stageIds.length > 1 ? dragGrip({ container: listEl, index: i, label: name, onDrop: drop }) : null,
         h("span", { class: "match-num", text: String(i + 1), "aria-label": `Stage ${i + 1}` }),
@@ -119,10 +119,10 @@ export function createMatches({ store, currentId, onOpen, onNewStage, onCreateFr
           h("span", { class: "proj-name", text: name }),
           h("span", { class: "lg-muted proj-meta", text: `${id === current ? "Open now · " : ""}${st.minRounds} rounds · ${st.maxPoints} points` }),
         ]),
-        h("div", { class: "lg-row proj-buttons" }, [
-          id === current ? null : btn("Open", () => { contextId = m.id; return onOpen(id); }, "lg-btn lg-btn-primary"),
-          btn("", () => confirm(), "lg-btn lg-btn-icon", "x", { "aria-label": `Remove ${name} from the match`, title: "Remove from the match" }),
-        ].filter(Boolean)),
+        h("div", { class: "row-icons" }, [
+          id === current ? null : rowIcon("open", `Open ${name}`, () => { contextId = m.id; return onOpen(id); }),
+          rowIcon("trash", `Remove ${name} from the match`, () => confirm(), { danger: true }),
+        ]),
       ].filter(Boolean));
       // Taking a stage out asks first: it leaves the match, not your saved stages.
       const confirm = () => row.replaceChildren(

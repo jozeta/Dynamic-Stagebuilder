@@ -4,6 +4,10 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Projects: the buttons on matches and stages are small icons on the right of each row (open,
+  duplicate, delete or remove); the trash glows red under the pointer and still asks first. The ⓘ
+  is smaller and sits with them.
+
 - Fix: the Projects panel could stay empty (no matches, no stages, no stage library) when a saved
   stage still held a prop under an older name (from before walls, tyres and pillars were merged):
   counting its targets stopped the panel filling. Saved stages are now upgraded as they are read,
