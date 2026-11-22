@@ -1,6 +1,7 @@
 // The right-click menu (long-press on an iPad), on the 3D view and on the props-on-stage list:
 // cut, copy, paste (here), duplicate, delete, lock, hide, group, rotate, select all of a kind,
-// frame the selection, and Shooter's eye from a shooting position. A Låda Glass .lg-menu:
+// frame the selection, Shooter's eye from a shooting position, and always Measure and the two kinds of
+// snapping (grid, wall ends), which used to be toolbar buttons. A Låda Glass .lg-menu:
 // arrow keys move, Enter picks, Escape or a click outside closes.
 import { h, icon } from "./dom.js";
 import { getProp } from "../model/props.js";
@@ -26,6 +27,10 @@ export function createContextMenu({ editor, rig, onShooterEye = () => {} }) {
     onclick: () => { close(); run(); },
   }, [icon(iconName), h("span", { text: label }), kbd ? h("kbd", { class: "lg-kbd", text: kbd }) : null].filter(Boolean));
   const sep = () => h("div", { class: "lg-menu-sep", role: "separator" });
+  // An on/off item: its state as a checkbox for screen readers, On/Off shown at its end.
+  const toggle = (label, iconName, on, run) => h("button", {
+    type: "button", class: "lg-menu-item", role: "menuitemcheckbox", "aria-checked": String(on), tabindex: "-1", onclick: () => { close(); run(); },
+  }, [icon(iconName), h("span", { text: label }), h("kbd", { class: "lg-kbd", text: on ? "On" : "Off" })]);
 
   /** The menu's items for the current selection; `ground` is where it was opened on the floor. */
   function items(ground) {
@@ -80,6 +85,14 @@ export function createContextMenu({ editor, rig, onShooterEye = () => {} }) {
         item("Mirror the stage", "mirror", () => d({ type: "mirror", ids: [] }), { disabled: !s.objects.length && !s.lines.length }),
       );
     }
+    // Measuring and snapping, whatever is selected.
+    const measuring = Boolean(editor.state.mode?.measure);
+    out.push(
+      sep(),
+      item(measuring ? "Stop measuring" : "Measure distances", "ruler", () => d({ type: measuring ? "cancel" : "beginMeasure" }), { kbd: "M" }),
+      toggle("Snap to the grid", "grid", s.settings.grid > 0, () => d({ type: "toggleGrid" })),
+      toggle("Snap wall ends to walls", "magnet", s.settings.objectSnap !== false, () => d({ type: "setSetting", key: "objectSnap", value: s.settings.objectSnap === false })),
+    );
     return out;
   }
 
@@ -91,11 +104,11 @@ export function createContextMenu({ editor, rig, onShooterEye = () => {} }) {
     const r = menu.getBoundingClientRect();
     menu.style.setProperty("left", `${Math.max(8, Math.min(x, innerWidth - r.width - 8))}px`);
     menu.style.setProperty("top", `${Math.max(8, Math.min(y, innerHeight - r.height - 8))}px`);
-    menu.querySelector('[role="menuitem"]:not(:disabled)')?.focus();
+    menu.querySelector(':is([role="menuitem"], [role="menuitemcheckbox"]):not(:disabled)')?.focus();
   }
 
   menu.addEventListener("keydown", (e) => {
-    const all = [...menu.querySelectorAll('[role="menuitem"]:not(:disabled)')];
+    const all = [...menu.querySelectorAll(':is([role="menuitem"], [role="menuitemcheckbox"]):not(:disabled)')];
     const i = all.indexOf(document.activeElement);
     if (e.key === "ArrowDown") { e.preventDefault(); all[(i + 1) % all.length]?.focus(); }
     else if (e.key === "ArrowUp") { e.preventDefault(); all[(i - 1 + all.length) % all.length]?.focus(); }

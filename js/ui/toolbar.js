@@ -1,4 +1,5 @@
-// The top toolbar: undo, redo, renumber, snapping and measuring, then Print, Settings, Help and About.
+// The top toolbar: undo, redo, renumber, then Print, Settings, Help and About. (Measuring and the
+// two kinds of snapping are in the right-click menu.)
 // (Duplicate and Delete are in the inspector and the right-click menu; the briefing in the right panel.)
 import { h, icon } from "./dom.js";
 import { canUndo, canRedo } from "../model/history.js";
@@ -13,11 +14,6 @@ export function createToolbar(root, { editor, rig, onViewing = () => {}, walking
   const undoB = btn("undo", "Undo", () => editor.dispatch({ type: "undo" }));
   const redoB = btn("redo", "Redo", () => editor.dispatch({ type: "redo" }));
   const numB = btn("hash", "Renumber", () => editor.dispatch({ type: "renumber" }));
-  const gridB = btn("grid", "Grid", () => editor.dispatch({ type: "toggleGrid" }), { "aria-pressed": "true", title: "Snap to the grid" });
-  const magB = btn("magnet", "Objects", () => editor.dispatch({ type: "setSetting", key: "objectSnap", value: editor.stage().settings.objectSnap === false }),
-    { "aria-pressed": "true", title: "Snap wall ends to other walls" });
-  const measureB = btn("ruler", "Measure (M)", () => editor.dispatch({ type: editor.state.mode?.measure ? "cancel" : "beginMeasure" }),
-    { "aria-pressed": "false", title: "Measure distances on the ground (M)" });
   // The briefing opens from the right-hand panel, under the stage's statistics.
   const wsbB = h("button", { type: "button", class: "lg-btn brief-btn", onclick: onBriefing }, [icon("doc"), "Written stage briefing…"]);
   document.getElementById("brief-slot")?.append(wsbB);
@@ -35,17 +31,12 @@ export function createToolbar(root, { editor, rig, onViewing = () => {}, walking
   root.append(
     h("div", { class: "brand" }, [h("span", { class: "brand-name", text: "Dynamic-Stagebuilder" })]),
     h("div", { class: "toolgroup", role: "group", "aria-label": "Edit" }, [undoB, redoB, numB]),
-    h("div", { class: "toolgroup", role: "group", "aria-label": "Snapping and measuring" }, [gridB, magB, measureB]),
     h("div", { class: "toolgroup end" }, [printB, btn("sliders", "Settings", onSettings, { "aria-pressed": "false" }), btn("help", "Help", onHelp), btn("info", "About", onAbout)]),
   );
 
   return function update(state) {
     eyeSteps.update();
-    measureB.setAttribute("aria-pressed", String(Boolean(state.mode?.measure)));
     undoB.disabled = !canUndo(state.history);
     redoB.disabled = !canRedo(state.history);
-    const st = state.history.present.settings;
-    gridB.setAttribute("aria-pressed", String(st.grid > 0));
-    magB.setAttribute("aria-pressed", String(st.objectSnap !== false));
   };
 }

@@ -4,6 +4,10 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- *Measure*, *Grid* and *Objects* moved from the toolbar to the right-click menu (a long press on an
+  iPad): *Measure distances* (M), *Snap to the grid* and *Snap wall ends to walls*, each showing
+  whether it is on.
+
 - Every window (Settings, Briefing, About, Help, the drawing and plan windows, the questions) hangs
   from a fixed place near the top and grows downwards only; they were centred, so a window whose
   content changed grew up and down at once.

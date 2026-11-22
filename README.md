@@ -209,7 +209,7 @@ Stage settings are in the inspector when nothing is selected. They are saved wit
 | Bay width | Width of the shooting bay across the range, 1–200 m | 20 m |
 | Bay depth | Depth of the bay down range, 1–200 m | 30 m |
 | Bay shape | Rectangle; *Tapered* (narrow end back or front, its width); *Corner cut away* (back left or right, cut width and depth); *L* / *Reverse L* (width of the back part, depth of the full-width front); *T* (width and depth of the front stem); *U* (arm width, depth of the full-width front); *Reverse U* (arm width, depth of the front arms); *Dogleg (Z)* / *Reverse dogleg (S)* (width of each part, where it bends). Width and depth stay the outer rectangle. *Draw a new shape…* and *My shapes*: a drawn grid of raised ground and floor (see How to) | Rectangle |
-| Grid snap | Positions snap to this grid: off, 0.1, 0.25, 0.5 or 1 m (toolbar *Grid* turns it on/off) | 0.25 m |
+| Grid snap | Positions snap to this grid: off, 0.1, 0.25, 0.5 or 1 m (*Snap to the grid* in the right-click menu turns it on/off) | 0.25 m |
 | Object snap | Toolbar *Objects*: a wall's end jumps onto another wall's end within 35 cm | On |
 | Angle snap | Rotations snap to this step: off, 5°, 15°, 45° or 90° | 15° |
 | Surroundings | *Settings* (a window opened from the toolbar): Outdoor (dirt range), Technical (grey floor, grid), Blueprint (drafting sheet) or Industrial (an indoor factory hall, lit from overhead); never moves the stage | Outdoor |
@@ -267,8 +267,9 @@ it snaps to the grid and stays inside the bay. Rotate the selected prop with the
 ↺/↻ buttons in the inspector, or Q and E. Shift-click selects several props.
 
 **Join walls.** Drag or drop a wall so its end comes within about 35 cm of another wall's end and
-it jumps into place, end to end (in a straight line or at a corner). Turn *Objects* off in the
-toolbar to place walls freely, and *Grid* off to stop grid snapping. For fine adjustments, hold
+it jumps into place, end to end (in a straight line or at a corner). Turn *Snap wall ends to
+walls* off in the right-click menu (a long press on an iPad) to place walls freely, and *Snap to the
+grid* off to stop grid snapping. For fine adjustments, hold
 **Shift** while you drag: the prop moves at a fifth of the speed and doesn't snap.
 
 **Set up targets and arrays.** Select an IPSC or mini target and pick a *Presentation*: target,
@@ -347,7 +348,7 @@ or the list (long-press on an iPad) for cut, copy, paste, duplicate, delete, loc
 rotate 90°, select all of that kind, frame the selection and Shooter's eye from a shooting
 position; right-click the ground to paste there.
 
-**Measure distances.** Press *Measure* in the toolbar (or M), then tap two points on the ground: a
+**Measure distances.** Choose *Measure distances* in the right-click menu (a long press on an iPad), or press M, then tap two points on the ground: a
 dashed line shows the distance in metres. Near a prop or the start, a point snaps to its centre, so a
 shooting position to a target is exact; hold Shift to place it exactly where you tap. Take as many as
 you like; *Clear* removes them and *Done* or Escape ends measuring. Measurements aren't saved.
