@@ -19,14 +19,16 @@ function arrow(dir) {
 const RATE = { pan: 60, tilt: 40, rise: 1.5, dolly: 3 };
 const STEP = { pan: 5, tilt: 4, rise: 0.25, dolly: 0.5 };
 
-export function createCameraPad(slot, { rig }) {
+export function createCameraPad(slot, { rig, around = () => null }) {
+  // Pan and tilt circle round the selection when there is one (around() gives its centre).
+  const go = (m, amount) => rig.move(m, amount, m === "pan" || m === "tilt" ? around() : null);
   const scale = (m) => (m === "rise" || m === "dolly" ? Math.max(1, rig.getView().position[1] / 4) : 1);
   let held = null;
   const tick = (now) => {
     if (!held) return;
     const dt = Math.min(0.1, (now - held.last) / 1000);
     held.last = now;
-    rig.move(held.move, held.sign * RATE[held.move] * scale(held.move) * dt);
+    go(held.move, held.sign * RATE[held.move] * scale(held.move) * dt);
     held.frame = requestAnimationFrame(tick);
   };
   const stop = () => { if (held) { cancelAnimationFrame(held.frame); held.btn.classList.remove("is-held"); held = null; } };
@@ -39,12 +41,12 @@ export function createCameraPad(slot, { rig }) {
       stop();
       b.setPointerCapture?.(e.pointerId);
       b.classList.add("is-held");
-      rig.move(move, sign * STEP[move] * scale(move) * 0.4);          // a small first step, then a steady glide
+      go(move, sign * STEP[move] * scale(move) * 0.4);          // a small first step, then a steady glide
       held = { move, sign, btn: b, last: performance.now() };
       held.frame = requestAnimationFrame(tick);
     });
     for (const ev of ["pointerup", "pointercancel", "lostpointercapture"]) b.addEventListener(ev, stop);
-    b.addEventListener("click", (e) => { if (e.detail === 0) rig.move(move, sign * STEP[move] * scale(move)); });   // keyboard
+    b.addEventListener("click", (e) => { if (e.detail === 0) go(move, sign * STEP[move] * scale(move)); });   // keyboard
     return b;
   };
 

@@ -48,3 +48,39 @@ test("tilt can be held below level (the orbit view never looks up)", () => {
   const pitch = Math.asin((t.target[1] - 2) / 10) * 180 / Math.PI;
   assert.ok(Math.abs(pitch + 1.5) < 1e-6, `held at −1.5°, was ${pitch}`);
 });
+
+// --- Orbiting round the selection ---
+const { orbitView, selectionCentre } = await import("../js/model/camera-move.js");
+
+test("pan with a selection circles the camera round it, looking at it, at the same distance and height", () => {
+  const v = { position: [0, 3, 0], target: [0, 1, 6] }, c = [0, 1, 6];
+  const o = moveOrbit(v, c, "pan", 90);
+  close(o.target, c, "looks at the object");
+  assert.ok(Math.abs(len(o.position, c) - len(v.position, c)) < 1e-9, "same distance");
+  assert.ok(Math.abs(o.position[1] - 3) < 1e-9, "same height");
+  close(o.position, [-6, 3, 6], "a quarter turn round it");
+});
+
+test("tilt with a selection raises or lowers the camera round it, never under it or straight over it", () => {
+  const v = { position: [0, 1, 0], target: [0, 1, 6] }, c = [0, 1, 6];
+  const down = moveOrbit(v, c, "tilt", -30);                         // tilt down: the camera rises and looks down
+  assert.ok(down.position[1] > 1 && Math.abs(len(down.position, c) - 6) < 1e-9);
+  const top = moveOrbit(v, c, "tilt", -200), under = moveOrbit(v, c, "tilt", 200);
+  const el = (p) => Math.asin((p[1] - c[1]) / len(p, c)) * 180 / Math.PI;
+  assert.ok(el(top.position) <= 85.01 && el(under.position) >= 2.99, `between 3° and 85° (${el(top.position)}, ${el(under.position)})`);
+});
+
+test("rise and dolly move the whole view as before, the selection or not", () => {
+  const v = { position: [0, 3, 0], target: [0, 1, 6] };
+  close(moveOrbit(v, [0, 1, 6], "rise", 1).position, [0, 4, 0], "rise");
+});
+
+test("the selection's centre: the middle of the selected props, half way up them", () => {
+  const stage = { objects: [{ id: "a", type: "barrel", position: [0, 10], params: { color: "black", stack: 1 } }, { id: "b", type: "barrel", position: [2, 12], params: { color: "black", stack: 1 } }], lines: [] };
+  const c = selectionCentre(stage, ["a", "b"]);
+  close([c[0], c[2]], [1, 11], "between them");
+  assert.ok(c[1] > 0.3 && c[1] < 0.6, `half way up a drum (${c[1]})`);
+  assert.equal(selectionCentre(stage, []), null);
+  assert.equal(selectionCentre(stage, ["gone"]), null);
+});
+const moveOrbit = (v, c, m, a) => orbitView(v, c, m, a);

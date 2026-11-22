@@ -10,6 +10,7 @@ import { getProp } from "./model/props.js";
 import { demoStage } from "./demo.js";
 import { createToolbar } from "./ui/toolbar.js";
 import { createCameraPad } from "./ui/camera-pad.js";
+import { selectionCentre } from "./model/camera-move.js";
 import { createLibrary } from "./ui/library.js";
 import { createBayDrawer } from "./ui/bay-draw.js";
 import { onEarthLoaded } from "./render/environments/ground.js";
@@ -532,7 +533,16 @@ const library = createLibrary(document.getElementById("library-body"), { editor,
 const menu = createContextMenu({ editor, rig, onShooterEye: () => document.getElementById("toolbar")?.eyeSteps?.reset() });
 menu.attach(canvas, { target: (e) => picking.objectAt(e, { locked: true }), ground: (e) => picking.groundAt(e) });
 const layers = createLayers(document.getElementById("layers"), { editor, menu });
-createCameraPad(document.getElementById("camera-slot"), { rig });
+const selectedCentre = () => selectionCentre(editor.stage(), editor.state.selection);
+createCameraPad(document.getElementById("camera-slot"), { rig, around: selectedCentre });
+// Turning the view (left drag on empty ground, one finger) with something selected turns it round
+// the selection: the pivot glides onto it as the drag starts. Dragging a prop doesn't move the camera.
+let viewButton = -1;
+canvas.addEventListener("pointerdown", (e) => { viewButton = e.button; }, true);
+rig.controls.addEventListener("start", () => setTimeout(() => {
+  const c = viewButton === 0 && rig.controls.enabled ? selectedCentre() : null;
+  if (c) rig.glideTarget(c);
+}, 0));
 updaters.push(
   createToolbar(document.getElementById("toolbar"), {
     editor, rig, onAbout: () => about.open(), onHelp: () => help.open(), onBriefing: () => briefing.open(), onPrint: () => printBrief(),

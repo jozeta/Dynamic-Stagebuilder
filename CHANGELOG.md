@@ -4,6 +4,10 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- With something selected, turning the view circles round it: dragging the ground swings the view
+  round the selection (the pivot glides onto it), and the view pad's *Look* arrows circle the camera
+  round it (pan) or raise and lower it round it (tilt).
+
 - Settings opens as a window over the app (Done or Escape closes it) instead of a tab in the
   right-hand panel.
 - The toolbar: *Duplicate* and *Delete* are gone from it (they are in the inspector, the right-click

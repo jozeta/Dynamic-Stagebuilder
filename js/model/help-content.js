@@ -57,7 +57,7 @@ export const HELP_TOPICS = Object.freeze([
   { id: "view", title: "Looking at the stage", icon: "frame", art: "camera",
     text: ["Drag the empty ground to orbit. Right-drag (two fingers on an iPad) to pan. Scroll or pinch to zoom.",
       "The buttons over the view jump to Isometric (a high overview of the whole stage), Top, Front and Shooter's eye. Frame all fits everything on screen.",
-      "The faint arrows in the top-right corner steer the camera: Look pans and tilts, Move goes forward or back, Height raises or lowers it. Press and hold to keep moving."],
+      "The faint arrows in the top-right corner steer the camera: Look pans and tilts, Move goes forward or back, Height raises or lowers it. Press and hold to keep moving.", "With something selected, turning the view (dragging the ground, or Look on the arrows) circles round it."],
     tips: ["Keys 1–4 pick the views, F frames everything.", "The printed 3D view uses the view you see when you print."] },
   { id: "settings", title: "Light and surroundings", icon: "sliders", art: "sun",
     text: ["Settings opens in the right-hand panel, so you can watch the stage while you change it. Choose Outdoor (a dirt range at golden hour; Grid on the ground adds 1 m squares), Technical (a plain bay), Blueprint or Industrial (an indoor factory hall lit from overhead), the time of day, sunlight, ambient light, shadows, haze and exposure.",

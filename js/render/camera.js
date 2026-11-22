@@ -1,6 +1,7 @@
 // Camera navigation (orbit, pan, zoom; one finger rotates, two pan and zoom on touch) and presets.
+import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { moveView } from "../model/camera-move.js";
+import { moveView, orbitView } from "../model/camera-move.js";
 import { obliqueView, stageArea, VIEW } from "./view-math.js";
 import { viewFromPosition, anglesFromView } from "../model/positions.js";
 
@@ -150,7 +151,27 @@ export function createCameraRig(engine, domElement) {
   // The view pad: pan, tilt, rise or dolly by `amount` (degrees or metres). Tilt stays a little below
   // level, where the orbit controls allow it, so the camera never jumps on the next drag.
   const maxPitch = -(Math.PI / 2 - controls.maxPolarAngle) * 180 / Math.PI - 0.2;
-  const move = (m, amount) => { stopWalk(); const v = moveView(getView(), m, amount, { maxPitch }); look(v.position, v.target); };
+  // With `around` (the selection's centre), pan and tilt circle the camera round it instead.
+  const move = (m, amount, around = null) => {
+    stopWalk();
+    const v = around && (m === "pan" || m === "tilt") ? orbitView(getView(), around, m, amount) : moveView(getView(), m, amount, { maxPitch });
+    look(v.position, v.target);
+  };
+  // Turning the view round the selection: the pivot glides onto it (the camera stays where it is).
+  let glide = null;
+  const glideTarget = (to, ms = 200) => {
+    if (glide) cancelAnimationFrame(glide);
+    const from = controls.target.clone(), t0 = performance.now(), end = new THREE.Vector3(...to);
+    if (from.distanceTo(end) < 0.01) return;
+    const step = (now) => {
+      const k = Math.min(1, (now - t0) / ms), e = k * (2 - k);
+      controls.target.lerpVectors(from, end, e);
+      controls.update();
+      engine.requestRender();
+      glide = k < 1 ? requestAnimationFrame(step) : null;
+    };
+    glide = requestAnimationFrame(step);
+  };
 
-  return { controls, move, preset, frameAll, viewFrom, currentAngles, walkTo, stopWalk, jumpTo: (v) => { stopWalk(); lens(VIEW.eyeFov); lookFrom(v); }, startView, positionView, getView, setView, setPace: (p) => { pace = p; }, dispose: () => controls.dispose() };
+  return { controls, move, glideTarget, preset, frameAll, viewFrom, currentAngles, walkTo, stopWalk, jumpTo: (v) => { stopWalk(); lens(VIEW.eyeFov); lookFrom(v); }, startView, positionView, getView, setView, setPace: (p) => { pace = p; }, dispose: () => controls.dispose() };
 }

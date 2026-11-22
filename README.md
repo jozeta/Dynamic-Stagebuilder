@@ -404,7 +404,8 @@ long 32° lens) that fits the whole bay; *Shooter's eye* and *Front* use a natur
 The faint arrows in the top-right corner of the view (bottom right when the view is narrow) steer
 the camera: *Look* pans left or right and tilts up or down, *Move* goes forward or back along the
 ground, *Height* raises or lowers it. Press and hold to keep moving; it moves faster the higher the
-camera is.
+camera is. With something selected, turning the view circles round it: dragging the ground swings
+round the selection, and *Look* on the arrows circles the camera round it (pan) or over it (tilt).
 
 **Change the light and surroundings.** *Settings* opens in the right-hand panel (the 3D view stays
 live; *Done* or Escape returns to the inspector). It switches between Outdoor and Technical and sets

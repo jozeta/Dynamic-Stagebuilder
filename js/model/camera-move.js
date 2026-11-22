@@ -4,6 +4,7 @@
 //   tilt  degrees: look up (+) or down (−), held within ±85° of level
 //   rise  metres:  lift (+) or lower (−) the camera and its look together, never below 10 cm
 //   dolly metres:  move forward (+) or back (−) along the ground the way the camera looks
+import { dimensionsOf } from "./props.js";
 const MAX_PITCH = 85, MIN_Y = 0.1, RAD = Math.PI / 180;
 
 /** `maxPitch` (degrees) caps how far up a tilt may look (the orbit view never looks above level). */
@@ -31,4 +32,33 @@ export function moveView(view, move, amount, { maxPitch = MAX_PITCH } = {}) {
     return { position: [p[0] + dx, p[1], p[2] + dz], target: [t[0] + dx, t[1], t[2] + dz] };
   }
   return { position: p, target: t };
+}
+
+/**
+ * The view pad with something selected: pan circles the camera round `centre` (a turn left moves the
+ * camera so the view swings left), tilt raises or lowers it round `centre` (between 3° and 85° above
+ * it), both still looking at it; rise and dolly move the whole view as moveView does.
+ */
+export function orbitView(view, centre, move, amount) {
+  if (!centre || (move !== "pan" && move !== "tilt") || !Number.isFinite(amount)) return moveView(view, move, amount);
+  const p = view.position, c = centre;
+  const o = [p[0] - c[0], p[1] - c[1], p[2] - c[2]];
+  const dist = Math.hypot(...o) || 1, flat = Math.hypot(o[0], o[2]);
+  if (move === "pan") {
+    const a = amount * RAD, cs = Math.cos(a), sn = Math.sin(a);
+    return { position: [c[0] + o[0] * cs + o[2] * sn, p[1], c[2] - o[0] * sn + o[2] * cs], target: [...c] };
+  }
+  const el = Math.max(3, Math.min(85, Math.atan2(o[1], flat) / RAD - amount)) * RAD;   // tilt up: the camera goes down
+  const hx = flat > 1e-9 ? o[0] / flat : 0, hz = flat > 1e-9 ? o[2] / flat : -1;
+  return { position: [c[0] + hx * Math.cos(el) * dist, c[1] + Math.sin(el) * dist, c[2] + hz * Math.cos(el) * dist], target: [...c] };
+}
+
+/** The middle of the selected props, half way up them ([x, y, z]), or null when none are selected. */
+export function selectionCentre(stage, ids) {
+  const picked = (stage?.objects || []).filter((o) => ids?.includes(o.id));
+  if (!picked.length) return null;
+  const xs = picked.map((o) => o.position[0]), zs = picked.map((o) => o.position[1]);
+  const mid = (v) => (Math.min(...v) + Math.max(...v)) / 2;
+  const h = Math.max(...picked.map((o) => { try { return dimensionsOf(o).h; } catch { return 0; } }));
+  return [mid(xs), h / 2, mid(zs)];
 }
