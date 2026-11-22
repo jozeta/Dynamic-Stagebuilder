@@ -58,7 +58,7 @@ export function createProjects({ panel, docked = false, hide = [], onToggle = ()
     ]),
     h("div", { class: "lg-stack proj-body" }, [
       h("div", { class: "proj-actions" }, [
-        h("button", { type: "button", class: "lg-btn", onclick: async () => { if (await onNew() !== false) close(); } }, [icon("new"), "New stage"]),
+        h("button", { type: "button", class: "lg-btn", onclick: async () => { if (await onNew() !== false) { matches.showList(); await fill(); close(); } } }, [icon("new"), "New stage"]),
         h("button", { type: "button", class: "lg-btn", onclick: () => matches.create() }, [icon("layers"), "New match"]),
         h("button", { type: "button", class: "lg-btn", onclick: () => file.click() }, [icon("folder"), "Import file…"]),
         h("button", { type: "button", class: "lg-btn", onclick: async () => { await onExport(); await fill(); } }, [icon("doc"), "Export this stage"]),
@@ -157,10 +157,11 @@ export function createProjects({ panel, docked = false, hide = [], onToggle = ()
 
   return {
     // Open, or close when it's open and in view; when it's open but its panel is folded, unfold it.
-    async open() { if (isOpen && !panel.closest(".lg-dock-folded") && !panel.classList.contains("lg-dock-inactive")) return close(); if (isOpen) return show(true); say(""); await fill(); fillLibrary(); show(true); panel.querySelector("button")?.focus(); },
+    // Opened, it shows the full list (matches, then your stages), not a match page left open earlier.
+    async open() { if (isOpen && !panel.closest(".lg-dock-folded") && !panel.classList.contains("lg-dock-inactive")) return close(); if (isOpen) return show(true); say(""); matches.showList(); await fill(); fillLibrary(); show(true); panel.querySelector("button")?.focus(); },
     close,
     /** Shown by the dock (its tab clicked): fill it and count as open, without toggling. */
-    async ensureOpen() { if (isOpen) return; say(""); await fill(); fillLibrary(); show(true); },
+    async ensureOpen() { if (isOpen) return; say(""); matches.showList(); await fill(); fillLibrary(); show(true); },
     get isOpen() { return isOpen; },
   };
 }

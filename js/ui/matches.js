@@ -185,5 +185,7 @@ export function createMatches({ store, currentId, onOpen, onNewStage, onCreateFr
     if (m) await fillMatch(m); else await fillList();
   }
 
-  return { box, fill, create, adopt, get inMatch() { return Boolean(openId); } };
+  /** Back to the list of matches (and, in the Projects panel, the stages under it). */
+  const showList = () => { openId = null; adding = false; };
+  return { box, fill, create, adopt, showList, get inMatch() { return Boolean(openId); } };
 }

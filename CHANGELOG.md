@@ -4,6 +4,10 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Fix: a new stage didn't seem to appear under Stages: when a match's page was open, the Projects
+  panel came back on that match page, which hides the stage list. *New stage*, and opening the
+  Projects panel, now show the full list (matches, then your stages).
+
 - A new stage is clean: no props, no lines and the default surroundings and light. It used to take
   over the open stage's surroundings, so an Industrial hall or your own surroundings' buildings and
   walls came along.
