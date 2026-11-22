@@ -89,7 +89,7 @@ npm run lint        # ESLint, including the unsafe-DOM rule
 
 ## Design
 
-Låda Glass 2.4.0 (`~/Desktop/code/tools/design`, preview: `design/preview.html` there): dark frosted
+Låda Glass 2.5.0 (`~/Desktop/code/tools/design`, preview: `design/preview.html` there): dark frosted
 glass is the main theme, light the alternative, compact density. Use its `lg-` components and
 tokens instead of new styles; don't edit the vendored copy (update it when `claude-check` says it's
 old). The 3D viewport is the app's own canvas.
