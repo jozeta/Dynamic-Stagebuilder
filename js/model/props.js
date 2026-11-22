@@ -67,7 +67,7 @@ export const FURNITURE = Object.freeze({
   sofa: Object.freeze({ seat: 0.62, arm: 0.2, depth: 0.9, height: 0.85, seatH: 0.44,
     shapes: Object.freeze({ "1": [1.02, 0.9], "2": [1.64, 0.9], "3": [2.26, 0.9], "l-left": [2.6, 1.6], "l-right": [2.6, 1.6], u: [3.2, 2], corner: [2.4, 2.4] }) }),
   desk: Object.freeze({ sizes: Object.freeze({ small: [1.2, 0.6], medium: [1.4, 0.7], large: [1.6, 0.8] }), height: 0.75, chairH: 1.1, chairReach: 0.55 }),
-  dining: Object.freeze({ tables: Object.freeze({ "2": [0.8, 0.8], "4": [1.4, 0.9], "6": [1.8, 0.9], "8": [2.4, 1] }), height: 0.75, chairH: 0.9, chairReach: 0.45 }),
+  dining: Object.freeze({ tables: Object.freeze({ "2": [0.8, 0.8], "4": [1.4, 0.9], "6": [1.8, 0.9], "8": [2.4, 1] }), height: 0.75, chairH: 0.9, chairReach: 0.25, tuck: 0.22 }),
   coffee: Object.freeze({ rect: [1.2, 0.6], round: [0.8, 0.8], height: 0.42 }),
 });
 export const CONE = Object.freeze({ diameter: 0.36, height: 0.7 });

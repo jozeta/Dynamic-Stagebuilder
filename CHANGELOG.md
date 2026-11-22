@@ -4,6 +4,9 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Dining table and chairs: the chairs are pushed in, half of each seat under the table, and spaced
+  between the table's legs.
+
 - Sandbag wall: bags look like filled sandbags (squashed pillows, rounded edges, a tied end) and lie
   in a running bond with half bags closing the offset rows, so no bag hangs in the air at the ends;
   each row settles a little into the one below.

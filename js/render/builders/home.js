@@ -131,10 +131,12 @@ export function buildDiningSet(obj) {
   for (const x of [-tw / 2 + 0.05, tw / 2 - 0.12]) for (const z of [-td / 2 + 0.05, td / 2 - 0.12]) g.add(block(x, x + 0.07, 0, D.height - 0.04, z, z + 0.07, wood));
   g.add(block(-tw / 2 + 0.06, tw / 2 - 0.06, D.height - 0.12, D.height - 0.04, -td / 2 + 0.06, -td / 2 + 0.08, wood));   // aprons
   g.add(block(-tw / 2 + 0.06, tw / 2 - 0.06, D.height - 0.12, D.height - 0.04, td / 2 - 0.08, td / 2 - 0.06, wood));
-  // Chairs along both long sides, tucked in a little: seat with a pad, four legs, a slatted back.
+  // Chairs along both long sides, pushed in so half the seat is under the table (the seats are
+  // below the aprons): seat with a pad, four legs, a slatted back.
   const n = Number(p.seats) / 2;
   for (const side of [-1, 1]) for (let i = 0; i < n; i++) {
-    const cx = -tw / 2 + (tw / n) * (i + 0.5), outer = side * (d / 2), inner = side * (td / 2 - 0.02);
+    const free = tw - 2 * 0.14;                            // the table's length between its legs
+    const cx = -free / 2 + (free / n) * (i + 0.5), outer = side * (d / 2), inner = side * (td / 2 - D.tuck);
     const z0 = Math.min(inner, outer), z1 = Math.max(inner, outer);
     g.add(block(cx - 0.22, cx + 0.22, 0.43, 0.47, z0, z1, wood));
     g.add(cushion(cx - 0.2, cx + 0.2, 0.47, 0.5, z0 + 0.02, z1 - 0.02, "fabric-grey"));

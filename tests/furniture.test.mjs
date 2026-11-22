@@ -44,3 +44,21 @@ for (const [type, p] of VARIANTS) {
     near(b.min.y, 0, `${type} on the ground`);
   });
 }
+
+test("dining chairs are tucked in: each seat is half under the table, clear of the legs", () => {
+  for (const seats of ["2", "4", "6", "8"]) {
+    const g = buildProp(obj("dining-set", { seats }));
+    g.updateMatrixWorld(true);
+    const boxes = []; g.traverse((c) => { if (c.isMesh) boxes.push(new Box3().setFromObject(c)); });
+    const top = boxes.reduce((a, b) => (b.max.y > 0.74 && b.max.y - b.min.y < 0.06 && (!a || b.max.x - b.min.x > a.max.x - a.min.x) ? b : a), null);
+    const seatsFound = boxes.filter((b) => Math.abs(b.min.y - 0.43) < 0.005 && Math.abs(b.max.y - 0.47) < 0.005);
+    assert.equal(seatsFound.length, Number(seats), `${seats}: one seat per chair`);
+    for (const s of seatsFound) {
+      const depth = s.max.z - s.min.z, under = Math.max(0, Math.min(s.max.z, top.max.z) - Math.max(s.min.z, top.min.z));
+      assert.ok(Math.abs(under / depth - 0.5) < 0.08, `${seats}: ${Math.round((100 * under) / depth)} % of the seat under the table`);
+      const legs = boxes.filter((b) => b.min.y < 0.01 && b.max.y > 0.68 && b.max.x - b.min.x < 0.1 && b.max.z - b.min.z < 0.1);
+      assert.equal(legs.length, 4, `${seats}: four table legs`);
+      for (const l of legs) assert.ok(!l.intersectsBox(s), `${seats}: a seat runs into a table leg`);
+    }
+  }
+});
