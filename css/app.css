@@ -466,3 +466,6 @@ body { background: var(--lg-bg); overflow: hidden; }
 .app.toolbar-rail .toolbar .tool > span { overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 .app-dock .lg-dock.has-toolbar > .lg-dock-frame:first-child { margin-top: calc(var(--rail-toolbar-h) + var(--lg-space-s)); }
 .app-dock .lg-dock.has-toolbar { min-height: 0; }
+/* A match's Add stages list: the 59 ready-made stages scroll in their own box. */
+.match-picker .match-ready { max-height: 260px; overflow: auto; }
+.match-picker .lg-label { margin-top: var(--lg-space-xs); }

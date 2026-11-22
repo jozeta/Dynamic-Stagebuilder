@@ -83,7 +83,7 @@ export const HELP_TOPICS = Object.freeze([
       "Copy share link (Projects) copies a link holding the stage itself; whoever opens it gets a copy as a new project. Nothing is uploaded."],
     tips: ["A very large stage may be too big for a link: export a file instead."] },
   { id: "matches", title: "Matches", icon: "layers", art: "page",
-    text: ["In the Projects tab, New match starts a match of one or more stages in order. Add a new stage to it, or tick stages you already made under Add stages you made….",
+    text: ["In the Projects tab, New match starts a match of one or more stages in order. Add a new stage to it, or open Add stages… and tick your own stages, the example stage or stages from the stage library (those are saved as new projects). A stage in another match moves to this one.",
       "On the match's page, move stages up and down, take one out or open one to edit. Each stage gets the match name and its stage number in its briefing.",
       "Print the match prints a cover page with every stage's rounds and points, then each stage's brief page."],
     tips: ["Taking a stage out of a match, or deleting the match, keeps the stage as a project.", "Export the match saves it with all its stages in one file; Import file… takes it back."] },

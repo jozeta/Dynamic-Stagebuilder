@@ -46,7 +46,7 @@ import { createAnimator } from "./render/animate.js";
 import { fadeFigures } from "./render/figure-fade.js";
 import { createSurroundings } from "./ui/surroundings.js";
 import { takeBuildingPieces } from "./model/surroundings.js";
-import { libraryStage } from "./model/stage-library.js";
+import { libraryStage, STAGE_LIBRARY } from "./model/stage-library.js";
 import { loadHidden, saveHidden, loadView, saveView, loadWalkSpeed, saveWalkSpeed, loadRunLook, saveRunLook, loadShapes, saveShapes } from "./ui/prefs.js";
 import { withRunPart } from "./model/run-look.js";
 import { setRunLook } from "./render/materials.js";
@@ -454,6 +454,15 @@ onEarthLoaded(() => engine.requestRender());           // a berm's ground textur
 let dock = null;                   // the side panels' dock (Låda Glass), set up below
 const projects = createProjects({
   onOpenLibrary: (spec) => addProject(withView(libraryStage(spec))),
+  // A match takes the example stage or a library stage: saved as a new project (not opened).
+  onCreateFrom: async (key) => {
+    const spec = key.startsWith("lib:") ? STAGE_LIBRARY.find((s) => s.id === key.slice(4)) : null;
+    const st = key === "demo" ? demoStage() : spec ? libraryStage(spec) : null;
+    if (!st) return null;
+    const s = withView(st);
+    await store.put(projectRecord(s, { now: Date.now() }));
+    return s.id;
+  },
   panel: document.getElementById("projects"),
   docked: true,
   onToggle: (open) => {

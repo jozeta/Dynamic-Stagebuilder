@@ -8,16 +8,16 @@ import { createMatches } from "./matches.js";
 
 const when = (t) => new Date(t).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
 
-export function createProjects({ panel, docked = false, hide = [], onToggle = () => {}, onOpenLibrary = async () => {}, store, currentId, onOpen, onNew, onDuplicate, onDelete, onImport, onExport,
+export function createProjects({ panel, docked = false, hide = [], onToggle = () => {}, onOpenLibrary = async () => {}, onCreateFrom = async () => null, store, currentId, onOpen, onNew, onDuplicate, onDelete, onImport, onExport,
   onNewStage = async () => null, onApplyBriefing = async () => {}, onPrintMatch = () => {}, onExportMatch = () => {}, onImportMatch = async () => [], onShareLink = async () => ({ ok: false, error: "Not available." }) }) {
   // Matches: their list above the stages, and a match's own page in place of the lists.
   const stagesBox = h("div", { class: "lg-stack" });
   const matches = createMatches({
     store, currentId,
     onOpen: async (id) => { await onOpen(id); await fill(); },
-    onNewStage, onApplyBriefing, onPrint: onPrintMatch, onExport: onExportMatch,
+    onNewStage, onCreateFrom, onApplyBriefing, onPrint: onPrintMatch, onExport: onExportMatch,
     onViewChange: (inMatch) => { stagesBox.hidden = inMatch; },
-    onChanged: async () => {},
+    onChanged: async () => { await fillStages(); },     // stages a match added (example, library) show in the list
   });
   const list = h("div", { class: "proj-list", role: "list" });
   const message = h("div", { class: "proj-message", role: "status", "aria-live": "polite" });
@@ -127,6 +127,9 @@ export function createProjects({ panel, docked = false, hide = [], onToggle = ()
 
   async function fill() {
     await matches.fill();
+    await fillStages();
+  }
+  async function fillStages() {
     const now = Date.now();
     const records = sortProjects(await store.list());
     const id = currentId();

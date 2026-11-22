@@ -6,8 +6,9 @@
 import { h, icon } from "./dom.js";
 import { createMatch, addStages, removeStage, moveStage, renameMatch, briefingFor, matchSummary, cleanMatch, inOtherMatches, takeFromOthers } from "../model/match.js";
 import { sortProjects } from "../storage/projects.js";
+import { STAGE_LIBRARY, LIBRARY_CATEGORIES } from "../model/stage-library.js";
 
-export function createMatches({ store, currentId, onOpen, onNewStage, onApplyBriefing, onPrint, onExport = () => {}, onViewChange = () => {}, onChanged = async () => {} }) {
+export function createMatches({ store, currentId, onOpen, onNewStage, onCreateFrom = async () => null, onApplyBriefing, onPrint, onExport = () => {}, onViewChange = () => {}, onChanged = async () => {} }) {
   const box = h("section", { class: "matches", "aria-labelledby": "matches-title" });
   let openId = null;            // the match whose page is shown, or null for the list
   let adding = false;           // the "add existing stages" checklist is open
@@ -117,18 +118,41 @@ export function createMatches({ store, currentId, onOpen, onNewStage, onApplyBri
         return h("label", { class: "vis-item", for: `add-${r.id}` }, [cb,
           h("span", { text: r.name || "Untitled stage" }), inMatch ? h("span", { class: "lg-muted proj-meta", text: ` · moves it from ${inMatch}` }) : null]);
       });
+      // Ready-made stages: the example stage and the stage library, each saved as a new project when added.
+      const ready = [{ key: "demo", name: "Example stage (a new copy)", meta: "The example shown on first open", text: "Example stage" },
+        ...STAGE_LIBRARY.map((s) => ({ key: `lib:${s.id}`, name: s.name, meta: LIBRARY_CATEGORIES.find((c) => c.id === s.category)?.name || "", text: `${s.name} ${s.summary || ""}` }))];
+      const readyList = h("div", { class: "vis-items match-ready" });
+      const picked = new Set();
+      const fillReady = (q = "") => {
+        const words = q.trim().toLowerCase();
+        const shown = ready.filter((r) => !words || `${r.text || r.name} ${r.meta}`.toLowerCase().includes(words));
+        readyList.replaceChildren(...(shown.length ? shown.map((r) => {
+          const id = `add-${r.key.replace(/[^a-z0-9-]/gi, "-")}`;
+          const cb = h("input", { type: "checkbox", value: r.key, id, onchange: (e) => (e.target.checked ? picked.add(r.key) : picked.delete(r.key)) });
+          cb.checked = picked.has(r.key);
+          return h("label", { class: "vis-item", for: id }, [cb, h("span", { text: r.name }), h("span", { class: "lg-muted proj-meta", text: ` · ${r.meta}` })]);
+        }) : [h("p", { class: "lg-muted hint-text", text: "No ready-made stage matches. Try another word." })]));
+      };
+      fillReady();
+      const readySearch = h("input", { type: "search", class: "lg-input", placeholder: "Search the stage library", "aria-label": "Search the example and library stages", oninput: (e) => fillReady(e.target.value) });
       picker = h("fieldset", { class: "vis-group match-picker" }, [
-        h("legend", { class: "vis-head" }, [h("span", { class: "vis-name", text: "Add stages you already made" })]),
-        h("div", { class: "vis-items" }, checks.length ? checks : [h("p", { class: "lg-muted hint-text", text: "Every stage is in this match already." })]),
+        h("legend", { class: "vis-head" }, [h("span", { class: "vis-name", text: "Add stages" })]),
+        h("span", { class: "lg-label", text: "Your stages" }),
+        h("div", { class: "vis-items match-own" }, checks.length ? checks : [h("p", { class: "lg-muted hint-text", text: "Every stage you made is in this match already." })]),
+        h("span", { class: "lg-label", text: "Example and stage library (added as new projects)" }),
+        readySearch,
+        readyList,
         h("div", { class: "lg-row" }, [
           btn("Add selected", async () => {
-            const ids = [...picker.querySelectorAll("input:checked")].map((c) => c.value);
-            if (!ids.length) return say("Tick the stages to add first.");
+            const ids = [...picker.querySelectorAll(".match-own input:checked")].map((c) => c.value);
+            if (!ids.length && !picked.size) return say("Tick the stages to add first.");
+            // Ready-made ones are saved as new projects first (in the order they are listed).
+            for (const r of ready) if (picked.has(r.key)) { const id = await onCreateFrom(r.key); if (id) ids.push(id); }
             // Stages taken from another match leave it, and that match's stages are numbered again.
             for (const other of takeFromOthers(await listMatches(), m.id, ids)) { await save(other); await syncBriefings(other); }
             adding = false;
             await update(addStages(m, ids));
-          }, "lg-btn lg-btn-primary", null, { disabled: !others.length }),
+          }, "lg-btn lg-btn-primary"),
           btn("Cancel", async () => { adding = false; await fill(); }),
         ]),
       ]);
@@ -141,10 +165,10 @@ export function createMatches({ store, currentId, onOpen, onNewStage, onApplyBri
       Object.assign(name, { id: "match-name-input" }),
       h("p", { class: "lg-muted proj-meta", text: `${sum.stages} stage${sum.stages === 1 ? "" : "s"} · ${sum.minRounds} rounds minimum · ${sum.maxPoints} points` }),
       h("div", { class: "proj-list", role: "list", "aria-label": "Stages in this match" }, stageRows.length ? stageRows
-        : [h("p", { class: "lg-muted hint-text", text: "No stages yet. Add a new one, or add stages you already made." })]),
+        : [h("p", { class: "lg-muted hint-text", text: "No stages yet. Add a new one, or add stages: yours, the example or ones from the stage library." })]),
       h("div", { class: "proj-actions" }, [
         btn("New stage in this match", async () => { const id = await onNewStage(); if (id) await update(addStages(m, [id])); }, "lg-btn", "new"),
-        btn("Add stages you made…", async () => { adding = true; await fill(); }, "lg-btn", "folder", { "aria-expanded": String(adding) }),
+        btn("Add stages…", async () => { adding = true; await fill(); }, "lg-btn", "folder", { "aria-expanded": String(adding) }),
         btn("Print the match", () => onPrint(m, m.stageIds.map((id) => byId.get(id).stage)), "lg-btn", "print", { disabled: !m.stageIds.length }),
         btn("Export the match", () => onExport(m, m.stageIds.map((id) => byId.get(id).stage)), "lg-btn", "doc", { disabled: !m.stageIds.length, title: "One file with the match and all its stages" }),
       ]),
