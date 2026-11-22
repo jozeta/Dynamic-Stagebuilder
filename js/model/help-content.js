@@ -34,7 +34,7 @@ export const HELP_TOPICS = Object.freeze([
   { id: "targets", title: "Targets, no-shoots and arrays", icon: "hash", art: "arrays",
     text: ["The IPSC target and the mini target have a Presentation choice: a target, a no-shoot, a target with no-shoots over its lower half or sides, two overlapping targets, two targets with a no-shoot between, or two stacked one above the other.",
       "Hard cover paints the lower quarter, third or half, one side, or a lower diagonal black. The combinations follow the IPSC Target Array Handbook (January 2019), and the inspector warns when a target's top is above 1.8 m (1.6 m for mini targets)."],
-    tips: ["Targets are numbered T1…, steel P1…, a lone no-shoot NS1…; Renumber closes the gaps.", "Classic (octagon) or With head is set per target; the default is in Settings."] },
+    tips: ["Targets are numbered T1…, steel P1…, a lone no-shoot NS1…; deleting one closes its gap (the numbers above move down by one).", "Classic (octagon) or With head is set per target; the default is in Settings."] },
   { id: "moving", title: "Moving and reactive targets", icon: "rotl", art: "star",
     text: ["The Moving and reactive group has a swinger, a drop turner, a clamshell and a mover on a track, which count as paper targets, and a Texas star, a plate rack and a dueling tree, which count each plate.",
       "Stars, plate racks and trees are not allowed in IPSC matches (Target Array Handbook, 4.1). They are common in USPSA and club matches, so the inspector says so."],

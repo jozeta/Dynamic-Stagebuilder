@@ -20,7 +20,7 @@ export function createStats(root) {
     for (const [k, v] of rows) dl.append(h("dt", { text: k }), h("dd", { class: "lg-num", text: String(v) }));
     const warnings = [];
     if (s.overLimit) warnings.push(`More than ${SCORING.courseLimits.Long} rounds: over the Long course limit.`);
-    if (dups.length) warnings.push(`Duplicate target labels: ${dups.join(", ")}. Use Renumber or change a label.`);
+    if (dups.length) warnings.push(`Duplicate target labels: ${dups.join(", ")}. Change one of them in the inspector.`);
     const estNote = est ? h("p", { class: "lg-muted hint-text", text: `Estimate: draw, ${est.rounds} shots, ${est.metres} m of movement${est.reloads ? `, ${est.reloads} reload${est.reloads === 1 ? "" : "s"}` : ""}. A rule of thumb, not a rule.` }) : null;
     root.replaceChildren(...[h("h2", { class: "lg-subtitle panel-title", text: "Stage statistics" }), dl, estNote,
       ...warnings.map((w) => h("p", { class: "lg-alert lg-alert-warn stats-warn", role: "status", text: w }))].filter(Boolean));

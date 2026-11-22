@@ -1,4 +1,5 @@
-// The top toolbar: undo, redo, renumber, then Print, Settings, Help and About. (Measuring and the
+// The top toolbar, on the right: Undo, Redo, Print, Settings, Help and About. (Deleting a target
+// closes its number's gap by itself, so there is no Renumber.) (Measuring and the
 // two kinds of snapping are in the right-click menu.)
 // (Duplicate and Delete are in the inspector and the right-click menu; the briefing in the right panel.)
 import { h, icon } from "./dom.js";
@@ -13,7 +14,6 @@ export function createToolbar(root, { editor, rig, onViewing = () => {}, walking
 
   const undoB = btn("undo", "Undo", () => editor.dispatch({ type: "undo" }));
   const redoB = btn("redo", "Redo", () => editor.dispatch({ type: "redo" }));
-  const numB = btn("hash", "Renumber", () => editor.dispatch({ type: "renumber" }));
   // The briefing opens from the right-hand panel, under the stage's statistics, while it shows the
   // stage (nothing selected); a selected prop's panel has no briefing button.
   const wsbB = h("button", { type: "button", class: "lg-btn brief-btn", onclick: onBriefing }, [icon("doc"), "Written stage briefing…"]);
@@ -32,8 +32,7 @@ export function createToolbar(root, { editor, rig, onViewing = () => {}, walking
 
   root.append(
     h("div", { class: "brand" }, [h("span", { class: "brand-name", text: "Dynamic-Stagebuilder" })]),
-    h("div", { class: "toolgroup", role: "group", "aria-label": "Edit" }, [undoB, redoB, numB]),
-    h("div", { class: "toolgroup end" }, [printB, btn("sliders", "Settings", onSettings, { "aria-pressed": "false" }), btn("help", "Help", onHelp), btn("info", "About", onAbout)]),
+    h("div", { class: "toolgroup end" }, [undoB, redoB, printB, btn("sliders", "Settings", onSettings, { "aria-pressed": "false" }), btn("help", "Help", onHelp), btn("info", "About", onAbout)]),
   );
 
   return function update(state) {

@@ -1,6 +1,6 @@
 // Target labels: T1… for paper targets, P1… for steel, NS1… for no-shoots, in placement order. A
 // paper array with two scoring targets takes two numbers and shows them as a range ("T2–3").
-// New targets get the next free number (gaps are kept until Renumber); hand-set labels are kept.
+// New targets get the next free number; deleting one closes its gap (closeGaps); hand-set labels are kept.
 import { getProp } from "./props.js";
 import { arrayCounts } from "./arrays.js";
 
@@ -91,4 +91,30 @@ export function duplicateLabels(stage) {
     seen.add(o.label);
   }
   return [...dups];
+}
+
+/**
+ * After `removed` props were taken off the stage: close the gaps they leave. In each series (T, P,
+ * NS, shooting positions) numbers below a removed one stay, numbers above move down by how many were
+ * removed below them (a two-target array removes two). Labels typed by hand are kept as they are.
+ */
+export function closeGaps(stage, removed) {
+  const gone = {};
+  for (const o of removed) {
+    const p = labelPrefix(o);
+    if (p !== null) for (const n of numbersOf(o.label, p)) (gone[p] ||= []).push(n);
+  }
+  if (!Object.keys(gone).length) return stage;
+  let changed = false;
+  const objects = stage.objects.map((o) => {
+    const p = labelPrefix(o);
+    if (p === null || o.labelManual || !gone[p]) return o;
+    const ns = numbersOf(o.label, p);
+    if (!ns.length) return o;
+    const shift = gone[p].filter((n) => n < ns[0]).length;
+    if (!shift) return o;
+    changed = true;
+    return { ...o, label: labelFor(p, ns[0] - shift, ns.length) };
+  });
+  return changed ? { ...stage, objects } : stage;
 }

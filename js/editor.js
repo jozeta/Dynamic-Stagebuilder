@@ -4,7 +4,7 @@
 import { createStage, addObject, updateObject, removeObjects, duplicateObjects, addLine, setStart,
   setSetting, setBay, setBriefing, pruneSelection } from "./model/stage.js";
 import { createHistory, commit, replacePresent, undo, redo } from "./model/history.js";
-import { assignLabels, renumber, setLabel } from "./model/numbering.js";
+import { assignLabels, renumber, setLabel, closeGaps } from "./model/numbering.js";
 import { fitStand, arrayCounts, arrayExtent } from "./model/arrays.js";
 import { takeBuildingPieces, putBackPieces } from "./model/surroundings.js";
 import { snapPoint, snapAngle, clampToBay } from "./model/snap.js";
@@ -28,6 +28,12 @@ const clampNum = (v, min, max) => Math.min(max, Math.max(min, v));
 function withVia(stage, id, fn) {
   return { ...stage, objects: stage.objects.map((o) => (o.id === id && o.type === "shooting-position"
     ? { ...o, via: fn(o.via || []).slice(0, 50).map((p) => [Math.round(p[0] * 1000) / 1000, Math.round(p[1] * 1000) / 1000]) } : o)) };
+}
+
+// Remove props, and close the gaps their numbers leave (numbers above move down; model/numbering.js).
+function withoutGaps(stage, ids) {
+  const removed = stage.objects.filter((o) => ids.includes(o.id));
+  return closeGaps(removeObjects(stage, ids), removed);
 }
 
 export function createEditor({ stage = createStage(), onChange = () => {} } = {}) {
@@ -241,7 +247,7 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
     delete({ ids = state.selection }) {
       const go = unlocked(ids);                    // a locked prop is kept: unlock it first
       if (!go.length) return;
-      edit(removeObjects(present(), go));
+      edit(withoutGaps(present(), go));
       state.selection = state.selection.filter((id) => !go.includes(id));
     },
     // The props-on-stage list and the right-click menu.
@@ -279,7 +285,7 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
       const go = unlocked(objIds(ids));
       if (!go.length) return;
       state.clipboard = copyObjects(present(), go);
-      edit(removeObjects(present(), go));
+      edit(withoutGaps(present(), go));
       state.selection = [];
     },
     paste({ offset = [0.5, 0.5] } = {}) {

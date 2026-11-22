@@ -395,8 +395,9 @@ they would be off it; the Outdoor banks, Technical walls and the printed map fol
 
 **Number targets.** Targets are numbered as you place them: T1… for paper, P1… for steel, NS1… for
 a lone no-shoot (an array with a target is one T label; its targets and no-shoots all count in the
-statistics). Deleting a target leaves a gap until you press *Renumber*. To set a label by hand, type
-it in the inspector; Renumber keeps hand-set labels and warns about duplicates.
+statistics). Deleting a target closes its gap: the numbers below it stay, the ones above
+move down by one (by two for a two-target array). To set a label by hand, type it in the inspector;
+hand-set labels are never changed, and duplicates are warned about.
 
 **Look at the stage.** Drag the empty ground to orbit, right-drag (two fingers on an iPad) to pan,
 scroll or pinch to zoom. The buttons over the view jump to Isometric, Top, Front, Shooter's eye or

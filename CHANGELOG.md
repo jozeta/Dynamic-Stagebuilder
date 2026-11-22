@@ -4,6 +4,11 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Deleting (or cutting) a target closes its number's gap: numbers below it stay, numbers above move
+  down by one (by two for a two-target array). The same for steel, no-shoots and shooting positions,
+  each in its own series; labels typed by hand stay. *Renumber* is gone from the toolbar.
+- Undo and Redo moved to the right side of the toolbar, beside Print.
+
 - *Measure*, *Grid* and *Objects* moved from the toolbar to the right-click menu (a long press on an
   iPad): *Measure distances* (M), *Snap to the grid* and *Snap wall ends to walls*, each showing
   whether it is on.
