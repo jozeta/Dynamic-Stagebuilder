@@ -10,6 +10,7 @@ import { getProp } from "./model/props.js";
 import { demoStage } from "./demo.js";
 import { createToolbar } from "./ui/toolbar.js";
 import { createCameraPad } from "./ui/camera-pad.js";
+import { askName } from "./ui/name-prompt.js";
 import { selectionCentre } from "./model/camera-move.js";
 import { createLibrary } from "./ui/library.js";
 import { createBayDrawer } from "./ui/bay-draw.js";
@@ -397,8 +398,8 @@ async function addProject(stage) {
 }
 // A library stage opens in the surroundings and light you're using now.
 const withView = (s) => { const cur = editor.stage().settings; return { ...s, settings: { ...s.settings, environment: cur.environment, look: cur.look } }; };
-const freshStage = () => {
-  const s = createStage({ name: "New stage" });
+const freshStage = (name = "New stage") => {
+  const s = createStage({ name });
   const cur = editor.stage().settings;
   return { ...s, settings: { ...s.settings, environment: cur.environment, look: cur.look } };
 };
@@ -474,7 +475,8 @@ const projects = createProjects({
     matches: { list: () => store.matches.list(), put: (r) => store.matches.put(r), remove: (id) => store.matches.remove(id) },
   },
   // A new stage made from a match's page: saved and opened like New stage; its id goes in the match.
-  onNewStage: async () => { const st = freshStage(); await addProject(st); return st.id; },
+  // New stage (here or in a match): asks for its name first; Cancel makes none.
+  onNewStage: async () => { const name = await askName({ title: "New stage in this match", value: "" }); if (!name) return null; const st = freshStage(name); await addProject(st); return st.id; },
   onApplyBriefing: applyBriefing,
   // Print a match: a cover page, then each stage's brief page (the open stage as it is now).
   onPrintMatch: (match, stages) => {
@@ -487,7 +489,7 @@ const projects = createProjects({
   },
   currentId: () => editor.stage().id,
   onOpen: openProject,
-  onNew: () => addProject(freshStage()),
+  onNew: async () => { const name = await askName({ title: "New stage", value: "" }); if (!name) return false; await addProject(freshStage(name)); return true; },
   onDuplicate: async (id) => {
     await saveNow();
     const rec = await store.get(id);

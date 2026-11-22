@@ -85,3 +85,11 @@ test("pruneSelection drops ids that no longer exist", () => {
   assert.deepEqual(pruneSelection([id, "gone"], stage), [id]);
   assert.deepEqual(pruneSelection([id], removeObjects(stage, [id])), []);
 });
+
+test("a new stage's name: trimmed, at most 120 characters, and not empty", async () => {
+  const { stageName } = await import("../js/model/stage.js");
+  assert.equal(stageName("  Club stage 3  "), "Club stage 3");
+  assert.equal(stageName("x".repeat(200)).length, 120);
+  assert.equal(stageName("   "), null);
+  assert.equal(stageName(null), null);
+});

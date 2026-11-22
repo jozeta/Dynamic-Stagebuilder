@@ -58,7 +58,7 @@ export function createProjects({ panel, docked = false, hide = [], onToggle = ()
     ]),
     h("div", { class: "lg-stack proj-body" }, [
       h("div", { class: "proj-actions" }, [
-        h("button", { type: "button", class: "lg-btn", onclick: async () => { await onNew(); close(); } }, [icon("new"), "New stage"]),
+        h("button", { type: "button", class: "lg-btn", onclick: async () => { if (await onNew() !== false) close(); } }, [icon("new"), "New stage"]),
         h("button", { type: "button", class: "lg-btn", onclick: () => matches.create() }, [icon("layers"), "New match"]),
         h("button", { type: "button", class: "lg-btn", onclick: () => file.click() }, [icon("folder"), "Import file…"]),
         h("button", { type: "button", class: "lg-btn", onclick: async () => { await onExport(); await fill(); } }, [icon("doc"), "Export this stage"]),

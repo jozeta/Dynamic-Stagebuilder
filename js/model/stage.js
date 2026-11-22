@@ -98,3 +98,9 @@ export function pruneSelection(selection, stage) {
   const ids = new Set([...stage.objects.map((o) => o.id), ...stage.lines.map((l) => l.id)]);
   return selection.filter((id) => ids.has(id));
 }
+
+/** A stage name typed by the user: trimmed, at most 120 characters; null when empty. */
+export function stageName(text) {
+  const s = typeof text === "string" ? text.trim().slice(0, 120) : "";
+  return s || null;
+}

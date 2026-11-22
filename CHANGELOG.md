@@ -4,6 +4,9 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- *New stage* (and *New stage in this match*) asks for the stage's name first; *Cancel* or Escape
+  makes no stage, and an empty name isn't accepted.
+
 - Matches: *Add stages…* also offers the example stage and every stage in the stage library (with a
   search); each one ticked is saved as a new project and added to the match, without leaving the
   stage you have open. The stage list shows them straight away.
