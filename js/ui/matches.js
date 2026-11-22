@@ -4,7 +4,7 @@
 // The stages stay ordinary projects; each one in the match gets its name and number in the briefing.
 // Names come from storage and are only ever shown with textContent.
 import { h, icon } from "./dom.js";
-import { createMatch, addStages, removeStage, moveStage, renameMatch, briefingFor, matchSummary, cleanMatch, inOtherMatches } from "../model/match.js";
+import { createMatch, addStages, removeStage, moveStage, renameMatch, briefingFor, matchSummary, cleanMatch, inOtherMatches, takeFromOthers } from "../model/match.js";
 import { sortProjects } from "../storage/projects.js";
 
 export function createMatches({ store, currentId, onOpen, onNewStage, onApplyBriefing, onPrint, onExport = () => {}, onViewChange = () => {}, onChanged = async () => {} }) {
@@ -71,7 +71,12 @@ export function createMatches({ store, currentId, onOpen, onNewStage, onApplyBri
     );
   }
 
+  // A short note under the match's buttons (e.g. "Tick the stages to add first.").
+  let note = null;
+  const say = (text) => { note?.remove(); note = text ? h("p", { class: "lg-alert lg-alert-info", role: "status", text }) : null; if (note) box.querySelector(".match-picker")?.after(note); };
+
   async function fillMatch(m) {
+    note = null;
     const records = await stageRecords();
     const byId = new Map(records.map((r) => [r.id, r]));
     // Stages deleted since: dropped from the match.
@@ -102,13 +107,15 @@ export function createMatches({ store, currentId, onOpen, onNewStage, onApplyBri
     let picker = null;
     if (adding) {
       const others = records.filter((r) => !m.stageIds.includes(r.id));
-      // A stage belongs to one match (its briefing carries that match's name and number).
-      const taken = inOtherMatches(await listMatches(), m.id);
+      // A stage belongs to one match (its briefing carries that match's name and number): one that is
+      // in another match can still be picked, and moves from that match to this one.
+      const all = await listMatches();
+      const taken = inOtherMatches(all, m.id);
       const checks = others.map((r) => {
         const inMatch = taken.get(r.id);
-        const cb = h("input", { type: "checkbox", value: r.id, id: `add-${r.id}`, disabled: Boolean(inMatch) });
-        return h("label", { class: `vis-item${inMatch ? " is-taken" : ""}`, for: `add-${r.id}` }, [cb,
-          h("span", { text: r.name || "Untitled stage" }), inMatch ? h("span", { class: "lg-muted proj-meta", text: ` · in ${inMatch}` }) : null]);
+        const cb = h("input", { type: "checkbox", value: r.id, id: `add-${r.id}` });
+        return h("label", { class: "vis-item", for: `add-${r.id}` }, [cb,
+          h("span", { text: r.name || "Untitled stage" }), inMatch ? h("span", { class: "lg-muted proj-meta", text: ` · moves it from ${inMatch}` }) : null]);
       });
       picker = h("fieldset", { class: "vis-group match-picker" }, [
         h("legend", { class: "vis-head" }, [h("span", { class: "vis-name", text: "Add stages you already made" })]),
@@ -116,14 +123,17 @@ export function createMatches({ store, currentId, onOpen, onNewStage, onApplyBri
         h("div", { class: "lg-row" }, [
           btn("Add selected", async () => {
             const ids = [...picker.querySelectorAll("input:checked")].map((c) => c.value);
+            if (!ids.length) return say("Tick the stages to add first.");
+            // Stages taken from another match leave it, and that match's stages are numbered again.
+            for (const other of takeFromOthers(await listMatches(), m.id, ids)) { await save(other); await syncBriefings(other); }
             adding = false;
             await update(addStages(m, ids));
-          }, "lg-btn lg-btn-primary", null, { disabled: !others.some((r) => !taken.has(r.id)) }),
+          }, "lg-btn lg-btn-primary", null, { disabled: !others.length }),
           btn("Cancel", async () => { adding = false; await fill(); }),
         ]),
       ]);
     }
-    box.replaceChildren(
+    box.replaceChildren(...[
       h("div", { class: "match-head" }, [
         btn("All projects", async () => { openId = null; adding = false; await fill(); }, "lg-btn lg-btn-ghost", "chevl"),
       ]),
@@ -139,8 +149,9 @@ export function createMatches({ store, currentId, onOpen, onNewStage, onApplyBri
         btn("Export the match", () => onExport(m, m.stageIds.map((id) => byId.get(id).stage)), "lg-btn", "doc", { disabled: !m.stageIds.length, title: "One file with the match and all its stages" }),
       ]),
       picker,
+      note,
       h("p", { class: "lg-muted hint-text", text: "Each stage here gets the match name and its stage number in its briefing. Taking a stage out (or deleting the match) keeps the stage as a project." }),
-    );
+    ].filter(Boolean));
   }
 
   async function fill() {

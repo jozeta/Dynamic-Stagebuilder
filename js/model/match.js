@@ -73,3 +73,9 @@ export function inOtherMatches(matches, matchId) {
 export function dropStageEverywhere(matches, stageId, now = Date.now()) {
   return matches.filter((m) => m.stageIds.includes(stageId)).map((m) => removeStage(m, stageId, now));
 }
+
+/** Adding `ids` to match `matchId` moves them out of any other match: those matches, changed. */
+export function takeFromOthers(matches, matchId, ids, now = Date.now()) {
+  return matches.filter((m) => m.id !== matchId && m.stageIds.some((id) => ids.includes(id)))
+    .map((m) => touch(m, now, { stageIds: m.stageIds.filter((id) => !ids.includes(id)) }));
+}

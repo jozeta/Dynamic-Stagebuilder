@@ -4,6 +4,13 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Matches: a stage that is already in another match can be added (it was greyed out, so adding
+  your stages to a new match could do nothing); it moves from that match, which closes up its
+  numbers. *Add selected* with nothing ticked says so. A match's page shows only the match (the
+  stage list and library showed below it), and a stray "null" under its buttons is gone.
+- Fix: anything hidden by the app is hidden whatever its style (some panels and buttons showed
+  anyway).
+
 - Picking a prop (or a group) in the *On stage* list slides the camera over to it, so it is in the
   middle of the view; the distance and angle stay, nothing zooms.
 

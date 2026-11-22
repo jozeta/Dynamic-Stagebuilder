@@ -51,3 +51,12 @@ test("a stored match is checked before use", () => {
   assert.equal(cleanMatch({ kind: "match", id: "m", name: "x".repeat(500), stageIds: [] }).name.length, 120);
   assert.equal(cleanMatch({ kind: "match", id: "m", name: "X", stageIds: Array.from({ length: 300 }, (_, i) => `s${i}`) }).stageIds.length, 100, "at most 100 stages");
 });
+
+test("adding a stage that is in another match moves it: it leaves the other match, which closes up", async () => {
+  const { createMatch, addStages, takeFromOthers } = await import("../js/model/match.js");
+  const a = addStages(createMatch({ name: "A" }), ["s1", "s2", "s3"]), b = addStages(createMatch({ name: "B" }), ["s9"]);
+  const changed = takeFromOthers([a, b], b.id, ["s2", "s9"]);
+  assert.equal(changed.length, 1, "only the match that loses a stage changes");
+  assert.deepEqual(changed[0].stageIds, ["s1", "s3"]);
+  assert.deepEqual(takeFromOthers([a, b], b.id, ["s7"]), [], "stages in no other match: nothing changes");
+});

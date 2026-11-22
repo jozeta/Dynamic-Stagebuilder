@@ -1,6 +1,8 @@
 /* The app's own styles. Build on the Låda Glass tokens (var(--lg-…)) and lg- components; animate
    only with --lg-dur-* and keep a prefers-reduced-motion rule for any animation added here. */
 html, body { height: 100%; margin: 0; }
+/* hidden always hides, whatever display a Låda Glass class (lg-stack, lg-btn…) gives the element. */
+[hidden] { display: none !important; }
 body { background: var(--lg-bg); overflow: hidden; }
 
 .app {
