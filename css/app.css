@@ -438,3 +438,10 @@ body { background: var(--lg-bg); overflow: hidden; }
 .brief-slot { padding-top: var(--lg-space-s); }
 .brief-slot .lg-btn { width: 100%; justify-content: center; min-height: var(--lg-touch); }
 .settings-modal > * { flex-shrink: 0; }          /* the modal scrolls; its tabs and rows keep their height */
+
+/* Every modal hangs from a fixed distance below the top of the window and grows downwards only
+   (Låda Glass centres them, so a modal whose content grows spread up and down at once). */
+.lg-modal { --modal-top: max(24px, 6dvh); margin: var(--modal-top) auto auto; max-height: calc(100dvh - var(--modal-top) - 24px); }
+.help-modal { --modal-top: 24px; height: calc(100dvh - 48px); }
+.plan-modal { --modal-top: 16px; height: calc(100dvh - 32px); max-height: calc(100dvh - 32px); }
+.settings-modal { max-height: calc(100dvh - var(--modal-top) - 24px); }

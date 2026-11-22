@@ -4,6 +4,10 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Every window (Settings, Briefing, About, Help, the drawing and plan windows, the questions) hangs
+  from a fixed place near the top and grows downwards only; they were centred, so a window whose
+  content changed grew up and down at once.
+
 - With something selected, turning the view circles round it: dragging the ground swings the view
   round the selection (the pivot glides onto it), and the view pad's *Look* arrows circle the camera
   round it (pan) or raise and lower it round it (tilt).
