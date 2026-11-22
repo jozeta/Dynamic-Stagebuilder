@@ -12,6 +12,10 @@ import { groundPoint, createDragTracker } from "./ground.js";
 import { yawDegrees } from "./rotation.js";
 import { insertIndex } from "../model/route.js";
 import { rotationSnap } from "../model/snap.js";
+import { sweepRadius } from "../model/rotation-sweep.js";
+import { dimensionsOf } from "../model/props.js";
+import { createRotationSweep, createMoveGuide } from "./rotation-sweep.js";
+import { moveOf } from "../model/move-guide.js";
 
 const TAP_PX = 6;
 
@@ -35,6 +39,59 @@ export function attachPicking({ engine, stageView, editor, cameraRig, canvas, on
   const onShift = (e) => { if (e.shiftKey !== shift) { shift = e.shiftKey; snapRing(); } };
   window.addEventListener("keydown", onShift);
   window.addEventListener("keyup", onShift);
+  // A sharp screen label for the guides ("+30°", "2.3 m"), pinned to a point on the ground. Text only
+  // (textContent), placed with style properties (the CSP allows no inline style attributes).
+  const tag = document.createElement("div");
+  tag.className = "guide-tag";
+  tag.hidden = true;
+  canvas.parentElement?.append(tag);
+  const tagAt = new THREE.Vector3();
+  function showTag(text, [x, z], y = 0) {
+    tagAt.set(x, y, z).project(camera);
+    if (tagAt.z > 1) { tag.hidden = true; return; }           // behind the camera
+    tag.textContent = text;
+    tag.style.setProperty("left", `${canvas.offsetLeft + ((tagAt.x + 1) / 2) * canvas.clientWidth}px`);
+    tag.style.setProperty("top", `${canvas.offsetTop + ((1 - tagAt.y) / 2) * canvas.clientHeight}px`);
+    tag.hidden = false;
+  }
+  // Metres per screen pixel at a point on the ground, so guides keep their size on screen.
+  const metresPerPixel = ([x, z], y = 0) => (2 * camera.position.distanceTo(new THREE.Vector3(x, y, z)) * Math.tan((camera.fov * Math.PI) / 360)) / Math.max(1, canvas.clientHeight);
+
+  // While the ring turns a prop: the angle it started at, the angle now and the turn, on the ground.
+  const sweep = createRotationSweep();
+  engine.groups.helper.add(sweep.group);
+  let turning = null;      // { from, centre, y, radius } while the ring is dragged
+  const showSweep = () => {
+    if (!turning || !gizmo.object) return;
+    const mpp = metresPerPixel(turning.centre, turning.y);
+    // The circle a little wider than the ring; the turn just outside it.
+    const s = sweep.show({ ...turning, radius: Math.max(turning.radius, 100 * mpp), gap: 28 * mpp, to: yawDegrees(gizmo.object) });
+    showTag(s.text, s.labelAt, turning.y);
+  };
+
+  // While a prop is dragged: where it started, a line to where it is now, and how far it has moved.
+  const moveGuide = createMoveGuide();
+  engine.groups.helper.add(moveGuide.group);
+  let moving = null;       // { id, from } while a prop is dragged
+  function showMove() {
+    const o = moving && editor.stage().objects.find((x) => x.id === moving.id);
+    if (!o) return;
+    const m = moveOf(moving.from, o.position);
+    moveGuide.show({ from: moving.from, to: o.position, size: Math.max(0.12, 10 * metresPerPixel(moving.from)) });
+    showTag(m.text, m.labelAt);
+    engine.requestRender();
+  }
+  function endMove() { moving = null; moveGuide.hide(); tag.hidden = true; engine.requestRender(); }
+  gizmo.addEventListener("objectChange", () => { showSweep(); engine.requestRender(); });
+  gizmo.addEventListener("dragging-changed", (e) => {
+    if (e.value && gizmo.object) {
+      const o = editor.stage().objects.find((x) => x.id === gizmo.object.userData.id);
+      const p = gizmo.object.getWorldPosition(new THREE.Vector3());
+      turning = { from: yawDegrees(gizmo.object), centre: [p.x, p.z], y: o ? 0 : p.y, radius: sweepRadius(o ? dimensionsOf(o) : { w: 1, d: 1 }) };
+      showSweep();
+    } else { turning = null; sweep.hide(); tag.hidden = true; }
+    engine.requestRender();
+  });
   gizmo.addEventListener("dragging-changed", (e) => {
     cameraRig.controls.enabled = !e.value;
     if (!e.value && gizmo.object) {
@@ -117,6 +174,8 @@ export function attachPicking({ engine, stageView, editor, cameraRig, canvas, on
       press.dragging = true;
       press.tracker = createDragTracker();
       editor.dispatch({ type: "dragStart", ids: editor.state.selection });
+      const o = editor.stage().objects.find((x) => x.id === press.id);
+      moving = o ? { id: o.id, from: [...o.position] } : null;
     }
     if (press.dragging) {
       const g = groundAt(e);
@@ -124,6 +183,7 @@ export function attachPicking({ engine, stageView, editor, cameraRig, canvas, on
       // Shift: a fifth of the speed and no snapping, for fine placement.
       const delta = press.tracker.update([g[0] - press.ground[0], g[1] - press.ground[1]], e.shiftKey);
       editor.dispatch({ type: "dragMove", delta, fine: e.shiftKey });
+      showMove();
     }
   });
 
@@ -139,7 +199,7 @@ export function attachPicking({ engine, stageView, editor, cameraRig, canvas, on
       else editor.dispatch({ type: "addVia", id: p.route.leg.to, index: insertIndex(p.route.leg.points, p.route.point), point: p.route.point });
       return;
     }
-    if (p.dragging) { editor.dispatch({ type: "dragEnd" }); return; }
+    if (p.dragging) { editor.dispatch({ type: "dragEnd" }); endMove(); return; }
     const tap = Math.hypot(e.clientX - p.x, e.clientY - p.y) <= TAP_PX;
     if (!tap || e.type === "pointercancel") return;
     const mode = editor.state.mode;

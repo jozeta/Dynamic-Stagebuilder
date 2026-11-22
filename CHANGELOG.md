@@ -4,6 +4,11 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Turning a prop with the rotate ring shows, on the ground, a line for the angle it started at, a
+  line for the angle now, the area between them in see-through grey, and the turn ("+30°") beside it.
+- Dragging a prop marks where it started, draws a line to where it is now and shows how far it has
+  moved in metres (one decimal).
+
 - Fix: the rotate ring in the 3D view turns in the angle-snap steps (15° by default) while you drag,
   not only when you let go; hold Shift to turn freely to an exact angle.
 

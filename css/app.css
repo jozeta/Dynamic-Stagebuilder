@@ -555,3 +555,8 @@ body { background: var(--lg-bg); overflow: hidden; }
 
 .brief-slot { display: grid; gap: var(--lg-space-xs); }
 .brief-slot .close-stage-btn { order: 2; }      /* under Written stage briefing… */
+/* The 3D view's guide labels while turning or dragging a prop ("+30°", "2.3 m"): sharp screen text
+   with a dark outline, beside the guide on the ground. */
+.guide-tag { position: absolute; z-index: 4; transform: translate(-50%, -50%); pointer-events: none; white-space: nowrap;
+  font: 700 15px/1 var(--lg-font, system-ui, sans-serif); color: #fff; font-variant-numeric: tabular-nums;
+  padding: 4px 7px; border-radius: 6px; background: rgb(20 22 25 / 0.72); }
