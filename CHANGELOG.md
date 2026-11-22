@@ -4,6 +4,10 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- The stage's name shows over the 3D view, between the view buttons and the camera arrows, in white
+  with a thin black outline and no background (just under the view buttons when the view is too
+  narrow for both). It follows renames at once.
+
 - *New stage* (and *New stage in this match*) asks for the stage's name first; *Cancel* or Escape
   makes no stage, and an empty name isn't accepted.
 

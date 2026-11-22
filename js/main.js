@@ -547,6 +547,24 @@ menu.attach(canvas, { target: (e) => picking.objectAt(e, { locked: true }), grou
 const layers = createLayers(document.getElementById("layers"), { editor, menu, onFocus: (ids) => rig.focusOn(selectionCentre(editor.stage(), ids)) });
 const selectedCentre = () => selectionCentre(editor.stage(), editor.state.selection);
 createCameraPad(document.getElementById("camera-slot"), { rig, around: selectedCentre });
+// The stage's name over the view, in the gap between the view buttons and the camera arrows (below
+// the buttons when the view is too narrow for both). Text only, never in the way of the view.
+const stageTitle = h("div", { class: "stage-title", "aria-hidden": "true" });
+document.getElementById("camera-slot").append(stageTitle);
+function placeStageTitle() {
+  const slot = document.querySelector(".viewport-wrap").getBoundingClientRect();
+  const bar = document.querySelector(".camera-bar")?.getBoundingClientRect(), pad = document.querySelector(".camera-pad")?.getBoundingClientRect();
+  if (!bar || !pad || !slot.width) return;
+  const left = bar.right - slot.left + 12, right = slot.right - pad.left + 12;
+  const roomy = slot.width - left - right >= 120 && pad.top - slot.top < 60;
+  stageTitle.classList.toggle("is-below", !roomy);
+  stageTitle.style.setProperty("--title-left", `${roomy ? left : bar.left - slot.left}px`);
+  stageTitle.style.setProperty("--title-right", `${roomy ? right : slot.right - bar.right}px`);
+  stageTitle.style.setProperty("--title-top", `${roomy ? bar.top - slot.top : bar.bottom - slot.top + 6}px`);
+  stageTitle.style.setProperty("--title-h", `${bar.height}px`);
+}
+updaters.push((state) => { const name = state.history.present.name || "Untitled stage"; if (stageTitle.textContent !== name) stageTitle.textContent = name; requestAnimationFrame(placeStageTitle); });
+new ResizeObserver(() => placeStageTitle()).observe(document.querySelector(".viewport-wrap"));
 // Turning the view (left drag on empty ground, one finger) with something selected turns it round
 // the selection: the pivot glides onto it as the drag starts. Dragging a prop doesn't move the camera.
 let viewButton = -1;

@@ -469,3 +469,11 @@ body { background: var(--lg-bg); overflow: hidden; }
 /* A match's Add stages list: the 59 ready-made stages scroll in their own box. */
 .match-picker .match-ready { max-height: 260px; overflow: auto; }
 .match-picker .lg-label { margin-top: var(--lg-space-xs); }
+
+/* The stage's name over the 3D view: white with a thin black outline, no background. */
+.stage-title { position: absolute; top: var(--title-top, 8px); left: var(--title-left, 50%); right: var(--title-right, auto); height: var(--title-h, 36px);
+  display: block; line-height: var(--title-h, 36px); text-align: center; pointer-events: none; color: #fff; font-weight: 650; font-size: 15px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: 0.01em;
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 -1px 0 #000, 0 1px 0 #000, -1px 0 0 #000, 1px 0 0 #000; }
+.stage-title.is-below { text-align: left; height: auto; line-height: 1.4; }
+.stage-title:empty { display: none; }
