@@ -416,7 +416,7 @@ the printed 3D view uses the same light.
 
 **Undo anything** with Undo/Redo or ⌘Z / ⇧⌘Z (Ctrl on Windows).
 
-**Write the briefing.** *Written stage briefing…*, in the right-hand panel under the stage statistics, opens the Written Stage Briefing. Fill in the match, stage
+**Write the briefing.** *Written stage briefing…*, in the right-hand panel under the stage statistics (with nothing selected), opens the Written Stage Briefing. Fill in the match, stage
 number, designer, start signal, start position, gun condition, procedure and notes. Scoring, start
 signal, start position, gun condition and stop time have a list of common wordings; *Custom text…*
 lets you type your own. *Add a common sentence…* adds a usual procedure line. Targets,

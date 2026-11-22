@@ -437,6 +437,7 @@ body { background: var(--lg-bg); overflow: hidden; }
 .settings-modal .settings-foot { background: var(--lg-bg); }
 .brief-slot { padding-top: var(--lg-space-s); }
 .brief-slot .lg-btn { width: 100%; justify-content: center; min-height: var(--lg-touch); }
+.brief-slot[hidden] { display: none; }
 .settings-modal > * { flex-shrink: 0; }          /* the modal scrolls; its tabs and rows keep their height */
 
 /* Every modal hangs from a fixed distance below the top of the window and grows downwards only

@@ -14,9 +14,11 @@ export function createToolbar(root, { editor, rig, onViewing = () => {}, walking
   const undoB = btn("undo", "Undo", () => editor.dispatch({ type: "undo" }));
   const redoB = btn("redo", "Redo", () => editor.dispatch({ type: "redo" }));
   const numB = btn("hash", "Renumber", () => editor.dispatch({ type: "renumber" }));
-  // The briefing opens from the right-hand panel, under the stage's statistics.
+  // The briefing opens from the right-hand panel, under the stage's statistics, while it shows the
+  // stage (nothing selected); a selected prop's panel has no briefing button.
   const wsbB = h("button", { type: "button", class: "lg-btn brief-btn", onclick: onBriefing }, [icon("doc"), "Written stage briefing…"]);
-  document.getElementById("brief-slot")?.append(wsbB);
+  const briefSlot = document.getElementById("brief-slot");
+  briefSlot?.append(wsbB);
   const printB = btn("print", "Print", onPrint);
 
   const cams = h("div", { class: "camera-bar lg-glass", role: "group", "aria-label": "Camera" }, [
@@ -36,6 +38,7 @@ export function createToolbar(root, { editor, rig, onViewing = () => {}, walking
 
   return function update(state) {
     eyeSteps.update();
+    if (briefSlot) briefSlot.hidden = state.selection.length > 0;
     undoB.disabled = !canUndo(state.history);
     redoB.disabled = !canRedo(state.history);
   };

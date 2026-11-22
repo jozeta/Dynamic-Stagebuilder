@@ -20,7 +20,7 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
   right-hand panel.
 - The toolbar: *Duplicate* and *Delete* are gone from it (they are in the inspector, the right-click
   menu and ⌘/Ctrl D, Delete); *Print* sits left of *Settings*; *Written stage briefing…* moved to the
-  right-hand panel, under the stage statistics.
+  right-hand panel, under the stage statistics, shown while the panel shows the stage (nothing selected).
 - Saving shows a green *Saved* alert under the toolbar that fades away after a few seconds (it was a
   chip in the toolbar); a problem saving stays until you close it.
 - The Help window is nearly as big as the browser window.
