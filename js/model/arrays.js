@@ -24,17 +24,19 @@ export function paperSize(obj) {
 
 const STACK_GAP = 0.02;   // between stacked cards (m)
 const T = "target", N = "noshoot";
-// Each card: kind, x and y in card widths/heights from the main card's bottom centre, and its layer
-// (front: stapled in front, toward the shooter; back: behind on its own sticks).
+// Each card: kind, x and y in card widths/heights from the main card's bottom centre, and its layer:
+// main (on the main stand's sticks), front (stapled on the cards behind it: only where they back at
+// least half of it), fore (on its own stand in front, toward the shooter) or back (its own stand
+// behind). Cards that only overlap an edge stand on their own sticks, as on a real range.
 export const PRESENTATIONS = Object.freeze([
   { id: "target", name: "Target", cards: [[T, 0, 0]] },
   { id: "noshoot", name: "No-shoot", cards: [[N, 0, 0]] },
   { id: "ns-lower", name: "Target, no-shoot over the lower half", cards: [[T, 0, 0.5], [N, 0, 0, "front"]] },
-  { id: "ns-left", name: "Target, no-shoot over the left side", cards: [[T, 0, 0], [N, 0.55, 0, "front"]] },
-  { id: "ns-right", name: "Target, no-shoot over the right side", cards: [[T, 0, 0], [N, -0.55, 0, "front"]] },
-  { id: "ns-flank", name: "Target between two no-shoots", cards: [[T, 0, 0], [N, 0.6, 0, "front"], [N, -0.6, 0, "front"]] },
+  { id: "ns-left", name: "Target, no-shoot over the left side", cards: [[T, 0, 0], [N, 0.55, 0, "fore"]] },
+  { id: "ns-right", name: "Target, no-shoot over the right side", cards: [[T, 0, 0], [N, -0.55, 0, "fore"]] },
+  { id: "ns-flank", name: "Target between two no-shoots", cards: [[T, 0, 0], [N, 0.6, 0, "fore"], [N, -0.6, 0, "fore"]] },
   { id: "ns-behind", name: "Target in front of a no-shoot", cards: [[T, 0, 0], [N, 0.55, 0.1, "back"]] },
-  { id: "two-overlap", name: "Two overlapping targets", cards: [[T, 0.35, 0], [T, -0.35, 0, "front"]] },
+  { id: "two-overlap", name: "Two overlapping targets", cards: [[T, 0.35, 0], [T, -0.35, 0, "fore"]] },
   { id: "two-ns-between", name: "Two targets, no-shoot between", cards: [[T, 0.6, 0], [T, -0.6, 0], [N, 0, 0.15, "front"]] },
   { id: "stacked", name: "Two targets, one above the other", cards: [[T, 0, 0], [T, 0, "up"]] },
   { id: "stacked-ns", name: "Target above a no-shoot", cards: [[N, 0, 0], [T, 0, "up"]] },
@@ -73,20 +75,33 @@ export function arrayCounts(obj) {
   return { paper: cards.filter((c) => c[0] === T).length, noshoot: cards.filter((c) => c[0] === N).length };
 }
 
-/** Where the stands go: one under each card that isn't stapled in front (distinct x, in metres). */
+// How far a card's own stand stands in front of (fore) or behind (back) the main stand: more than a
+// stand's depth (26 cm), so the stands never touch.
+export const STAND_SPACING = 0.32;
+const LAYER_DEPTH = { fore: -STAND_SPACING, main: 0, back: STAND_SPACING };
+/** How far in z (− toward the shooter) a layer's stand stands from the main one; stapled cards sit on the main one. */
+export const layerZ = (layer) => LAYER_DEPTH[layer] ?? 0;
+
+/**
+ * Where the stands go: one under each card (or column of stacked cards) on its own sticks, centred
+ * under it: [{ x, z, layer }] in metres, before the array is centred on the prop.
+ */
 export function arrayStands(obj) {
-  return [...new Set(arrayCards(obj).filter((c) => c.layer !== "front").map((c) => c.x))];
+  const seen = new Map();
+  for (const c of arrayCards(obj)) if (c.layer !== "front") seen.set(`${c.x}|${c.layer}`, { x: c.x, z: layerZ(c.layer), layer: c.layer });
+  return [...seen.values()];
 }
 
 /**
  * The array's extent in metres: { minX, maxX } across the cards and stands (standWidth wide), and
  * top, the highest card edge above the stand height.
  */
-export function arrayExtent(obj, standWidth = 0) {
+export function arrayExtent(obj, standWidth = 0, standDepth = 0) {
   const { w, h } = paperSize(obj);
-  const cards = arrayCards(obj);
-  const xs = [...cards.flatMap((c) => [c.x - w / 2, c.x + w / 2]), ...arrayStands(obj).flatMap((x) => [x - standWidth / 2, x + standWidth / 2])];
-  return { minX: Math.min(...xs), maxX: Math.max(...xs), top: Math.max(...cards.map((c) => c.y + h)) };
+  const cards = arrayCards(obj), stands = arrayStands(obj);
+  const xs = [...cards.flatMap((c) => [c.x - w / 2, c.x + w / 2]), ...stands.flatMap((s) => [s.x - standWidth / 2, s.x + standWidth / 2])];
+  const zs = stands.flatMap((s) => [s.z - standDepth / 2, s.z + standDepth / 2]);
+  return { minX: Math.min(...xs), maxX: Math.max(...xs), minZ: Math.min(...zs), maxZ: Math.max(...zs), top: Math.max(...cards.map((c) => c.y + h)) };
 }
 
 /**

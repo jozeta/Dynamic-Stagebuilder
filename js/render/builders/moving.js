@@ -118,7 +118,7 @@ export function buildTexasStar(obj) {
   star.userData.anim = { kind: "spin" };
   const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.06, 20), getMaterial("steel-dark"));
   hub.rotation.x = Math.PI / 2;
-  hub.position.set(0, 0, -0.02);
+  hub.position.set(0, 0, -0.01);                  // on its axle, against the post
   star.add(hub);
   for (const [x, y] of starPlates(obj.params.plates)) {
     const len = Math.hypot(x, y - s.hub), arm = box(len, 0.04, 0.015, "steel-dark", x / 2, (y - s.hub) / 2, -0.035);
@@ -144,6 +144,7 @@ export function buildPlateRack(obj) {
     hinge.position.set((i - (n - 1) / 2) * r.pitch, r.centre - r.plate / 2, -0.05);
     hinge.userData.anim = { kind: "fall", delay: i * 0.35, period: n * 0.35 + 2 };
     hinge.add(disc(r.plate, `steel-${obj.params.paint || "white"}`, 0, r.plate / 2, 0));
+    hinge.add(box(0.08, 0.03, 0.016, "steel-dark", 0, 0.015, 0.014));                                // its hinge on the beam
     g.add(hinge);
   }
   return g;

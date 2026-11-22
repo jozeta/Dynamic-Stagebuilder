@@ -30,7 +30,8 @@ export function buildPopper(obj) {
   const s = obj.type === "mini-popper" ? TARGET_SIZES.miniPopper : TARGET_SIZES.popper;
   const g = group(obj.id);
   const bh = obj.params.baseHeight;
-  if (bh > 0) g.add(box(POST, bh, POST, "steel-dark", 0, bh / 2, 0));
+  // Raised: the base plate on a post, the post on a foot plate on the ground.
+  if (bh > 0) { g.add(box(Math.max(s.w, PLATE_FOOT), 0.02, Math.max(s.d, PLATE_FOOT), "steel-dark", 0, 0.01, 0)); g.add(box(POST, bh, POST, "steel-dark", 0, bh / 2, 0)); }
   g.add(box(s.w, BASE, s.d, "steel-dark", 0, bh + BASE / 2, 0));
   // Hinge bracket the popper falls back on.
   g.add(box(s.w * 0.55, 0.05, 0.05, "steel-dark", 0, bh + BASE + 0.025, 0.055));
@@ -57,7 +58,8 @@ export function buildPlate(obj) {
   const { size, baseHeight: bh } = obj.params;
   const g = group(obj.id);
   g.add(box(PLATE_FOOT, 0.02, PLATE_FOOT, "steel-dark", 0, 0.01, 0));
-  g.add(box(POST, bh, POST, "steel-dark", 0, bh / 2, 0));
+  // The post runs up behind the plate to its centre, where the plate is bolted on.
+  g.add(box(POST, bh + size / 2, POST, "steel-dark", 0, (bh + size / 2) / 2, 0));
   const paint = getMaterial(`steel-${obj.params.paint || "white"}`);
   let plate;
   if (obj.type === "plate-round") {

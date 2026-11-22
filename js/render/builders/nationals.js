@@ -44,7 +44,7 @@ export function buildBobber(obj) {
   const g = group(obj.id), c = paperSize(obj);
   g.add(box(0.6, 0.05, 0.5, "steel-dark", 0, 0.025, 0));
   g.add(box(0.6, 0.9, 0.02, "hard-cover", 0, 0.45, -0.2));
-  g.add(box(0.06, 0.9, 0.06, "steel-dark", 0, 0.45, 0.12));
+  g.add(box(0.06, 0.9, 0.06, "steel-dark", 0, 0.45, TARGET_STICK / 2 + 0.03));          // the guide post, right behind the riser
   const riser = new THREE.Group();
   riser.userData.anim = { kind: "bob", drop: c.h + 0.15 };
   riser.add(box(TARGET_STICK, 0.75 + c.h * 0.5, TARGET_STICK, "stick-wood", 0, 0.25 + (0.75 + c.h * 0.5) / 2, 0));
@@ -62,8 +62,10 @@ export function buildTwister(obj) {
   g.add(box(0.05, 0.9, 0.05, "steel-dark", 0, 0.45, 0));
   const spin = new THREE.Group();
   spin.userData.anim = { kind: "twist" };
+  const c = paperSize(obj);
+  spin.add(box(0.025, 0.1 + c.h * 0.5, 0.025, "steel-dark", 0, 0.85 + (0.1 + c.h * 0.5) / 2, 0));   // the spindle, up behind the card
   const card = paperCard(obj);
-  card.position.set(0, 0.9, -0.003);
+  card.position.set(0, 0.9, -0.0125 - 0.006);
   spin.add(card);
   g.add(spin);
   return g;

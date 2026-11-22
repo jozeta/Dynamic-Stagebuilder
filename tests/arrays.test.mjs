@@ -53,7 +53,7 @@ test("cards: the lowest card sits on the stand height, stacked targets one above
   const d = dimensionsOf(o);
   assert.ok(Math.abs(d.h - (0.3 + cards[1].y + h)) < 1e-6, `height ${d.h}`);
   const flank = arrayCards(obj("paper-ipsc", { presentation: "ns-flank" }));
-  assert.equal(flank.filter((k) => k.layer === "front" && k.kind === "noshoot").length, 2);
+  assert.equal(flank.filter((k) => k.layer === "fore" && k.kind === "noshoot").length, 2, "the flanking no-shoots stand on their own stands in front");
   const fw = dimensionsOf(obj("paper-ipsc", { presentation: "ns-flank" })).w;
   assert.ok(fw > 2 * w, `the flanked array is wider than two cards (${fw})`);
 });

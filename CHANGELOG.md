@@ -4,6 +4,18 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Targets stand the way they do on a range, nothing floats:
+  - Paper: in *Two overlapping targets*, *No-shoot over the left/right side* and *Target between
+    two no-shoots*, the card that only overlaps an edge stands on its own stand 32 cm in front
+    (it was stapled on and hung in the air); *Target in front of a no-shoot* has its rear stand
+    behind, with its sticks in its sockets (the stands overlapped). Every stand is centred under
+    its sticks and card, and the whole array is centred on the prop.
+  - Steel: a raised popper stands on a foot plate (it stood on a bare post); a plate's post runs
+    up behind it to its centre (it held the plate by its bottom edge).
+  - Moving: the twister's card sits on its spindle, the bobber's riser runs up its guide post, the
+    Texas star's hub sits on its post and the plate rack's plates are hinged to the beam.
+- The version number now matches everywhere (package-lock.json still said 0.2.0); a test keeps it so.
+
 ## 0.9.1 (2026-11-21)
 
 - Fix: opened over plain `http://` from another computer (a network address, not `localhost`), the

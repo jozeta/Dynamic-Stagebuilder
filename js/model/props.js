@@ -278,14 +278,14 @@ export function dimensionsOf(obj) {
   switch (obj.type) {
     case "paper-ipsc": case "paper-mini": {
       // The builder centres the array on the object's position.
-      const e = arrayExtent({ type: obj.type, params: p }, STAND.w);
-      [w, h, d] = [e.maxX - e.minX, p.mountHeight + e.top, STAND.d]; break;
+      const e = arrayExtent({ type: obj.type, params: p }, STAND.w, STAND.d);
+      [w, h, d] = [e.maxX - e.minX, p.mountHeight + e.top, e.maxZ - e.minZ]; break;
     }
     case "popper": {
-      const s = TARGET_SIZES.popper; [w, h, d] = [s.w, p.baseHeight + s.h, s.d]; break;
+      const s = TARGET_SIZES.popper, f = p.baseHeight > 0 ? PLATE_FOOT : 0; [w, h, d] = [Math.max(s.w, f), p.baseHeight + s.h, Math.max(s.d, f)]; break;
     }
     case "mini-popper": {
-      const s = TARGET_SIZES.miniPopper; [w, h, d] = [s.w, p.baseHeight + s.h, s.d]; break;
+      const s = TARGET_SIZES.miniPopper, f = p.baseHeight > 0 ? PLATE_FOOT : 0; [w, h, d] = [Math.max(s.w, f), p.baseHeight + s.h, Math.max(s.d, f)]; break;
     }
     case "plate-round": case "plate-square":
       [w, h, d] = [Math.max(p.size, PLATE_FOOT), p.baseHeight + p.size, PLATE_FOOT]; break;
