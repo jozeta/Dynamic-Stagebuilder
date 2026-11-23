@@ -572,3 +572,9 @@ body { background: var(--lg-bg); overflow: hidden; }
 .proj-row > select.lg-select { flex: 1 1 100%; }
 .lib-folder > .lib-summary > .lg-icon { flex: none; color: var(--lg-accent); width: 16px; height: 16px; }
 .lib-folder .lib-stages { margin: 0 0 var(--lg-space-s) var(--lg-space-s); }
+
+/* The club's name and logo in the briefing window. */
+.club-fields { border: 1px solid var(--lg-border); border-radius: var(--lg-radius-card); padding: var(--lg-space-m); margin: 0 0 var(--lg-space-m); display: grid; gap: var(--lg-space-s); }
+.club-logo { align-items: center; gap: var(--lg-space-s); flex-wrap: wrap; }
+.club-logo-img { max-height: 48px; max-width: 160px; object-fit: contain; background: #fff; border-radius: var(--lg-radius-small); padding: 2px; }
+.club-label { font-weight: 500; }

@@ -4,6 +4,10 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Club name and logo on every printed brief (in the header, and on a match print's cover), set in
+  the briefing window and kept in this browser, not in the stage. A chosen logo is redrawn and kept
+  as a small PNG; it travels in a backup.
+
 - Back up everything (Projects): one file with every stage, match, folder and your own surroundings
   with their plan images. *Import file…* restores it: everything comes in as new records next to
   what you have, with the matches, folders and surroundings still linked to their stages; damaged

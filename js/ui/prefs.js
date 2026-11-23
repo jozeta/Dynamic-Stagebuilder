@@ -5,6 +5,7 @@ import { cleanCameraView } from "../model/camera-view.js";
 import { walkSpeed } from "../model/route.js";
 import { cleanRunLook } from "../model/run-look.js";
 import { cleanShapeList } from "../model/bay.js";
+import { cleanClub } from "../model/club.js";
 
 const KEY = "dsb:hidden-props";
 export function loadHidden() { try { return cleanHidden(JSON.parse(localStorage.getItem(KEY) || "null")); } catch { return cleanHidden(null); } }
@@ -30,3 +31,9 @@ const SHAPES = "dsb:bay-shapes";
 export function loadShapes() { try { return cleanShapeList(JSON.parse(localStorage.getItem(SHAPES) || "[]")); } catch { return []; } }
 /** Save the list; false when the browser's storage is full or unavailable. */
 export function saveShapes(list) { try { localStorage.setItem(SHAPES, JSON.stringify(cleanShapeList(list))); return true; } catch { return false; } }
+
+// The club's name and logo on every printed brief (the briefing window).
+const CLUB = "dsb:club";
+export function loadClub() { try { return cleanClub(JSON.parse(localStorage.getItem(CLUB) || "null")); } catch { return cleanClub(null); } }
+/** Save it; false when the browser's storage is full or unavailable. */
+export function saveClub(v) { try { localStorage.setItem(CLUB, JSON.stringify(cleanClub(v))); return true; } catch { return false; } }

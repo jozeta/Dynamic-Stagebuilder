@@ -80,3 +80,11 @@ test("only PNG, JPEG or WebP data URLs are images", () => {
   assert.equal(dataUrlToBytes("javascript:alert(1)"), null);
   assert.equal(dataUrlToBytes("data:image/jpeg;base64,/9j/").type, "image/jpeg");
 });
+
+test("the club's name and logo travel in the backup, checked on the way back", () => {
+  const r = parseBackup(backupToJson({ ...data(), club: { name: "GPSK", logo: "data:image/png;base64,iVBORw0KGgo=" } }));
+  assert.deepEqual(r.club, { name: "GPSK", logo: "data:image/png;base64,iVBORw0KGgo=" });
+  const bad = parseBackup(backupToJson({ ...data(), club: { name: "GPSK", logo: "javascript:x" } }));
+  assert.equal(bad.club.logo, null);
+  assert.equal(parseBackup(backupToJson(data())).club, null);
+});

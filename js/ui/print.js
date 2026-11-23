@@ -135,18 +135,22 @@ function distanceSheet(stage) {
   ]);
 }
 
-export function renderPrint(root, stage, snapshot, { threeD = true, setup = true, distances = true } = {}) {
+// The club's logo and name (model/club.js) on a page's header; the logo is a data URL the app made.
+const clubLogo = (club) => (club?.logo ? h("img", { class: "print-logo", src: club.logo, alt: club.name ? `${club.name} logo` : "Club logo" }) : null);
+
+export function renderPrint(root, stage, snapshot, { threeD = true, setup = true, distances = true, club = null } = {}) {
   const b = stage.briefing;
   const { procedure, notes } = briefingText(stage);
   const row = Object.fromEntries(briefingRows(stage).map((r) => [r.label, r.value]));
   const cell = (label, wide = false) => h("div", { class: `print-cell${wide ? " wide" : ""}` }, [h("span", { class: "print-k", text: label }), h("span", { class: "print-v", text: row[label] })]);
   const figure = (label, value) => h("div", { class: "print-figure" }, [h("span", { class: "print-k", text: label }), h("strong", { text: value })]);
-  const meta = [b.matchName.trim() ? null : "Written Stage Briefing", row.Designer !== "–" ? `Designer: ${row.Designer}` : null, `Stage type: ${row["Stage type"]}`].filter(Boolean).join("  ·  ");
+  const meta = [b.matchName.trim() || club?.name ? null : "Written Stage Briefing", row.Designer !== "–" ? `Designer: ${row.Designer}` : null, `Stage type: ${row["Stage type"]}`].filter(Boolean).join("  ·  ");
   const nodes = [
-    h("header", { class: "print-head" }, [
+    h("header", { class: `print-head${club?.logo ? " has-logo" : ""}` }, [
+      clubLogo(club),
       h("div", { class: "print-badge" }, [h("span", { text: "Stage" }), h("strong", { text: String(b.stageNumber) })]),
       h("div", { class: "print-title" }, [
-        b.matchName.trim() ? h("p", { class: "print-match", text: b.matchName.trim() }) : null,
+        club?.name || b.matchName.trim() ? h("p", { class: "print-match", text: [club?.name, b.matchName.trim()].filter(Boolean).join("  ·  ") }) : null,
         h("h1", { text: stage.name || "Untitled stage" }),
         h("p", { class: "print-meta", text: meta }),
       ]),
@@ -176,7 +180,7 @@ export function renderPrint(root, stage, snapshot, { threeD = true, setup = true
  * totals), then each stage's brief page (header, briefing, map). The 3D view needs the stage on
  * screen, so it isn't part of a match print.
  */
-export function renderMatchPrint(root, match, stages) {
+export function renderMatchPrint(root, match, stages, { club = null } = {}) {
   const rows = stages.map((st, i) => {
     const r = Object.fromEntries(briefingRows(st).map((x) => [x.label, x.value]));
     return h("tr", {}, [h("td", { text: String(i + 1) }), h("td", { text: st.name || "Untitled stage" }), h("td", { text: r["Stage type"] }),
@@ -184,7 +188,8 @@ export function renderMatchPrint(root, match, stages) {
   });
   const total = (label) => stages.reduce((n, st) => n + Number(briefingRows(st).find((x) => x.label === label)?.value || 0), 0);
   const cover = h("section", { class: "print-cover" }, [
-    h("p", { class: "print-match", text: "Match" }),
+    clubLogo(club),
+    h("p", { class: "print-match", text: club?.name ? `${club.name}  ·  Match` : "Match" }),
     h("h1", { text: match.name }),
     h("p", { class: "print-meta", text: `${stages.length} stage${stages.length === 1 ? "" : "s"} · ${total("Minimum rounds")} rounds minimum · ${total("Maximum points")} points` }),
     h("table", { class: "print-stages" }, [
@@ -192,6 +197,6 @@ export function renderMatchPrint(root, match, stages) {
       h("tbody", {}, rows),
     ]),
   ]);
-  const pages = stages.map((st) => { const el = h("div", { class: "print-stage" }); renderPrint(el, st, null, { threeD: false, setup: false, distances: false }); return el; });
+  const pages = stages.map((st) => { const el = h("div", { class: "print-stage" }); renderPrint(el, st, null, { threeD: false, setup: false, distances: false, club }); return el; });
   root.replaceChildren(cover, ...pages);
 }

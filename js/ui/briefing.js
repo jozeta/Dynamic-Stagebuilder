@@ -6,6 +6,26 @@ import { activationText } from "../model/activation.js";
 import { stageStats } from "../model/stats.js";
 import { targetsText } from "../model/briefing.js";
 import { BRIEFING_OPTIONS, choiceFor } from "../model/briefing-options.js";
+import { cleanClub, LOGO_MAX } from "../model/club.js";
+import { loadClub, saveClub } from "./prefs.js";
+
+// A chosen logo, redrawn on a canvas (at most 600 × 300 px) and kept as PNG, or JPEG if that is too
+// large: only the redrawn pixels are stored, never the file itself.
+async function logoFromFile(file) {
+  if (!["image/png", "image/jpeg", "image/webp"].includes(file.type)) throw new Error("Choose a PNG, JPEG or WebP image.");
+  if (file.size > 20_000_000) throw new Error("The image is larger than 20 MB.");
+  let bmp;
+  try { bmp = await createImageBitmap(file); } catch { throw new Error("That file couldn't be read as an image."); }
+  const k = Math.min(1, 600 / bmp.width, 300 / bmp.height);
+  const c = document.createElement("canvas");
+  c.width = Math.max(1, Math.round(bmp.width * k)); c.height = Math.max(1, Math.round(bmp.height * k));
+  c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
+  bmp.close?.();
+  let url = c.toDataURL("image/png");
+  if (url.length > LOGO_MAX) url = c.toDataURL("image/jpeg", 0.85);
+  if (url.length > LOGO_MAX) throw new Error("The logo is too detailed to keep. Try a simpler or smaller image.");
+  return url;
+}
 
 const TEXT_FIELDS = [
   ["matchName", "Match name"], ["designer", "Designer"], ["scoring", "Scoring"],
@@ -85,6 +105,7 @@ export function createBriefing({ editor }) {
       ...(activationText(stage) ? [h("dt", { text: "Activated" }), h("dd", { text: activationText(stage) })] : []),
     ]);
     body.replaceChildren(
+      clubFields(),
       h("p", { class: "lg-muted wsb-wide", text: "Targets, rounds and points are counted from the stage." }),
       counted,
       field("Stage name", h("input", { class: "lg-input", value: stage.name, maxlength: "120", onchange: (e) => d({ type: "rename", name: e.target.value }) })),
@@ -95,6 +116,33 @@ export function createBriefing({ editor }) {
       area("procedure", "Procedure"),
       area("notes", "Notes"),
     );
+  }
+
+  // The club's name and logo: on every printed brief in this browser, not saved in the stage.
+  function clubFields() {
+    let club = loadClub();
+    const note = h("p", { class: "lg-muted hint-text", text: "On every printed brief from this browser (not saved in the stage, its file or share link)." });
+    const status = h("p", { class: "hint-text", role: "status" });
+    const keep = (next) => { club = cleanClub(next); if (!saveClub(club)) status.textContent = "The browser's storage is full: the club details couldn't be saved."; paint(); };
+    const file = h("input", { type: "file", accept: "image/png,image/jpeg,image/webp", hidden: true, onchange: async () => {
+      const f = file.files?.[0]; file.value = "";
+      if (!f) return;
+      try { status.textContent = ""; keep({ ...club, logo: await logoFromFile(f) }); } catch (err) { status.textContent = err.message; }
+    } });
+    const logoBox = h("div", { class: "lg-row club-logo" });
+    const paint = () => logoBox.replaceChildren(...[
+      club.logo ? h("img", { class: "club-logo-img", src: club.logo, alt: "Club logo" }) : null,
+      h("button", { type: "button", class: "lg-btn", text: club.logo ? "Change logo…" : "Add a logo…", onclick: () => file.click() }),
+      club.logo ? h("button", { type: "button", class: "lg-btn lg-btn-ghost", text: "Remove logo", onclick: () => keep({ ...club, logo: null }) }) : null,
+    ].filter(Boolean));
+    paint();
+    const name = h("input", { class: "lg-input", value: club.name, maxlength: "120", placeholder: "e.g. Göteborgs Pistolskytteklubb", onchange: (e) => keep({ ...club, name: e.target.value }) });
+    return h("fieldset", { class: "wsb-wide club-fields" }, [
+      h("legend", { class: "lg-subtitle", text: "Club" }),
+      field("Club name", name),
+      h("div", { class: "lg-field" }, [h("span", { class: "club-label", text: "Logo" }), logoBox, file]),
+      note, status,
+    ]);
   }
 
   return { open() { fill(); dialog.showModal(); } };

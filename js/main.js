@@ -51,7 +51,7 @@ import { fadeFigures } from "./render/figure-fade.js";
 import { createSurroundings } from "./ui/surroundings.js";
 import { takeBuildingPieces } from "./model/surroundings.js";
 import { libraryStage, STAGE_LIBRARY } from "./model/stage-library.js";
-import { loadHidden, saveHidden, loadView, saveView, loadWalkSpeed, saveWalkSpeed, loadRunLook, saveRunLook, loadShapes, saveShapes } from "./ui/prefs.js";
+import { loadHidden, saveHidden, loadView, saveView, loadWalkSpeed, saveWalkSpeed, loadRunLook, saveRunLook, loadShapes, saveShapes, loadClub, saveClub } from "./ui/prefs.js";
 import { withRunPart } from "./model/run-look.js";
 import { setRunLook } from "./render/materials.js";
 import { walkSpeed } from "./model/route.js";
@@ -299,7 +299,7 @@ let printedStage = null;           // the stage the brief was last built from
 async function buildPrint() {
   const root = document.getElementById("print");
   printedStage = editor.stage();
-  renderPrint(root, printedStage, snapshot());
+  renderPrint(root, printedStage, snapshot(), { club: loadClub() });
   const img = root.querySelector(".print-3d img");
   try { await img?.decode(); } catch { /* print without it rather than not at all */ }
 }
@@ -312,7 +312,7 @@ async function printBrief() {
 window.addEventListener("beforeprint", () => {
   if (printReady || printedStage === editor.stage()) return;      // already built for this stage
   printedStage = editor.stage();
-  renderPrint(document.getElementById("print"), printedStage, snapshot());
+  renderPrint(document.getElementById("print"), printedStage, snapshot(), { club: loadClub() });
 });
 
 // While Shooter's eye looks from the start ("start") or a shooting position, that marker (with its
@@ -555,7 +555,7 @@ const projects = createProjects({
   // Print a match: a cover page, then each stage's brief page (the open stage as it is now).
   onPrintMatch: (match, stages) => {
     const now = stages.map((st) => (st.id === editor.stage().id ? editor.stage() : st));
-    renderMatchPrint(document.getElementById("print"), match, now);
+    renderMatchPrint(document.getElementById("print"), match, now, { club: loadClub() });
     printedStage = null;
     printReady = true;
     window.print();
@@ -601,7 +601,8 @@ const projects = createProjects({
       const image = r.image instanceof Blob ? bytesToDataUrl(new Uint8Array(await r.image.arrayBuffer()), r.image.type || "image/jpeg") : null;
       surroundings.push({ id: r.id, name: r.name, plan: r.plan, pieces: r.pieces, drawing: r.drawing ?? null, image });
     }
-    const data = { projects: projectsAll, matches: kept.map(cleanMatch).filter(Boolean), folders: kept.map(cleanFolder).filter(Boolean), surroundings };
+    const club = loadClub();
+    const data = { projects: projectsAll, matches: kept.map(cleanMatch).filter(Boolean), folders: kept.map(cleanFolder).filter(Boolean), surroundings, club: club.name || club.logo ? club : null };
     download(backupToJson(data), backupFileName());
     return { projects: data.projects.length, matches: data.matches.length, folders: data.folders.length, surroundings: surroundings.length };
   },
@@ -613,6 +614,9 @@ const projects = createProjects({
       const { imageBytes, imageType, ...rest } = t;
       await store.surroundings.put({ ...rest, image: imageBytes ? new Blob([imageBytes], { type: imageType }) : null });
     }
+    // The club details come back only if this browser has none.
+    const club = loadClub();
+    if (r.club && !club.name && !club.logo) saveClub(r.club);
     for (const p of r.projects) await store.put(p);
     for (const m of [...r.matches, ...r.folders]) await store.matches.put(m);
     if (r.surroundings.length) { try { await mine.load(); surroundingsVersion++; render(editor.state); } catch (err) { console.warn(err); } }

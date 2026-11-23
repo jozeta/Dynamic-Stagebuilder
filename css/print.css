@@ -11,6 +11,9 @@
   /* Header: stage number badge, name, key figures. */
   .print-head { display: grid; grid-template-columns: auto 1fr auto; gap: 4mm; align-items: center;
     padding-bottom: 3mm; margin-bottom: 3mm; border-bottom: 0.6mm solid #111; }
+  .print-head.has-logo { grid-template-columns: auto auto 1fr auto; }
+  .print-logo { display: block; max-width: 34mm; max-height: 19mm; object-fit: contain; }
+  .print-cover .print-logo { max-width: 60mm; max-height: 30mm; margin-bottom: 4mm; }
   .print-badge { display: grid; place-items: center; width: 19mm; height: 19mm; border-radius: 2mm; background: #111; color: #fff; }
   .print-badge span { font-size: 7pt; letter-spacing: 0.12em; text-transform: uppercase; margin-top: 1.5mm; }
   .print-badge strong { font-size: 20pt; line-height: 1; margin-bottom: 1.5mm; }

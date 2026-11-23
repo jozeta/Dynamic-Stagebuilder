@@ -10,6 +10,7 @@ import { newId } from "../model/id.js";
 import { cleanMatch } from "../model/match.js";
 import { cleanFolder } from "../model/folders.js";
 import { cleanTemplate, customId, customEnv } from "../model/surroundings.js";
+import { cleanClub } from "../model/club.js";
 
 export const BACKUP_KIND = "dynamic-stagebuilder-backup";
 const MAX_BYTES = 200_000_000;
@@ -20,10 +21,10 @@ const IMAGE = /^data:(image\/(?:png|jpeg|webp));base64,([A-Za-z0-9+/]*={0,2})$/;
 export const backupFileName = (now = Date.now()) => `dynamic-stagebuilder-backup-${new Date(now).toISOString().slice(0, 10)}.json`;
 
 /** The backup file's text. surroundings: templates with `image` as a data URL (or null). */
-export function backupToJson({ projects = [], matches = [], folders = [], surroundings = [] }, { now = Date.now() } = {}) {
+export function backupToJson({ projects = [], matches = [], folders = [], surroundings = [], club = null }, { now = Date.now() } = {}) {
   return JSON.stringify({ kind: BACKUP_KIND, version: 1, created: now,
     projects: projects.map((r) => ({ id: r.id, name: r.name, modified: r.modified, exportedAt: r.exportedAt ?? null, stage: r.stage })),
-    matches, folders, surroundings });
+    matches, folders, surroundings, ...(club ? { club } : {}) });
 }
 
 /** A data URL's bytes and type, or null unless it is a base64 PNG, JPEG or WebP. */
@@ -47,8 +48,8 @@ const list = (v) => (Array.isArray(v) ? v.slice(0, MAX_RECORDS) : []);
 const num = (v, fallback) => (typeof v === "number" && Number.isFinite(v) ? v : fallback);
 
 /**
- * A backup file (untrusted) as new records: { ok, projects, matches, folders, surroundings, counts,
- * skipped } (surroundings carry imageBytes and imageType, or null), or { ok: false, error }.
+ * A backup file (untrusted) as new records: { ok, projects, matches, folders, surroundings, club,
+ * counts, skipped } (surroundings carry imageBytes and imageType, or null), or { ok: false, error }.
  */
 export function parseBackup(text, { maxBytes = MAX_BYTES, now = Date.now() } = {}) {
   if (typeof text !== "string" || text.length > maxBytes) return { ok: false, error: "The file is too large to be a backup." };
@@ -105,6 +106,7 @@ export function parseBackup(text, { maxBytes = MAX_BYTES, now = Date.now() } = {
   if (!projects.length && !matches.length && !folders.length && !surroundings.length) {
     return { ok: false, error: skipped ? "Nothing in the backup could be read." : "The backup is empty." };
   }
-  return { ok: true, projects, matches, folders, surroundings, skipped,
+  const club = json.club && typeof json.club === "object" ? cleanClub(json.club) : null;
+  return { ok: true, projects, matches, folders, surroundings, skipped, club,
     counts: { projects: projects.length, matches: matches.length, folders: folders.length, surroundings: surroundings.length } };
 }

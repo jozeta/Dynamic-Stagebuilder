@@ -66,7 +66,8 @@ training, and want a clear briefing sheet without drawing the map by hand.
 - **Written Stage Briefing** editor: match, stage name and number, designer, stage type, scoring,
   start signal, start position, gun condition, procedure, stop time and notes, with common choices
   or your own text. Targets, rounds and points are counted from the stage.
-- **Printable brief** (A4): a header with the stage number and key figures, the briefing grid, the
+- **Printable brief** (A4): a header with your club's logo and name (set once in the briefing
+  window), the stage number and key figures, the briefing grid, the
   procedure and a top-down map with a legend and scale bar on page 1, the map with the distances
   between props on page 2 (straight legs, down range then across, each labelled in metres with one
   decimal), then a 3D view and the setup sheet. Save it
