@@ -85,13 +85,10 @@ training, and want a clear briefing sheet without drawing the map by hand.
   start, listed in the briefing.
 - **Animated moving targets** (swingers, drop turners, clamshells, movers, Texas stars, plate racks,
   dueling trees, poppers) with a per-prop switch and one Play / Pause button.
-- **Six surroundings,** Outdoor (a dirt range with earth banks, bushes and trees, stones, a
+- **Four surroundings,** Outdoor (a dirt range with earth banks, bushes and trees, stones, a
   choice of sand, light sand, dark sand, red dirt or gravel, and an optional ground grid), Technical
   (grey floor, grid), Blueprint (an endless, worn blue drafting sheet with grid, title block,
-  comments, arrows and stamps), Indoor range (a small club range: low ceiling with fluorescent
-  tubes, plywood safety baffles, a steel bullet trap and a gallery behind glass), Urban (a city block:
-  a street with kerbs, buildings, stacked containers and chain-link fencing round a concrete bay) and
-  Industrial (a worn indoor factory hall, with a roof you can hide
+  comments, arrows and stamps) and Industrial (a worn indoor factory hall, with a roof you can hide
   and an optional floor grid). Every surroundings' grid can be turned on or off in Settings.
   Switching never moves anything on the stage; a warning asks first if your surroundings settings
   would be lost.

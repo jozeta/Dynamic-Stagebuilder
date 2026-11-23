@@ -4,15 +4,6 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
-- Two new surroundings. **Indoor range:** a small club range built tight round the bay, with a low
-  ceiling of acoustic tiles and fluorescent tubes, plywood-faced safety baffles overhead, block
-  walls with acoustic panels, a steel bullet trap over a sand catch, and a gallery with a glass
-  screen and a painted firing line behind the shooters; lit from the ceiling whatever the time of
-  day, with *Show ceiling and baffles* and a floor grid in Settings. **Urban:** a city block with
-  worn asphalt and a concrete bay floor, a street with kerbs and markings, buildings of three to
-  five storeys, stacked containers, chain-link fencing, street lamps, bollards and bins; the sun
-  follows the time of day. Both keep everything outside the bay and never touch the stage.
-
 - View links and a QR code on the printed brief: *Copy view link* (next to Copy share link) and the
   QR code under page 1's map open the stage read-only, on a phone, tablet or computer, with
   Shooter's eye. Nothing is saved and edits are ignored; *Save a copy to edit* makes it a project.
