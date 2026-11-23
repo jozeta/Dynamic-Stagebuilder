@@ -21,8 +21,7 @@ training, and want a clear briefing sheet without drawing the map by hand.
 - **Safety distances** from the IPSC Handgun Rules (January 2026): rings round a target at 7 and 8 m for
   steel, 3 m for paper.
 - **Sight lines** from a shooting position, a **run-time estimate**, a printed **setup sheet**, and
-  **share links** that carry the stage itself; **view links** open it read-only, and the printed
-  brief has one as a **QR code** to scan and walk the stage in 3D.
+  **share links** that carry the stage itself; **view links** open it read-only.
 - **Prop library**, every prop drawn in 3D at real dimensions:
   - stage markings (first in the panel): fault lines, shooting areas, the start position and
     numbered shooting positions with a facing, look angle and stance
@@ -71,8 +70,7 @@ training, and want a clear briefing sheet without drawing the map by hand.
   window), the stage number and key figures, the briefing grid, the
   procedure and a top-down map with a legend and scale bar on page 1, the map with the distances
   between props on page 2 (straight legs, down range then across, each labelled in metres with one
-  decimal), a start-position card (a picture of the posed shooter at the start with the start
-  wording in large type, for the Range Officer, rule 3.2.2), then a 3D view and the setup sheet. Save it
+  decimal), then a 3D view and the setup sheet. Save it
   as a PDF from the print dialog.
 - **Help** guide with a drawing for every main task, and side panels you can dock left, right or
   under the view, fold away and resize (remembered).

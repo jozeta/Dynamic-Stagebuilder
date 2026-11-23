@@ -19,7 +19,6 @@ import { MAX_SHAPES } from "./model/bay.js";
 import { createInspector } from "./ui/inspector.js";
 import { createStats } from "./ui/stats.js";
 import { createRuleChecks } from "./ui/rule-checks.js";
-import { startCamera } from "./model/start-card.js";
 import { attachShortcuts } from "./ui/shortcuts.js";
 import { createAbout } from "./ui/about.js";
 import { createBriefing } from "./ui/briefing.js";
@@ -294,50 +293,8 @@ function snapshot() {
   engine.requestRender();
   return url;
 }
-// The start-position card's picture: from in front of the start box, looking back at the posed
-// shooter (model/start-card.js), rendered like snapshot() and put back afterwards.
-function startSnapshot() {
-  const st = editor.stage();
-  if (!st.start || !canvas.clientWidth || !canvas.clientHeight) return null;
-  const cam = engine.camera.position.clone();
-  const target = rig.controls.target.clone();
-  const helperWas = engine.groups.helper.visible;
-  engine.groups.helper.visible = false;
-  const view = startCamera(st.start);
-  engine.camera.position.set(...view.position);
-  rig.controls.target.set(...view.target);
-  engine.camera.lookAt(...view.target);
-  // A 16:10 picture whatever the view's shape, with the figure solid (on screen it is see-through).
-  const aspect = engine.camera.aspect;
-  engine.camera.aspect = 1.6;
-  engine.camera.updateProjectionMatrix();
-  setRunLook({ ...runLook, figure: { ...runLook.figure, show: true, opacity: 1 } });
-  const ratio = engine.renderer.getPixelRatio();
-  engine.renderer.setPixelRatio(1);
-  engine.renderer.setSize(1600, 1000, false);
-  engine.renderer.render(engine.scene, engine.camera);
-  const url = canvas.toDataURL("image/jpeg", 0.92);
-  setRunLook(runLook);
-  engine.camera.aspect = aspect;
-  engine.camera.updateProjectionMatrix();
-  engine.renderer.setPixelRatio(ratio);
-  engine.renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
-  engine.groups.helper.visible = helperWas;
-  engine.camera.position.copy(cam);
-  rig.controls.target.copy(target);
-  rig.controls.update();
-  engine.requestRender();
-  return url;
-}
-// The view link (#view=…) printed as a QR code on the brief. Building it is async, so the last one is
-// kept for ⌘P (beforeprint builds the page at once) and refreshed a moment after each change.
+// A read-only view link (#view=…) for a stage (Copy view link).
 const viewUrlOf = async (stage) => `${location.origin}${location.pathname}#${viewHash}${await encodeView(stage)}`;
-let viewUrl = { stage: null, url: null }, viewUrlTimer = 0;
-function refreshViewUrl() {
-  clearTimeout(viewUrlTimer);
-  viewUrlTimer = setTimeout(async () => { const st = editor.stage(); try { viewUrl = { stage: st, url: await viewUrlOf(st) }; } catch { /* no QR code then */ } }, 800);
-}
-const cachedViewUrl = () => (viewUrl.stage === editor.stage() ? viewUrl.url : null);
 // The brief is built, and its 3D image fully decoded, before the print dialog opens: a large image
 // that is still loading prints as a blank page 2. ⌘P / Ctrl+P (beforeprint) builds it too.
 let printReady = false;
@@ -345,10 +302,9 @@ let printedStage = null;           // the stage the brief was last built from
 async function buildPrint() {
   const root = document.getElementById("print");
   printedStage = editor.stage();
-  let url = null;
-  try { url = await viewUrlOf(printedStage); } catch { /* print without the QR code */ }
-  renderPrint(root, printedStage, snapshot(), { club: loadClub(), startImage: startSnapshot(), viewUrl: url });
-  for (const img of root.querySelectorAll(".print-3d img, .print-start img")) { try { await img.decode(); } catch { /* print without it rather than not at all */ } }
+  renderPrint(root, printedStage, snapshot(), { club: loadClub() });
+  const img = root.querySelector(".print-3d img");
+  try { await img?.decode(); } catch { /* print without it rather than not at all */ }
 }
 async function printBrief() {
   await buildPrint();
@@ -359,7 +315,7 @@ async function printBrief() {
 window.addEventListener("beforeprint", () => {
   if (printReady || printedStage === editor.stage()) return;      // already built for this stage
   printedStage = editor.stage();
-  renderPrint(document.getElementById("print"), printedStage, snapshot(), { club: loadClub(), startImage: startSnapshot(), viewUrl: cachedViewUrl() });
+  renderPrint(document.getElementById("print"), printedStage, snapshot(), { club: loadClub() });
 });
 
 // While Shooter's eye looks from the start ("start") or a shooting position, that marker (with its
@@ -392,7 +348,7 @@ function viewingFrom(ids) {
 let picking = null;
 let briefing = null;
 let settings = null;
-const editor = createEditor({ stage: demoStage(), onChange: (state) => { render(state); scheduleSave(); refreshViewUrl(); } });
+const editor = createEditor({ stage: demoStage(), onChange: (state) => { render(state); scheduleSave(); } });
 picking = attachPicking({ engine, stageView: view, editor, cameraRig: rig, canvas });
 
 // --- Saved projects: autosave 600 ms after the last change, and when the page is hidden. ---
@@ -602,9 +558,7 @@ const projects = createProjects({
   // Print a match: a cover page, then each stage's brief page (the open stage as it is now).
   onPrintMatch: async (match, stages) => {
     const now = stages.map((st) => (st.id === editor.stage().id ? editor.stage() : st));
-    const viewUrls = [];
-    for (const st of now) { try { viewUrls.push(await viewUrlOf(st)); } catch { viewUrls.push(null); } }
-    renderMatchPrint(document.getElementById("print"), match, now, { club: loadClub(), viewUrls });
+    renderMatchPrint(document.getElementById("print"), match, now, { club: loadClub() });
     printedStage = null;
     printReady = true;
     window.print();
@@ -640,7 +594,7 @@ const projects = createProjects({
     if (code.length > MAX_LINK) return { ok: false, error: "This stage is too large for a link. Export a file instead." };
     return { ok: true, url: `${location.origin}${location.pathname}#${shareHash}${code}` };
   },
-  // A read-only view link for the open stage (the same link as the QR code on the printed brief).
+  // A read-only view link for the open stage.
   onViewLink: async () => { try { return { ok: true, url: await viewUrlOf(editor.stage()) }; } catch { return { ok: false, error: "This browser can't make a view link." }; } },
   // A view link's stage: saved as a new project to edit, or left (back to what was open).
   onSaveCopy: async () => {
@@ -889,7 +843,7 @@ rig.controls.addEventListener("change", () => { clearTimeout(viewTimer); viewTim
 addEventListener("pagehide", keepView);
 rig.preset("iso", editor.stage());
 
-// A view link (#view=…, the QR code on a printed brief) opens its stage read-only: nothing is
+// A view link (#view=…, Copy view link) opens its stage read-only: nothing is
 // saved, edits are ignored (editor.setReadOnly), the Props and On stage tabs and the inspector's
 // fields are hidden, and the left panel offers Save a copy and Leave.
 async function openView(stage) {

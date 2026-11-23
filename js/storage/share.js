@@ -4,7 +4,7 @@
 // decompressed text is capped while it streams (no zip bombs), and the stage goes through the same
 // checks as an imported file, with a new id. No DOM.
 // View links ("#view=…") carry the compact stage (model/compact.js: short ids, no defaults), small
-// enough for a QR code on the printed brief; they open read-only, as a view, not a new project.
+// enough to keep the link short; they open read-only, as a view, not a new project.
 import { parseStageFile } from "./files.js";
 import { compactStage } from "../model/compact.js";
 

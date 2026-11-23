@@ -66,7 +66,7 @@ const FILES = [
   "js/ui/projects.js", "js/ui/eye-steps.js", "js/ui/surroundings.js", "js/ui/help.js", "js/model/help-content.js",
   "js/ui/settings.js",
   "js/ui/shortcuts.js",
-  "js/ui/stats.js", "js/ui/rule-checks.js", "js/model/rule-checks.js", "js/model/club.js", "js/model/start-card.js", "js/model/qr.js", "js/model/compact.js", "vendor/qrcode-generator/2.0.4/qrcode.mjs",
+  "js/ui/stats.js", "js/ui/rule-checks.js", "js/model/rule-checks.js", "js/model/club.js", "js/model/compact.js", 
   "js/ui/toolbar.js",
   "manifest.webmanifest",
   "package.json",

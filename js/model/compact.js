@@ -1,5 +1,5 @@
-// A stage made as small as it can be for a view link (storage/share.js) and the QR code on the
-// printed brief: short ids (random UUIDs barely compress), no values equal to their defaults, no
+// A stage made as small as it can be for a view link (storage/share.js), so the link stays short:
+// short ids (random UUIDs barely compress), no values equal to their defaults, no
 // empty labels or briefing fields, no camera. The schema puts the defaults back when it loads, so
 // the stage comes back the same (only the ids differ). Pure: no DOM.
 import { PROPS } from "./props.js";

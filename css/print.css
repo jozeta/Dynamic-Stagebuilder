@@ -60,16 +60,6 @@
 @media print {
   .print-setup { break-before: page; }
   .print-distances { break-before: page; }
-  .print-qr { display: flex; gap: 4mm; align-items: center; break-inside: avoid; margin-top: 1mm; font-size: 8.5pt; }
-  .print-qr svg { flex: none; }
-  .print-qr p { margin: 0 0 1mm; }
-  .print-qr-title { font-weight: 700; font-size: 10pt; }
-  .print-start { break-before: page; }
-  .print-start h2 { font-size: 12pt; margin: 0 0 3mm; text-transform: uppercase; letter-spacing: 0.05em; }
-  .print-start img { display: block; width: 100%; max-height: 150mm; object-fit: contain; border: 0.3mm solid #999; border-radius: 1.5mm; }
-  .print-start-rows { display: grid; grid-template-columns: max-content 1fr; gap: 2.5mm 5mm; margin: 5mm 0 0; font-size: 14pt; }
-  .print-start-rows dt { font-size: 9pt; color: #555; text-transform: uppercase; letter-spacing: 0.05em; padding-top: 1.2mm; }
-  .print-start-rows dd { margin: 0; font-weight: 600; }
   .print-distances h2 { font-size: 10.5pt; margin: 0 0 1mm; text-transform: uppercase; letter-spacing: 0.05em; }
   .print-distance-list { columns: 3; column-gap: 6mm; margin: 3mm 0 0; padding-left: 6mm; font-size: 8.5pt; }
   .print-distance-list li { break-inside: avoid; }

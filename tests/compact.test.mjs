@@ -1,4 +1,4 @@
-// A stage made compact for a view link and its QR code: short ids, no default values, no camera.
+// A stage made compact for a view link: short ids, no default values, no camera.
 // Loaded back through the schema, it is the same stage (only the ids differ, consistently).
 import { test } from "node:test";
 import assert from "node:assert/strict";

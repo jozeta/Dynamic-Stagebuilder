@@ -233,7 +233,7 @@ export function createProjects({ panel, stageBox = null, docked = false, hide = 
     stageActions = h("div", { class: "proj-actions stage-actions" }, [
       h("button", { type: "button", class: "lg-btn", onclick: async () => { await onExport(); await fill(); } }, [icon("doc"), "Export this stage"]),
       h("button", { type: "button", class: "lg-btn", onclick: () => shareLink(), title: "Opens a copy that can be changed and saved" }, [icon("link"), "Copy share link"]),
-      h("button", { type: "button", class: "lg-btn", onclick: () => shareLink("view"), title: "Opens the stage read-only, like the QR code on the printed brief" }, [icon("link"), "Copy view link"]),
+      h("button", { type: "button", class: "lg-btn", onclick: () => shareLink("view"), title: "Opens the stage read-only: look and walk round it, nothing saved" }, [icon("link"), "Copy view link"]),
     ]),
   ].filter(Boolean));
   const title = h("h2", { class: "lg-subtitle panel-title", id: "projects-title", text: "Projects" });
@@ -292,7 +292,7 @@ export function createProjects({ panel, stageBox = null, docked = false, hide = 
     try {
       // A clipboard that doesn't answer (a permission prompt left open) falls back to the field below.
       await Promise.race([navigator.clipboard.writeText(r.url), new Promise((_, no) => setTimeout(() => no(new Error("clipboard timeout")), 3000))]);
-      say(view ? "View link copied. Anyone with it can look at this stage read-only (as with the QR code on the brief); nothing is uploaded."
+      say(view ? "View link copied. Anyone with it can look at this stage read-only; nothing is uploaded."
         : "Share link copied. Anyone with the link can open a copy of this stage; nothing is uploaded.", "ok");
     } catch {
       const field = h("input", { class: "lg-input", readonly: true, value: r.url, "aria-label": "Share link", onfocus: (e) => e.target.select() });

@@ -35,8 +35,8 @@ test("broken, oversized and bomb links are refused with a message", async () => 
   assert.equal(junk.ok, false);
 });
 
-// View links (#view=…): the compact stage (model/compact.js), opened read-only; small enough for a
-// QR code on the printed brief.
+// View links (#view=…): the compact stage (model/compact.js), opened read-only; much shorter than a
+// share link.
 import { encodeView, viewHash } from "../js/storage/share.js";
 import { demoStage } from "../js/demo.js";
 
@@ -52,7 +52,7 @@ test("a view link opens read-only: the same stage, marked as a view", async () =
   assert.equal(plain.view, false);
 });
 
-test("a view link is much shorter than a share link (the example stage fits a QR code)", async () => {
+test("a view link is much shorter than a share link", async () => {
   const s = demoStage();
   const v = await encodeView(s), sh = await encodeShare(s);
   assert.ok(v.length < sh.length * 0.6, `${v.length} vs ${sh.length}`);
