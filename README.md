@@ -4,7 +4,7 @@ A browser-based 3D stage builder for IPSC practical shooting. Lay out a stage at
 it from any angle, and print a Written Stage Briefing with a stage map for range officers and
 competitors.
 
-**Version:** 0.11.1 · **Try it:** [jozeta.github.io/Dynamic-Stagebuilder](https://jozeta.github.io/Dynamic-Stagebuilder/)
+**Version:** 0.12.0 · **Try it:** [jozeta.github.io/Dynamic-Stagebuilder](https://jozeta.github.io/Dynamic-Stagebuilder/)
 (runs in the browser; nothing to install, nothing leaves your device) · Started 2026-11-18 (see the
 [v1 design](docs/superpowers/specs/2026-11-18-stage-builder-v1-design.md)).
 
@@ -112,6 +112,27 @@ not supported: below 768 px wide the app asks you to use a larger screen. Englis
 
 ## What's new
 
+### 0.12.0 (2026-11-23)
+
+- **Stage edit mode:** with a stage open, the left panel shows it (breadcrumb, settings, statistics,
+  briefing, export and share) with *Close stage*; a new stage in a match opens there and closes back
+  to the match. The left tabs are Projects, Props, On stage, and the panel starts wider.
+- **Folders** for stages, matches and folders in Projects: drag a row onto a folder or a breadcrumb
+  link, or use *Move to folder* on an iPad.
+- **Start position:** a new stage starts with one; select, drag and turn it, and set it in the
+  inspector. The start position, start marks and shooting positions drag from the Props panel, and
+  shooting positions are placed one tap after another until Enter, Esc or *Done*.
+- **Move arrows** on a selected prop: the cube moves it anywhere, the red and blue arrows along one
+  axis, the green arrow raises a steel base or paper stand.
+- **Alignment guides:** while dragging, a thin line to every prop exactly in line (red across, blue
+  down range).
+- **Stage library in folders**, with seven practice drills and three new stages, and shots and
+  course length (Short, Medium, Long) in each entry's details.
+- **Printed distance sheet:** a page after page 1 with the map and straight measured lines between
+  neighbouring props (down range, then across, each labelled in metres), and a list of them.
+- Settings is back in the right-hand panel with the surroundings in a dropdown; the camera pad says
+  *Fwd/Back* and *Up/Down*.
+
 ### 0.11.1 (2026-11-22)
 
 - **Fix:** a paper target's stand height is whole centimetres, also when a new layout sets it.
@@ -122,8 +143,7 @@ not supported: below 768 px wide the app asks you to use a larger screen. Englis
   card, side by side, one above the other, overlapping, three in a row…), then for each card target
   or no-shoot, with or without hard cover.
 - **Guides while editing:** turning a prop shows its start and current angle on the ground with the
-  turn (+30°); dragging marks where it started, with a line and the distance (2.3 m), and draws a thin line to
-  every prop it is exactly in line with (red across, blue down range). The rotate
+  turn (+30°); dragging marks where it started, with a line and the distance (2.3 m). The rotate
   ring now snaps to the angle step while you drag (Shift turns freely).
 - **Bay and grid:** the bay is sized in whole metres and the grid starts at its edges, so they line
   up at any width; every surroundings has a grid switch, and Industrial a floor grid.

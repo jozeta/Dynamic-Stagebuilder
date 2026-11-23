@@ -4,6 +4,8 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+## 0.12.0 (2026-11-23)
+
 - Alignment guides: while a prop or the start box is dragged, a thin line runs to every other prop
   it is exactly in line with (same across or same down-range position, within 1 cm): red across,
   blue down range, like the move arrows.
