@@ -4,6 +4,8 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+## 0.13.0 (2026-11-23)
+
 - View links: *Copy view link* (next to Copy share link) copies a link that opens the stage
   read-only, on a phone, tablet or computer, with Shooter's eye. Nothing is saved and edits are
   ignored; *Save a copy to edit* makes it a project. The stage is in the link itself, made compact
