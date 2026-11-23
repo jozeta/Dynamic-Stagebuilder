@@ -1,6 +1,6 @@
 // The settings panel: surroundings, the default IPSC target style, time of day, light, shadows,
-// haze and exposure. It opens in the right-hand panel in place of the inspector (toolbar
-// *Settings* toggles it, *Done* or Escape closes it), so the 3D view stays visible and live.
+// haze and exposure. It is a tab of the right-hand panel beside the Inspector (toolbar *Settings*
+// toggles it, *Done* or Escape closes it), so the 3D view stays visible and live.
 // Sliders apply while dragging; settings are saved with the stage but aren't undo steps.
 // The View tab: Shooter's eye walking speed, and how the figures, position marks and route are
 // drawn (shown, colour, see-through). The Props tab hides library groups and single props. Both
@@ -201,13 +201,14 @@ export function createSettings({ editor, panel, docked = false, modal = panel.ta
   function fill() {
     const st = editor.stage().settings;
     const look = st.look;
-    const env = h("div", { class: "lg-segmented", role: "radiogroup", "aria-label": "Surroundings" });
-    for (const name of ENVIRONMENT_NAMES) {
-      const id = `set-env-${name}`;
-      const input = h("input", { type: "radio", name: "set-env", id, value: name, onchange: () => switchTo(name) });
-      input.checked = st.environment === name;
-      env.append(input, h("label", { for: id, text: ENVIRONMENT_LABELS[name] }));
-    }
+    // The surroundings: a dropdown (your own surroundings have their own picker below).
+    // With your own surroundings on, the list says so (they are picked under My surroundings).
+    const own = !ENVIRONMENT_NAMES.includes(st.environment);
+    const env = h("select", { class: "lg-select", id: "set-env", onchange: (e) => { if (e.target.value) switchTo(e.target.value); } }, [
+      ...ENVIRONMENT_NAMES.map((name) => h("option", { value: name, text: ENVIRONMENT_LABELS[name] })),
+      own ? h("option", { value: "", text: "My surroundings", disabled: true }) : null,
+    ].filter(Boolean));
+    env.value = own ? "" : st.environment;
     // Your own surroundings: pick one, make one from a plan, line up the plan, keep the building pieces.
     const myRows = [];
     if (mine && offersPlans(st.environment)) {          // not with Outdoor, Blueprint or Industrial
@@ -351,7 +352,7 @@ export function createSettings({ editor, panel, docked = false, modal = panel.ta
       }
     }
     body.replaceChildren(...[
-      h("div", { class: "settings-row" }, [h("span", { class: "settings-label", text: "Surroundings" }), env]),
+      h("div", { class: "settings-row" }, [h("label", { for: "set-env", text: "Surroundings" }), env]),
       st.environment === "outdoor" ? h("div", { class: "settings-row" }, [h("label", { for: "set-ground", text: "Ground" }), groundSel]) : null,
       st.environment === "outdoor" ? h("div", { class: "settings-row" }, [h("label", { for: "set-foliage", text: "Foliage" }), foliageSel]) : null,
       ...(st.environment === "outdoor" ? outdoorGridRows(look) : []),

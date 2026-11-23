@@ -91,7 +91,7 @@ training, and want a clear briefing sheet without drawing the map by hand.
   (hands up, arms hanging, seated…), pistol holstered. A route on the ground links them; Shooter's
   eye walks it at a chosen speed, looking the way the shooter moves, or jumps between positions.
 - **Cameras:** orbit, pan, zoom, Top, Isometric, Front and Shooter's eye, and a view pad of
-  arrow buttons (look round, move forward or back, up or down); the view is remembered
+  arrow buttons (*Look* round, *Fwd/Back*, *Up/Down*); the view is remembered
   per project, so a reload opens where you left off. Figures fade out as the camera comes close.
 - **Matches** of one or more stages, numbered in order, with the match name in every briefing and
   one print for the whole match.
@@ -253,7 +253,7 @@ Stage settings are in the inspector when nothing is selected. They are saved wit
 | Grid snap | Positions snap to this grid: off, 0.1, 0.25, 0.5 or 1 m (*Snap to the grid* in the right-click menu turns it on/off) | 0.25 m |
 | Object snap | Toolbar *Objects*: a wall's end jumps onto another wall's end within 35 cm | On |
 | Angle snap | Rotations snap to this step: off, 5°, 15°, 45° or 90° | 15° |
-| Surroundings | *Settings* (a window opened from the toolbar): Outdoor (dirt range), Technical (grey floor, grid), Blueprint (drafting sheet) or Industrial (an indoor factory hall, lit from overhead); never moves the stage | Outdoor |
+| Surroundings | *Settings* (a tab of the right-hand panel; a dropdown): Outdoor (dirt range), Technical (grey floor, grid), Blueprint (drafting sheet) or Industrial (an indoor factory hall, lit from overhead); never moves the stage | Outdoor |
 | Ground | *Settings* (Outdoor): sand, light sand, dark sand, red dirt or gravel | Gravel |
 | Foliage | *Settings* (Outdoor): mixed broadleaf, Nordic, desert, savanna, tropical or bare banks | Nordic |
 | Grid on the ground | *Settings* (Outdoor): 1 m squares on the ground, a stronger line every 5 m; *Grid opacity* 5–100 % | Off, 35 % |
@@ -273,7 +273,7 @@ Stage settings are in the inspector when nothing is selected. They are saved wit
 | Cloud speed | *Settings → Environment* (Outdoor): 0 (still) – 300 %; 100 % ≈ 8 m/s; they move only with Play on | 50 % |
 | Wind direction | *Settings → Environment* (Outdoor): which way the clouds drift, 0° = toward down range, 90° = toward +x | 70° |
 | Hidden props | *Settings → Props*: groups and single props the props panel leaves out (per browser) | None |
-| Panel places | Drag a panel's tab (or a lone panel's grip ⋮⋮) onto a side for a frame of its own, or onto another frame to add it as a tab; or click the grip for *Move to…* (per browser) | Props, On stage and Projects as tabs on the left; Inspector and Settings on the right (under the view on a narrow screen) |
+| Panel places | Drag a panel's tab (or a lone panel's grip ⋮⋮) onto a side for a frame of its own, or onto another frame to add it as a tab; or click the grip for *Move to…* (per browser) | Projects, Props and On stage as tabs on the left (320 px wide); Inspector and Settings on the right (under the view on a narrow screen) |
 | Folded panels | The arrow beside the grip (per browser) | Both open |
 | Panel sizes | Drag a dock's inner edge, or arrow keys on it (Shift: bigger steps); double-click resets (per browser) | 260 / 300 px, bottom 260 px |
 | My surroundings | *Settings*: your own plan-based surroundings, with plan position, turn and strength | None |

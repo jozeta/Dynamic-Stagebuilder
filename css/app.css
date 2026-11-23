@@ -134,10 +134,10 @@ body { background: var(--lg-bg); overflow: hidden; }
 .pad-cross { display: grid; grid-template-columns: repeat(3, 44px); grid-template-rows: repeat(3, 44px); }
 .pad-n { grid-area: 1 / 2; } .pad-w { grid-area: 2 / 1; } .pad-e { grid-area: 2 / 3; } .pad-s { grid-area: 3 / 2; }
 .pad-cross .pad-label { grid-area: 2 / 2; align-self: center; justify-self: center; }
-.pad-column { display: flex; flex-direction: column; align-items: center; }
+.pad-column { display: flex; flex-direction: column; align-items: center; min-width: 58px; }      /* room for FWD/BACK */
 /* The view buttons wrap rather than run under the pad; in a narrow view the pad moves to the bottom right. */
 .viewport-wrap { container: view / inline-size; }
-.camera-bar { max-width: calc(100% - 236px - 3 * var(--lg-space-s)); }
+.camera-bar { max-width: calc(100% - 264px - 3 * var(--lg-space-s)); }
 @container view (max-width: 560px) {
   .camera-bar { max-width: calc(100% - 2 * var(--lg-space-s)); }
   .camera-pad { top: auto; bottom: max(var(--lg-space-s), env(safe-area-inset-bottom)); }
@@ -433,21 +433,15 @@ body { background: var(--lg-bg); overflow: hidden; }
 .bay-draw-canvas.is-bucket { cursor: cell; }
 .plan-modal [hidden] { display: none !important; }
 
-/* Settings in a modal window: roomy, scrolling inside, Done kept in view at the bottom. */
-.settings-modal { width: min(760px, calc(100vw - 32px)); max-width: none; max-height: calc(100dvh - 32px); padding: var(--lg-space-m); overflow: auto; }
-.settings-modal .settings-head { padding-right: 0; }
-.settings-modal .settings-foot { background: var(--lg-bg); }
 .brief-slot { padding-top: var(--lg-space-s); }
 .brief-slot .lg-btn { width: 100%; justify-content: center; min-height: var(--lg-touch); }
 .brief-slot[hidden] { display: none; }
-.settings-modal > * { flex-shrink: 0; }          /* the modal scrolls; its tabs and rows keep their height */
 
 /* Every modal hangs from a fixed distance below the top of the window and grows downwards only
    (Låda Glass centres them, so a modal whose content grows spread up and down at once). */
 .lg-modal { --modal-top: max(24px, 6dvh); margin: var(--modal-top) auto auto; max-height: calc(100dvh - var(--modal-top) - 24px); }
 .help-modal { --modal-top: 24px; height: calc(100dvh - 48px); }
 .plan-modal { --modal-top: 16px; height: calc(100dvh - 32px); max-height: calc(100dvh - 32px); }
-.settings-modal { max-height: calc(100dvh - var(--modal-top) - 24px); }
 /* On/off items in the right-click menu, styled like Låda Glass menu items. */
 .lg-menu [role="menuitemcheckbox"] > .lg-icon { flex: none; color: var(--lg-muted); }
 .lg-menu [role="menuitemcheckbox"] > .lg-kbd { margin-left: auto; flex: none; }

@@ -4,6 +4,12 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- The left panel's tabs are in the order Projects, Props, On stage, and the left panel starts wider
+  (320 px). Panel places saved before this version start over from the new defaults.
+- Settings is a tab of the right-hand panel again (beside the Inspector), not a window over the app;
+  the surroundings are picked from a dropdown.
+- The view pad's labels say *Fwd/Back* and *Up/Down* (were *Move* and *Height*).
+
 ## 0.11.1 (2026-11-22)
 
 - A paper target's stand height is whole centimetres, also when a new layout or style sets it to

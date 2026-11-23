@@ -56,10 +56,10 @@ export function createCameraPad(slot, { rig, around = () => null }) {
     btn("pan", -1, "Pan right", "right", "pad-e"), btn("tilt", -1, "Tilt down", "down", "pad-s"),
   ]);
   const walk = h("div", { class: "pad-column", role: "group", "aria-label": "Move forward or back" }, [
-    btn("dolly", 1, "Move forward", "up", ""), h("span", { class: "pad-label", text: "Move" }), btn("dolly", -1, "Move back", "down", ""),
+    btn("dolly", 1, "Move forward", "up", ""), h("span", { class: "pad-label", text: "Fwd/Back" }), btn("dolly", -1, "Move back", "down", ""),
   ]);
   const lift = h("div", { class: "pad-column", role: "group", "aria-label": "Camera height" }, [
-    btn("rise", 1, "Move up", "up", ""), h("span", { class: "pad-label", text: "Height" }), btn("rise", -1, "Move down", "down", ""),
+    btn("rise", 1, "Move up", "up", ""), h("span", { class: "pad-label", text: "Up/Down" }), btn("rise", -1, "Move down", "down", ""),
   ]);
   const pad = h("div", { class: "camera-pad", role: "group", "aria-label": "View controls" }, [look, walk, lift]);
   window.addEventListener("blur", stop);

@@ -24,11 +24,11 @@
   <div class="app">
     <header class="toolbar lg-glass" id="toolbar" aria-label="Tools"></header>
     <div class="lg-dock-layout app-dock" id="dock" data-lg-dock="dsb">
+    <section class="library lg-glass side-panel projects-panel" id="projects" aria-label="Projects" data-lg-dock-panel="projects" data-lg-dock-side="left" data-lg-dock-group="left"></section>
     <section class="library lg-glass" id="library" aria-label="Props" data-lg-dock-panel="props" data-lg-dock-side="left" data-lg-dock-group="left">
       <div id="library-body"></div>
     </section>
     <section class="library lg-glass layers-panel" id="layers" aria-label="On stage" data-lg-dock-panel="stage" data-lg-dock-side="left" data-lg-dock-group="left"></section>
-    <section class="library lg-glass side-panel projects-panel" id="projects" aria-label="Projects" data-lg-dock-panel="projects" data-lg-dock-side="left" data-lg-dock-group="left"></section>
     <main class="viewport-wrap" data-lg-dock-main>
       <canvas id="viewport" aria-label="3D stage view" tabindex="0"></canvas>
       <div class="lg-state lg-state-loading viewport-state" id="boot-state" role="status">
@@ -44,9 +44,9 @@
       <div id="stats" class="stats"></div>
       <div id="brief-slot" class="brief-slot"></div>
     </aside>
+    <section class="inspector lg-glass settings-panel" id="settings-panel" aria-label="Settings" data-lg-dock-panel="settings" data-lg-dock-side="right" data-lg-dock-group="right"></section>
     </div>
   </div>
-  <dialog class="lg-modal settings-panel settings-modal" id="settings-panel" aria-label="Settings"></dialog>
   <div id="print" aria-hidden="true"></div>
 </body>
 </html>

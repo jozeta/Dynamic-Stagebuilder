@@ -156,6 +156,7 @@ function revealInspector(selection) {
   const reveal = revealOnSelect(shownSelection, selection);
   shownSelection = [...selection];
   if (!reveal) return;
+  if (settings?.isOpen && dock.side("settings") === dock.side("inspector")) settings.close();    // they share the right-hand panel
   dock.activate("inspector");                // its tab comes forward, unfolded
 }
 
@@ -687,8 +688,13 @@ playButton = (() => {
 // right or under the view (drag the grip, or click it), fold to a rail and resize; remembered per
 // browser. On a narrow screen (an iPad upright) the Inspector starts under the view.
 const dockEl = document.getElementById("dock");
-if (matchMedia("(max-width: 1099px)").matches) for (const id of ["inspector"]) document.getElementById(id).setAttribute("data-lg-dock-side", "bottom");
-dock = window.LadaGlass.dock.init(dockEl, { key: "dsb", onChange: () => { engine.resize?.(); syncDockTabs(); placeToolbar(); } });
+if (matchMedia("(max-width: 1099px)").matches) for (const id of ["inspector", "settings-panel"]) document.getElementById(id).setAttribute("data-lg-dock-side", "bottom");
+// The left column starts a little wider than the dock's default (320 px). The key is new in 0.12, when
+// the left tabs became Projects, Props, On stage and Settings came back as a tab: older arrangements
+// saved under "dsb" don't carry over.
+const DOCK_KEY = "dsb-0.12";
+try { if (!localStorage.getItem(`lg-dock:${DOCK_KEY}`)) localStorage.setItem(`lg-dock:${DOCK_KEY}`, JSON.stringify({ sizes: { left: 320 } })); } catch { /* private mode: the dock's defaults */ }
+dock = window.LadaGlass.dock.init(dockEl, { key: DOCK_KEY, onChange: () => { engine.resize?.(); syncDockTabs(); placeToolbar(); } });
 // The toolbar sits at the top of the right-hand column (else the left), so the 3D view reaches the
 // top of the window; with no side column wide enough, it is a bar across the top as before.
 function placeToolbar() {
@@ -710,6 +716,7 @@ requestAnimationFrame(placeToolbar);
 // A tab shown by the dock (clicked, or still shown after a reload) is filled in.
 function syncDockTabs() {
   if (!dock) return;                         // still being set up
+  if (dock.active("settings") && !dock.folded("settings") && settings && !settings.isOpen) settings.ensureOpen();
   // Projects needs the store, which opens a moment after start-up (that end of start-up calls this again).
   if (store && dock.active("projects") && !dock.folded("projects") && projects && !projects.isOpen) projects.ensureOpen();
 }
@@ -747,8 +754,12 @@ settings = createSettings({
   mine: mineApi,
   editor,
   panel: document.getElementById("settings-panel"),
-  // A modal window over the app (Done or Escape closes it).
-  onToggle: (open) => { document.querySelector('[aria-label="Settings"].tool')?.setAttribute("aria-pressed", String(open)); },
+  // A tab of the right-hand panel, beside the Inspector: Done goes back to the Inspector.
+  docked: true,
+  onToggle: (open) => {
+    document.querySelector('[aria-label="Settings"].tool')?.setAttribute("aria-pressed", String(open));
+    dock?.activate(open ? "settings" : "inspector");
+  },
   getHidden: () => hiddenProps,
   onHidden: (next) => { hiddenProps = next; saveHidden(next); library.setHidden(next); },
   getSpeed: () => speed,
