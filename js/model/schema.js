@@ -61,7 +61,10 @@ export function validateStage(json) {
     return s;
   };
 
-  const settings = isObj(json.settings) ? json.settings : (err("settings", "missing"), {});
+  const settingsIn = isObj(json.settings) ? json.settings : (err("settings", "missing"), {});
+  // Surroundings tried out and removed before a release (Urban, Indoor range): open as the nearest kept ones.
+  const REMOVED = { urban: "outdoor", indoor: "industrial" };
+  const settings = Object.hasOwn(REMOVED, settingsIn.environment) ? { ...settingsIn, environment: REMOVED[settingsIn.environment] } : settingsIn;
   // Built-in surroundings, or your own ("custom:<id>", Settings → Surroundings → New from a plan).
   if (!ENVIRONMENTS.includes(settings.environment) && !/^custom:[A-Za-z0-9-]{1,64}$/.test(String(settings.environment))) err("settings.environment", `unknown environment ${JSON.stringify(settings.environment)}`);
   const targetStyle = settings.targetStyle ?? "classic";

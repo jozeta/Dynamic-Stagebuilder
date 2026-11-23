@@ -86,3 +86,13 @@ test("steel saved before the paint setting stays white", () => {
   delete old.objects[0].params.paint;
   assert.equal(validateStage(old).stage.objects[0].params.paint, "white");
 });
+
+test("a stage saved with the removed Urban or Indoor range surroundings opens as Outdoor or Industrial", async () => {
+  const { createStage } = await import("../js/model/stage.js");
+  for (const [old, now] of [["urban", "outdoor"], ["indoor", "industrial"]]) {
+    const s = createStage();
+    const r = validateStage({ ...s, settings: { ...s.settings, environment: old } });
+    assert.equal(r.ok, true, r.errors?.join("; "));
+    assert.equal(r.stage.settings.environment, now);
+  }
+});
