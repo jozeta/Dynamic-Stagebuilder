@@ -29,3 +29,20 @@ The stage library's layouts and briefing text are original, written for this app
 | Source | Opened | What it gave |
 |---|---|---|
 | [US IPSC Stage Diagrams (2012 US IPSC Nationals, 24 stages), Universal Shooting Academy](http://www.universalshootingacademy.com/wp-content/uploads/2013/01/US-IPSC-Stage-Diagrams-final.pdf) | yes (all 24 pages) | Stage layouts, target counts and props; each library stage is an original concept with new names and wording. Positions are estimated (the diagrams have no scale). |
+
+## Practice drills (added in 0.12)
+
+| Source | Opened | What it gave |
+|---|---|---|
+| [Ben Stoeger: Live-fire drills (index)](https://benstoeger.com/livefire-drills) | yes | The list of drills: Accelerator, Bill Drill, Blake Drill, Distance Changeup, The Dots, Group Shooting, Double Reload Double (Four Aces), The Heads, Easy Exit, Hard Exit. |
+| [Blake Drill](https://www.benstoeger.com/live-fire-drill-blake-drill) | yes | 3 targets a yard apart at 7 yards, 2 each from the draw, goal about 2 s. |
+| [The Accelerator](https://benstoeger.com/livefire-drill-the-accelerator) | yes | Targets a yard apart at mixed distances (7, 15, 25 yards), 2 each, reload, 2 each; about 6 s. |
+| [Double Reload Double (Four Aces)](https://benstoeger.com/livefire-drill-double-reload-double-four-aces) | yes | One target at 3, 5 or 7 yards: 2, reload, 2; goals 2.2–2.5 s. |
+| [The Heads](https://benstoeger.com/livefire-drill-the-heads) | yes | Head boxes at 5, 15, 25 yards, 2 each; accuracy standard by distance. |
+| [Distance Changeup](https://benstoeger.com/livefire-drill-distance-changeup) | yes | 2 each on targets of very different difficulty; under 3 s. |
+| [Easy Exit](https://benstoeger.com/livefire-drill-easy-exit), [Hard Exit](https://benstoeger.com/livefire-drill-hard-exit) | yes | Two positions A and B with a vision barrier; leave A while still shooting. |
+| [Athlon Outdoors: Doubles drill](https://athlonoutdoors.com/article/doubles-drill/) | search result only | Pairs from low ready, a short pause between pairs. |
+| [Primer Peak: The Super Test](https://www.primerpeak.com/the-super-test-skills-and-drills-2023/), [FAST drill](https://www.primerpeak.com/fast-drill/amp/), [Casino drill](https://www.luckygunner.com/lounge/the-casino-drill/amp/) | search result only | Not added: they need NRA B-8 targets, 3×5 cards or numbered dice targets, which the app doesn't have. |
+
+The setups use IPSC targets in place of USPSA ones; wording, layouts and the three new stages
+(Coffee Break, Off Hand, Box to Box) are original.

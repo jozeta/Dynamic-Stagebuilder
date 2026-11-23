@@ -563,3 +563,5 @@ body { background: var(--lg-bg); overflow: hidden; }
 .proj-row.is-dragging { opacity: 0.5; }
 .is-drop { outline: 2px dashed var(--lg-accent); outline-offset: 2px; background: color-mix(in srgb, var(--lg-accent) 12%, transparent); }
 .proj-row > select.lg-select { flex: 1 1 100%; }
+.lib-folder > .lib-summary > .lg-icon { flex: none; color: var(--lg-accent); width: 16px; height: 16px; }
+.lib-folder .lib-stages { margin: 0 0 var(--lg-space-s) var(--lg-space-s); }

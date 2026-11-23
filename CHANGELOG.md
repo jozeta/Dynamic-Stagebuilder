@@ -23,6 +23,10 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 - Folders in Projects for sorting stages, matches and folders: *New folder*, drag a row onto a
   folder or a breadcrumb link, or use the *Move to folder* icon; rename, move or delete a folder
   (what it holds moves up a level). The breadcrumb shows the folders round a stage or match.
+- The stage library is in folders (one per kind of stage) and has 10 more entries: seven practice
+  drills researched from Ben Stoeger's live-fire drills (Blake Drill, Accelerator, Four Aces, The
+  Heads, Distance Changeup, Exit Drill, Doubles) and three original stages (Coffee Break, Off Hand,
+  Box to Box). A library stage's ⓘ shows its shots (fewest and most) and its course length.
 - The view pad's labels say *Fwd/Back* and *Up/Down* (were *Move* and *Height*).
 
 ## 0.11.1 (2026-11-22)

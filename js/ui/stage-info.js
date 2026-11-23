@@ -12,13 +12,15 @@ function show(btn, details) {
   owner?.setAttribute("aria-expanded", "false");
   owner = btn;
   btn.setAttribute("aria-expanded", "true");
-  // A saved stage: { rows, matches }; a library stage: { meta, text } (category line and description).
-  box.replaceChildren(...(details.rows ? [
+  // A saved stage: { rows, matches }; a library stage: { meta, rows?, text } (category line, its
+  // shots and course length, and the description).
+  box.replaceChildren(...(details.rows && details.matches ? [
     h("dl", { class: "stage-info-rows" }, details.rows.flatMap(([k, v]) => [h("dt", { text: k }), h("dd", { text: v })])),
     h("p", { class: "stage-info-head", text: details.matches.length ? "In matches" : "Not in a match" }),
     details.matches.length ? h("ul", { class: "stage-info-matches" }, details.matches.map((m) => h("li", { text: m }))) : null,
   ] : [
     h("p", { class: "stage-info-meta", text: details.meta }),
+    details.rows ? h("dl", { class: "stage-info-rows" }, details.rows.flatMap(([k, v]) => [h("dt", { text: k }), h("dd", { text: v })])) : null,
     h("p", { class: "stage-info-text", text: details.text }),
   ]).filter(Boolean));
   box.hidden = false;

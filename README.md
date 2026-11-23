@@ -96,7 +96,7 @@ training, and want a clear briefing sheet without drawing the map by hand.
 - **Matches** of one or more stages, numbered in order, with the match name in every briefing and
   one print for the whole match.
 - **Projects** saved in the browser automatically, with JSON export and import, and a **stage
-  library** of 58 ready-made drills and IPSC/USPSA stages (including 24 after the 2012 US IPSC
+  library** of 68 ready-made drills and IPSC/USPSA stages (including 24 after the 2012 US IPSC
   Nationals) to open and edit, each with suggested shooting positions worked out from its sight lines.
 - **Works offline** and can be installed as an app (PWA).
 
@@ -198,7 +198,7 @@ Older versions are listed in [CHANGELOG.md](CHANGELOG.md).
     <td><img src="docs/screenshots/settings-view.png" alt="Settings, View tab" width="400"><br>Settings → View: walking speed, and the colour and opacity of figures, marks and route</td>
   </tr>
   <tr>
-    <td><img src="docs/screenshots/projects.png" alt="The Projects tab with the stage library" width="400"><br>Projects and the stage library (58 stages)</td>
+    <td><img src="docs/screenshots/projects.png" alt="The Projects tab with the stage library" width="400"><br>Projects and the stage library</td>
     <td><img src="docs/screenshots/briefing.png" alt="The Written Stage Briefing" width="400"><br>The Written Stage Briefing; rounds and points are counted from the stage</td>
   </tr>
   <tr>
@@ -506,9 +506,12 @@ right corner saves and closes the stage and goes back to where you came from (th
 stage of a match); a breadcrumb link above it does the same. With no stage open the view greys out
 under *Create new stage*, which asks for the new stage's name.
 An import always becomes a new project, so it never overwrites one. Below your projects is the
-*Stage library*: 58 ready-made stages (drills and standards, short, medium and long IPSC courses,
-USPSA and club stages with moving targets). Search or pick a category, then *Open as new project*
-to get your own copy to change. *Copy share link* copies a link that holds the open stage itself
+*Stage library*: 68 ready-made stages in folders (drills and standards, practice drills for
+transitions, reloads and movement, short, medium and long IPSC courses, USPSA and club stages with
+moving targets, and match stages). Open a folder or search, hover or tap a stage's ⓘ for its shots
+(fixed for a drill; a minimum and no maximum for a Comstock stage), course length (Short up to 12
+rounds, Medium 13–24, Long 25–32), targets and description, then use its open icon to get your own
+copy to change. *Copy share link* copies a link that holds the open stage itself
 (after the #, which browsers never send to a server): whoever opens it gets a copy as a new project.
 A project with changes that
 aren't in an exported file shows a hint, so you know when to export a backup.

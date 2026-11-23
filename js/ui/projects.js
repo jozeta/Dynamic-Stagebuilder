@@ -7,7 +7,7 @@
 import { h, icon, rowIcon } from "./dom.js";
 import { sortProjects, exportAge } from "../storage/projects.js";
 import { parseFile } from "../storage/files.js";
-import { STAGE_LIBRARY, LIBRARY_CATEGORIES, librarySummary } from "../model/stage-library.js";
+import { STAGE_LIBRARY, librarySummary, libraryInfo, libraryFolders } from "../model/stage-library.js";
 import { createMatches } from "./matches.js";
 import { stageInfoButton } from "./stage-info.js";
 import { stageDetails } from "../model/match.js";
@@ -178,32 +178,41 @@ export function createProjects({ panel, stageBox = null, docked = false, hide = 
   const file = h("input", { type: "file", accept: ".json,application/json", hidden: true, onchange: () => importFile() });
   // The stage library: ready-made stages and drills, each opened as a new project to edit.
   const libSearch = h("input", { type: "search", placeholder: "Search stages", "aria-label": "Search the stage library", oninput: () => fillLibrary() });
-  const libCat = h("select", { class: "lg-select", "aria-label": "Stage category", onchange: () => fillLibrary() },
-    [h("option", { value: "", text: "All categories" }), ...LIBRARY_CATEGORIES.map((c) => h("option", { value: c.id, text: c.name }))]);
+  // The library's folders (one per category) start folded; a search opens those with matches.
+  const libOpen = new Set();
   const libList = h("div", { class: "lib-stages", role: "list" });
   const summaries = new Map();
   const summaryOf = (spec) => { if (!summaries.has(spec.id)) summaries.set(spec.id, librarySummary(spec)); return summaries.get(spec.id); };
   const libraryBox = h("section", { class: "stage-library", "aria-labelledby": "library-title" }, [
     h("h3", { class: "lg-label stage-library-title", id: "library-title", text: `Stage library (${STAGE_LIBRARY.length})` }),
-    h("p", { class: "lg-muted hint-text", text: "Ready-made stages and drills. Open one as a new project, then change anything." }),
+    h("p", { class: "lg-muted hint-text", text: "Ready-made stages and drills in folders. Open one as a new project, then change anything." }),
     h("div", { class: "lg-search" }, [icon("search"), libSearch]),
-    libCat,
     libList,
   ]);
   function fillLibrary() {
-    const q = libSearch.value.trim().toLowerCase(), cat = libCat.value;
-    const shown = STAGE_LIBRARY.filter((s) => (!cat || s.category === cat) && (!q || `${s.name} ${s.summary} ${s.discipline}`.toLowerCase().includes(q)));
-    libList.replaceChildren(...(shown.length ? shown.map((spec) => {
-      const catName = LIBRARY_CATEGORIES.find((c) => c.id === spec.category)?.name || spec.category;
-      // The name, and on the right an ⓘ (category, rounds and the description on hover) and the open icon.
+    const q = libSearch.value.trim().toLowerCase();
+    const hit = (s) => !q || `${s.name} ${s.summary} ${s.discipline}`.toLowerCase().includes(q);
+    const card = (spec, catName) => {
+      // The name, and on the right an ⓘ (category, shots, course length, targets and the description) and the open icon.
+      const info = () => { const i = libraryInfo(spec); return { meta: `${catName} · ${spec.discipline === "both" ? "IPSC and USPSA" : spec.discipline}`,
+        rows: [["Shots", i.shotsText.replace(/^Shots: /, "")], ["Course", i.courseText], ["Targets", summaryOf(spec).targets]], text: spec.summary }; };
       return h("div", { class: "lib-stage icon-row", role: "listitem" }, [
         h("span", { class: "proj-name", text: spec.name }),
         h("div", { class: "row-icons" }, [
           rowIcon("open", `Open ${spec.name} as a new project`, async () => { matches.leaveMatch(); matches.showList(); await onOpenLibrary(spec); await placeNew(); await fill(); }),
-          stageInfoButton(spec.name, () => ({ meta: `${catName} · ${spec.discipline === "both" ? "IPSC and USPSA" : spec.discipline} · ${summaryOf(spec).rounds}`, text: spec.summary })),
+          stageInfoButton(spec.name, info),
         ]),
       ]);
-    }) : [h("p", { class: "lg-muted", text: "No stages match. Try another word or category." })]));
+    };
+    const folders = libraryFolders().map((f) => ({ ...f, stages: f.stages.filter(hit) })).filter((f) => f.stages.length);
+    libList.replaceChildren(...(folders.length ? folders.map((f) => {
+      const sec = h("details", { class: "lib-section lib-folder", open: q ? true : libOpen.has(f.id) }, [
+        h("summary", { class: "lib-summary" }, [icon("folder"), h("span", { class: "lg-label", text: f.name }), h("span", { class: "lib-count lg-muted", text: String(f.stages.length) })]),
+        h("div", { class: "lib-stages", role: "list" }, f.stages.map((spec) => card(spec, f.name))),
+      ]);
+      sec.addEventListener("toggle", () => { if (q) return; if (sec.open) libOpen.add(f.id); else libOpen.delete(f.id); });
+      return sec;
+    }) : [h("p", { class: "lg-muted", text: "No stages match. Try another word." })]));
   }
 
   // The open stage: its settings, statistics and briefing (stageBox), then export and share.
