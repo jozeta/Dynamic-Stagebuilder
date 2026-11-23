@@ -66,7 +66,7 @@ export const HELP_TOPICS = Object.freeze([
     tips: ["Lower Shadow strength for lighter shadows.", "The Props tab hides what you don't need in the props panel."] },
   { id: "briefing", title: "Briefing and printing", icon: "print", art: "page",
     text: ["Written stage briefing… (in the left panel's stage view, under the statistics) opens the Written Stage Briefing. Scoring, start signal, start position, gun condition and stop time have common choices; pick Custom text… to type your own. Procedure has common sentences to add.",
-      "Targets, minimum rounds and maximum points are counted from the stage. Print makes an A4 brief: the briefing and a map with a legend on page 1, the same map with the distances between props (metres, one decimal) and a list of them on page 2, then the 3D view and the setup sheet. Choose Save as PDF in the print dialog."],
+      "Targets, minimum rounds and maximum points are counted from the stage. Print makes an A4 brief: the briefing and a map with a legend on page 1, the same map with the distances between props on page 2: straight lines, first down range and then across, each labelled in metres with one decimal, and a list of them, then the 3D view and the setup sheet. Choose Save as PDF in the print dialog."],
     tips: ["On an iPad: Share → Print, pinch out on the preview, then Share → Save to Files.", "Stage type is suggested from the round count; you can set it yourself."] },
   { id: "arrange", title: "Exact positions, mirror and align", icon: "mirror", art: "place",
     text: ["Select a prop to see its position: Across (from the centre line, + to the shooter's left) and Down range (from the up-range edge). Type a value to place it exactly, without grid snap.",

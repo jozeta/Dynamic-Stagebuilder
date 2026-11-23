@@ -62,7 +62,7 @@ function placeLabels(labels) {
 /** The ground area a map shows (see regionOf), for sizing its box. */
 export const mapRegion = (stage, region = "bay") => regionOf(stage, region);
 
-// distances: also the distance sheet's lines between props (model/distances.js), each labelled at its middle.
+// distances: also the distance sheet's straight legs between props (model/distances.js), each labelled at its middle.
 export function mapModel(stage, { width, height, margin = 4, region = "bay", distances = false }) {
   const { width: bw, depth: bd } = stage.bay;
   const r = regionOf(stage, region);
@@ -111,9 +111,13 @@ export function mapModel(stage, { width, height, margin = 4, region = "bay", dis
 
   if (distances) {
     for (const p of distancePairs(stage)) {
-      const a = pt(p.a.position), b = pt(p.b.position);
-      items.push({ kind: "distance", points: [a, b] });
-      labels.push({ kind: "distance-label", x: (a[0] + b[0]) / 2, y: (a[1] + b[1]) / 2 + 1, text: p.text, ...labelSize(p.text) });
+      for (const leg of p.legs) {
+        const a = pt(leg.from), b = pt(leg.to);
+        items.push({ kind: "distance", points: [a, b] });
+        // Across legs: the length above the line; down-range legs: beside it.
+        const size = labelSize(leg.text);
+        labels.push({ kind: "distance-label", x: (a[0] + b[0]) / 2 + (leg.axis === "z" ? size.w / 2 + 0.8 : 0), y: (a[1] + b[1]) / 2 + (leg.axis === "z" ? 1 : 0), text: leg.text, ...size });
+      }
     }
   }
   items.push(...placeLabels(labels));

@@ -128,7 +128,7 @@ function distanceSheet(stage) {
   const pairs = distancePairs(stage);
   return h("section", { class: "print-distances" }, [
     h("h2", { text: `Stage ${stage.briefing.stageNumber} – ${stage.name || "Untitled stage"}: distances` }),
-    h("p", { class: "print-setup-note", text: "Centre to centre, in metres. Each prop and the start box is joined to a near neighbour by the shortest set of lines that connects them all." }),
+    h("p", { class: "print-setup-note", text: "Centre to centre, in metres. Each prop and the start box is joined to a near neighbour: first down range, then across, as measured with a tape." }),
     h("figure", { class: "print-map" }, [mapSvg(stage, { distances: true })]),
     pairs.length ? h("ol", { class: "print-distance-list" }, pairs.map((p) => h("li", {}, [h("span", { text: `${p.a.name} – ${p.b.name}` }), h("strong", { text: p.text })])))
       : h("p", { text: "Nothing on the stage to measure yet." }),

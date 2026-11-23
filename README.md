@@ -63,7 +63,8 @@ training, and want a clear briefing sheet without drawing the map by hand.
   or your own text. Targets, rounds and points are counted from the stage.
 - **Printable brief** (A4): a header with the stage number and key figures, the briefing grid, the
   procedure and a top-down map with a legend and scale bar on page 1, the map with the distances
-  between props (in metres, one decimal) on page 2, then a 3D view and the setup sheet. Save it
+  between props on page 2 (straight legs, down range then across, each labelled in metres with one
+  decimal), then a 3D view and the setup sheet. Save it
   as a PDF from the print dialog.
 - **Help** guide with a drawing for every main task, and side panels you can dock left, right or
   under the view, fold away and resize (remembered).
