@@ -9,6 +9,8 @@ import { isLocked } from "../model/layers.js";
 import { sightFrom, safetyRings } from "../model/safety.js";
 import { eyeHeight } from "../model/positions.js";
 import { BAY_SHAPE_NAMES, bayShapeFields as shapeFieldsOf } from "../model/bay.js";
+import { BRIEFING_OPTIONS, choiceFor } from "../model/briefing-options.js";
+import { START_POSES, startPoseFor, holsteredAtStart } from "../model/start-pose.js";
 
 const PARAM_LABELS = {
   kind: "Popper",
@@ -222,6 +224,47 @@ export function createInspector(root, { editor, shapes = { list: () => [], draw:
 
 
 
+  // The start position (selected on the ground): where it is, which way it faces, and how the
+  // shooter starts there (the briefing's start position and gun condition, which also pose the man).
+  function startPanel(stage, angle) {
+    const st = stage.start, b = stage.briefing;
+    const pos = (k, i, label) => field(label, h("input", { class: "lg-input", type: "number", inputmode: "decimal", step: "0.01", value: String(st.position[i]),
+      dataset: { field: `start-${k}` }, onchange: (e) => d({ type: "setPosition", id: "start", [k]: e.target.value }) }));
+    const step = angle || 15;
+    // A list of common wordings; "Custom text…" shows a text box for your own (as in the briefing).
+    const wording = (key, label) => {
+      const input = h("input", { class: "lg-input", value: b[key], maxlength: "4000", dataset: { field: `start-${key}-text` }, placeholder: "Type your own wording",
+        "aria-label": `${label}, custom text`, onchange: (e) => d({ type: "setBriefing", patch: { [key]: e.target.value } }) });
+      const { choice, custom } = choiceFor(key, b[key]);
+      input.hidden = !custom;
+      const list = h("select", { class: "lg-select", dataset: { field: `start-${key}` }, onchange: (e) => {
+        const v = e.target.value;
+        input.hidden = v !== "custom";
+        if (v === "custom") { input.value = ""; input.focus(); } else d({ type: "setBriefing", patch: { [key]: v } });
+      } }, [h("option", { value: "", text: "Not set" }), ...BRIEFING_OPTIONS[key].map((o) => h("option", { value: o, text: o })), h("option", { value: "custom", text: "Custom text…" })]);
+      list.value = choice;
+      const f = field(label, list);
+      f.append(input);
+      return f;
+    };
+    const poseName = START_POSES.find((p) => p.id === startPoseFor(b))?.name ?? "";
+    return [
+      h("h2", { class: "lg-subtitle panel-title", text: "Start position" }),
+      h("p", { class: "lg-muted hint-text", text: "Where the shooter starts. Drag the box to move it, turn it with the ring; the arrow points the way the shooter faces." }),
+      h("div", { class: "pos-fields" }, [pos("x", 0, "Across (m, + left)"), pos("z", 1, "Down range (m)")]),
+      field("Facing (°)", h("div", { class: "lg-row rot-row" }, [
+        h("button", { type: "button", class: "lg-btn lg-btn-icon", "aria-label": `Turn −${step}°`, onclick: () => d({ type: "rotate", by: -step, ids: ["start"] }) }, [icon("rotl")]),
+        numberInput("start-facing", st.facing, { min: 0, max: 359, step: angle || 1 }, (v) => d({ type: "setRotation", id: "start", value: v })),
+        h("button", { type: "button", class: "lg-btn lg-btn-icon", "aria-label": `Turn +${step}°`, onclick: () => d({ type: "rotate", by: step, ids: ["start"] }) }, [icon("rotr")]),
+      ])),
+      wording("startPosition", "Start position (briefing)"),
+      wording("gunCondition", "Gun condition (briefing)"),
+      wording("startSignal", "Start signal (briefing)"),
+      h("p", { class: "lg-muted hint-text", text: `The man at the start: ${poseName.toLowerCase()}, pistol ${holsteredAtStart(b) ? "in the holster" : "not on him"}.` }),
+      h("div", { class: "lg-row panel-actions" }, [h("button", { type: "button", class: "lg-btn lg-btn-danger", onclick: () => d({ type: "delete", ids: ["start"] }) }, [icon("trash"), "Remove the start position"])]),
+    ];
+  }
+
   function stagePanel(stage) {
     return [
       h("h2", { class: "lg-subtitle panel-title", text: "Stage" }),
@@ -248,13 +291,15 @@ export function createInspector(root, { editor, shapes = { list: () => [], draw:
     const links = stage.objects.filter((o) => isActivator(o.type) || o.activatedBy).map((o) => [o.id, o.label, o.activatedBy]);
     links.push(stage.groups ?? null);
     const sights = objs.length === 1 && objs[0].type === "shooting-position" ? stage.objects : null;     // what it sees changes with the rest
-    const key = JSON.stringify([sel, objs, lines, links, sights, sel.length ? null : [stage.bay, stage.settings.grid, stage.settings.angleSnap, shapes.version]]);     // My shapes changed: rebuilt
+    const start = sel.includes("start") ? [stage.start, stage.briefing.startPosition, stage.briefing.gunCondition, stage.briefing.startSignal, stage.settings.angleSnap] : null;
+    const key = JSON.stringify([sel, objs, lines, links, sights, start, sel.length ? null : [stage.bay, stage.settings.grid, stage.settings.angleSnap, shapes.version]]);     // My shapes changed: rebuilt
     if (key === lastKey) return;
     lastKey = key;
     const focused = root.contains(document.activeElement) ? document.activeElement.dataset.field : null;
 
     let nodes;
     if (!sel.length) nodes = stagePanel(stage);
+    else if (sel.length === 1 && sel[0] === "start" && stage.start) nodes = startPanel(stage, stage.settings.angleSnap);
     else if (objs.length === 1 && sel.length === 1) nodes = [...objectPanel(objs[0], stage.settings.angleSnap, stage), actions(isLocked(stage, objs[0]))];
     else if (lines.length === 1 && sel.length === 1) {
       const l = lines[0];

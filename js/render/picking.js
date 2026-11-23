@@ -3,7 +3,8 @@
 //   drag empty ground to orbit (OrbitControls), tap empty ground to clear the selection;
 // - place mode: tap the ground to place the armed prop; mouse drag-and-drop from the library too;
 // - draw mode: tap to add points, double-click (or the Finish button / Enter) to end;
-// - start mode: tap to set the start position;
+// - start mode: tap to set the start position; the start box itself is selected, dragged and
+//   turned like a prop (its id is "start");
 // - a rotate ring (TransformControls, vertical axis only) on a single selected object.
 import * as THREE from "three";
 import { isLocked } from "../model/layers.js";
@@ -73,8 +74,9 @@ export function attachPicking({ engine, stageView, editor, cameraRig, canvas, on
   const moveGuide = createMoveGuide();
   engine.groups.helper.add(moveGuide.group);
   let moving = null;       // { id, from } while a prop is dragged
+  const placeOf = (id) => (id === "start" ? editor.stage().start : editor.stage().objects.find((x) => x.id === id));
   function showMove() {
-    const o = moving && editor.stage().objects.find((x) => x.id === moving.id);
+    const o = moving && placeOf(moving.id);
     if (!o) return;
     const m = moveOf(moving.from, o.position);
     moveGuide.show({ from: moving.from, to: o.position, size: Math.max(0.12, 10 * metresPerPixel(moving.from)) });
@@ -120,7 +122,7 @@ export function attachPicking({ engine, stageView, editor, cameraRig, canvas, on
     for (const h of hits) {
       if (!shown(h.object)) continue;
       const id = stageView.idFor(h.object);
-      if (!id || id === "start" || id === "route") continue;
+      if (!id || id === "route") continue;
       const o = editor.stage().objects.find((x) => x.id === id);
       if (o && isLocked(editor.stage(), o) && !locked) return null;
       return id;
@@ -174,8 +176,8 @@ export function attachPicking({ engine, stageView, editor, cameraRig, canvas, on
       press.dragging = true;
       press.tracker = createDragTracker();
       editor.dispatch({ type: "dragStart", ids: editor.state.selection });
-      const o = editor.stage().objects.find((x) => x.id === press.id);
-      moving = o ? { id: o.id, from: [...o.position] } : null;
+      const o = placeOf(press.id);
+      moving = o ? { id: press.id, from: [...o.position] } : null;
     }
     if (press.dragging) {
       const g = groundAt(e);
@@ -219,16 +221,21 @@ export function attachPicking({ engine, stageView, editor, cameraRig, canvas, on
     if (editor.state.mode?.draw) editor.dispatch({ type: "finishDraw" });
   });
 
-  // Mouse drag-and-drop from the prop library.
+  // Mouse drag-and-drop from the prop library (props, start marks and shooting positions), and the
+  // start position (a marking of its own).
   canvas.addEventListener("dragover", (e) => {
-    if (e.dataTransfer?.types.includes("application/x-stage-prop")) e.preventDefault();
+    if (e.dataTransfer?.types.includes("application/x-stage-prop") || e.dataTransfer?.types.includes("application/x-stage-start")) e.preventDefault();
   });
   canvas.addEventListener("drop", (e) => {
     const type = e.dataTransfer?.getData("application/x-stage-prop");
-    if (!type) return;
+    const start = e.dataTransfer?.types.includes("application/x-stage-start");
+    if (!type && !start) return;
     e.preventDefault();
     const g = groundAt(e);
-    if (g) editor.dispatch({ type: "place", propType: type, position: g });
+    if (!g) return;
+    if (start) { editor.dispatch({ type: "setStart", position: g, facing: editor.stage().start?.facing ?? 0 }); editor.dispatch({ type: "select", ids: ["start"] }); return; }
+    editor.dispatch({ type: "place", propType: type, position: g });
+    if (editor.state.mode?.place === type) editor.dispatch({ type: "setMode", mode: "select" });      // a drop places one
   });
 
   /** Put the rotate ring on the single selected object (call after every stage view sync). */
@@ -237,7 +244,7 @@ export function attachPicking({ engine, stageView, editor, cameraRig, canvas, on
     const sel = editor.state.selection;
     const node = sel.length === 1 ? stageView.objectFor(sel[0]) : null;
     const o = node && editor.stage().objects.find((x) => x.id === sel[0]);
-    const isObject = o && !isLocked(editor.stage(), o);         // no rotate ring on a locked prop
+    const isObject = (o && !isLocked(editor.stage(), o)) || (node && sel[0] === "start");         // no rotate ring on a locked prop
     if (isObject && editor.state.mode === "select") { if (gizmo.object !== node) gizmo.attach(node); }
     else if (gizmo.object) gizmo.detach();
   }

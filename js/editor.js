@@ -2,7 +2,7 @@
 // settings, kept inside the bay, numbered, and committed to the undo history as one step. No DOM,
 // no Three.js, so it runs under node --test.
 import { createStage, addObject, updateObject, removeObjects, duplicateObjects, addLine, setStart,
-  setSetting, setBay, setBriefing, pruneSelection } from "./model/stage.js";
+  setSetting, setBay, setBriefing, pruneSelection, START_ID } from "./model/stage.js";
 import { createHistory, commit, replacePresent, undo, redo } from "./model/history.js";
 import { assignLabels, renumber, setLabel, closeGaps } from "./model/numbering.js";
 import { fitStand, arrayCounts, arrayExtent, layoutDefaults, CARD_PARAMS } from "./model/arrays.js";
@@ -23,6 +23,11 @@ const STAGE_TYPES = ["", "Short", "Medium", "Long"];
 const BRIEFING_TEXT = ["matchName", "designer", "startSignal", "startPosition", "gunCondition", "procedure", "stopTime", "notes", "scoring"];
 const LINE_MIN = { "fault-line": 2, "shooting-area": 3 };
 const clampNum = (v, min, max) => Math.min(max, Math.max(min, v));
+const turn = (deg) => ((deg % 360) + 360) % 360;
+// Props placed one tap after another until Esc or Enter (the others are placed one at a time).
+const REPEAT_PLACE = new Set(["shooting-position"]);
+// The start position moved or turned (keeping its saved Shooter's eye view only when not turned).
+const startAt = (stage, patch) => (stage.start ? setStart(stage, patch.position ?? stage.start.position, patch.facing ?? stage.start.facing) : stage);
 
 // A copy of the stage with one shooting position's grab points changed by fn(via) (at most 50).
 function withVia(stage, id, fn) {
@@ -82,6 +87,7 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
       if (o) pts.push(o.position);
       const l = base.lines.find((x) => x.id === id);
       if (l) pts.push(...l.points);
+      if (id === START_ID && base.start) pts.push(base.start.position);
     }
     const half = base.bay.width / 2;
     for (const [x, z] of pts) {
@@ -101,6 +107,10 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
     const delta = limitDelta(base, ids, rawDelta);
     const place = (p) => (fine ? clampToBay(p, base.bay) : fit(p, base));
     let s = base;
+    if (ids.includes(START_ID) && base.start) {
+      const [x, z] = base.start.position;
+      s = startAt(s, { position: place([x + delta[0], z + delta[1]]) });
+    }
     if (ids.length === 1) {
       const o = base.objects.find((x) => x.id === ids[0]);
       if (o) return updateObject(s, o.id, { position: landing(base, o, [o.position[0] + delta[0], o.position[1] + delta[1]], fine) });
@@ -148,7 +158,7 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
       const obj = r.stage.objects.find((o) => o.id === r.id);
       edit(updateObject(r.stage, r.id, { position: landing(r.stage, obj, position) }));
       state.selection = [r.id];
-      state.mode = "select";
+      if (!REPEAT_PLACE.has(propType)) state.mode = "select";
     },
     // Shooter's eye move arrows: one step relative to the position's facing, unsnapped, in the bay.
     stepPosition({ id, dir, step }) {
@@ -174,6 +184,7 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
     },
     rotate({ by, ids = state.selection }) {
       let s = present();
+      if (ids.includes(START_ID) && s.start) s = startAt(s, { facing: turn(snapAngle(s.start.facing + by, s.settings.angleSnap)) });
       for (const id of unlocked(ids)) {
         const o = s.objects.find((x) => x.id === id);
         if (o) s = updateObject(s, id, { rotation: snapAngle(o.rotation + by, s.settings.angleSnap) });
@@ -182,9 +193,11 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
     },
     // A position typed in: used exactly (no grid or object snap), kept inside the bay.
     setPosition({ id, x, z }) {
+      const num = (v, old) => (v === "" || v === null || v === undefined || !Number.isFinite(Number(v)) ? old : Math.round(Number(v) * 1000) / 1000);
+      const st = present().start;
+      if (id === START_ID) { if (st) edit(startAt(present(), { position: clampToBay([num(x, st.position[0]), num(z, st.position[1])], present().bay) })); return; }
       const o = present().objects.find((v) => v.id === id);
       if (!o || isLocked(present(), o)) return;
-      const num = (v, old) => (v === "" || v === null || v === undefined || !Number.isFinite(Number(v)) ? old : Math.round(Number(v) * 1000) / 1000);
       edit(updateObject(present(), id, { position: clampToBay([num(x, o.position[0]), num(z, o.position[1])], present().bay) }));
     },
     // Mirror left to right: the selection about its centre, or (nothing selected) the whole stage.
@@ -197,7 +210,9 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
     align({ ids = state.selection, edge }) { const next = alignObjects(present(), unlocked(objIds(ids)), edge); if (next !== present()) edit(onFloor(next)); },
     distribute({ ids = state.selection, axis }) { const next = distributeObjects(present(), unlocked(objIds(ids)), axis); if (next !== present()) edit(onFloor(next)); },
     // fine (Shift on the rotate ring): the exact angle, unsnapped.
-    setRotation({ id, value, fine = false }) { edit(updateObject(present(), id, { rotation: snapAngle(Number(value) || 0, fine ? 0 : present().settings.angleSnap) })); },
+    setRotation({ id, value, fine = false }) {
+      if (id === START_ID) { if (present().start) edit(startAt(present(), { facing: turn(snapAngle(Number(value) || 0, fine ? 0 : present().settings.angleSnap)) })); return; }
+      edit(updateObject(present(), id, { rotation: snapAngle(Number(value) || 0, fine ? 0 : present().settings.angleSnap) })); },
     setParams({ id, params }) {
       const o = present().objects.find((x) => x.id === id);
       if (!o) return;
@@ -253,7 +268,8 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
     delete({ ids = state.selection }) {
       const go = unlocked(ids);                    // a locked prop is kept: unlock it first
       if (!go.length) return;
-      edit(withoutGaps(present(), go));
+      const s = go.includes(START_ID) ? { ...present(), start: null } : present();
+      edit(withoutGaps(s, go.filter((id) => id !== START_ID)));
       state.selection = state.selection.filter((id) => !go.includes(id));
     },
     // The props-on-stage list and the right-click menu.

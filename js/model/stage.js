@@ -28,6 +28,16 @@ export function createStage({ name = "Stage 1", width = 20, depth = 30 } = {}) {
   };
 }
 
+// A new stage made in the app: the start position is already on the ground, up range in the middle
+// of the bay, facing down range.
+export function newStage(opts = {}) {
+  const s = createStage(opts);
+  return setStart(s, [0, Math.min(1.5, s.bay.depth / 2)], 0);
+}
+
+/** The start position's id when it is selected (it is not one of the stage's objects). */
+export const START_ID = "start";
+
 export function addObject(stage, oldType, position, rotation = 0, oldParams = {}) {
   const { type, params } = upgradeProp(oldType, oldParams);     // older prop types open as today's
   getProp(type);
@@ -95,7 +105,7 @@ export function setBriefing(stage, patch) {
 }
 
 export function pruneSelection(selection, stage) {
-  const ids = new Set([...stage.objects.map((o) => o.id), ...stage.lines.map((l) => l.id)]);
+  const ids = new Set([...stage.objects.map((o) => o.id), ...stage.lines.map((l) => l.id), ...(stage.start ? [START_ID] : [])]);
   return selection.filter((id) => ids.has(id));
 }
 

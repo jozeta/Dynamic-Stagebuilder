@@ -33,6 +33,7 @@ export function attachShortcuts({ editor, rig, onEscape }) {
       return;
     }
     if (k === "enter" && editor.state.mode?.draw) return d({ type: "finishDraw" });
+    if (k === "enter" && editor.state.mode?.place) return d({ type: "cancel" });       // stop placing shooting positions
     if (k === "l" && editor.state.selection.length) return d({ type: "setLocked", locked: !allFlag(editor, "locked") });
     if (k === "h" && editor.state.selection.length) return d({ type: "setHidden", hidden: !allFlag(editor, "hidden") });
     if (k === "q") return d({ type: "rotate", by: -step });

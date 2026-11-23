@@ -24,7 +24,7 @@ import { createBriefing } from "./ui/briefing.js";
 import { createSettings } from "./ui/settings.js";
 import { renderPrint, renderMatchPrint } from "./ui/print.js";
 import { h, icon } from "./ui/dom.js";
-import { createStage } from "./model/stage.js";
+import { createStage, newStage } from "./model/stage.js";
 import { validateStage } from "./model/schema.js";
 import { openStore, memoryStore } from "./storage/db.js";
 import { decodeShare, encodeShare, shareHash, MAX_LINK } from "./storage/share.js";
@@ -241,7 +241,11 @@ function updateHint(state) {
   const stage = state.history.present;
   const cancel = h("button", { type: "button", class: "lg-btn", onclick: () => editor.dispatch({ type: "cancel" }), text: "Cancel" });
   let nodes = null;
-  if (m?.place) nodes = [h("span", { text: `Tap the ground to place: ${getProp(m.place).name}.` }), cancel];
+  if (m?.place === "shooting-position") {
+    const n = stage.objects.filter((o) => o.type === "shooting-position").length;
+    nodes = [h("span", { text: `Tap the ground for shooting position ${n + 1}. Keep tapping for the next; Enter or Esc when done.` }),
+      h("button", { type: "button", class: "lg-btn lg-btn-primary", onclick: () => editor.dispatch({ type: "cancel" }), text: "Done" })];
+  } else if (m?.place) nodes = [h("span", { text: `Tap the ground to place: ${getProp(m.place).name}.` }), cancel];
   else if (m?.draw) {
     const need = m.draw === "fault-line" ? 2 : 3;
     nodes = [h("span", { text: `Tap to add points (${m.points.length}). Double-click, Enter or Finish to end.` }),
@@ -453,7 +457,8 @@ async function addProject(stage) {
 }
 // A new stage is clean: no props, no lines, and the default surroundings and light (it does not take
 // over the open stage's surroundings, which may be a hall or your own buildings).
-const freshStage = (name = "New stage") => createStage({ name });
+// The start position is already on the ground, up range in the middle.
+const freshStage = (name = "New stage") => newStage({ name });
 
 // A match writes its name and the stage's number into the stage's briefing. The open stage gets it
 // through the editor (so autosave keeps it); others in their saved record. With onlyIf, only when

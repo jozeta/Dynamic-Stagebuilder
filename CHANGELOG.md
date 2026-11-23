@@ -8,6 +8,12 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
   (320 px). Panel places saved before this version start over from the new defaults.
 - Settings is a tab of the right-hand panel again (beside the Inspector), not a window over the app;
   the surroundings are picked from a dropdown.
+- A new stage starts with the start position on the ground. Click the start box to select it: drag
+  it, turn it with the ring, or set its place, facing, start position, gun condition and start signal
+  in the inspector (or remove it). Delete removes a selected start too.
+- The start position, start marks and shooting positions can be dragged from the props panel onto
+  the 3D view.
+- Shooting positions are placed one tap after another (1, 2, 3…) until Enter, Escape or *Done*.
 - The view pad's labels say *Fwd/Back* and *Up/Down* (were *Move* and *Height*).
 
 ## 0.11.1 (2026-11-22)

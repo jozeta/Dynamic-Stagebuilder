@@ -81,11 +81,15 @@ export function createLibrary(root, { editor, hidden: initialHidden = { categori
   const markings = [
     ["line", "Fault line", "Tap points; Finish or Enter to end", { type: "beginDraw", lineType: "fault-line" }, (s) => s.mode?.draw === "fault-line"],
     ["area", "Shooting area", "Tap the corners; Finish to close", { type: "beginDraw", lineType: "shooting-area" }, (s) => s.mode?.draw === "shooting-area"],
-    ["flag", "Start position", "Tap where the shooter starts", { type: "beginStart" }, (s) => s.mode === "start"],
+    ["flag", "Start position", "Tap or drag to where the shooter starts", { type: "beginStart" }, (s) => s.mode === "start"],
     ["flag", "Start marks (X)", "Tap to place X marks for toes, heels or palms", { type: "setMode", mode: { place: "start-marks" } }, (s) => s.mode?.place === "start-marks", "start-marks"],
-    ["eye", "Shooting position", "Tap each place the shooter shoots from: 1, 2, 3…", { type: "setMode", mode: { place: "shooting-position" } }, (s) => s.mode?.place === "shooting-position", "shooting-position"],
+    ["eye", "Shooting position", "Tap each place the shooter shoots from: 1, 2, 3… (Enter or Esc ends)", { type: "setMode", mode: { place: "shooting-position" } }, (s) => s.mode?.place === "shooting-position", "shooting-position"],
   ].map(([ic, name, hint, action, active, id = action.lineType || "start"]) => {
+    // The start position, start marks and shooting positions can also be dragged onto the 3D view.
+    const drag = id === "start" ? "application/x-stage-start" : action.mode?.place ? "application/x-stage-prop" : null;
     const el = h("button", { type: "button", class: "lib-item lib-marking", role: "listitem", "aria-pressed": "false", dataset: { marking: name, type: id },
+      draggable: drag ? "true" : null,
+      ondragstart: drag ? (e) => { e.dataTransfer.setData(drag, id); e.dataTransfer.effectAllowed = "copy"; } : null,
       onclick: () => editor.dispatch(active(editor.state) ? { type: "setMode", mode: "select" } : action) },
     [h("span", { class: "lib-name" }, [icon(ic), name]), h("span", { class: "lib-size lg-muted", text: hint })]);
     items.push({ el, text: `${name} stage markings`.toLowerCase(), marking: true, group: "markings", id });

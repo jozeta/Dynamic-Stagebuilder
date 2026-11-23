@@ -324,7 +324,11 @@ plate rack, dueling tree) are in their own group.
 
 **Draw fault lines and shooting areas.** Choose *Fault line* or *Shooting area* at the top of the props panel, tap
 the points on the ground, then double-click, press Enter or tap *Finish*. Escape or *Cancel* stops.
-*Start position* then a tap sets where the shooter starts (the shooter's-eye camera stands there).
+A new stage already has its start position on the ground (up range, in the middle). Click the
+start box to select it: drag it to move it, turn it with the ring, or set its place, facing, start
+position, gun condition and start signal in the inspector (*Remove the start position* takes it
+away). *Start position* then a tap (or a drag onto the view) puts it somewhere else; *Start marks
+(X)* and *Shooting position* can also be dragged onto the view.
 
 **Build an earth berm.** *Earth berm* (Buildings and surroundings) is a mound with sloping sides and
 ends, on the Outdoor ground's own surface. In the inspector set its length, height and base depth,
@@ -362,7 +366,8 @@ dueling tree or popper and switch on *Animate*. The *Play / Pause* button over t
 appears once something is animated) starts and stops all of them together.
 
 **Plan the shooter's run.** Pick *Shooting position* in Stage markings and tap each place the
-shooter shoots from; they are numbered 1, 2, 3…. In the inspector set the stance (standing,
+shooter shoots from, one tap after another; they are numbered 1, 2, 3…. Enter, Escape or *Done*
+stops placing them. In the inspector set the stance (standing,
 crouching, kneeling, sitting, prone), the facing and the look up/down angle; each position shows
 a grey man in that stance. The man in the start box takes the pose the briefing's *Start position*
 describes and has his pistol holstered unless the gun starts on a table or in a case; "facing up

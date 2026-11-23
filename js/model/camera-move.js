@@ -56,10 +56,12 @@ export function orbitView(view, centre, move, amount) {
 /** The middle of the selected props, half way up them ([x, y, z]), or null when none are selected. */
 export function selectionCentre(stage, ids) {
   const picked = (stage?.objects || []).filter((o) => ids?.includes(o.id));
+  // The start position counts as a standing man (1.6 m) on its box.
+  if (stage?.start && ids?.includes("start")) picked.push({ position: stage.start.position, start: true });
   if (!picked.length) return null;
   const xs = picked.map((o) => o.position[0]), zs = picked.map((o) => o.position[1]);
   const mid = (v) => (Math.min(...v) + Math.max(...v)) / 2;
-  const h = Math.max(...picked.map((o) => { try { return dimensionsOf(o).h; } catch { return 0; } }));
+  const h = Math.max(...picked.map((o) => { if (o.start) return 1.6; try { return dimensionsOf(o).h; } catch { return 0; } }));
   return [mid(xs), h / 2, mid(zs)];
 }
 
