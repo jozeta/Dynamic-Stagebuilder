@@ -554,3 +554,12 @@ body { background: var(--lg-bg); overflow: hidden; }
 .guide-tag { position: absolute; z-index: 4; transform: translate(-50%, -50%); pointer-events: none; white-space: nowrap;
   font: 700 15px/1 var(--lg-font, system-ui, sans-serif); color: #fff; font-variant-numeric: tabular-nums;
   padding: 4px 7px; border-radius: 6px; background: rgb(20 22 25 / 0.72); }
+
+/* Folders in Projects: a folder row opens on click; rows can be dragged onto a folder or a breadcrumb link. */
+.folder-open { display: flex; align-items: center; gap: var(--lg-space-s); flex: 1; min-width: 0; min-height: var(--lg-touch); padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.folder-open > .lg-icon { flex: none; color: var(--lg-accent); }
+.folder-open:focus-visible { outline: 2px solid var(--lg-accent); outline-offset: 2px; border-radius: var(--lg-radius-small); }
+.proj-row.is-draggable { cursor: grab; }
+.proj-row.is-dragging { opacity: 0.5; }
+.is-drop { outline: 2px dashed var(--lg-accent); outline-offset: 2px; background: color-mix(in srgb, var(--lg-accent) 12%, transparent); }
+.proj-row > select.lg-select { flex: 1 1 100%; }

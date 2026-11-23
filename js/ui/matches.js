@@ -10,7 +10,7 @@ import { openMatchEditor } from "./match-editor.js";
 import { dragGrip } from "./drag-sort.js";
 import { sortProjects } from "../storage/projects.js";
 
-export function createMatches({ store, currentId, onOpen, onNewStage, onCreateFrom = async () => null, onCloseMatch = null, onApplyBriefing, onPrint, onExport = () => {}, onViewChange = () => {}, onChanged = async () => {} }) {
+export function createMatches({ store, currentId, inFolder = () => true, rowExtras = () => [], onOpen, onNewStage, onCreateFrom = async () => null, onCloseMatch = null, onApplyBriefing, onPrint, onExport = () => {}, onViewChange = () => {}, onChanged = async () => {} }) {
   const box = h("section", { class: "matches", "aria-labelledby": "matches-title" });
   let openId = null;            // the match whose page is shown, or null for the list
   let contextId = null;         // the match you are working in (its page, or a stage opened from it); null: a stage on its own
@@ -64,7 +64,7 @@ export function createMatches({ store, currentId, onOpen, onNewStage, onCreateFr
   const btn = (label, onclick, cls = "lg-btn", ic = null, extra = {}) => h("button", { type: "button", class: cls, onclick, ...extra }, [ic ? icon(ic) : null, label].filter(Boolean));
 
   async function fillList() {
-    const matches = await listMatches();
+    const matches = (await listMatches()).filter((m) => inFolder(`match:${m.id}`));      // the folder shown
     const records = await stageRecords();
     const stages = records.map((r) => r.stage);
     const rows = matches.map((m) => {
@@ -77,6 +77,7 @@ export function createMatches({ store, currentId, onOpen, onNewStage, onCreateFr
         ]),
         h("div", { class: "row-icons" }, [
           rowIcon("open", `Open the match ${m.name}`, async () => { openId = m.id; await fill(); }),
+          ...rowExtras(row, `match:${m.id}`, m.name, () => normal()),
           rowIcon("trash", `Delete the match ${m.name}`, () => confirm(), { danger: true }),
         ]));
       const confirm = () => row.replaceChildren(h("span", { class: "proj-confirm", text: `Delete the match "${m.name}"? Its stages stay as projects.` }),

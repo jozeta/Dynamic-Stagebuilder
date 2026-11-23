@@ -421,7 +421,9 @@ async function claimBlank() {
 async function newStageFlow() {
   const name = await askName({ title: "New stage", value: "" });
   if (!name) return false;
-  await addProject(freshStage(name));
+  const st = freshStage(name);
+  await addProject(st);
+  await projects?.placeNew(`stage:${st.id}`);       // into the folder the panel shows, if any
   await projects?.refresh();
   dock?.activate("props");                  // a new stage starts with the props to place
   return true;

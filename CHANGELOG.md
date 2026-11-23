@@ -20,6 +20,9 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
   right-hand Inspector is for the selection only.
 - A new stage made in a match opens in stage edit mode: the breadcrumb shows Projects › the match ›
   Stage n, the corner button says *Close stage*, and closing goes back to the match's page.
+- Folders in Projects for sorting stages, matches and folders: *New folder*, drag a row onto a
+  folder or a breadcrumb link, or use the *Move to folder* icon; rename, move or delete a folder
+  (what it holds moves up a level). The breadcrumb shows the folders round a stage or match.
 - The view pad's labels say *Fwd/Back* and *Up/Down* (were *Move* and *Height*).
 
 ## 0.11.1 (2026-11-22)

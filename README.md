@@ -494,7 +494,11 @@ its stages in one file; *Import file…* takes it back as new projects in a new 
 **Projects, export and import.** Every change is saved in this browser automatically (a green *Saved*
 alert shows at the top of the 3D view for a few seconds; a problem saving stays until you close it).
 The *Projects* tab in the left-hand panel lists your stages, with small icons to open, duplicate or
-delete them and an ⓘ for their details; *Import file…* adds a stage from a file. With a stage open,
+delete them and an ⓘ for their details; *Import file…* adds a stage from a file. *New folder* makes
+a folder for sorting stages, matches and other folders: drag a row onto a folder (or onto a
+breadcrumb link to move it up), or use its *Move to folder* icon, which works without dragging on an
+iPad. Click a folder to open it; deleting a folder moves what it holds up a level. Folders are kept
+in this browser and don't travel in files or share links. With a stage open,
 the tab shows that stage instead: a breadcrumb of where it sits (*Projects › Club match › Stage 2:
 Name*), its settings (bay, shape, grid and angle snap, mirror), statistics, *Written stage
 briefing…*, *Export this stage* (a `.json` file) and *Copy share link*. *Close stage* in its top

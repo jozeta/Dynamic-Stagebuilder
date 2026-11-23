@@ -89,6 +89,7 @@ export const HELP_TOPICS = Object.freeze([
     tips: ["Taking a stage out of a match, or deleting the match, keeps the stage as a project.", "Export the match saves it with all its stages in one file; Import file… takes it back."] },
   { id: "projects", title: "Projects and files", icon: "folder", art: "files",
     text: ["The Projects tab in the left-hand panel lists every stage saved in this browser: open, duplicate or delete them, or start a new stage.",
+      "New folder sorts stages, matches and other folders: drag a row onto a folder, or onto a breadcrumb link to move it up, or use its Move to folder icon. Deleting a folder moves what it holds up a level. With a stage open, the tab shows that stage: its breadcrumb, settings, statistics and briefing, and Close stage.",
       "Export this stage saves a .json file you can keep or move to another device; Import file… adds one as a new project, so nothing is ever overwritten."],
     tips: ["A project with changes that aren't exported yet says so.", "Stages are kept in this browser only; export a copy now and then."] },
   { id: "keys", title: "Keyboard shortcuts", icon: "doc", art: "keys",
