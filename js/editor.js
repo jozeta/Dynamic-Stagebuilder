@@ -26,6 +26,9 @@ const clampNum = (v, min, max) => Math.min(max, Math.max(min, v));
 const turn = (deg) => ((deg % 360) + 360) % 360;
 // Props placed one tap after another until Esc or Enter (the others are placed one at a time).
 const REPEAT_PLACE = new Set(["shooting-position"]);
+// What still works on a read-only stage (a view link): looking, selecting and measuring, and the
+// view choices (look, surroundings, grid), which are never undo steps. Everything else is ignored.
+const VIEW_ACTIONS = new Set(["select", "cancel", "setMode", "beginMeasure", "addMeasurePoint", "clearMeasures", "copy", "selectAll", "setLook", "setEnvironment", "toggleGrid", "load"]);
 // The start position moved or turned (keeping its saved Shooter's eye view only when not turned).
 const startAt = (stage, patch) => (stage.start ? setStart(stage, patch.position ?? stage.start.position, patch.facing ?? stage.start.facing) : stage);
 
@@ -476,12 +479,14 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
     },
   };
 
+  let readOnly = false;
   function dispatch(action) {
     const h = handlers[action.type];
     if (!h) throw new Error(`Unknown editor action: ${action.type}`);
+    if (readOnly && !VIEW_ACTIONS.has(action.type)) return;
     h(action);
     onChange(state, action);
   }
 
-  return { state, dispatch, stage: present };
+  return { state, dispatch, stage: present, setReadOnly(on) { readOnly = Boolean(on); if (readOnly) state.drag = null; }, get readOnly() { return readOnly; } };
 }

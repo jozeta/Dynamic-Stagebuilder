@@ -3,9 +3,13 @@
 // people who have the link. Opening one is untrusted input: the link is size-capped, the
 // decompressed text is capped while it streams (no zip bombs), and the stage goes through the same
 // checks as an imported file, with a new id. No DOM.
+// View links ("#view=…") carry the compact stage (model/compact.js: short ids, no defaults), small
+// enough for a QR code on the printed brief; they open read-only, as a view, not a new project.
 import { parseStageFile } from "./files.js";
+import { compactStage } from "../model/compact.js";
 
 export const shareHash = "stage=";
+export const viewHash = "view=";
 export const MAX_LINK = 120_000;                 // characters after "#stage=" (browsers cope with far more)
 const MAX_TEXT = 5_000_000;                      // decompressed bytes, the stage file limit
 
@@ -19,16 +23,27 @@ const fromB64url = (code) => {
   return Uint8Array.from(bin, (c) => c.charCodeAt(0));
 };
 
+const deflate = async (text) => toB64url(new Uint8Array(await new Response(new Blob([text]).stream().pipeThrough(new CompressionStream("deflate-raw"))).arrayBuffer()));
+
 /** The code for a share link (the part after "#stage="). */
-export async function encodeShare(stage) {
-  const stream = new Blob([JSON.stringify(stage)]).stream().pipeThrough(new CompressionStream("deflate-raw"));
-  return toB64url(new Uint8Array(await new Response(stream).arrayBuffer()));
+export const encodeShare = (stage) => deflate(JSON.stringify(stage));
+
+/** The code for a view link (the part after "#view="): the compact stage. */
+export const encodeView = (stage) => deflate(JSON.stringify(compactStage(stage)));
+
+/**
+ * A location hash: null if it isn't a share or view link, else { ok, stage, view } (view: true for
+ * a #view= link, to open read-only) or { ok: false, error }.
+ */
+export async function decodeShare(hash) {
+  if (typeof hash !== "string") return null;
+  const prefix = [shareHash, viewHash].find((p) => hash.startsWith(`#${p}`));
+  if (!prefix) return null;
+  const r = await decodeCode(hash.slice(1 + prefix.length));
+  return r.ok ? { ...r, view: prefix === viewHash } : r;
 }
 
-/** A location hash: null if it isn't a share link, else { ok, stage } or { ok: false, error }. */
-export async function decodeShare(hash) {
-  if (typeof hash !== "string" || !hash.startsWith(`#${shareHash}`)) return null;
-  const code = hash.slice(1 + shareHash.length);
+async function decodeCode(code) {
   if (code.length > MAX_LINK) return { ok: false, error: "The share link is too large." };
   if (!/^[A-Za-z0-9_-]+$/.test(code)) return { ok: false, error: "The share link is damaged (it may have been cut short when copied)." };
   let bytes;

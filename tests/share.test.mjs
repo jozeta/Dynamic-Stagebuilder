@@ -34,3 +34,27 @@ test("broken, oversized and bomb links are refused with a message", async () => 
   const junk = (await decodeShare(`#${shareHash}${Buffer.from("not deflate").toString("base64url")}`));
   assert.equal(junk.ok, false);
 });
+
+// View links (#view=…): the compact stage (model/compact.js), opened read-only; small enough for a
+// QR code on the printed brief.
+import { encodeView, viewHash } from "../js/storage/share.js";
+import { demoStage } from "../js/demo.js";
+
+test("a view link opens read-only: the same stage, marked as a view", async () => {
+  const s = demoStage();
+  const r = await decodeShare(`#${viewHash}${await encodeView(s)}`);
+  assert.equal(r.ok, true, r.error);
+  assert.equal(r.view, true);
+  assert.equal(r.stage.name, s.name);
+  assert.equal(r.stage.objects.length, s.objects.length);
+  assert.deepEqual(r.stage.objects.map((o) => o.position), s.objects.map((o) => o.position));
+  const plain = await decodeShare(`#${shareHash}${await encodeShare(s)}`);
+  assert.equal(plain.view, false);
+});
+
+test("a view link is much shorter than a share link (the example stage fits a QR code)", async () => {
+  const s = demoStage();
+  const v = await encodeView(s), sh = await encodeShare(s);
+  assert.ok(v.length < sh.length * 0.6, `${v.length} vs ${sh.length}`);
+  assert.ok(v.length < 2000);
+});

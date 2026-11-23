@@ -29,7 +29,7 @@ import { h, icon } from "./ui/dom.js";
 import { createStage, newStage } from "./model/stage.js";
 import { validateStage } from "./model/schema.js";
 import { openStore, memoryStore } from "./storage/db.js";
-import { decodeShare, encodeShare, shareHash, MAX_LINK } from "./storage/share.js";
+import { decodeShare, encodeShare, encodeView, shareHash, viewHash, MAX_LINK } from "./storage/share.js";
 import { cleanMatch, briefingFor, dropStageEverywhere } from "./model/match.js";
 import { projectRecord, sortProjects, nextProjectAfterDelete, upgradeRecord } from "./storage/projects.js";
 import { exportFileName, stageToJson, matchToJson, matchFileName } from "./storage/files.js";
@@ -89,6 +89,7 @@ function showViewportError(err) {
 const view = createStageView(engine.groups.stage, { labelFactory: createLabel });
 const rig = createCameraRig(engine, canvas);
 let speed = loadWalkSpeed();                     // Shooter's eye walking speed (per browser)
+let viewLink = null;               // a view link's stage on screen, read-only (openView)
 let runLook = loadRunLook();                     // how the shooter's run is drawn (per browser)
 setRunLook(runLook);
 rig.setPace(walkSpeed(speed).pace);
@@ -328,6 +329,15 @@ function startSnapshot() {
   engine.requestRender();
   return url;
 }
+// The view link (#view=…) printed as a QR code on the brief. Building it is async, so the last one is
+// kept for ⌘P (beforeprint builds the page at once) and refreshed a moment after each change.
+const viewUrlOf = async (stage) => `${location.origin}${location.pathname}#${viewHash}${await encodeView(stage)}`;
+let viewUrl = { stage: null, url: null }, viewUrlTimer = 0;
+function refreshViewUrl() {
+  clearTimeout(viewUrlTimer);
+  viewUrlTimer = setTimeout(async () => { const st = editor.stage(); try { viewUrl = { stage: st, url: await viewUrlOf(st) }; } catch { /* no QR code then */ } }, 800);
+}
+const cachedViewUrl = () => (viewUrl.stage === editor.stage() ? viewUrl.url : null);
 // The brief is built, and its 3D image fully decoded, before the print dialog opens: a large image
 // that is still loading prints as a blank page 2. ⌘P / Ctrl+P (beforeprint) builds it too.
 let printReady = false;
@@ -335,7 +345,9 @@ let printedStage = null;           // the stage the brief was last built from
 async function buildPrint() {
   const root = document.getElementById("print");
   printedStage = editor.stage();
-  renderPrint(root, printedStage, snapshot(), { club: loadClub(), startImage: startSnapshot() });
+  let url = null;
+  try { url = await viewUrlOf(printedStage); } catch { /* print without the QR code */ }
+  renderPrint(root, printedStage, snapshot(), { club: loadClub(), startImage: startSnapshot(), viewUrl: url });
   for (const img of root.querySelectorAll(".print-3d img, .print-start img")) { try { await img.decode(); } catch { /* print without it rather than not at all */ } }
 }
 async function printBrief() {
@@ -347,7 +359,7 @@ async function printBrief() {
 window.addEventListener("beforeprint", () => {
   if (printReady || printedStage === editor.stage()) return;      // already built for this stage
   printedStage = editor.stage();
-  renderPrint(document.getElementById("print"), printedStage, snapshot(), { club: loadClub(), startImage: startSnapshot() });
+  renderPrint(document.getElementById("print"), printedStage, snapshot(), { club: loadClub(), startImage: startSnapshot(), viewUrl: cachedViewUrl() });
 });
 
 // While Shooter's eye looks from the start ("start") or a shooting position, that marker (with its
@@ -380,7 +392,7 @@ function viewingFrom(ids) {
 let picking = null;
 let briefing = null;
 let settings = null;
-const editor = createEditor({ stage: demoStage(), onChange: (state) => { render(state); scheduleSave(); } });
+const editor = createEditor({ stage: demoStage(), onChange: (state) => { render(state); scheduleSave(); refreshViewUrl(); } });
 picking = attachPicking({ engine, stageView: view, editor, cameraRig: rig, canvas });
 
 // --- Saved projects: autosave 600 ms after the last change, and when the page is hidden. ---
@@ -414,7 +426,7 @@ function onSaveStatus(kind, err) {
   else if (kind === "saved") setStatus(store.memory ? "Not saved: this browser blocks storage" : "Saved", store.memory ? "lg-warn" : "lg-ok");
   else { console.error(err); setStatus("Not saved: storage error", "lg-bad"); }
 }
-function scheduleSave() { if (noStage) { claimBlank(); return; } autosave?.schedule(); }
+function scheduleSave() { if (viewLink) return; if (noStage) { claimBlank(); return; } autosave?.schedule(); }
 
 // No stage open (Close stage / Close match): an empty, unsaved stage on screen. Nothing on it is
 // saved by itself; the first change asks for a name and makes it a project (Cancel clears it again).
@@ -588,9 +600,11 @@ const projects = createProjects({
   onNewStage: async () => { const name = await askName({ title: "New stage in this match", value: "" }); if (!name) return null; const st = freshStage(name); await addProject(st); dock?.activate("props"); return st.id; },
   onApplyBriefing: applyBriefing,
   // Print a match: a cover page, then each stage's brief page (the open stage as it is now).
-  onPrintMatch: (match, stages) => {
+  onPrintMatch: async (match, stages) => {
     const now = stages.map((st) => (st.id === editor.stage().id ? editor.stage() : st));
-    renderMatchPrint(document.getElementById("print"), match, now, { club: loadClub() });
+    const viewUrls = [];
+    for (const st of now) { try { viewUrls.push(await viewUrlOf(st)); } catch { viewUrls.push(null); } }
+    renderMatchPrint(document.getElementById("print"), match, now, { club: loadClub(), viewUrls });
     printedStage = null;
     printReady = true;
     window.print();
@@ -626,6 +640,16 @@ const projects = createProjects({
     if (code.length > MAX_LINK) return { ok: false, error: "This stage is too large for a link. Export a file instead." };
     return { ok: true, url: `${location.origin}${location.pathname}#${shareHash}${code}` };
   },
+  // A read-only view link for the open stage (the same link as the QR code on the printed brief).
+  onViewLink: async () => { try { return { ok: true, url: await viewUrlOf(editor.stage()) }; } catch { return { ok: false, error: "This browser can't make a view link." }; } },
+  // A view link's stage: saved as a new project to edit, or left (back to what was open).
+  onSaveCopy: async () => {
+    const st = { ...editor.stage(), id: newId() };
+    await leaveView({ open: false });
+    await addProject(st);
+    notify(`Saved "${st.name}" as a new project.`, "ok");
+  },
+  onLeaveView: () => leaveView(),
   // Back up everything: every saved record (the open stage saved first), plan images as data URLs.
   onBackup: async () => {
     await saveNow();
@@ -860,18 +884,51 @@ render(editor.state);
 document.getElementById("boot-state")?.remove();
 // Remember the camera (per project, in this browser) a moment after it stops moving, and on leaving.
 let viewTimer = 0, viewReady = false;
-const keepView = () => { if (viewReady && !noStage) saveView(editor.stage().id, rig.getView()); };
+const keepView = () => { if (viewReady && !noStage && !viewLink) saveView(editor.stage().id, rig.getView()); };
 rig.controls.addEventListener("change", () => { clearTimeout(viewTimer); viewTimer = setTimeout(keepView, 400); });
 addEventListener("pagehide", keepView);
 rig.preset("iso", editor.stage());
 
-// A share link (#stage=…) opens its stage as a new project, and the link leaves the address bar.
-// true when it opened one.
+// A view link (#view=…, the QR code on a printed brief) opens its stage read-only: nothing is
+// saved, edits are ignored (editor.setReadOnly), the Props and On stage tabs and the inspector's
+// fields are hidden, and the left panel offers Save a copy and Leave.
+async function openView(stage) {
+  await saveNow();                           // the project that was open is saved first
+  viewLink = stage;
+  noStage = false;
+  editor.setReadOnly(false);
+  editor.dispatch({ type: "load", stage });
+  editor.setReadOnly(true);
+  autosave.markSaved(editor.stage());
+  document.body.classList.add("is-viewing");
+  rig.preset("iso", editor.stage());
+  document.getElementById("toolbar")?.eyeSteps?.hide();
+  settings?.refresh();
+  if (dock && (dock.active("props") || dock.active("stage"))) dock.activate("projects");
+  await projects?.setViewing({ name: stage.name });
+}
+// In the inspector while viewing: why there are no fields (CSS shows it only then).
+document.getElementById("inspector")?.append(h("p", { class: "lg-muted hint-text view-only-note", text: "Read-only view: tap props to see them. Save a copy (in the left panel) to change anything." }));
+async function leaveView({ open = true } = {}) {
+  if (!viewLink) return;
+  viewLink = null;
+  editor.setReadOnly(false);
+  document.body.classList.remove("is-viewing");
+  await projects?.setViewing(null);
+  if (!open) return;
+  const last = recall();
+  if (!(last && last !== NONE && await openProject(last))) await closeStage();
+}
+
+// A share link (#stage=…) opens its stage as a new project, a view link (#view=…) read-only; the
+// link leaves the address bar. true when it opened one.
 async function openSharedLink() {
   const shared = await decodeShare(location.hash);
   if (!shared) return false;
   history.replaceState(null, "", location.pathname + location.search);
   if (!shared.ok) { notify(shared.error, "bad"); return false; }
+  if (shared.view) { await openView(shared.stage); notify(`Viewing "${shared.stage.name}" read-only. Save a copy to change it.`, "ok"); return true; }
+  await leaveView({ open: false });
   await addProject(shared.stage);
   notify(`Opened the shared stage "${shared.stage.name}" as a new project.`, "ok");
   return true;

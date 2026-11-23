@@ -48,7 +48,8 @@ npm run lint        # ESLint, including the unsafe-DOM rule
   group of the body); `moving.js`: swinger, drop turner, clamshell, mover, Texas star, plate rack,
   dueling tree
 - `js/demo.js`: the example stage shown on open (until saved projects exist)
-- `vendor/three/0.187.0/`, `vendor/lada-glass/2.5.0/`: self-hosted libraries (don't edit)
+- `vendor/three/0.187.0/`, `vendor/lada-glass/2.5.0/`, `vendor/qrcode-generator/2.0.4/` (QR codes on the
+  printed brief, used only through `js/model/qr.js`): self-hosted libraries (don't edit)
 - `vendor/textures/polyhaven/gravelly_sand/`: CC0 photo-scanned ground texture (see its SOURCE.md)
 - `tests/`: `node --test` (model, editor, builders and environments run in Node; Three.js from
   node_modules, pinned to the vendored version)

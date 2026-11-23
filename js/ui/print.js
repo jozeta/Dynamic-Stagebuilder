@@ -9,13 +9,30 @@ import { setupRows, setupLines } from "../model/setup.js";
 import { isDrawn } from "../model/bay.js";
 import { distancePairs } from "../model/distances.js";
 import { startCard } from "../model/start-card.js";
+import { qrFor } from "../model/qr.js";
 
 const SVG = "http://www.w3.org/2000/svg";
 const MAP_WIDTH = 186;
 // The map box follows the stage's shape, between 90 and 165 mm tall, so a deep stage uses the page.
-function mapBox(stage) {
+// reserve: millimetres page 1 needs for the QR code under the map.
+function mapBox(stage, reserve = 0) {
   const r = mapRegion(stage, "content");
-  return { width: MAP_WIDTH, height: Math.round(Math.min(165, Math.max(90, (MAP_WIDTH * (r.maxZ - r.minZ)) / (r.maxX - r.minX)))) };
+  return { width: MAP_WIDTH, height: Math.round(Math.min(165 - reserve, Math.max(90 - reserve / 2, (MAP_WIDTH * (r.maxZ - r.minZ)) / (r.maxX - r.minX)))) };
+}
+
+// The view link as a QR code (model/qr.js), drawn as one SVG path; about 0.3 mm a module so a phone
+// reads it off paper. { el, mm } or null when there is no link or it is too long for a QR code.
+const QR_MODULE = 0.3, QR_QUIET = 4;
+function qrSvg(text) {
+  const q = qrFor(text);
+  if (!q) return null;
+  const n = q.size + 2 * QR_QUIET;
+  const mm = Math.min(50, Math.max(28, n * QR_MODULE));
+  let d = "";
+  for (let r = 0; r < q.size; r++) for (let c = 0; c < q.size; c++) if (q.dark(r, c)) d += `M${c + QR_QUIET} ${r + QR_QUIET}h1v1h-1z`;
+  const svg = s("svg", { viewBox: `0 0 ${n} ${n}`, width: `${mm}mm`, height: `${mm}mm`, role: "img", "aria-label": "QR code: open this stage in 3D, read-only", "shape-rendering": "crispEdges" });
+  svg.append(s("rect", { width: n, height: n, fill: "#fff" }), s("path", { d, fill: "#000" }));
+  return { el: svg, mm };
 }
 // Map colours as on IPSC stage diagrams: tan = shoot, white = no-shoot, blue = steel, black = hard cover.
 const FILL = { paper: "#c9a273", noshoot: "#ffffff", steel: "#3d6fd6", wall: "#1d1f22", hardcover: "#000000", obstacle: "#6f5638", position: "#2f7bff" };
@@ -28,8 +45,8 @@ function s(tag, attrs = {}, text) {
 }
 const pts = (points) => points.map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`).join(" ");
 
-export function mapSvg(stage, { distances = false } = {}) {
-  const MAP = mapBox(stage);
+export function mapSvg(stage, { distances = false, reserve = 0 } = {}) {
+  const MAP = mapBox(stage, reserve);
   const { items } = mapModel(stage, { ...MAP, region: "content", distances });
   const svg = s("svg", { viewBox: `0 0 ${MAP.width} ${MAP.height}`, width: `${MAP.width}mm`, height: `${MAP.height}mm`,
     role: "img", "aria-label": "Top-down stage map" });
@@ -151,7 +168,8 @@ function startSheet(stage, image) {
   ]);
 }
 
-export function renderPrint(root, stage, snapshot, { threeD = true, setup = true, distances = true, club = null, startImage = null } = {}) {
+export function renderPrint(root, stage, snapshot, { threeD = true, setup = true, distances = true, club = null, startImage = null, viewUrl = null } = {}) {
+  const qr = viewUrl ? qrSvg(viewUrl) : null;
   const b = stage.briefing;
   const { procedure, notes } = briefingText(stage);
   const row = Object.fromEntries(briefingRows(stage).map((r) => [r.label, r.value]));
@@ -176,8 +194,13 @@ export function renderPrint(root, stage, snapshot, { threeD = true, setup = true
     ].filter(Boolean)),
     h("section", { class: "print-text print-procedure" }, [h("h2", { text: "Procedure" }), h("p", { text: procedure.trim() || "–" })]),
     notes.trim() ? h("section", { class: "print-text" }, [h("h2", { text: "Notes" }), h("p", { text: notes })]) : null,
-    h("figure", { class: "print-map" }, [mapSvg(stage), h("figcaption", {}, [legend(stage)])]),
-    h("p", { class: "print-foot", text: "Made with Dynamic-Stagebuilder. Counts follow the IPSC rules; check the stage before the match." }),
+    h("figure", { class: "print-map" }, [mapSvg(stage, { reserve: qr ? qr.mm - 6 : 0 }), h("figcaption", {}, [legend(stage)])]),
+    qr ? h("div", { class: "print-qr" }, [qr.el, h("div", {}, [
+      h("p", { class: "print-qr-title", text: "Scan to walk this stage in 3D" }),
+      h("p", { text: "Opens the stage read-only on a phone, tablet or computer, with Shooter's eye. The stage is inside the code itself: nothing is uploaded." }),
+      h("p", { class: "print-foot", text: "Made with Dynamic-Stagebuilder. Counts follow the IPSC rules; check the stage before the match." }),
+    ])])
+      : h("p", { class: "print-foot", text: "Made with Dynamic-Stagebuilder. Counts follow the IPSC rules; check the stage before the match." }),
     distances ? distanceSheet(stage) : null,
     threeD && stage.start ? startSheet(stage, startImage) : null,
     threeD ? h("section", { class: "print-3d" }, [
@@ -194,7 +217,7 @@ export function renderPrint(root, stage, snapshot, { threeD = true, setup = true
  * totals), then each stage's brief page (header, briefing, map). The 3D view needs the stage on
  * screen, so it isn't part of a match print.
  */
-export function renderMatchPrint(root, match, stages, { club = null } = {}) {
+export function renderMatchPrint(root, match, stages, { club = null, viewUrls = [] } = {}) {
   const rows = stages.map((st, i) => {
     const r = Object.fromEntries(briefingRows(st).map((x) => [x.label, x.value]));
     return h("tr", {}, [h("td", { text: String(i + 1) }), h("td", { text: st.name || "Untitled stage" }), h("td", { text: r["Stage type"] }),
@@ -211,6 +234,6 @@ export function renderMatchPrint(root, match, stages, { club = null } = {}) {
       h("tbody", {}, rows),
     ]),
   ]);
-  const pages = stages.map((st) => { const el = h("div", { class: "print-stage" }); renderPrint(el, st, null, { threeD: false, setup: false, distances: false, club }); return el; });
+  const pages = stages.map((st, i) => { const el = h("div", { class: "print-stage" }); renderPrint(el, st, null, { threeD: false, setup: false, distances: false, club, viewUrl: viewUrls[i] ?? null }); return el; });
   root.replaceChildren(cover, ...pages);
 }

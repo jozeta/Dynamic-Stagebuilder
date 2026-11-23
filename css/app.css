@@ -578,3 +578,9 @@ body { background: var(--lg-bg); overflow: hidden; }
 .club-logo { align-items: center; gap: var(--lg-space-s); flex-wrap: wrap; }
 .club-logo-img { max-height: 48px; max-width: 160px; object-fit: contain; background: #fff; border-radius: var(--lg-radius-small); padding: 2px; }
 .club-label { font-weight: 500; }
+
+/* A view link's stage (read-only): no props or On stage tabs, no inspector fields or stage settings. */
+.view-only-note { display: none; padding: var(--lg-space-m); }
+body.is-viewing .view-only-note { display: block; }
+body.is-viewing #inspector-body, body.is-viewing #library-tab, body.is-viewing #layers-tab,
+body.is-viewing .stage-settings, body.is-viewing #brief-slot, body.is-viewing #library, body.is-viewing #layers { display: none; }

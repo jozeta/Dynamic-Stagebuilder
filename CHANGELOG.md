@@ -4,6 +4,13 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- View links and a QR code on the printed brief: *Copy view link* (next to Copy share link) and the
+  QR code under page 1's map open the stage read-only, on a phone, tablet or computer, with
+  Shooter's eye. Nothing is saved and edits are ignored; *Save a copy to edit* makes it a project.
+  The stage is in the link itself, made compact (short ids, no default values) so the example stage
+  fits a 40 mm code; a stage too large for a QR code prints without one. The QR encoder is
+  qrcode-generator 2.0.4 (MIT), self-hosted in `vendor/`.
+
 - A start-position card in the printed brief (after the distance sheet): a picture of the posed
   shooter at the start box, taken from in front of it, with the start position, gun condition and
   start signal in large type, for the Range Officer to show (IPSC rule 3.2.2 allows a picture).

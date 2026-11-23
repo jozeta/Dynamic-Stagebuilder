@@ -21,7 +21,7 @@ const DND = "application/x-dsb-item";
 const when = (t) => new Date(t).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
 
 export function createProjects({ panel, stageBox = null, docked = false, hide = [], onToggle = () => {}, onOpenLibrary = async () => {}, onCreateFrom = async () => null, onCloseStage = async () => {}, onModeChange = () => {}, store, currentId, onOpen, onDuplicate, onDelete, onImport, onExport,
-  onNewStage = async () => null, onApplyBriefing = async () => {}, onPrintMatch = () => {}, onExportMatch = () => {}, onImportMatch = async () => [], onBackup = async () => {}, onRestore = async () => ({ ok: false, error: "Not available." }), onShareLink = async () => ({ ok: false, error: "Not available." }) }) {
+  onNewStage = async () => null, onApplyBriefing = async () => {}, onPrintMatch = () => {}, onExportMatch = () => {}, onImportMatch = async () => [], onSaveCopy = async () => {}, onLeaveView = () => {}, onBackup = async () => {}, onRestore = async () => ({ ok: false, error: "Not available." }), onShareLink = async () => ({ ok: false, error: "Not available." }), onViewLink = async () => ({ ok: false, error: "Not available." }) }) {
   // Matches: their list above the stages, and a match's own page in place of the lists.
   const stagesBox = h("div", { class: "lg-stack" });
   const crumbs = h("nav", { class: "proj-crumbs", "aria-label": "Where you are" });
@@ -29,7 +29,8 @@ export function createProjects({ panel, stageBox = null, docked = false, hide = 
   // The button in the corner says what it closes: the match (on its page), the stage you have open,
   // or just the panel when nothing is open. Closing saves first and leaves an empty view.
   const closeB = h("button", { type: "button", class: "lg-btn lg-btn-primary", onclick: () => closeWhat(), text: "Done" });
-  const mode = () => (matches.inMatch ? "match" : currentId() ? "stage" : "none");
+  let viewing = null;          // a view link's stage on screen (read-only): { name }, or null
+  const mode = () => (viewing ? "view" : matches.inMatch ? "match" : currentId() ? "stage" : "none");
   async function closeWhat() {
     const m = mode();
     if (m === "match") return closeMatch();
@@ -215,25 +216,41 @@ export function createProjects({ panel, stageBox = null, docked = false, hide = 
     }) : [h("p", { class: "lg-muted", text: "No stages match. Try another word." })]));
   }
 
+  // A view link's stage: read-only, with Save a copy (a new project) and Leave.
+  const viewNote = h("p", { class: "lg-alert lg-alert-info", role: "status" });
+  const viewActions = h("div", { class: "lg-stack view-actions", hidden: true }, [
+    viewNote,
+    h("div", { class: "proj-actions" }, [
+      h("button", { type: "button", class: "lg-btn lg-btn-primary", onclick: () => onSaveCopy() }, [icon("doc"), "Save a copy to edit"]),
+      h("button", { type: "button", class: "lg-btn", onclick: () => onLeaveView() }, [icon("chevl"), "Leave the view"]),
+    ]),
+  ]);
   // The open stage: its settings, statistics and briefing (stageBox), then export and share.
+  let stageActions;
   const stageView = h("div", { class: "lg-stack stage-view", hidden: true }, [
+    viewActions,
     stageBox,
-    h("div", { class: "proj-actions stage-actions" }, [
+    stageActions = h("div", { class: "proj-actions stage-actions" }, [
       h("button", { type: "button", class: "lg-btn", onclick: async () => { await onExport(); await fill(); } }, [icon("doc"), "Export this stage"]),
-      h("button", { type: "button", class: "lg-btn", onclick: () => shareLink() }, [icon("link"), "Copy share link"]),
+      h("button", { type: "button", class: "lg-btn", onclick: () => shareLink(), title: "Opens a copy that can be changed and saved" }, [icon("link"), "Copy share link"]),
+      h("button", { type: "button", class: "lg-btn", onclick: () => shareLink("view"), title: "Opens the stage read-only, like the QR code on the printed brief" }, [icon("link"), "Copy view link"]),
     ]),
   ].filter(Boolean));
   const title = h("h2", { class: "lg-subtitle panel-title", id: "projects-title", text: "Projects" });
   // Which part shows: the open stage, a match's page, or the lists (matches, stages, library).
   function applyView() {
     const m = mode();
-    stageView.hidden = m !== "stage";
+    stageView.hidden = m !== "stage" && m !== "view";
+    viewActions.hidden = m !== "view";
+    stageActions.hidden = m === "view";
+    crumbs.hidden = m === "view";
+    panel.classList.toggle("is-viewing", m === "view");
     matches.box.hidden = m === "stage";
     stagesBox.hidden = m !== "none";
     foldersBox.hidden = m !== "none";
     libraryBox.hidden = m !== "none" || folderId !== null;          // the library is at the top only
     if (actions) actions.hidden = m !== "none";
-    title.textContent = m === "stage" ? "Stage" : "Projects";
+    title.textContent = m === "view" ? "Shared stage" : m === "stage" ? "Stage" : "Projects";
   }
   panel.append(
     h("div", { class: "side-head" }, [title, closeB]),
@@ -268,16 +285,18 @@ export function createProjects({ panel, stageBox = null, docked = false, hide = 
   const say = (text, tone) => message.replaceChildren(text ? h("p", { class: `lg-alert lg-alert-${tone}`, text }) : "");
 
   // Copy a link that holds the open stage. Where the clipboard isn't allowed, show the link to copy.
-  async function shareLink() {
-    const r = await onShareLink();
+  async function shareLink(kind = "share") {
+    const view = kind === "view";
+    const r = await (view ? onViewLink() : onShareLink());
     if (!r.ok) return say(r.error, "bad");
     try {
       // A clipboard that doesn't answer (a permission prompt left open) falls back to the field below.
       await Promise.race([navigator.clipboard.writeText(r.url), new Promise((_, no) => setTimeout(() => no(new Error("clipboard timeout")), 3000))]);
-      say("Share link copied. Anyone with the link can open a copy of this stage; nothing is uploaded.", "ok");
+      say(view ? "View link copied. Anyone with it can look at this stage read-only (as with the QR code on the brief); nothing is uploaded."
+        : "Share link copied. Anyone with the link can open a copy of this stage; nothing is uploaded.", "ok");
     } catch {
       const field = h("input", { class: "lg-input", readonly: true, value: r.url, "aria-label": "Share link", onfocus: (e) => e.target.select() });
-      message.replaceChildren(h("div", { class: "lg-alert lg-alert-info" }, [h("p", { text: "Copy this link. Anyone with it can open a copy of this stage." }), field]));
+      message.replaceChildren(h("div", { class: "lg-alert lg-alert-info" }, [h("p", { text: view ? "Copy this link. Anyone with it can look at this stage read-only." : "Copy this link. Anyone with it can open a copy of this stage." }), field]));
       field.focus();
     }
   }
@@ -368,8 +387,8 @@ export function createProjects({ panel, stageBox = null, docked = false, hide = 
     crumbs.replaceChildren(...parts);
     applyView();
     onModeChange();
-    closeB.textContent = { match: "Close match", stage: "Close stage", none: "Done" }[mode()];
-    closeB.hidden = mode() === "none";              // nothing open: no button (the panel tabs close it)
+    closeB.textContent = { match: "Close match", stage: "Close stage", none: "Done", view: "" }[mode()];
+    closeB.hidden = mode() === "none" || mode() === "view";              // nothing open: no button (the panel tabs close it)
     closeB.title = { match: "Save and close the match; back to all your projects", stage: "Save and close this stage", none: "Close the panel" }[mode()];
   }
   async function fillStages() {
@@ -416,6 +435,12 @@ export function createProjects({ panel, stageBox = null, docked = false, hide = 
     get isOpen() { return isOpen; },
     /** Save and close the open stage (the Stage panel's Close stage). */
     closeStage: () => closeStageHere(),
+    /** A view link's stage on screen ({ name }), read-only; null when it is left. */
+    async setViewing(v) {
+      viewing = v;
+      viewNote.textContent = v ? `"${v.name || "Untitled stage"}" is open read-only from a view link. Nothing is saved; save a copy to change it.` : "";
+      await fill();
+    },
     /** Bring an open panel up to date (a stage made or closed elsewhere). */
     async refresh() { if (isOpen) await fill(); },
     /** The match you are working in (its page, or a stage opened from it), or null. */
