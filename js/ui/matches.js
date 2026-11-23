@@ -120,7 +120,7 @@ export function createMatches({ store, currentId, onOpen, onNewStage, onCreateFr
           h("span", { class: "lg-muted proj-meta", text: `${id === current ? "Open now · " : ""}${st.minRounds} rounds · ${st.maxPoints} points` }),
         ]),
         h("div", { class: "row-icons" }, [
-          id === current ? null : rowIcon("open", `Open ${name}`, () => { contextId = m.id; return onOpen(id); }),
+          id === current ? null : rowIcon("open", `Open ${name}`, () => { contextId = m.id; openId = null; return onOpen(id); }),
           rowIcon("trash", `Remove ${name} from the match`, () => confirm(), { danger: true }),
         ]),
       ].filter(Boolean));
@@ -142,7 +142,8 @@ export function createMatches({ store, currentId, onOpen, onNewStage, onCreateFr
         : h("p", { class: "lg-muted hint-text", text: "No stages yet. Edit the match to add some, or make a new stage in it." }),
       h("div", { class: "proj-actions" }, [
         btn("Edit match…", () => editInWindow(m), "lg-btn lg-btn-primary", "edit", { title: "Name, stages and their order" }),
-        btn("New stage in this match", async () => { const id = await onNewStage(); if (id) { const next = addStages(m, [id]); await save(next); await syncBriefings(next); await fill(); await onChanged(); } }, "lg-btn", "new"),
+        // The new stage opens in stage edit mode, inside this match (Close stage comes back here).
+        btn("New stage in this match", async () => { await newStageIn(m.id); await fill(); }, "lg-btn", "new"),
         btn("Print the match", () => onPrint(m, m.stageIds.map((id) => byId.get(id).stage)), "lg-btn", "print", { disabled: !m.stageIds.length }),
         btn("Export the match", () => onExport(m, m.stageIds.map((id) => byId.get(id).stage)), "lg-btn", "doc", { disabled: !m.stageIds.length, title: "One file with the match and all its stages" }),
       ]),
@@ -169,6 +170,7 @@ export function createMatches({ store, currentId, onOpen, onNewStage, onCreateFr
     const next = addStages(m, [sid]);
     await save(next); await syncBriefings(next);
     contextId = id;
+    openId = null;                                  // the new stage is shown, not the match's page
     await onChanged();
   }
   /** Working on a stage on its own (opened from the stage list, a new stage…): no match around it. */

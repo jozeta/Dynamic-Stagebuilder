@@ -14,6 +14,12 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 - The start position, start marks and shooting positions can be dragged from the props panel onto
   the 3D view.
 - Shooting positions are placed one tap after another (1, 2, 3…) until Enter, Escape or *Done*.
+- With a stage open, the left panel's Projects tab shows that stage: a breadcrumb of where it sits
+  (Projects › match › stage), its settings (bay, shape, grid and angle snap, mirror), statistics,
+  the briefing button, export and share link, with *Close stage* in the top right corner. The
+  right-hand Inspector is for the selection only.
+- A new stage made in a match opens in stage edit mode: the breadcrumb shows Projects › the match ›
+  Stage n, the corner button says *Close stage*, and closing goes back to the match's page.
 - The view pad's labels say *Fwd/Back* and *Up/Down* (were *Move* and *Height*).
 
 ## 0.11.1 (2026-11-22)

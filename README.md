@@ -243,7 +243,7 @@ Safari keeps its saved stages (a site that isn't installed can lose them after 7
 
 ## Configuration
 
-Stage settings are in the inspector when nothing is selected. They are saved with the stage.
+Stage settings are in the left panel's *Projects* tab while a stage is open (its stage view). They are saved with the stage.
 
 | Setting | What it does | Default |
 |---|---|---|
@@ -405,7 +405,7 @@ you like; *Clear* removes them and *Done* or Escape ends measuring. Measurements
 centre line, + to the shooter's left) and *Down range* (metres from the up-range edge). Type a value
 to put it exactly there, without grid snap. With two or more selected, *Arrange* lines them up (left,
 centre, right, front or back) or spreads three or more evenly across or down range. *Mirror left to
-right* flips the selection about its centre; with nothing selected, *Mirror the stage* flips every
+right* flips the selection about its centre; in the stage view, *Mirror the stage* flips every
 prop, line and the start about the centre line (doors swap hinge sides). Locked props stay put.
 
 **Show safety distances.** Select a paper or steel target and switch on *Show safety distances*:
@@ -422,7 +422,7 @@ stance's height) to each target it can see, and the inspector lists the targets 
 minimum rounds, the walk along the route through the shooting positions, and a reload every 15
 rounds) and the hit factors they give with all A hits. A rule of thumb for designers.
 
-**Shape the bay.** With nothing selected, *Bay shape* fits the bay to a range that isn't a
+**Shape the bay.** In the stage view (left panel), *Bay shape* fits the bay to a range that isn't a
 rectangle: tapered, a back corner cut away, an L or reverse L, a T, a U (a berm jutting in from the
 back) or reverse U (from the front), or a dogleg (Z or S) where the back is shifted to one side. Each
 shape has its own sizes; "left" is the shooter's left.
@@ -465,7 +465,7 @@ the printed 3D view uses the same light.
 
 **Undo anything** with Undo/Redo or ⌘Z / ⇧⌘Z (Ctrl on Windows).
 
-**Write the briefing.** *Written stage briefing…*, in the right-hand panel under the stage statistics (with nothing selected), opens the Written Stage Briefing. Fill in the match, stage
+**Write the briefing.** *Written stage briefing…*, in the left panel's stage view under the stage statistics, opens the Written Stage Briefing. Fill in the match, stage
 number, designer, start signal, start position, gun condition, procedure and notes. Scoring, start
 signal, start position, gun condition and stop time have a list of common wordings; *Custom text…*
 lets you type your own. *Add a common sentence…* adds a usual procedure line. Targets,
@@ -494,10 +494,13 @@ its stages in one file; *Import file…* takes it back as new projects in a new 
 **Projects, export and import.** Every change is saved in this browser automatically (a green *Saved*
 alert shows at the top of the 3D view for a few seconds; a problem saving stays until you close it).
 The *Projects* tab in the left-hand panel lists your stages, with small icons to open, duplicate or
-delete them and an ⓘ for their details; *Export this stage* saves a `.json` file and *Import file…*
-adds a stage from a file. *Close stage* (in Projects, or in the Stage panel on the right) saves and
-closes the stage; the view then greys out under *Create new stage*, which asks for the new stage's
-name.
+delete them and an ⓘ for their details; *Import file…* adds a stage from a file. With a stage open,
+the tab shows that stage instead: a breadcrumb of where it sits (*Projects › Club match › Stage 2:
+Name*), its settings (bay, shape, grid and angle snap, mirror), statistics, *Written stage
+briefing…*, *Export this stage* (a `.json` file) and *Copy share link*. *Close stage* in its top
+right corner saves and closes the stage and goes back to where you came from (the match's page for a
+stage of a match); a breadcrumb link above it does the same. With no stage open the view greys out
+under *Create new stage*, which asks for the new stage's name.
 An import always becomes a new project, so it never overwrites one. Below your projects is the
 *Stage library*: 58 ready-made stages (drills and standards, short, medium and long IPSC courses,
 USPSA and club stages with moving targets). Search or pick a category, then *Open as new project*

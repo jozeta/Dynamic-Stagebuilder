@@ -448,6 +448,7 @@ async function openProject(id) {
   try { eye = JSON.parse(localStorage.getItem(`dsb:eye:${id}`) || "null"); } catch { /* private mode */ }
   const steps = document.getElementById("toolbar")?.eyeSteps;
   if (eye?.on && typeof eye.at === "string" && view) steps?.restore(eye.at); else steps?.hide();
+  projects?.refresh();                       // the left panel shows this stage
   return true;
 }
 async function addProject(stage) {
@@ -509,7 +510,15 @@ const bermDrawer = (() => {
 onEarthLoaded(() => engine.requestRender());           // a berm's ground textures arrived
 
 let dock = null;                   // the side panels' dock (Låda Glass), set up below
+// The open stage in the left panel (Projects tab): its settings, statistics and briefing button.
+const stageSettings = h("div", { class: "lg-stack stage-settings" });
+const stageBox = h("div", { class: "lg-stack stage-box" }, [
+  stageSettings,
+  h("div", { id: "stats", class: "stats" }),
+  h("div", { id: "brief-slot", class: "brief-slot" }),
+]);
 const projects = createProjects({
+  stageBox,
   // A library stage opens clean: its own layout on the default surroundings and light, nothing taken
   // over from the stage you had open (no hall, no drawn walls, no plan).
   onOpenLibrary: (spec) => addProject(libraryStage(spec)),
@@ -636,10 +645,6 @@ function updateBlankCover() {
   if (noStage) blankCover.querySelector(".blank-cover-label").textContent = projects?.matchContext() ? "Create new stage within this match" : "Create new stage";
 }
 updaters.push(updateBlankCover);
-// The Stage panel (nothing selected) has Close stage under the briefing: saves and closes the stage.
-const closeStageB = h("button", { type: "button", class: "lg-btn brief-btn close-stage-btn", onclick: () => projects?.closeStage() }, [icon("x"), "Close stage"]);
-document.getElementById("brief-slot")?.append(closeStageB);
-updaters.push(() => { closeStageB.hidden = noStage; const wsb = document.querySelector("#brief-slot .brief-btn:not(.close-stage-btn)"); if (wsb) wsb.hidden = noStage; });
 updaters.push((state) => { const name = noStage ? "No stage open" : state.history.present.name || "Untitled stage"; if (stageTitle.textContent !== name) stageTitle.textContent = name; requestAnimationFrame(placeStageTitle); });
 new ResizeObserver(() => placeStageTitle()).observe(document.querySelector(".viewport-wrap"));
 // Turning the view (left drag on empty ground, one finger) with something selected turns it round
@@ -658,7 +663,7 @@ updaters.push(
   }),
   library,
   layers.update,
-  createInspector(document.getElementById("inspector-body"), { editor, shapes: myShapes, berms: bermDrawer }),
+  createInspector(document.getElementById("inspector-body"), { editor, stageRoot: stageSettings, shapes: myShapes, berms: bermDrawer }),
   createStats(document.getElementById("stats")),
 );
 attachShortcuts({ editor, rig });

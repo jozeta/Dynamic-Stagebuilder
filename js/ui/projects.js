@@ -1,5 +1,8 @@
-// The Projects panel (in the left-hand panel, in place of the props): every stage saved in this browser, with open, duplicate, delete, new,
-// import and export. Names and file contents are untrusted and only ever shown with textContent.
+// The Projects panel (the left-hand panel's first tab): every stage saved in this browser, with open,
+// duplicate, delete, new, import and export. With a stage open it shows that stage instead (its
+// settings, statistics and briefing, `stageBox`), with Close stage in the corner and a breadcrumb of
+// where it sits (Projects › match › stage). Names and file contents are untrusted and only ever
+// shown with textContent.
 import { h, icon, rowIcon } from "./dom.js";
 import { sortProjects, exportAge } from "../storage/projects.js";
 import { parseFile } from "../storage/files.js";
@@ -7,10 +10,11 @@ import { STAGE_LIBRARY, LIBRARY_CATEGORIES, librarySummary } from "../model/stag
 import { createMatches } from "./matches.js";
 import { stageInfoButton } from "./stage-info.js";
 import { stageDetails } from "../model/match.js";
+import { trail } from "../model/trail.js";
 
 const when = (t) => new Date(t).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
 
-export function createProjects({ panel, docked = false, hide = [], onToggle = () => {}, onOpenLibrary = async () => {}, onCreateFrom = async () => null, onCloseStage = async () => {}, onModeChange = () => {}, store, currentId, onOpen, onDuplicate, onDelete, onImport, onExport,
+export function createProjects({ panel, stageBox = null, docked = false, hide = [], onToggle = () => {}, onOpenLibrary = async () => {}, onCreateFrom = async () => null, onCloseStage = async () => {}, onModeChange = () => {}, store, currentId, onOpen, onDuplicate, onDelete, onImport, onExport,
   onNewStage = async () => null, onApplyBriefing = async () => {}, onPrintMatch = () => {}, onExportMatch = () => {}, onImportMatch = async () => [], onShareLink = async () => ({ ok: false, error: "Not available." }) }) {
   // Matches: their list above the stages, and a match's own page in place of the lists.
   const stagesBox = h("div", { class: "lg-stack" });
@@ -47,7 +51,7 @@ export function createProjects({ panel, docked = false, hide = [], onToggle = ()
     onNewStage, onCreateFrom, onApplyBriefing, onPrint: onPrintMatch, onExport: onExportMatch, onCloseMatch: () => closeMatch(),
     // A match's page shows only the match (with Close match at the top): the general buttons and the
     // stage list are hidden meanwhile.
-    onViewChange: (inMatch) => { stagesBox.hidden = inMatch; if (actions) actions.hidden = inMatch; queueMicrotask(() => fillCrumbs()); },
+    onViewChange: () => { applyView(); queueMicrotask(() => fillCrumbs()); },
     onChanged: async () => { await fillStages(); },     // stages a match added (example, library) show in the list
   });
   const list = h("div", { class: "proj-list", role: "list" });
@@ -76,28 +80,42 @@ export function createProjects({ panel, docked = false, hide = [], onToggle = ()
       return h("div", { class: "lib-stage icon-row", role: "listitem" }, [
         h("span", { class: "proj-name", text: spec.name }),
         h("div", { class: "row-icons" }, [
-          rowIcon("open", `Open ${spec.name} as a new project`, async () => { matches.leaveMatch(); await onOpenLibrary(spec); close(); }),
+          rowIcon("open", `Open ${spec.name} as a new project`, async () => { matches.leaveMatch(); matches.showList(); await onOpenLibrary(spec); await fill(); }),
           stageInfoButton(spec.name, () => ({ meta: `${catName} · ${spec.discipline === "both" ? "IPSC and USPSA" : spec.discipline} · ${summaryOf(spec).rounds}`, text: spec.summary })),
         ]),
       ]);
     }) : [h("p", { class: "lg-muted", text: "No stages match. Try another word or category." })]));
   }
 
-  panel.append(
-    h("div", { class: "side-head" }, [
-      h("h2", { class: "lg-subtitle panel-title", id: "projects-title", text: "Projects" }),
-      closeB,
+  // The open stage: its settings, statistics and briefing (stageBox), then export and share.
+  const stageView = h("div", { class: "lg-stack stage-view", hidden: true }, [
+    stageBox,
+    h("div", { class: "proj-actions stage-actions" }, [
+      h("button", { type: "button", class: "lg-btn", onclick: async () => { await onExport(); await fill(); } }, [icon("doc"), "Export this stage"]),
+      h("button", { type: "button", class: "lg-btn", onclick: () => shareLink() }, [icon("link"), "Copy share link"]),
     ]),
+  ].filter(Boolean));
+  const title = h("h2", { class: "lg-subtitle panel-title", id: "projects-title", text: "Projects" });
+  // Which part shows: the open stage, a match's page, or the lists (matches, stages, library).
+  function applyView() {
+    const m = mode();
+    stageView.hidden = m !== "stage";
+    matches.box.hidden = m === "stage";
+    stagesBox.hidden = m !== "none";
+    if (actions) actions.hidden = m !== "none";
+    title.textContent = m === "stage" ? "Stage" : "Projects";
+  }
+  panel.append(
+    h("div", { class: "side-head" }, [title, closeB]),
     crumbs,
     h("div", { class: "lg-stack proj-body" }, [
       actions = h("div", { class: "proj-actions" }, [
         h("button", { type: "button", class: "lg-btn", onclick: () => matches.create() }, [icon("layers"), "New match"]),
         h("button", { type: "button", class: "lg-btn", onclick: () => file.click() }, [icon("folder"), "Import file…"]),
-        h("button", { type: "button", class: "lg-btn", onclick: async () => { await onExport(); await fill(); } }, [icon("doc"), "Export this stage"]),
-        h("button", { type: "button", class: "lg-btn", onclick: () => shareLink() }, [icon("link"), "Copy share link"]),
         file,
       ]),
       message,
+      stageView,
       matches.box,
       stagesBox,
     ]),
@@ -164,24 +182,26 @@ export function createProjects({ panel, docked = false, hide = [], onToggle = ()
     }
   }
   // Where you are: Projects › a match (its page) › a stage of it, or Projects › a stage on its own.
+  // Going up from an open stage saves and closes it first.
   async function fillCrumbs() {
     const all = await matches.list(), cur = currentId();
     const rec = cur ? (await store.list()).find((r) => r.id === cur) : null;
-    const stageName = rec?.name || "Untitled stage";
     const page = matches.openId ? all.find((m) => m.id === matches.openId) : null;
-    const home = matches.inMatch || matches.contextId ? h("button", { type: "button", class: "crumb-link", onclick: async () => { matches.showList(); matches.leaveMatch(); await fill(); }, text: "Projects" }) : h("span", { text: "Projects" });
-    const parts = [home];
-    const sep = () => h("span", { class: "crumb-sep", "aria-hidden": "true", text: "›" });
-    if (page) {
-      parts.push(sep(), h("span", { class: "crumb-here", text: `${page.name} (match)` }));
-    } else {
-      // A stage in a match only when you came to it through the match (Close match leaves it).
-      const m = cur && matches.contextId ? all.find((x) => x.id === matches.contextId && x.stageIds.includes(cur)) : null;
-      if (m) parts.push(sep(), h("button", { type: "button", class: "crumb-link", onclick: async () => { await matches.show(m.id); await fill(); }, text: m.name }),
-        sep(), h("span", { class: "crumb-here", text: `Stage ${m.stageIds.indexOf(cur) + 1}: ${stageName}` }));
-      else if (rec) parts.push(sep(), h("span", { class: "crumb-here", text: `${stageName} (stage)` }));
-    }
+    // A stage in a match only when you came to it through the match (Close match leaves it).
+    const match = page || (matches.contextId ? all.find((x) => x.id === matches.contextId) : null);
+    const crumbsNow = trail({ match, stage: page || !cur ? null : { id: cur, name: rec?.name ?? "" }, page: page ? "match" : "" });
+    const go = {
+      home: async () => { if (mode() === "stage") await onCloseStage("stage"); matches.showList(); matches.leaveMatch(); await fill(); },
+      match: async (c) => { if (mode() === "stage") await onCloseStage("stage"); await matches.show(c.id); await fill(); },
+    };
+    const parts = [];
+    crumbsNow.forEach((c, i) => {
+      if (i) parts.push(h("span", { class: "crumb-sep", "aria-hidden": "true", text: "›" }));
+      parts.push(c.here || !go[c.kind] ? h("span", { class: c.here ? "crumb-here" : "", text: c.text, "aria-current": c.here ? "page" : null })
+        : h("button", { type: "button", class: "crumb-link", onclick: () => go[c.kind](c), text: c.text, title: mode() === "stage" ? "Save and close the stage, then go here" : null }));
+    });
     crumbs.replaceChildren(...parts);
+    applyView();
     onModeChange();
     closeB.textContent = { match: "Close match", stage: "Close stage", none: "Done" }[mode()];
     closeB.hidden = mode() === "none";              // nothing open: no button (the panel tabs close it)
@@ -203,7 +223,7 @@ export function createProjects({ panel, docked = false, hide = [], onToggle = ()
       ]);
       const nm = r.name || "Untitled stage";
       const normal = () => row.replaceChildren(info, h("div", { class: "row-icons" }, [
-        r.id === id ? null : rowIcon("open", `Open ${nm}`, async () => { matches.leaveMatch(); await onOpen(r.id); close(); }),
+        r.id === id ? null : rowIcon("open", `Open ${nm}`, async () => { matches.leaveMatch(); matches.showList(); await onOpen(r.id); await fill(); }),
         rowIcon("copy", `Duplicate ${nm}`, async () => { await onDuplicate(r.id); await fill(); }),
         rowIcon("trash", `Delete ${nm}`, () => confirm(), { danger: true }),
         infoB,

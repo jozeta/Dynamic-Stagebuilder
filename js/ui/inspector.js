@@ -1,4 +1,5 @@
-// The inspector: settings for the selected object(s), or the stage when nothing is selected.
+// The inspector: settings for the selected object(s). The stage's own settings (bay, grid, angle
+// snap, mirror) are drawn into `stageRoot`, the left panel's stage view.
 // Fields commit on change (Enter or leaving the field); every change goes through the editor.
 import { h, icon } from "./dom.js";
 import { getProp, propName } from "../model/props.js";
@@ -55,9 +56,9 @@ const select = (key, value, options, onchange) => {
   return s;
 };
 
-export function createInspector(root, { editor, shapes = { list: () => [], draw: () => {} }, berms = { draw: () => {} } }) {
+export function createInspector(root, { editor, stageRoot = null, shapes = { list: () => [], draw: () => {} }, berms = { draw: () => {} } }) {
   const d = (action) => editor.dispatch(action);
-  let lastKey = "";
+  let lastKey = "", stageKey = "";
 
   function objectPanel(o, angle, stage) {
     const def = getProp(o.type);
@@ -267,8 +268,7 @@ export function createInspector(root, { editor, shapes = { list: () => [], draw:
 
   function stagePanel(stage) {
     return [
-      h("h2", { class: "lg-subtitle panel-title", text: "Stage" }),
-      h("p", { class: "lg-muted hint-text", text: "Nothing selected. Tap a prop on the stage to edit it." }),
+      h("h2", { class: "lg-subtitle panel-title", text: "Stage settings" }),
       field("Bay width (m)", numberInput("bayWidth", stage.bay.width, { min: 1, max: 200, step: 1 }, (v) => d({ type: "setBay", width: v, depth: stage.bay.depth }))),
       field("Bay depth (m)", numberInput("bayDepth", stage.bay.depth, { min: 1, max: 200, step: 1 }, (v) => d({ type: "setBay", width: stage.bay.width, depth: v }))),
       ...bayShapeFields(stage.bay),
@@ -283,8 +283,26 @@ export function createInspector(root, { editor, shapes = { list: () => [], draw:
     h("button", { type: "button", class: "lg-btn lg-btn-danger", disabled: locked, title: locked ? "Unlock it to delete it" : null, onclick: () => d({ type: "delete" }) }, [icon("trash"), "Delete"]),
   ]);
 
+  // Nothing selected: a short note (the stage's settings are in the left panel).
+  const nothing = () => [
+    h("h2", { class: "lg-subtitle panel-title", text: "Inspector" }),
+    h("div", { class: "lg-state inspector-empty" }, [
+      h("p", { class: "lg-state-title", text: "Nothing selected" }),
+      h("p", { class: "lg-state-text", text: "Tap a prop on the stage to edit it. The stage's own settings, statistics and briefing are in the left panel." }),
+    ]),
+  ];
+
   return function update(state) {
     const stage = state.history.present;
+    if (stageRoot) {
+      const k = JSON.stringify([stage.bay, stage.settings.grid, stage.settings.angleSnap, shapes.version]);
+      if (k !== stageKey) {
+        stageKey = k;
+        const focusedStage = stageRoot.contains(document.activeElement) ? document.activeElement.dataset.field : null;
+        stageRoot.replaceChildren(...stagePanel(stage));
+        if (focusedStage) stageRoot.querySelector(`[data-field="${CSS.escape(focusedStage)}"]`)?.focus();
+      }
+    }
     const sel = state.selection;
     const objs = stage.objects.filter((o) => sel.includes(o.id));
     const lines = stage.lines.filter((l) => sel.includes(l.id));
@@ -292,13 +310,13 @@ export function createInspector(root, { editor, shapes = { list: () => [], draw:
     links.push(stage.groups ?? null);
     const sights = objs.length === 1 && objs[0].type === "shooting-position" ? stage.objects : null;     // what it sees changes with the rest
     const start = sel.includes("start") ? [stage.start, stage.briefing.startPosition, stage.briefing.gunCondition, stage.briefing.startSignal, stage.settings.angleSnap] : null;
-    const key = JSON.stringify([sel, objs, lines, links, sights, start, sel.length ? null : [stage.bay, stage.settings.grid, stage.settings.angleSnap, shapes.version]]);     // My shapes changed: rebuilt
+    const key = JSON.stringify([sel, objs, lines, links, sights, start, sel.length || stageRoot ? null : [stage.bay, stage.settings.grid, stage.settings.angleSnap, shapes.version]]);     // My shapes changed: rebuilt
     if (key === lastKey) return;
     lastKey = key;
     const focused = root.contains(document.activeElement) ? document.activeElement.dataset.field : null;
 
     let nodes;
-    if (!sel.length) nodes = stagePanel(stage);
+    if (!sel.length) nodes = stageRoot ? nothing() : stagePanel(stage);
     else if (sel.length === 1 && sel[0] === "start" && stage.start) nodes = startPanel(stage, stage.settings.angleSnap);
     else if (objs.length === 1 && sel.length === 1) nodes = [...objectPanel(objs[0], stage.settings.angleSnap, stage), actions(isLocked(stage, objs[0]))];
     else if (lines.length === 1 && sel.length === 1) {
