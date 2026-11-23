@@ -70,7 +70,8 @@ training, and want a clear briefing sheet without drawing the map by hand.
   window), the stage number and key figures, the briefing grid, the
   procedure and a top-down map with a legend and scale bar on page 1, the map with the distances
   between props on page 2 (straight legs, down range then across, each labelled in metres with one
-  decimal), then a 3D view and the setup sheet. Save it
+  decimal), a start-position card (a picture of the posed shooter at the start with the start
+  wording in large type, for the Range Officer, rule 3.2.2), then a 3D view and the setup sheet. Save it
   as a PDF from the print dialog.
 - **Help** guide with a drawing for every main task, and side panels you can dock left, right or
   under the view, fold away and resize (remembered).

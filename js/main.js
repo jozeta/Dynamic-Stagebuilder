@@ -19,6 +19,7 @@ import { MAX_SHAPES } from "./model/bay.js";
 import { createInspector } from "./ui/inspector.js";
 import { createStats } from "./ui/stats.js";
 import { createRuleChecks } from "./ui/rule-checks.js";
+import { startCamera } from "./model/start-card.js";
 import { attachShortcuts } from "./ui/shortcuts.js";
 import { createAbout } from "./ui/about.js";
 import { createBriefing } from "./ui/briefing.js";
@@ -292,6 +293,41 @@ function snapshot() {
   engine.requestRender();
   return url;
 }
+// The start-position card's picture: from in front of the start box, looking back at the posed
+// shooter (model/start-card.js), rendered like snapshot() and put back afterwards.
+function startSnapshot() {
+  const st = editor.stage();
+  if (!st.start || !canvas.clientWidth || !canvas.clientHeight) return null;
+  const cam = engine.camera.position.clone();
+  const target = rig.controls.target.clone();
+  const helperWas = engine.groups.helper.visible;
+  engine.groups.helper.visible = false;
+  const view = startCamera(st.start);
+  engine.camera.position.set(...view.position);
+  rig.controls.target.set(...view.target);
+  engine.camera.lookAt(...view.target);
+  // A 16:10 picture whatever the view's shape, with the figure solid (on screen it is see-through).
+  const aspect = engine.camera.aspect;
+  engine.camera.aspect = 1.6;
+  engine.camera.updateProjectionMatrix();
+  setRunLook({ ...runLook, figure: { ...runLook.figure, show: true, opacity: 1 } });
+  const ratio = engine.renderer.getPixelRatio();
+  engine.renderer.setPixelRatio(1);
+  engine.renderer.setSize(1600, 1000, false);
+  engine.renderer.render(engine.scene, engine.camera);
+  const url = canvas.toDataURL("image/jpeg", 0.92);
+  setRunLook(runLook);
+  engine.camera.aspect = aspect;
+  engine.camera.updateProjectionMatrix();
+  engine.renderer.setPixelRatio(ratio);
+  engine.renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
+  engine.groups.helper.visible = helperWas;
+  engine.camera.position.copy(cam);
+  rig.controls.target.copy(target);
+  rig.controls.update();
+  engine.requestRender();
+  return url;
+}
 // The brief is built, and its 3D image fully decoded, before the print dialog opens: a large image
 // that is still loading prints as a blank page 2. ⌘P / Ctrl+P (beforeprint) builds it too.
 let printReady = false;
@@ -299,9 +335,8 @@ let printedStage = null;           // the stage the brief was last built from
 async function buildPrint() {
   const root = document.getElementById("print");
   printedStage = editor.stage();
-  renderPrint(root, printedStage, snapshot(), { club: loadClub() });
-  const img = root.querySelector(".print-3d img");
-  try { await img?.decode(); } catch { /* print without it rather than not at all */ }
+  renderPrint(root, printedStage, snapshot(), { club: loadClub(), startImage: startSnapshot() });
+  for (const img of root.querySelectorAll(".print-3d img, .print-start img")) { try { await img.decode(); } catch { /* print without it rather than not at all */ } }
 }
 async function printBrief() {
   await buildPrint();
@@ -312,7 +347,7 @@ async function printBrief() {
 window.addEventListener("beforeprint", () => {
   if (printReady || printedStage === editor.stage()) return;      // already built for this stage
   printedStage = editor.stage();
-  renderPrint(document.getElementById("print"), printedStage, snapshot(), { club: loadClub() });
+  renderPrint(document.getElementById("print"), printedStage, snapshot(), { club: loadClub(), startImage: startSnapshot() });
 });
 
 // While Shooter's eye looks from the start ("start") or a shooting position, that marker (with its

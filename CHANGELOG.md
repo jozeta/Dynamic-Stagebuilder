@@ -4,6 +4,10 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- A start-position card in the printed brief (after the distance sheet): a picture of the posed
+  shooter at the start box, taken from in front of it, with the start position, gun condition and
+  start signal in large type, for the Range Officer to show (IPSC rule 3.2.2 allows a picture).
+
 - Club name and logo on every printed brief (in the header, and on a match print's cover), set in
   the briefing window and kept in this browser, not in the stage. A chosen logo is redrawn and kept
   as a small PNG; it travels in a backup.

@@ -8,6 +8,7 @@ import { briefingRows, briefingText } from "../model/briefing.js";
 import { setupRows, setupLines } from "../model/setup.js";
 import { isDrawn } from "../model/bay.js";
 import { distancePairs } from "../model/distances.js";
+import { startCard } from "../model/start-card.js";
 
 const SVG = "http://www.w3.org/2000/svg";
 const MAP_WIDTH = 186;
@@ -138,7 +139,19 @@ function distanceSheet(stage) {
 // The club's logo and name (model/club.js) on a page's header; the logo is a data URL the app made.
 const clubLogo = (club) => (club?.logo ? h("img", { class: "print-logo", src: club.logo, alt: club.name ? `${club.name} logo` : "Club logo" }) : null);
 
-export function renderPrint(root, stage, snapshot, { threeD = true, setup = true, distances = true, club = null } = {}) {
+// The start-position card (rule 3.2.2): the picture of the posed shooter at the start and the
+// briefing's start wording, large enough to read out at the stage.
+function startSheet(stage, image) {
+  const card = startCard(stage);
+  return h("section", { class: "print-start" }, [
+    h("h2", { text: card.title }),
+    image ? h("img", { src: image, alt: "The shooter in the start position at the start box" }) : h("p", { text: "Picture not available." }),
+    h("dl", { class: "print-start-rows" }, card.rows.flatMap(([k, v]) => [h("dt", { text: k }), h("dd", { text: v })])),
+    h("p", { class: "print-foot", text: "For the Range Officer: rule 3.2.2 lets the start position be shown by a picture." }),
+  ]);
+}
+
+export function renderPrint(root, stage, snapshot, { threeD = true, setup = true, distances = true, club = null, startImage = null } = {}) {
   const b = stage.briefing;
   const { procedure, notes } = briefingText(stage);
   const row = Object.fromEntries(briefingRows(stage).map((r) => [r.label, r.value]));
@@ -166,6 +179,7 @@ export function renderPrint(root, stage, snapshot, { threeD = true, setup = true
     h("figure", { class: "print-map" }, [mapSvg(stage), h("figcaption", {}, [legend(stage)])]),
     h("p", { class: "print-foot", text: "Made with Dynamic-Stagebuilder. Counts follow the IPSC rules; check the stage before the match." }),
     distances ? distanceSheet(stage) : null,
+    threeD && stage.start ? startSheet(stage, startImage) : null,
     threeD ? h("section", { class: "print-3d" }, [
       h("h2", { text: `Stage ${b.stageNumber} – ${stage.name}: 3D view` }),
       snapshot ? h("img", { src: snapshot, alt: "3D view of the stage" }) : h("p", { text: "3D view not available." }),
