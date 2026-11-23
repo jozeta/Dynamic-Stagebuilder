@@ -18,8 +18,8 @@ import { rotationSnap } from "../model/snap.js";
 import { sweepRadius } from "../model/rotation-sweep.js";
 import { dimensionsOf, liftParam } from "../model/props.js";
 import { createMoveArrows } from "./move-arrows.js";
-import { createRotationSweep, createMoveGuide } from "./rotation-sweep.js";
-import { moveOf } from "../model/move-guide.js";
+import { createRotationSweep, createMoveGuide, createAlignGuides } from "./rotation-sweep.js";
+import { moveOf, alignGuides } from "../model/move-guide.js";
 
 const TAP_PX = 6;
 
@@ -91,6 +91,15 @@ export function attachPicking({ engine, stageView, editor, cameraRig, canvas, on
   // While a prop is dragged: where it started, a line to where it is now, and how far it has moved.
   const moveGuide = createMoveGuide();
   engine.groups.helper.add(moveGuide.group);
+  // …and a thin line to every other prop (or the start box) it is in line with, across or down range.
+  const aligned = createAlignGuides();
+  engine.groups.helper.add(aligned.group);
+  const othersThan = (ids) => {
+    const s = editor.stage();
+    const pts = s.objects.filter((o) => !ids.includes(o.id) && !o.hidden && Array.isArray(o.position)).map((o) => o.position);
+    if (s.start && !ids.includes("start")) pts.push(s.start.position);
+    return pts;
+  };
   let moving = null;       // { id, from } while a prop is dragged
   const placeOf = (id) => (id === "start" ? editor.stage().start : editor.stage().objects.find((x) => x.id === id));
   function showMove() {
@@ -98,10 +107,11 @@ export function attachPicking({ engine, stageView, editor, cameraRig, canvas, on
     if (!o) return;
     const m = moveOf(moving.from, o.position);
     moveGuide.show({ from: moving.from, to: o.position, size: Math.max(0.12, 10 * metresPerPixel(moving.from)) });
+    aligned.show(alignGuides(o.position, othersThan(editor.state.selection)));
     showTag(m.text, m.labelAt);
     engine.requestRender();
   }
-  function endMove() { moving = null; moveGuide.hide(); tag.hidden = true; engine.requestRender(); }
+  function endMove() { moving = null; moveGuide.hide(); aligned.hide(); tag.hidden = true; engine.requestRender(); }
   gizmo.addEventListener("objectChange", () => { showSweep(); engine.requestRender(); });
   gizmo.addEventListener("dragging-changed", (e) => {
     if (e.value && gizmo.object) {

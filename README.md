@@ -121,7 +121,8 @@ not supported: below 768 px wide the app asks you to use a larger screen. Englis
   card, side by side, one above the other, overlapping, three in a row…), then for each card target
   or no-shoot, with or without hard cover.
 - **Guides while editing:** turning a prop shows its start and current angle on the ground with the
-  turn (+30°); dragging marks where it started, with a line and the distance (2.3 m). The rotate
+  turn (+30°); dragging marks where it started, with a line and the distance (2.3 m), and draws a thin line to
+  every prop it is exactly in line with (red across, blue down range). The rotate
   ring now snaps to the angle step while you drag (Shift turns freely).
 - **Bay and grid:** the bay is sized in whole metres and the grid starts at its edges, so they line
   up at any width; every surroundings has a grid switch, and Industrial a floor grid.

@@ -4,6 +4,9 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Alignment guides: while a prop or the start box is dragged, a thin line runs to every other prop
+  it is exactly in line with (same across or same down-range position, within 1 cm): red across,
+  blue down range, like the move arrows.
 - The left panel's tabs are in the order Projects, Props, On stage, and the left panel starts wider
   (320 px). Panel places saved before this version start over from the new defaults.
 - Settings is a tab of the right-hand panel again (beside the Inspector), not a window over the app;

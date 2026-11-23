@@ -76,3 +76,33 @@ export function createMoveGuide() {
     hide() { group.visible = false; },
   };
 }
+
+/** Alignment guides (model/move-guide.js alignGuides): thin lines, red across and blue down range like the move arrows, a little past both ends. */
+export function createAlignGuides() {
+  const group = new THREE.Group();
+  group.name = "align-guides";
+  group.visible = false;
+  const EXTRA = 0.6;      // metres past the end props, so a short line still reads
+  const lines = { x: 0xe0453a, z: 0x3d7fe0 };
+  for (const [axis, color] of Object.entries(lines)) {
+    lines[axis] = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineBasicMaterial(flat({ color, opacity: 0.9 })));
+    lines[axis].renderOrder = 21;
+    group.add(lines[axis]);
+  }
+  return {
+    group,
+    show(guides, y = 0) {
+      for (const l of Object.values(lines)) l.visible = false;
+      for (const g of guides) {
+        const i = g.axis === "x" ? 0 : 1;
+        const a = [...g.from], b = [...g.to];
+        a[i] -= EXTRA; b[i] += EXTRA;
+        replace(lines[g.axis], new THREE.BufferGeometry().setFromPoints([toV(a), toV(b)]));
+        lines[g.axis].visible = true;
+      }
+      group.position.y = y + Y;
+      group.visible = guides.length > 0;
+    },
+    hide() { group.visible = false; },
+  };
+}
