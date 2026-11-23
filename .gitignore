@@ -50,3 +50,7 @@ coverage/
 test-results/
 playwright-report/
 npm-debug.log*
+
+# Research notes and reports (deep-research skill)
+research_notes/
+reports/
