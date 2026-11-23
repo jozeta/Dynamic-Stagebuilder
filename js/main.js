@@ -18,6 +18,7 @@ import { onEarthLoaded } from "./render/environments/ground.js";
 import { MAX_SHAPES } from "./model/bay.js";
 import { createInspector } from "./ui/inspector.js";
 import { createStats } from "./ui/stats.js";
+import { createRuleChecks } from "./ui/rule-checks.js";
 import { attachShortcuts } from "./ui/shortcuts.js";
 import { createAbout } from "./ui/about.js";
 import { createBriefing } from "./ui/briefing.js";
@@ -517,6 +518,7 @@ const stageSettings = h("div", { class: "lg-stack stage-settings" });
 const stageBox = h("div", { class: "lg-stack stage-box" }, [
   stageSettings,
   h("div", { id: "stats", class: "stats" }),
+  h("div", { id: "rule-checks", class: "stats" }),
   h("div", { id: "brief-slot", class: "brief-slot" }),
 ]);
 const projects = createProjects({
@@ -667,6 +669,8 @@ updaters.push(
   layers.update,
   createInspector(document.getElementById("inspector-body"), { editor, stageRoot: stageSettings, shapes: myShapes, berms: bermDrawer }),
   createStats(document.getElementById("stats")),
+  // A problem's Show selects the props or lines it is about.
+  createRuleChecks(document.getElementById("rule-checks"), { onShow: (ids) => editor.dispatch({ type: "select", ids }) }),
 );
 attachShortcuts({ editor, rig });
 // Play / pause for animated props, in the bar over the 3D view (shown when any prop is animated).

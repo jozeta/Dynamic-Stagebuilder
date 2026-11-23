@@ -4,6 +4,16 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Rule checks under a stage's statistics, from the IPSC Handgun Competition Rules (January 2026),
+  each naming its rule: the round limit for the course type (1.2.1.1–1.2.1.3), no plates-only stage
+  (4.3.3.3), steel at least 7 m from the shooting areas, shooting positions and start, and fault
+  lines at least 8 m from steel (2.1.3), fault lines at least 1.5 m long (2.2.1.4), platforms and
+  ramps over 1 m need scaling aids (2.2.2), and the briefing's required fields (3.2.1). *Show*
+  selects the props or lines a problem is about.
+- Match checks on a match's page: the 3 short : 2 medium : 1 long balance, with the approved splits
+  for 12 to 30 stages (1.2.1.4, Appendix A4), empty-chamber starts on at most 25 % of stages
+  (1.2.1.5), and which stages fail their own checks.
+
 ## 0.12.0 (2026-11-23)
 
 - Alignment guides: while a prop or the start box is dragged, a thin line runs to every other prop

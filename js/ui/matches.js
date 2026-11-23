@@ -9,6 +9,8 @@ import { createMatch, addStages, renameMatch, briefingFor, matchSummary, cleanMa
 import { openMatchEditor } from "./match-editor.js";
 import { dragGrip } from "./drag-sort.js";
 import { sortProjects } from "../storage/projects.js";
+import { matchChecks } from "../model/rule-checks.js";
+import { checkList } from "./rule-checks.js";
 
 export function createMatches({ store, currentId, inFolder = () => true, rowExtras = () => [], onOpen, onNewStage, onCreateFrom = async () => null, onCloseMatch = null, onApplyBriefing, onPrint, onExport = () => {}, onViewChange = () => {}, onChanged = async () => {} }) {
   const box = h("section", { class: "matches", "aria-labelledby": "matches-title" });
@@ -141,6 +143,7 @@ export function createMatches({ store, currentId, inFolder = () => true, rowExtr
       h("p", { class: "lg-muted proj-meta", text: `${sum.stages} stage${sum.stages === 1 ? "" : "s"} · ${sum.minRounds} rounds minimum · ${sum.maxPoints} points` }),
       stageRows.length ? (listEl.replaceChildren(...stageRows), listEl)
         : h("p", { class: "lg-muted hint-text", text: "No stages yet. Edit the match to add some, or make a new stage in it." }),
+      m.stageIds.length ? h("div", { class: "stats match-checks" }, [checkList(matchChecks(m.stageIds.map((id) => byId.get(id).stage)), { title: "Match checks", note: "Each stage's own checks are in its Rule checks." })]) : null,
       h("div", { class: "proj-actions" }, [
         btn("Edit match…", () => editInWindow(m), "lg-btn lg-btn-primary", "edit", { title: "Name, stages and their order" }),
         // The new stage opens in stage edit mode, inside this match (Close stage comes back here).

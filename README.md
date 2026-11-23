@@ -58,6 +58,11 @@ training, and want a clear briefing sheet without drawing the map by hand.
   props snap to the grid. Hold **Shift** while dragging for slow, fine moves without snapping.
 - **Automatic target numbers** (T1…, P1… for steel, NS1… for no-shoots), with hand-set labels kept.
 - **Live statistics:** targets, no-shoots, minimum rounds, maximum points, suggested stage type.
+- **Rule checks** from the IPSC Handgun Rules (January 2026), each with its rule number: round
+  limits per course type, no plates-only stage, steel 7 m from where the shooter stands and fault
+  lines 8 m from steel, fault line length, platform height, and the briefing's required fields;
+  *Show* selects what a problem is about. A match gets **match checks**: the 3:2:1 stage balance
+  (the approved splits for 12–30 stages) and empty-chamber starts on at most 25 % of stages.
 - **Written Stage Briefing** editor: match, stage name and number, designer, stage type, scoring,
   start signal, start position, gun condition, procedure, stop time and notes, with common choices
   or your own text. Targets, rounds and points are counted from the stage.

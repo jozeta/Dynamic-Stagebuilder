@@ -113,6 +113,13 @@ body { background: var(--lg-bg); overflow: hidden; }
 .hint-text { margin: 0 0 var(--lg-space-m); }
 .stats { margin-top: var(--lg-space-l); padding-top: var(--lg-space-m); border-top: 1px solid var(--lg-border); }
 .stats-warn { margin-top: var(--lg-space-s); }
+.rule-list { list-style: none; margin: var(--lg-space-s) 0 0; padding: 0; display: grid; gap: var(--lg-space-s); }
+.rule-check { display: grid; grid-template-columns: auto 1fr auto; gap: var(--lg-space-s); align-items: start; }
+.rule-badge { margin-top: 1px; min-width: 52px; justify-content: center; }
+.rule-num { white-space: nowrap; }
+.rule-show { min-height: 44px; padding-inline: var(--lg-space-m); }
+.rule-passed { margin-top: var(--lg-space-s); }
+.rule-passed summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; }
 
 .hint { position: absolute; left: 50%; bottom: max(var(--lg-space-m), env(safe-area-inset-bottom)); transform: translateX(-50%);
   display: flex; align-items: center; gap: var(--lg-space-s); flex-wrap: wrap; justify-content: center;
