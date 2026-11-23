@@ -1,11 +1,13 @@
 // The printed stage brief (A4, two pages). Page 1: a header with the stage number, name and key
 // figures, the briefing in a grid, the procedure, and the top-down map (cropped to the stage, with
-// a legend). Page 2: the 3D view. Built with createElementNS/textContent only.
+// a legend). Page 2: the same map with the distances between the props (model/distances.js) and a
+// list of them. Then the 3D view and the setup sheet. Built with createElementNS/textContent only.
 import { h } from "./dom.js";
 import { mapModel, mapRegion } from "../model/map.js";
 import { briefingRows, briefingText } from "../model/briefing.js";
 import { setupRows, setupLines } from "../model/setup.js";
 import { isDrawn } from "../model/bay.js";
+import { distancePairs } from "../model/distances.js";
 
 const SVG = "http://www.w3.org/2000/svg";
 const MAP_WIDTH = 186;
@@ -25,9 +27,9 @@ function s(tag, attrs = {}, text) {
 }
 const pts = (points) => points.map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`).join(" ");
 
-export function mapSvg(stage) {
+export function mapSvg(stage, { distances = false } = {}) {
   const MAP = mapBox(stage);
-  const { items } = mapModel(stage, { ...MAP, region: "content" });
+  const { items } = mapModel(stage, { ...MAP, region: "content", distances });
   const svg = s("svg", { viewBox: `0 0 ${MAP.width} ${MAP.height}`, width: `${MAP.width}mm`, height: `${MAP.height}mm`,
     role: "img", "aria-label": "Top-down stage map" });
   const layers = { grid: s("g"), area: s("g"), obj: s("g"), line: s("g"), text: s("g") };
@@ -51,6 +53,14 @@ export function mapSvg(stage) {
       case "circle": layers.obj.append(it.style === "position"
         ? s("circle", { cx: it.x, cy: it.y, r: it.r, fill: "none", stroke: FILL.position, "stroke-width": 0.5 })
         : s("circle", { cx: it.x, cy: it.y, r: it.r, fill: FILL[it.style] })); break;
+      case "distance": {
+        const [[x1, y1], [x2, y2]] = it.points;
+        layers.line.append(s("line", { x1, y1, x2, y2, stroke: "#0b5cad", "stroke-width": 0.3, "stroke-dasharray": "1.2 0.6" }),
+          s("circle", { cx: x1, cy: y1, r: 0.45, fill: "#0b5cad" }), s("circle", { cx: x2, cy: y2, r: 0.45, fill: "#0b5cad" }));
+        break;
+      }
+      case "distance-label": layers.text.append(s("text", { x: it.x, y: it.y - 0.5, "font-size": 2.4, "font-weight": 600, "text-anchor": "middle",
+        fill: "#0b5cad", stroke: "#fff", "stroke-width": 0.6, "paint-order": "stroke" }, it.text)); break;
       case "label": layers.text.append(s("text", { x: it.x, y: it.y - 0.5, "font-size": 2.6, "font-weight": 700, "text-anchor": "middle",
         fill: "#111", stroke: "#fff", "stroke-width": 0.6, "paint-order": "stroke" }, it.text)); break;
       case "start": {
@@ -112,7 +122,20 @@ function setupSheet(stage) {
   ]);
 }
 
-export function renderPrint(root, stage, snapshot, { threeD = true, setup = true } = {}) {
+// The distance sheet: page 1's map with a measured line from each prop (and the start) to a near
+// neighbour, and the same distances as a list.
+function distanceSheet(stage) {
+  const pairs = distancePairs(stage);
+  return h("section", { class: "print-distances" }, [
+    h("h2", { text: `Stage ${stage.briefing.stageNumber} – ${stage.name || "Untitled stage"}: distances` }),
+    h("p", { class: "print-setup-note", text: "Centre to centre, in metres. Each prop and the start box is joined to a near neighbour by the shortest set of lines that connects them all." }),
+    h("figure", { class: "print-map" }, [mapSvg(stage, { distances: true })]),
+    pairs.length ? h("ol", { class: "print-distance-list" }, pairs.map((p) => h("li", {}, [h("span", { text: `${p.a.name} – ${p.b.name}` }), h("strong", { text: p.text })])))
+      : h("p", { text: "Nothing on the stage to measure yet." }),
+  ]);
+}
+
+export function renderPrint(root, stage, snapshot, { threeD = true, setup = true, distances = true } = {}) {
   const b = stage.briefing;
   const { procedure, notes } = briefingText(stage);
   const row = Object.fromEntries(briefingRows(stage).map((r) => [r.label, r.value]));
@@ -138,6 +161,7 @@ export function renderPrint(root, stage, snapshot, { threeD = true, setup = true
     notes.trim() ? h("section", { class: "print-text" }, [h("h2", { text: "Notes" }), h("p", { text: notes })]) : null,
     h("figure", { class: "print-map" }, [mapSvg(stage), h("figcaption", {}, [legend(stage)])]),
     h("p", { class: "print-foot", text: "Made with Dynamic-Stagebuilder. Counts follow the IPSC rules; check the stage before the match." }),
+    distances ? distanceSheet(stage) : null,
     threeD ? h("section", { class: "print-3d" }, [
       h("h2", { text: `Stage ${b.stageNumber} – ${stage.name}: 3D view` }),
       snapshot ? h("img", { src: snapshot, alt: "3D view of the stage" }) : h("p", { text: "3D view not available." }),
@@ -168,6 +192,6 @@ export function renderMatchPrint(root, match, stages) {
       h("tbody", {}, rows),
     ]),
   ]);
-  const pages = stages.map((st) => { const el = h("div", { class: "print-stage" }); renderPrint(el, st, null, { threeD: false, setup: false }); return el; });
+  const pages = stages.map((st) => { const el = h("div", { class: "print-stage" }); renderPrint(el, st, null, { threeD: false, setup: false, distances: false }); return el; });
   root.replaceChildren(cover, ...pages);
 }

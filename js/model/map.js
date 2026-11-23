@@ -4,6 +4,7 @@
 import { dimensionsOf, getProp, STICK } from "./props.js";
 import { arrayCounts } from "./arrays.js";
 import { bayOutline, isRect, isDrawn } from "./bay.js";
+import { distancePairs } from "./distances.js";
 
 const ROUND = new Set(["shooting-position", "barrel", "tyre", "plate-round", "plant-palm", "cone"]);
 const CARD_DEPTH = 0.03;   // paper targets are drawn as their thin face, not their stand
@@ -61,7 +62,8 @@ function placeLabels(labels) {
 /** The ground area a map shows (see regionOf), for sizing its box. */
 export const mapRegion = (stage, region = "bay") => regionOf(stage, region);
 
-export function mapModel(stage, { width, height, margin = 4, region = "bay" }) {
+// distances: also the distance sheet's lines between props (model/distances.js), each labelled at its middle.
+export function mapModel(stage, { width, height, margin = 4, region = "bay", distances = false }) {
   const { width: bw, depth: bd } = stage.bay;
   const r = regionOf(stage, region);
   const rw = r.maxX - r.minX, rd = r.maxZ - r.minZ;
@@ -107,6 +109,13 @@ export function mapModel(stage, { width, height, margin = 4, region = "bay" }) {
     if (o.label && getProp(o.type).scoring) labels.push({ kind: "label", x, y: y - 1.6, text: o.label, style: st, ...labelSize(o.label) });
   }
 
+  if (distances) {
+    for (const p of distancePairs(stage)) {
+      const a = pt(p.a.position), b = pt(p.b.position);
+      items.push({ kind: "distance", points: [a, b] });
+      labels.push({ kind: "distance-label", x: (a[0] + b[0]) / 2, y: (a[1] + b[1]) / 2 + 1, text: p.text, ...labelSize(p.text) });
+    }
+  }
   items.push(...placeLabels(labels));
 
   if (stage.start) {

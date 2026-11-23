@@ -30,6 +30,9 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 - A selected prop shows move arrows inside the rotate ring: the cube moves it anywhere, the red
   arrow only across (x), the blue arrow only down range (z), and the green arrow (steel and paper
   targets) raises or lowers its base or stand height in whole centimetres.
+- The printed brief has a new page after page 1: the same top-down map with distances, each prop
+  and the start box joined to a near neighbour by the shortest set of lines that connects them all,
+  labelled in metres with one decimal, and the same distances as a list.
 - The view pad's labels say *Fwd/Back* and *Up/Down* (were *Move* and *Height*).
 
 ## 0.11.1 (2026-11-22)

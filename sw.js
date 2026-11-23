@@ -26,7 +26,7 @@ const FILES = [
   "js/model/snap.js",
   "js/model/rotation-sweep.js",
   "js/model/move-guide.js",
-  "js/model/stage.js", "js/model/trail.js", "js/model/folders.js",
+  "js/model/stage.js", "js/model/trail.js", "js/model/folders.js", "js/model/distances.js",
   "js/model/stats.js",
   "js/render/builders/furniture.js",
   "js/render/builders/index.js",

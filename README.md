@@ -62,7 +62,8 @@ training, and want a clear briefing sheet without drawing the map by hand.
   start signal, start position, gun condition, procedure, stop time and notes, with common choices
   or your own text. Targets, rounds and points are counted from the stage.
 - **Printable brief** (A4): a header with the stage number and key figures, the briefing grid, the
-  procedure and a top-down map with a legend and scale bar on page 1, a 3D view on page 2. Save it
+  procedure and a top-down map with a legend and scale bar on page 1, the map with the distances
+  between props (in metres, one decimal) on page 2, then a 3D view and the setup sheet. Save it
   as a PDF from the print dialog.
 - **Help** guide with a drawing for every main task, and side panels you can dock left, right or
   under the view, fold away and resize (remembered).
@@ -475,10 +476,12 @@ lets you type your own. *Add a common sentence…* adds a usual procedure line. 
 minimum rounds and maximum points are counted from the stage and can't be typed over. Stage type
 is suggested from the round count; pick Short, Medium or Long to set it yourself.
 
-**Print the brief or save it as a PDF.** *Print* makes a two-page A4 brief. Page 1: a header with
+**Print the brief or save it as a PDF.** *Print* makes an A4 brief. Page 1: a header with
 the stage number, name, minimum rounds and maximum points, the briefing in a grid, the procedure,
-and a top-down map of the stage (down range at the top) with a legend and scale bar. Page 2: a 3D
-view. Page 3: the setup sheet, for building it: every prop measured from the shooter's-left side line
+and a top-down map of the stage (down range at the top) with a legend and scale bar. Page 2: the
+same map with distances: each prop and the start box joined to a near neighbour by the shortest set
+of lines that connects them all, each line labelled in metres (one decimal, centre to centre), and
+the same distances as a list. Then a 3D view, and the setup sheet, for building it: every prop measured from the shooter's-left side line
 and the up-range edge and to both up-range corners (two tapes), with its rotation, and the corner
 points of the fault lines and shooting areas. A long
 procedure carries on to the next page instead of being cut. In the print dialog choose
