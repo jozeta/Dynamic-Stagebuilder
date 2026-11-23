@@ -77,9 +77,15 @@ export const BLUEPRINT_LOOK = Object.freeze({ hour: 11, sun: 0.85, ambient: 1.05
 // Industrial (indoors): lit by the hall's lamps, a little dust in the air, softer shadows.
 export const INDUSTRIAL_LOOK = Object.freeze({ ...TECHNICAL_LOOK, sun: 0.9, ambient: 1, softness: 5, shadowStrength: 0.5, haze: 0.06, exposure: 1.05, walls: true, gridIntensity: null });
 
-/** The light defaults for a surroundings name ("outdoor", "technical", "blueprint" or "industrial"). */
+// Indoor range (a small club range): bright, even light from the ceiling, soft shadows, clear air.
+export const INDOOR_LOOK = Object.freeze({ ...INDUSTRIAL_LOOK, sun: 0.95, ambient: 1.05, softness: 6, shadowStrength: 0.4, haze: 0.02, exposure: 1.05 });
+// Urban (a city block): an afternoon sun over the buildings, a little city haze, light cloud.
+export const URBAN_LOOK = Object.freeze({ ...LOOK_DEFAULTS, sunElevation: 38, sunAzimuth: 40, sunColor: 0.85, sun: 0.95, ambient: 1, haze: 0.12, clouds: 0, shadowStrength: 0.65, softness: 3 });
+
+/** The light defaults for a surroundings name ("outdoor", "technical", "blueprint", "industrial", "indoor" or "urban"). */
 export const lookDefaults = (environment) => (environment === "technical" || String(environment).startsWith("custom:") ? TECHNICAL_LOOK
-  : environment === "blueprint" ? BLUEPRINT_LOOK : environment === "industrial" ? INDUSTRIAL_LOOK : LOOK_DEFAULTS);
+  : environment === "blueprint" ? BLUEPRINT_LOOK : environment === "industrial" ? INDUSTRIAL_LOOK
+    : environment === "indoor" ? INDOOR_LOOK : environment === "urban" ? URBAN_LOOK : LOOK_DEFAULTS);
 const sameLook = (a, b) => Object.keys(b).every((k) => a?.[k] === b[k]);
 /** The look after switching surroundings: the new surroundings' own settings (yours are not carried over). */
 export function lookAfterSwitch(look, from, to) {
