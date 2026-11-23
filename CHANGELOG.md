@@ -27,6 +27,9 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
   drills researched from Ben Stoeger's live-fire drills (Blake Drill, Accelerator, Four Aces, The
   Heads, Distance Changeup, Exit Drill, Doubles) and three original stages (Coffee Break, Off Hand,
   Box to Box). A library stage's ⓘ shows its shots (fewest and most) and its course length.
+- A selected prop shows move arrows inside the rotate ring: the cube moves it anywhere, the red
+  arrow only across (x), the blue arrow only down range (z), and the green arrow (steel and paper
+  targets) raises or lowers its base or stand height in whole centimetres.
 - The view pad's labels say *Fwd/Back* and *Up/Down* (were *Move* and *Height*).
 
 ## 0.11.1 (2026-11-22)

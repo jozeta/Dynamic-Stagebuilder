@@ -9,7 +9,7 @@ import { fitStand, arrayCounts, arrayExtent, layoutDefaults, CARD_PARAMS } from 
 import { takeBuildingPieces, putBackPieces } from "./model/surroundings.js";
 import { snapPoint, snapAngle, clampToBay, gridOrigin } from "./model/snap.js";
 import { isRect, insideBay, isDrawn, onFloor, recentredRows } from "./model/bay.js";
-import { getProp } from "./model/props.js";
+import { getProp, liftParam } from "./model/props.js";
 import { snapToObjects, SNAP_RADIUS } from "./model/objsnap.js";
 import { cleanLook, lookDefaults, lookAfterSwitch } from "./model/look.js";
 import { stepFrom } from "./model/positions.js";
@@ -171,9 +171,39 @@ export function createEditor({ stage = createStage(), onChange = () => {} } = {}
       if (o) edit(updateObject(present(), id, { position: landing(present(), o, position) }));
     },
     dragStart({ ids }) { state.drag = { base: state.history, ids: unlocked(ids) }; },      // locked props stay put
-    dragMove({ delta, fine = false }) {
+    // axis "x" or "z" (a move arrow): the move goes along that axis only; snapping can't shift the other.
+    dragMove({ delta, fine = false, axis = null }) {
       if (!state.drag) return;
-      state.history = replacePresent(state.drag.base, moved(state.drag.base.present, state.drag.ids, delta, fine));
+      const base = state.drag.base.present;
+      const d = axis === "x" ? [delta[0], 0] : axis === "z" ? [0, delta[1]] : delta;
+      let next = moved(base, state.drag.ids, d, fine);
+      if (axis) {
+        const keep = axis === "x" ? 1 : 0;
+        const hold = (now, was) => { const p = [...now]; p[keep] = was[keep]; return p; };
+        next = { ...next, objects: next.objects.map((o) => { const b = base.objects.find((x) => x.id === o.id); return b && state.drag.ids.includes(o.id) ? { ...o, position: hold(o.position, b.position) } : o; }),
+          start: next.start && base.start && state.drag.ids.includes(START_ID) ? { ...next.start, position: hold(next.start.position, base.start.position) } : next.start };
+      }
+      state.history = replacePresent(state.drag.base, next);
+    },
+    // The move arrows' up arrow: raise or lower a prop's height (liftParam) by `by` metres from where
+    // the drag started, in whole centimetres within its limits; one undo step.
+    liftStart({ id }) {
+      const o = present().objects.find((x) => x.id === id);
+      if (!o || isLocked(present(), o) || !liftParam(o.type)) return;
+      state.drag = { base: state.history, lift: { id, key: liftParam(o.type), from: o.params[liftParam(o.type)] } };
+    },
+    liftMove({ by }) {
+      const l = state.drag?.lift;
+      if (!l || !Number.isFinite(by)) return;
+      const o = state.drag.base.present.objects.find((x) => x.id === l.id);
+      const v = cleanParams(o.type, { [l.key]: Math.round((l.from + by) * 100) / 100 })[l.key];
+      state.history = replacePresent(state.drag.base, updateObject(state.drag.base.present, l.id, { params: { [l.key]: v } }));
+    },
+    liftEnd() {
+      if (!state.drag?.lift) return;
+      const { base } = state.drag;
+      state.drag = null;
+      state.history = state.history.present !== base.present ? commit(base, state.history.present) : base;
     },
     dragEnd() {
       if (!state.drag) return;

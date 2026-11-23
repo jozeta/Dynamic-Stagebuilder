@@ -305,7 +305,10 @@ side panel folds the whole panel to give the 3D view more room, and the grip bes
 panel to the left, the right or under the view (drag it there, or click it and choose). Pick a prop in the library, then tap (or click) the ground to place it.
 With a mouse you can also drag a prop from the library onto the stage. Drag a placed prop to move it;
 it snaps to the grid and stays inside the bay. Rotate the selected prop with the green ring, the
-↺/↻ buttons in the inspector, or Q and E. Shift-click selects several props.
+↺/↻ buttons in the inspector, or Q and E. Shift-click selects several props. Inside the ring are
+the move arrows: drag the white cube to move the prop anywhere, the red arrow to move it only across,
+the blue arrow only down range, and (steel and paper targets) the green arrow up or down to change
+its base or stand height.
 
 **Join walls.** Drag or drop a wall so its end comes within about 35 cm of another wall's end and
 it jumps into place, end to end (in a straight line or at a corner). Turn *Snap wall ends to

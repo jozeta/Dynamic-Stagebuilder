@@ -20,6 +20,7 @@ export const HELP_TOPICS = Object.freeze([
     tips: ["Tap the picked prop again (or press Escape) to stop placing.", "The inspector shows the selected prop's size, style and other settings."] },
   { id: "move", title: "Moving and rotating", icon: "rotr", art: "rotate",
     text: ["Drag a prop to move it. It snaps to the grid and stays inside the bay. Rotate it with the green ring, the rotate buttons in the inspector, or Q and E.",
+      "Inside the ring are the move arrows: the white cube moves the prop anywhere, the red arrow only across, the blue arrow only down range, and the green arrow (steel and paper targets) raises or lowers its base or stand height.",
       "Hold Shift while dragging for fine moves: the prop moves at a fifth of the speed and doesn't snap. Shift-click selects several props to move or rotate together."],
     tips: ["Snap to the grid and Snap wall ends to walls, in the right-click menu (a long press on an iPad), turn the two kinds of snapping on and off.", "Angle snap and grid size are in the stage view: the left panel's Projects tab while a stage is open."] },
   { id: "walls", title: "Joining walls", icon: "magnet", art: "walls",

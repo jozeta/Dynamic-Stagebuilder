@@ -5,7 +5,9 @@
 // - draw mode: tap to add points, double-click (or the Finish button / Enter) to end;
 // - start mode: tap to set the start position; the start box itself is selected, dragged and
 //   turned like a prop (its id is "start");
-// - a rotate ring (TransformControls, vertical axis only) on a single selected object.
+// - a rotate ring (TransformControls, vertical axis only) on a single selected object, and inside it
+//   the move arrows (render/move-arrows.js): the cube drags it anywhere, an arrow along x or z only,
+//   the up arrow (props with a height) raises or lowers it.
 import * as THREE from "three";
 import { isLocked } from "../model/layers.js";
 import { TransformControls } from "three/addons/controls/TransformControls.js";
@@ -14,7 +16,8 @@ import { yawDegrees } from "./rotation.js";
 import { insertIndex } from "../model/route.js";
 import { rotationSnap } from "../model/snap.js";
 import { sweepRadius } from "../model/rotation-sweep.js";
-import { dimensionsOf } from "../model/props.js";
+import { dimensionsOf, liftParam } from "../model/props.js";
+import { createMoveArrows } from "./move-arrows.js";
 import { createRotationSweep, createMoveGuide } from "./rotation-sweep.js";
 import { moveOf } from "../model/move-guide.js";
 
@@ -69,6 +72,21 @@ export function attachPicking({ engine, stageView, editor, cameraRig, canvas, on
     const s = sweep.show({ ...turning, radius: Math.max(turning.radius, 100 * mpp), gap: 28 * mpp, to: yawDegrees(gizmo.object) });
     showTag(s.text, s.labelAt, turning.y);
   };
+
+  // The move arrows, sized like the rotate ring (TransformControls' own scale) every frame.
+  const arrows = createMoveArrows();
+  engine.groups.helper.add(arrows.group);
+  const v3 = new THREE.Vector3();
+  function placeArrows() {
+    const node = gizmo.object;
+    if (!node) { arrows.hide(); return; }
+    node.getWorldPosition(v3);
+    const factor = v3.distanceTo(camera.position) * Math.min((1.9 * Math.tan((Math.PI * camera.fov) / 360)) / camera.zoom, 7);
+    const id = editor.state.selection[0];
+    const o = editor.stage().objects.find((x) => x.id === id);
+    arrows.show({ position: [v3.x, v3.z], scale: (factor * gizmo.size) / 4, lift: Boolean(o && liftParam(o.type)) });
+  }
+  engine.onRender?.(placeArrows);
 
   // While a prop is dragged: where it started, a line to where it is now, and how far it has moved.
   const moveGuide = createMoveGuide();
@@ -146,6 +164,16 @@ export function attachPicking({ engine, stageView, editor, cameraRig, canvas, on
     if (e.button !== 0 || press || gizmo.dragging) return;
     const mode = editor.state.mode;
     press = { x: e.clientX, y: e.clientY, pointerId: e.pointerId, id: null, ground: groundAt(e), dragging: false, shift: e.shiftKey };
+    if (mode === "select" && arrows.visible) {
+      setPointer(e);
+      const handle = arrows.pick(raycaster);
+      if (handle) {                  // a move arrow (or the cube) of the selected prop
+        press.handle = handle;
+        press.id = editor.state.selection[0];
+        cameraRig.controls.enabled = false;
+        return;
+      }
+    }
     if (mode === "select") {
       const r = routeAt(e);
       if (r) {                       // the route: drag a grab point, tap it to remove it, tap the line to add one
@@ -163,7 +191,31 @@ export function attachPicking({ engine, stageView, editor, cameraRig, canvas, on
   });
 
   canvas.addEventListener("pointermove", (e) => {
-    if (!press) { if (editor.state.mode !== "select") onHover(groundAt(e)); return; }
+    if (!press) {
+      if (editor.state.mode !== "select") onHover(groundAt(e));
+      else if (arrows.visible && !gizmo.dragging) {
+        setPointer(e);
+        const handle = arrows.pick(raycaster);
+        if (arrows.hover(handle)) engine.requestRender();
+        canvas.style.setProperty("cursor", handle === "free" ? "move" : handle ? "grab" : "");
+      }
+      return;
+    }
+    // The up arrow: the prop's height follows the pointer up and down the screen.
+    if (press.handle === "y" && e.pointerId === press.pointerId) {
+      if (!press.dragging && Math.abs(e.clientY - press.y) > TAP_PX) {
+        press.dragging = true;
+        editor.dispatch({ type: "liftStart", id: press.id });
+        const o = editor.stage().objects.find((x) => x.id === press.id);
+        press.lift = o ? { key: liftParam(o.type), mpp: metresPerPixel(o.position) } : null;
+      }
+      if (press.dragging && press.lift) {
+        editor.dispatch({ type: "liftMove", by: (press.y - e.clientY) * press.lift.mpp });
+        const o = editor.stage().objects.find((x) => x.id === press.id);
+        if (o) showTag(`${press.lift.key === "mountHeight" ? "Stand" : "Base"} ${o.params[press.lift.key].toFixed(2)} m`, o.position, 0);
+      }
+      return;
+    }
     if (press.route?.via && e.pointerId === press.pointerId) {
       const moved = Math.hypot(e.clientX - press.x, e.clientY - press.y) > TAP_PX;
       if (!press.dragging && moved) { press.dragging = true; editor.dispatch({ type: "viaDragStart", ...press.route.via }); }
@@ -184,7 +236,7 @@ export function attachPicking({ engine, stageView, editor, cameraRig, canvas, on
       if (!g) return;
       // Shift: a fifth of the speed and no snapping, for fine placement.
       const delta = press.tracker.update([g[0] - press.ground[0], g[1] - press.ground[1]], e.shiftKey);
-      editor.dispatch({ type: "dragMove", delta, fine: e.shiftKey });
+      editor.dispatch({ type: "dragMove", delta, fine: e.shiftKey, axis: press.handle === "x" || press.handle === "z" ? press.handle : null });
       showMove();
     }
   });
@@ -201,7 +253,9 @@ export function attachPicking({ engine, stageView, editor, cameraRig, canvas, on
       else editor.dispatch({ type: "addVia", id: p.route.leg.to, index: insertIndex(p.route.leg.points, p.route.point), point: p.route.point });
       return;
     }
+    if (p.handle === "y") { if (p.dragging) { editor.dispatch({ type: "liftEnd" }); tag.hidden = true; } return; }
     if (p.dragging) { editor.dispatch({ type: "dragEnd" }); endMove(); return; }
+    if (p.handle) return;          // a tap on an arrow does nothing
     const tap = Math.hypot(e.clientX - p.x, e.clientY - p.y) <= TAP_PX;
     if (!tap || e.type === "pointercancel") return;
     const mode = editor.state.mode;
@@ -247,6 +301,7 @@ export function attachPicking({ engine, stageView, editor, cameraRig, canvas, on
     const isObject = (o && !isLocked(editor.stage(), o)) || (node && sel[0] === "start");         // no rotate ring on a locked prop
     if (isObject && editor.state.mode === "select") { if (gizmo.object !== node) gizmo.attach(node); }
     else if (gizmo.object) gizmo.detach();
+    placeArrows();
   }
 
   return { gizmo, updateGizmo, objectAt, groundAt };

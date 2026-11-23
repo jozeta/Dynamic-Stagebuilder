@@ -397,3 +397,9 @@ export function dimensionsOf(obj) {
   }
   return { w: round(w), h: round(h), d: round(d) };
 }
+
+/** The height the move arrows' up arrow changes: a steel target's base height, a paper target's stand; null for the rest. */
+export function liftParam(type) {
+  const p = PROPS[type]?.params || {};
+  return Object.hasOwn(p, "baseHeight") ? "baseHeight" : Object.hasOwn(p, "mountHeight") ? "mountHeight" : null;
+}
