@@ -102,7 +102,9 @@ training, and want a clear briefing sheet without drawing the map by hand.
   per project, so a reload opens where you left off. Figures fade out as the camera comes close.
 - **Matches** of one or more stages, numbered in order, with the match name in every briefing and
   one print for the whole match.
-- **Projects** saved in the browser automatically, with JSON export and import, and a **stage
+- **Projects** saved in the browser automatically, with JSON export and import, **Back up
+  everything** (one file with every stage, match, folder and your own surroundings, restored with
+  *Import file…* as new records), and a **stage
   library** of 68 ready-made drills and IPSC/USPSA stages (including 24 after the 2012 US IPSC
   Nationals) to open and edit, each with suggested shooting positions worked out from its sight lines.
 - **Works offline** and can be installed as an app (PWA).

@@ -32,6 +32,8 @@ import { decodeShare, encodeShare, shareHash, MAX_LINK } from "./storage/share.j
 import { cleanMatch, briefingFor, dropStageEverywhere } from "./model/match.js";
 import { projectRecord, sortProjects, nextProjectAfterDelete, upgradeRecord } from "./storage/projects.js";
 import { exportFileName, stageToJson, matchToJson, matchFileName } from "./storage/files.js";
+import { backupToJson, backupFileName, parseBackup, bytesToDataUrl } from "./storage/backup.js";
+import { cleanFolder } from "./model/folders.js";
 
 // Save text as a file download (a same-origin blob link, removed straight after).
 function download(text, name) {
@@ -588,6 +590,33 @@ const projects = createProjects({
     const code = await encodeShare(editor.stage());
     if (code.length > MAX_LINK) return { ok: false, error: "This stage is too large for a link. Export a file instead." };
     return { ok: true, url: `${location.origin}${location.pathname}#${shareHash}${code}` };
+  },
+  // Back up everything: every saved record (the open stage saved first), plan images as data URLs.
+  onBackup: async () => {
+    await saveNow();
+    const projectsAll = await store.list();
+    const kept = await store.matches.list();
+    const surroundings = [];
+    for (const r of await store.surroundings.list()) {
+      const image = r.image instanceof Blob ? bytesToDataUrl(new Uint8Array(await r.image.arrayBuffer()), r.image.type || "image/jpeg") : null;
+      surroundings.push({ id: r.id, name: r.name, plan: r.plan, pieces: r.pieces, drawing: r.drawing ?? null, image });
+    }
+    const data = { projects: projectsAll, matches: kept.map(cleanMatch).filter(Boolean), folders: kept.map(cleanFolder).filter(Boolean), surroundings };
+    download(backupToJson(data), backupFileName());
+    return { projects: data.projects.length, matches: data.matches.length, folders: data.folders.length, surroundings: surroundings.length };
+  },
+  // Restore a backup: everything comes in as new records next to what is there.
+  onRestore: async (text) => {
+    const r = parseBackup(text);
+    if (!r.ok) return r;
+    for (const t of r.surroundings) {
+      const { imageBytes, imageType, ...rest } = t;
+      await store.surroundings.put({ ...rest, image: imageBytes ? new Blob([imageBytes], { type: imageType }) : null });
+    }
+    for (const p of r.projects) await store.put(p);
+    for (const m of [...r.matches, ...r.folders]) await store.matches.put(m);
+    if (r.surroundings.length) { try { await mine.load(); surroundingsVersion++; render(editor.state); } catch (err) { console.warn(err); } }
+    return r;
   },
   // A match file's stages: saved as new projects (not opened), in order; their ids go in the match.
   onImportMatch: async (stages) => {

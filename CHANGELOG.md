@@ -4,6 +4,11 @@ All notable changes to Dynamic-Stagebuilder are listed here, newest first.
 
 ## Unreleased
 
+- Back up everything (Projects): one file with every stage, match, folder and your own surroundings
+  with their plan images. *Import file…* restores it: everything comes in as new records next to
+  what you have, with the matches, folders and surroundings still linked to their stages; damaged
+  records are left out and counted.
+
 - Rule checks under a stage's statistics, from the IPSC Handgun Competition Rules (January 2026),
   each naming its rule: the round limit for the course type (1.2.1.1–1.2.1.3), no plates-only stage
   (4.3.3.3), steel at least 7 m from the shooting areas, shooting positions and start, and fault

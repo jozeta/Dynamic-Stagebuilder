@@ -21,7 +21,7 @@ const DND = "application/x-dsb-item";
 const when = (t) => new Date(t).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
 
 export function createProjects({ panel, stageBox = null, docked = false, hide = [], onToggle = () => {}, onOpenLibrary = async () => {}, onCreateFrom = async () => null, onCloseStage = async () => {}, onModeChange = () => {}, store, currentId, onOpen, onDuplicate, onDelete, onImport, onExport,
-  onNewStage = async () => null, onApplyBriefing = async () => {}, onPrintMatch = () => {}, onExportMatch = () => {}, onImportMatch = async () => [], onShareLink = async () => ({ ok: false, error: "Not available." }) }) {
+  onNewStage = async () => null, onApplyBriefing = async () => {}, onPrintMatch = () => {}, onExportMatch = () => {}, onImportMatch = async () => [], onBackup = async () => {}, onRestore = async () => ({ ok: false, error: "Not available." }), onShareLink = async () => ({ ok: false, error: "Not available." }) }) {
   // Matches: their list above the stages, and a match's own page in place of the lists.
   const stagesBox = h("div", { class: "lg-stack" });
   const crumbs = h("nav", { class: "proj-crumbs", "aria-label": "Where you are" });
@@ -242,7 +242,8 @@ export function createProjects({ panel, stageBox = null, docked = false, hide = 
       actions = h("div", { class: "proj-actions" }, [
         h("button", { type: "button", class: "lg-btn", onclick: async () => { await matches.create(); if (matches.openId) await placeNew(`match:${matches.openId}`); } }, [icon("layers"), "New match"]),
         h("button", { type: "button", class: "lg-btn", onclick: () => newFolder() }, [icon("folder"), "New folder"]),
-        h("button", { type: "button", class: "lg-btn", onclick: () => file.click() }, [icon("folder"), "Import file…"]),
+        h("button", { type: "button", class: "lg-btn", onclick: () => file.click(), title: "A stage, match or backup file" }, [icon("folder"), "Import file…"]),
+        h("button", { type: "button", class: "lg-btn", onclick: () => backup(), title: "One file with every stage, match, folder and your own surroundings" }, [icon("doc"), "Back up everything"]),
         file,
       ]),
       message,
@@ -281,12 +282,29 @@ export function createProjects({ panel, stageBox = null, docked = false, hide = 
     }
   }
 
+  // Back up everything: a download, nothing leaves the computer otherwise.
+  async function backup() {
+    const n = await onBackup();
+    say(`Saved a backup of ${n.projects} stage${n.projects === 1 ? "" : "s"}, ${n.matches} match${n.matches === 1 ? "" : "es"}, ${n.folders} folder${n.folders === 1 ? "" : "s"} and ${n.surroundings} surroundings. Keep it somewhere safe: Import file… brings it back.`, "ok");
+  }
+
   async function importFile() {
     const f = file.files?.[0];
     file.value = "";
     if (!f) return;
-    if (f.size > 20_000_000) return say("The file is too large to be a stage or match file.", "bad");
-    const r = parseFile(await f.text());
+    if (f.size > 200_000_000) return say("The file is too large to be a stage, match or backup file.", "bad");
+    const text = await f.text();
+    // A backup (its kind comes first in the file) is restored: everything added as new records.
+    if (/^\{\s*"kind"\s*:\s*"dynamic-stagebuilder-backup"/.test(text.slice(0, 80))) {
+      const r = await onRestore(text);
+      if (!r.ok) return say(r.error, "bad");
+      const c = r.counts;
+      say(`Restored ${c.projects} stage${c.projects === 1 ? "" : "s"}, ${c.matches} match${c.matches === 1 ? "" : "es"}, ${c.folders} folder${c.folders === 1 ? "" : "s"} and ${c.surroundings} surroundings, next to what you had${r.skipped ? ` (${r.skipped} damaged record${r.skipped === 1 ? "" : "s"} left out)` : ""}.`, "ok");
+      await fill();
+      return;
+    }
+    if (text.length > 20_000_000) return say("The file is too large to be a stage or match file.", "bad");
+    const r = parseFile(text);
     if (!r.ok) return say(r.error, "bad");
     if (r.kind === "match") {
       // Every stage becomes a new project, and a new match holds them in the file's order.
